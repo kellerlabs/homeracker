@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.6](https://github.com/kellerlabs/homeracker/compare/scadm-v0.4.5...scadm-v0.4.6) (2026-02-02)
+
+
+### 📦 Dependencies
+
+* update dependency openscad-windows to v2026.01.29 ([#214](https://github.com/kellerlabs/homeracker/issues/214)) ([7e49ff6](https://github.com/kellerlabs/homeracker/commit/7e49ff6f389a475173113a0e31480dea2af42810))
+* update dependency openscad-windows to v2026.02.01 ([#218](https://github.com/kellerlabs/homeracker/issues/218)) ([8a04981](https://github.com/kellerlabs/homeracker/commit/8a0498182cdd044d4c0e74e36677f1ba928faceb))
+
 ## [0.4.5](https://github.com/kellerlabs/homeracker/compare/scadm-v0.4.4...scadm-v0.4.5) (2026-01-25)
 
 
