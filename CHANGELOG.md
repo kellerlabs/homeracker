@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.2...homeracker-v1.7.3) (2026-02-02)
+
+
+### 📦 Dependencies
+
+* update belfryscad/bosl2 digest to ffa493b ([#212](https://github.com/kellerlabs/homeracker/issues/212)) ([3bedd5e](https://github.com/kellerlabs/homeracker/commit/3bedd5e635cb209c7704c950eb851e153834d374))
+* update camunda/infra-global-github-actions digest to df04776 ([#213](https://github.com/kellerlabs/homeracker/issues/213)) ([13723ba](https://github.com/kellerlabs/homeracker/commit/13723ba093747897e55626fb07658e4d96f3a7f4))
+* update dependency openscad-windows to v2026.01.29 ([#214](https://github.com/kellerlabs/homeracker/issues/214)) ([7e49ff6](https://github.com/kellerlabs/homeracker/commit/7e49ff6f389a475173113a0e31480dea2af42810))
+* update dependency openscad-windows to v2026.02.01 ([#218](https://github.com/kellerlabs/homeracker/issues/218)) ([8a04981](https://github.com/kellerlabs/homeracker/commit/8a0498182cdd044d4c0e74e36677f1ba928faceb))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43 ([#215](https://github.com/kellerlabs/homeracker/issues/215)) ([937c1f8](https://github.com/kellerlabs/homeracker/commit/937c1f877257558350023461f63aac4cd18f6b48))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.0.8 ([#217](https://github.com/kellerlabs/homeracker/issues/217)) ([a8a75c1](https://github.com/kellerlabs/homeracker/commit/a8a75c15e9560ab148bf2cc3946b8bdbb9977719))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.0.9 ([#219](https://github.com/kellerlabs/homeracker/issues/219)) ([f8d1ed3](https://github.com/kellerlabs/homeracker/commit/f8d1ed3ede568a06ddc0c4cdef7554bbe8635667))
+
 ## [1.7.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.1...homeracker-v1.7.2) (2026-01-25)
 
 
