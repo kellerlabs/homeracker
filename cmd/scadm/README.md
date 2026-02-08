@@ -126,7 +126,7 @@ scadm vscode --python     # Install and configure Python extension
     {
       "name": "homeracker",
       "repository": "kellerlabs/homeracker",
-      "version": "v1.2.3",
+      "version": "homeracker-v1.7.3",
       "source": "github"
     }
   ]
