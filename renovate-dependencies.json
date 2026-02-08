@@ -27,7 +27,7 @@
       "customType": "regex",
       "fileMatch": ["^scadm\\.json$"],
       "matchStrings": [
-        "\"repository\":\\s*\"(?<depName>(?!kellerlabs/homeracker)[^\"]+)\",\\s*\"version\":\\s*\"(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\""
+        "\"repository\":\\s*\"(?<depName>[^\"]+)\",\\s*\"version\":\\s*\"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\""
       ],
       "datasourceTemplate": "github-tags",
       "versioningTemplate": "semver"
