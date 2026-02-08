@@ -21,8 +21,7 @@
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "kellerlabs/homeracker",
-      "extractVersionTemplate": "^homeracker-(?<version>v.+)$",
-      "versioningTemplate": "semver-coerced"
+      "versioningTemplate": "loose"
     },
     {
       "customType": "regex",
