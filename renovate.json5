@@ -37,7 +37,7 @@
       ],
       "datasourceTemplate": "custom.openscad-snapshots",
       "depNameTemplate": "OpenSCAD-Linux",
-      "extractVersionTemplate": "^OpenSCAD-(?<version>\\d{4}\\.\\d{2}\\.\\d{2}\\.ai\\d+)-x86_64\\.AppImage$",
+      "extractVersionTemplate": "^OpenSCAD-(?<version>\\d{4}\\.\\d{2}\\.\\d{2})-x86_64\\.AppImage$",
       "versioningTemplate": "loose"
     },
     {
