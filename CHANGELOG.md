@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.7.4](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.3...homeracker-v1.7.4) (2026-02-09)
+
+
+### 🐛 Bug Fixes
+
+* **renovate:** homeracker preset ([48dcc53](https://github.com/kellerlabs/homeracker/commit/48dcc53ef094a57807e42855f9375ece929ef4e2))
+* **renovate:** homeracker preset version extraction ([bb4b63f](https://github.com/kellerlabs/homeracker/commit/bb4b63feb385d7b4c94846804fa6e61acb91ec6d))
+
+
+### 📦 Dependencies
+
+* update belfryscad/bosl2 digest to 0e03331 ([#220](https://github.com/kellerlabs/homeracker/issues/220)) ([9a04573](https://github.com/kellerlabs/homeracker/commit/9a04573eb270bcb53ec31c1b102118fe5181b67c))
+* update belfryscad/bosl2 digest to 68bae2d ([#225](https://github.com/kellerlabs/homeracker/issues/225)) ([9b4c73f](https://github.com/kellerlabs/homeracker/commit/9b4c73f7ea33a3c22169a3c12bda5f68cdf483e6))
+* update camunda/infra-global-github-actions digest to 317ad65 ([#221](https://github.com/kellerlabs/homeracker/issues/221)) ([ea830d0](https://github.com/kellerlabs/homeracker/commit/ea830d064bef76b2ef9963606f416debe03c7f6e))
+* update dependency openscad-windows to v2026.02.07 ([#222](https://github.com/kellerlabs/homeracker/issues/222)) ([94928af](https://github.com/kellerlabs/homeracker/commit/94928af85cb9445bd6702427f8f48b75518020f6))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.4.2 ([#224](https://github.com/kellerlabs/homeracker/issues/224)) ([530b816](https://github.com/kellerlabs/homeracker/commit/530b81698c49051c43f9fbd1caafa397580f07fa))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.4.3 ([#226](https://github.com/kellerlabs/homeracker/issues/226)) ([bb3bd14](https://github.com/kellerlabs/homeracker/commit/bb3bd14752a7e2cf496e44b36b0db9063d9d8c56))
+
+
+### 📚 Documentation
+
+* **scadm:** fix homeracker version ref ([6c68b2e](https://github.com/kellerlabs/homeracker/commit/6c68b2e145030411f728ec6c29f39ae21efa40e1))
+
 ## [1.7.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.2...homeracker-v1.7.3) (2026-02-02)
 
 
