@@ -27,7 +27,7 @@ repos:
         args:
           - --maxkb=1000
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 43.14.1
+    rev: 43.15.0
     hooks:
       - id: renovate-config-validator
         args: ["--strict"]
