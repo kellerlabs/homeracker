@@ -7,7 +7,7 @@ repos:
         stages: [commit-msg]
         args: []
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.10
+    rev: v1.7.11
     hooks:
       - id: actionlint
   - repo: https://github.com/psf/black
@@ -27,7 +27,7 @@ repos:
         args:
           - --maxkb=1000
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 43.4.3
+    rev: 43.14.1
     hooks:
       - id: renovate-config-validator
         args: ["--strict"]
