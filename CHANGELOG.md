@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.7.5](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.4...homeracker-v1.7.5) (2026-02-15)
+
+
+### 📦 Dependencies
+
+* update belfryscad/bosl2 digest to 77004eb ([#231](https://github.com/kellerlabs/homeracker/issues/231)) ([8710278](https://github.com/kellerlabs/homeracker/commit/8710278f08e9620f93e38dc08d59d4454181b50a))
+* update belfryscad/bosl2 digest to b4f7ce8 ([#235](https://github.com/kellerlabs/homeracker/issues/235)) ([334ebcf](https://github.com/kellerlabs/homeracker/commit/334ebcfbfdab56d30f978dac687eb59851716f0b))
+* update camunda/infra-global-github-actions digest to 0d5665c ([#229](https://github.com/kellerlabs/homeracker/issues/229)) ([bda7862](https://github.com/kellerlabs/homeracker/commit/bda78629736b219122fdc7cadca84ffc733c19fd))
+* update camunda/infra-global-github-actions digest to a969eec ([#234](https://github.com/kellerlabs/homeracker/issues/234)) ([19436e6](https://github.com/kellerlabs/homeracker/commit/19436e678d93e3ba3471f15c6a3bb4f54daec1d7))
+* update openscad nightly to v2026.02.09 ([#227](https://github.com/kellerlabs/homeracker/issues/227)) ([6d292d3](https://github.com/kellerlabs/homeracker/commit/6d292d358b9dd8aa61e210a0c7782afb73ac8d85))
+* update openscad nightly to v2026.02.13 ([#230](https://github.com/kellerlabs/homeracker/issues/230)) ([6a23b48](https://github.com/kellerlabs/homeracker/commit/6a23b48f7047add55401295135ebac7e88324810))
+* update openscad nightly to v2026.02.15 ([#236](https://github.com/kellerlabs/homeracker/issues/236)) ([fd4f1db](https://github.com/kellerlabs/homeracker/commit/fd4f1db6a5961ce4939474e894588cf806bb5bad))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.15.0 ([#233](https://github.com/kellerlabs/homeracker/issues/233)) ([1080ab9](https://github.com/kellerlabs/homeracker/commit/1080ab913d92774c285fb8d3ebb0ea5de17f5148))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.15.1 ([#237](https://github.com/kellerlabs/homeracker/issues/237)) ([339c486](https://github.com/kellerlabs/homeracker/commit/339c486f4694487f05ae40902c4618e2c63f2690))
+* update pre-commit hooks ([#232](https://github.com/kellerlabs/homeracker/issues/232)) ([8245686](https://github.com/kellerlabs/homeracker/commit/8245686a311df29da9adacdb6d8c546318f389d9))
+
 ## [1.7.4](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.3...homeracker-v1.7.4) (2026-02-09)
 
 
