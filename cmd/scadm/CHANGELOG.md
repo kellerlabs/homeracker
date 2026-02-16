@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.8](https://github.com/kellerlabs/homeracker/compare/scadm-v0.4.7...scadm-v0.4.8) (2026-02-15)
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.02.09 ([#227](https://github.com/kellerlabs/homeracker/issues/227)) ([6d292d3](https://github.com/kellerlabs/homeracker/commit/6d292d358b9dd8aa61e210a0c7782afb73ac8d85))
+* update openscad nightly to v2026.02.13 ([#230](https://github.com/kellerlabs/homeracker/issues/230)) ([6a23b48](https://github.com/kellerlabs/homeracker/commit/6a23b48f7047add55401295135ebac7e88324810))
+* update openscad nightly to v2026.02.15 ([#236](https://github.com/kellerlabs/homeracker/issues/236)) ([fd4f1db](https://github.com/kellerlabs/homeracker/commit/fd4f1db6a5961ce4939474e894588cf806bb5bad))
+
 ## [0.4.7](https://github.com/kellerlabs/homeracker/compare/scadm-v0.4.6...scadm-v0.4.7) (2026-02-09)
 
 
