@@ -1,7 +1,7 @@
 ---
 repos:
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.3.0
+    rev: v4.4.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
@@ -27,7 +27,7 @@ repos:
         args:
           - --maxkb=1000
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 43.15.1
+    rev: 43.31.1
     hooks:
       - id: renovate-config-validator
         args: ["--strict"]
@@ -44,7 +44,7 @@ repos:
       - id: yamllint
         args: ['-c', '.lint/yamllint/.yamllint']
   - repo: https://github.com/PyCQA/pylint
-    rev: v4.0.4
+    rev: v4.0.5
     hooks:
       - id: pylint
         args:
