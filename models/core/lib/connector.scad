@@ -187,8 +187,8 @@ module connectorArmOuter(is_foot=false) {
   difference() {
     color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer=BASE_CHAMFER,except=BOTTOM);
     if(!is_foot){
-      color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-      color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
+      color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length + EPSILON], chamfer=-LOCKPIN_HOLE_CHAMFER);
+      color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length + EPSILON], chamfer=-LOCKPIN_HOLE_CHAMFER);
     }
   }
 }
@@ -200,7 +200,7 @@ module connectorArmOuter(is_foot=false) {
   */
 module connectorArmInner() {
 
-  arm_dimensions_inner = [arm_side_length_inner, arm_side_length_inner, BASE_UNIT];
+  arm_dimensions_inner = [arm_side_length_inner, arm_side_length_inner, BASE_UNIT + EPSILON];
   color(HR_GREEN)
   cuboid(arm_dimensions_inner, chamfer=BASE_CHAMFER,edges=BOTTOM);
 }

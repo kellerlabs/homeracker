@@ -20,6 +20,7 @@ x_holes = false;
 support(units=units, x_holes=x_holes);
 
 /* [Hidden] */
+EPSILON = $preview ? 0.01 : 0.00001;
 TOLERANCE = 0.2;
 PRINTING_LAYER_WIDTH = 0.4;
 PRINTING_LAYER_HEIGHT = 0.2;
@@ -87,7 +88,7 @@ module lock_pin_hole() {
         union() {
             prismoid(size1=lock_pin_center_dimension, size2=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, h=lock_pin_prismoid_inner_length);
             translate([0, 0, lock_pin_prismoid_inner_length]) {
-                prismoid(size1=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, size2=lock_pin_outer_dimension, h=lock_pin_prismoid_outer_length);
+                prismoid(size1=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, size2=lock_pin_outer_dimension, h=lock_pin_prismoid_outer_length + EPSILON);
             }
         }
     }
@@ -205,15 +206,15 @@ module connectorArmOuter(is_foot=false) {
   difference() {
     color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer=BASE_CHAMFER,except=BOTTOM);
     if(!is_foot){
-      color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-      color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
+      color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length + EPSILON], chamfer=-LOCKPIN_HOLE_CHAMFER);
+      color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length + EPSILON], chamfer=-LOCKPIN_HOLE_CHAMFER);
     }
   }
 }
 
 module connectorArmInner() {
 
-  arm_dimensions_inner = [arm_side_length_inner, arm_side_length_inner, BASE_UNIT];
+  arm_dimensions_inner = [arm_side_length_inner, arm_side_length_inner, BASE_UNIT + EPSILON];
   color(HR_GREEN)
   cuboid(arm_dimensions_inner, chamfer=BASE_CHAMFER,edges=BOTTOM);
 }
@@ -375,7 +376,7 @@ module tension_hole_half(){
   lockpin_tension_angle = 86.5;
   lockpin_tension_hole_width_inner = PRINTING_LAYER_WIDTH * 4;
   lockpin_tension_hole_height = BASE_UNIT / 2;
-  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height];
+  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height + EPSILON ];
   prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
 }
 

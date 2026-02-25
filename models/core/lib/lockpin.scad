@@ -193,6 +193,6 @@ module tension_hole_half(){
   lockpin_tension_angle = 86.5; // in degrees
   lockpin_tension_hole_width_inner = PRINTING_LAYER_WIDTH * 4; // widest/middle point of the tension hole
   lockpin_tension_hole_height = BASE_UNIT / 2;
-  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height]; // planar
+  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height + EPSILON ]; // planar
   prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
 }
