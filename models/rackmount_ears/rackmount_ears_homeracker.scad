@@ -17,10 +17,10 @@ $fn=100;
 RACK_HEIGHT_UNIT=STD_UNIT_HEIGHT;
 
 /* [Base] */
-// automatically chooses the tightest fit for the rackmount ears based on the device width. If true, rack_size will be ignored.
-autosize=true;
+// Total inner rack width in mm. Set to 0 to auto-detect from rack_size (10" or 19" standard). For custom homeracker racks, set this to your actual rack width.
+rack_width=0; // [0:1:600]
 
-// rack size in inches. If autosize is true, this value will be ignored. Only 10 and 19 inch racks are supported.
+// rack size in inches. Only used when rack_width is 0. Only 10 and 19 inch racks are supported.
 rack_size=10; // [10:10 inch,19:19 inch]
 
 // Asymetry Slider. CAUTION: there's no sanity check for this slider!
@@ -29,7 +29,7 @@ asymetry=0; // [-150:0.1:150]
 // shows the distance between the rackmount ears considering the device width.
 show_distance=false;
 
-// Width of the device in mm. Will determine the width of the rackmount ears depending on rack_size.
+// Width of the device in mm. Will determine the width of the rackmount ears depending on rack width.
 device_width=201;
 // Height of the device in mm. Will determine the height of the rackmount ear in standard HeightUnits (1HU=44.45 mm). The program will always choose the minimum number of units to fit the device height. Minimum is 1 unit.
 device_height=40;
@@ -42,6 +42,8 @@ strength=3;
 flange_style="support"; // [support:Support beam (15x15mm),tab:Flat tab]
 // Flange depth in base units (each unit = 15mm)
 flange_depth=1; // [1:1:10]
+// Direction the flange extends from the front face
+flange_direction="inside"; // [inside:Inside (into rack),outside:Outside (toward device)]
 
 /* [Device Bores] */
 // Distance (in mm) of the device's front bores(s) to the front of the device
@@ -73,7 +75,6 @@ PIN_HEIGHT_UNITS=max(1,floor(RACK_HEIGHT/BASE_UNIT));
 FLANGE_HEIGHT=PIN_HEIGHT_UNITS*BASE_UNIT;
 FLANGE_Z_OFFSET=(RACK_HEIGHT-FLANGE_HEIGHT)/2;
 
-RACK_WIDTH_10_INCH_INNER=222.25;
 RACK_WIDTH_10_INCH_OUTER=STD_WIDTH_10INCH;
 RACK_WIDTH_19_INCH=STD_WIDTH_19INCH;
 
@@ -200,32 +201,57 @@ module flange_tab_style(height_units, flange_units, ear_strength) {
 
 // Assemble the rackmount ear with homeracker flange
 module rackmount_ear_homeracker(asym=0){
-    ear_width_19_inch=(RACK_WIDTH_19_INCH - device_width) / 2 + asym;
-    ear_width_10_inch=(RACK_WIDTH_10_INCH_OUTER - device_width) / 2 + asym;
-    // Calculate the width of the ear
-    rack_ear_width = device_width > RACK_WIDTH_10_INCH_INNER || autosize == false && rack_size == 19 ?
-            ear_width_19_inch:
-            ear_width_10_inch
-    ;
+    // Determine effective rack width
+    effective_rack_width = rack_width > 0 ? rack_width :
+        (rack_size == 19 ? RACK_WIDTH_19_INCH : RACK_WIDTH_10_INCH_OUTER);
 
-    // Flange X position: centered on front face
-    flange_x_pos = rack_ear_width / 2;
+    // Calculate the width of the ear, enforcing minimum for flange + structural support
+    // tab+outside needs at least BASE_UNIT so holes are fully contained in front face
+    min_ear_width = (flange_style == "support" || flange_direction == "outside" ? BASE_UNIT : strength) + strength;
+    rack_ear_width = max(min_ear_width, (effective_rack_width - device_width) / 2 + asym);
+
+    // Flange thickness for positioning
+    flange_thick = flange_style == "support" ? BASE_UNIT : strength;
+
+    // Flange position depends on direction:
+    //   "inside"  — on front face, extending into rack (-Y), pins insert from side
+    //   "outside" — on outer edge, extending outward (+X), pins insert from front
+    flange_x_pos = flange_direction == "inside"
+        ? rack_ear_width - flange_thick/2
+        : rack_ear_width + flange_depth * BASE_UNIT;
+    flange_y_pos = flange_direction == "inside"
+        ? 0
+        : -flange_thick/2;
 
     difference() {
         union() {
             // Create the base L-bracket
             base_ear(rack_ear_width, strength, RACK_HEIGHT);
 
-            // Create the flange on the front face
-            translate([flange_x_pos, 0, FLANGE_Z_OFFSET])
-            if (flange_style == "support") {
-                flange_support_style(PIN_HEIGHT_UNITS, flange_depth);
-            } else {
-                flange_tab_style(PIN_HEIGHT_UNITS, flange_depth, strength);
+            // Create the flange (tab+outside needs no extra geometry — holes cut into front face)
+            if (!(flange_style == "tab" && flange_direction == "outside")) {
+                translate([flange_x_pos, flange_y_pos, FLANGE_Z_OFFSET])
+                rotate([0, 0, flange_direction == "outside" ? -90 : 0])
+                if (flange_style == "support") {
+                    flange_support_style(PIN_HEIGHT_UNITS, flange_depth);
+                } else {
+                    flange_tab_style(PIN_HEIGHT_UNITS, flange_depth, strength);
+                }
             }
         }
         // Create the holes for the device screws
         screws_countersunk(length=strength,diameter_head=device_bore_hole_head_diameter,length_head=device_bore_hole_head_length,diameter_shaft=device_bore_hole_diameter);
+
+        // For tab+outside, cut square lock pin holes through the front face
+        // Holes centered a half-unit from the outer edge to align with homeracker grid
+        if (flange_style == "tab" && flange_direction == "outside") {
+            for (z_idx = [0 : PIN_HEIGHT_UNITS - 1]) {
+                translate([rack_ear_width - BASE_UNIT/2, strength/2, FLANGE_Z_OFFSET + z_idx * BASE_UNIT + BASE_UNIT/2])
+                rotate([90, 0, 0])
+                cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, strength + 1],
+                       chamfer=-LOCKPIN_HOLE_CHAMFER);
+            }
+        }
     }
 }
 

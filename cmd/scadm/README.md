@@ -19,7 +19,30 @@ pip install scadm
 
 ## Quick Start
 
-### 1. Create `scadm.json` in your project root
+```bash
+pip install scadm    # Install scadm
+scadm install        # Install OpenSCAD + libraries (BOSL2, etc.)
+```
+
+That's it. Now open any `.scad` file using the **project-local** OpenSCAD:
+
+```bash
+./bin/openscad/openscad models/core/main.scad
+```
+
+> [!IMPORTANT]
+> You must use the project-local OpenSCAD at `bin/openscad/openscad` (not a system-installed `openscad`).
+> The project-local binary knows where to find the installed libraries. If you use a system OpenSCAD,
+> you'll get errors about missing dependencies (e.g. BOSL2).
+>
+> Alternatively, point any OpenSCAD at the libraries manually:
+> ```bash
+> OPENSCADPATH=./bin/openscad/libraries openscad models/core/main.scad
+> ```
+
+### Setting up a new project
+
+#### 1. Create `scadm.json` in your project root
 
 ```json
 {
@@ -34,7 +57,7 @@ pip install scadm
 }
 ```
 
-### 2. Install OpenSCAD and dependencies
+#### 2. Install OpenSCAD and dependencies
 
 ```bash
 scadm install
