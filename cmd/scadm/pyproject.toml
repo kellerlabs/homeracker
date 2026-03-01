@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scadm"
-version = "0.4.9"
+version = "0.4.10"
 description = "OpenSCAD dependency manager - Install OpenSCAD and manage library dependencies"
 readme = "README.md"
 requires-python = ">=3.11"
