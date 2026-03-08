@@ -201,10 +201,15 @@ I encourage you to make your own models based on HomeRacker!
 Let me know, and I’ll feature your work on this page and cross-link it on Makerworld (subject to my "very objective" approval 😄).
 Just [create an issue](https://github.com/kellerlabs/homeracker/issues/new) if you want to be featured.
 
+> 💡 **Want to contribute new features or extensions?**
+> Head over to the [HomeRacker Community Repository](https://github.com/kellerlabs/homeracker-community)!
+> This core repo focuses on the base system and accepts primarily bugfixes. New modules, adapters, and creative extensions live in the community repo.
+
 # 💬 Community
 
 Got questions? Want to share your builds? Join the HomeRacker community!
 
+- **🐙 [Community Repo](https://github.com/kellerlabs/homeracker-community)** – Contribute new features, extensions, and modules
 - **💬 [Discord](https://discord.gg/b6myzHRxc3)** – Chat with me and other builders, get help, share ideas
 - **🎥 [YouTube](https://www.youtube.com/@kellerlabs)** – Watch build guides, tutorials, and project updates
 - **🖨️ [Makerworld](https://makerworld.com/@kellerlab)** – Grab ready-to-print models and remixes
