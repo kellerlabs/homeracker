@@ -2,6 +2,14 @@
 
 Thanks for your interest in contributing! Even getting this far is already worth a ton 🏋
 
+## 📦 Contribution Scope
+
+This repository contains the **HomeRacker Core** system. We accept **bugfixes and improvements to the core model** here.
+
+**New features, modules, and extensions** (e.g. new mount types, adapters, accessories) should be contributed to the [HomeRacker Community Repository](https://github.com/kellerlabs/homeracker-community).
+
+> 💡 Not sure where your contribution belongs? [Open an issue](https://github.com/kellerlabs/homeracker/issues) or [start a discussion](https://github.com/kellerlabs/homeracker/discussions) first — we're happy to help you find the right place.
+
 ## 🚀 Quick Start
 
 ### Pre-commit Hooks (Required)
@@ -207,8 +215,9 @@ cmd/                # Command-line utilities (setup, test, lib)
 
 ## 💬 Getting Help
 
-- [Open an issue](https://github.com/kellerlabs/homeracker/issues) for bugs/features
+- [Open an issue](https://github.com/kellerlabs/homeracker/issues) for bugs
 - [Start a discussion](https://github.com/kellerlabs/homeracker/discussions) for questions
+- [Community Repo](https://github.com/kellerlabs/homeracker-community) for new features and extensions
 - See [scadm documentation](cmd/scadm/README.md) for dependency manager details
 
 ## 🔔 Discord Integration
