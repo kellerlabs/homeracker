@@ -24,13 +24,13 @@ git clone https://github.com/kellerlabs/homeracker.git
 cd homeracker
 
 # On Debian/Ubuntu systems, you need to install the python3-venv package before next command
-python3 -m venv ~/.venv
+python3 -m venv .venv
 
 # Activate the virtual environment
 # Windows (Git Bash/CMD/PowerShell):
-source ~/.venv/Scripts/activate
+source .venv/Scripts/activate
 # macOS/Linux:
-source ~/.venv/bin/activate
+source .venv/bin/activate
 
 # Install scadm package (openscad dependency manager)
 pip install -e cmd/scadm
