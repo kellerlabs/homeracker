@@ -406,4 +406,5 @@ module tension_hole_half(){
 }
 
 $fn = 100;
+color(HR_YELLOW)
 lockpin(grip_type=grip_type, neck_extension=neck_extension);

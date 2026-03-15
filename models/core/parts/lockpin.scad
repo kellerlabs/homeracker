@@ -29,5 +29,5 @@ $fn = 100;
 // lockpin(neck_extension=LP_NECK_EXT_GRIP);
 
 // Example 4: Create a lock pin with grip_type and neck_extension as set above
-// color(HR_YELLOW)
+color(HR_YELLOW)
 lockpin(grip_type=grip_type, neck_extension=neck_extension);
