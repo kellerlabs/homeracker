@@ -41,6 +41,19 @@ LOCKPIN_HOLE_CHAMFER = 0.8; // Chamfer size in mm
 LOCKPIN_HOLE_SIDE_LENGTH = 4; // Square hole side length in mm
 LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION = [LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH];
 
+// Lock pin grip types
+LP_GRIP_STANDARD = 0;
+LP_GRIP_EXTENDED = 1;
+LP_GRIP_NO_GRIP = 2;
+
+// Lock pin neck extension types
+LP_NECK_EXT_NONE = 0;
+LP_NECK_EXT_GRIP = 1;
+LP_NECK_EXT_BOTH = 2;
+
+// Lock pin neck extension length per unit
+LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE/2;
+
 // HomeRacker Colors
 HR_YELLOW = "#f7b600";
 HR_BLUE = "#0056b3";
