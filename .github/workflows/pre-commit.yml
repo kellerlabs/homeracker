@@ -16,6 +16,8 @@ jobs:
 
       - name: Setup OpenSCAD
         uses: ./.github/actions/setup-openscad
+        with:
+          scadm-source: cmd/scadm
 
       - name: Make scripts executable
         run: chmod +x cmd/export/export-core-models.sh .githooks/makerworld-export

@@ -23,6 +23,12 @@
       "release-type": "python",
       "package-name": "scadm",
       "component": "scadm"
+    },
+    ".github/actions/setup-openscad": {
+      "release-type": "simple",
+      "package-name": "setup-openscad",
+      "component": "setup-openscad",
+      "bump-minor-pre-major": false
     }
   }
 }

@@ -8,8 +8,8 @@ if [[ ! -d .venv ]]; then
   python3 -m venv .venv
 fi
 
-# Determine venv paths based on OS
-if [[ "${OS:-}" == "Windows_NT" ]]; then
+# Determine venv paths based on actual venv layout
+if [[ -d .venv/Scripts ]]; then
   PIP=".venv/Scripts/pip"
   SCADM=".venv/Scripts/scadm"
 else
