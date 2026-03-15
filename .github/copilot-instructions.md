@@ -21,6 +21,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Code: No unnecessary comments, clear variable names speak for themselves
   - Docs: Essential info only - what/why/how in <100 lines when possible
   - GitHub issues/PRs: Clear problem/solution, skip verbose explanations
+- **Use Emojis**: Supplement PR descriptions, issue comments, and review comments with emojis for easier reading (e.g. ✅ ❌ 🔧 📦 💡 🚀 ⚠️)
 - **Commits**: Use [Conventional Commits](https://www.conventionalcommits.org/) format
   - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
   - Format: `type(scope): description` or `type: description`
