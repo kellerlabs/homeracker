@@ -85,7 +85,7 @@
       // If checks fail, Renovate will not automerge
       "matchPackageNames": [
         "camunda/infra-global-github-actions",
-        "https://github.com/BelfrySCAD/BOSL2.git"
+        "BelfrySCAD/BOSL2"
       ],
       "automerge": true
     },
