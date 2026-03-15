@@ -26,13 +26,20 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Format: `type(scope): description` or `type: description`
   - Breaking changes: Add `!` (e.g., `feat!: change base unit`)
 
+## Terminal Session Setup
+Before terminal operations, consider running these steps (use best judgement):
+1. `git fetch origin && git rebase origin/main` — sync with latest main
+2. `source .venv/Scripts/activate` (Windows) or `source .venv/bin/activate` (Linux/macOS) — activate venv
+
+> **Note**: `scadm` upgrade and `scadm install` run automatically via a `SessionStart` hook (see `.github/hooks/`).
+
 ## **MANDATORY** Workflow
 1. **Check repo patterns** first for consistency
-2. **Consult online docs** (especially BOSL2: https://github.com/BelfrySCAD/BOSL2/wiki)
-3. **Ask before proceeding** if requirements conflict with best practices
+2. **Consult online docs** (especially BOSL2: https://github.com/BelfrySCAD/BOSL2/wiki). Use Context7 MCP Server for quick access to docs and codebase where applicable.
+3. **Ask before proceeding** if requirements conflict with best practices or patterns in the repo
 4. **Provide outline** before implementation for confirmation
 5. **Make the change** and immediately test it - do NOT announce completion before testing
-6. **Update** existing README.md files (project root, module-specific) and CONTRIBUTING.md and create new ones where applicable
+6. **Update** existing documentation (.md files) and create new ones where applicable
 7. **Run pre-commit hooks** to catch formatting/linting issues before commit. Fix any issues found (no ignores allowed).
 8. **On errors**: Step back, check docs, ask user if stuck—don't iterate blindly
 
