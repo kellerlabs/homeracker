@@ -22,6 +22,8 @@ jobs:
 
       - name: Setup OpenSCAD
         uses: ./.github/actions/setup-openscad
+        with:
+          scadm-source: cmd/scadm
 
       - name: Validate models
         run: |

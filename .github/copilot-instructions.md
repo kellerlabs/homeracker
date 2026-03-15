@@ -42,7 +42,9 @@ Before terminal operations, consider running these steps (use best judgement):
 5. **Make the change** and immediately test it - do NOT announce completion before testing
 6. **Update** existing documentation (.md files) and create new ones where applicable
 7. **Run pre-commit hooks** to catch formatting/linting issues before commit. Fix any issues found (no ignores allowed).
-8. **On errors**: Step back, check docs, ask user if stuck—don't iterate blindly
+8. **Code review**: Review ALL changes made in the session — check for consistency, missed edge cases, and unintended side effects before presenting to the user.
+9. **Creating PRs**: Use the **GitHub MCP Server** (never `gh` CLI). Read `.github/pull_request_template.md` and fill in every section. Keep it brief per project conventions.
+10. **On errors**: Step back, check docs, ask user if stuck—don't iterate blindly
 
 ## OpenSCAD Guidelines
 - Use BOSL2 for complex geometry

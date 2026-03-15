@@ -247,6 +247,11 @@ HomeRacker includes custom tooling to streamline development:
   - Install: `pip install scadm` → `scadm`
   - Manages dependencies from `scadm.json`
 
+- **[Setup OpenSCAD Action](.github/actions/setup-openscad/README.md)** - Reusable GitHub Action for CI
+  - Installs OpenSCAD, system dependencies, and libraries in one step
+  - Uses scadm under the hood, with caching for fast runs
+  - Usage: `uses: kellerlabs/homeracker/.github/actions/setup-openscad@setup-openscad-v1`
+
 - **[Renovate Preset](renovate-dependencies.json)** - Automated dependency updates
   - Tracks OpenSCAD versions, GitHub releases, and Python packages
   - Custom rules for this project's specific needs
