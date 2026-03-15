@@ -3,19 +3,22 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
+# Bootstrap workspace venv if missing
+if [[ ! -d .venv ]]; then
+  python3 -m venv .venv
+fi
+
 # Determine venv paths based on OS
 if [[ "${OS:-}" == "Windows_NT" ]]; then
   PIP=".venv/Scripts/pip"
+  SCADM=".venv/Scripts/scadm"
 else
   PIP=".venv/bin/pip"
+  SCADM=".venv/bin/scadm"
 fi
 
 # Upgrade scadm from PyPI
 "$PIP" install --upgrade --quiet scadm
 
-# Run scadm install (uses venv's entry point directly)
-if [[ "${OS:-}" == "Windows_NT" ]]; then
-  .venv/Scripts/scadm install
-else
-  .venv/bin/scadm install
-fi
+# Install/update OpenSCAD and libraries
+"$SCADM" install

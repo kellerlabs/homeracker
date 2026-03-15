@@ -5,6 +5,7 @@ bin/openscad/
 bin/openscad-nightly/
 renovate_cache/
 renovate_base/
+.venv/
 
 # Python
 __pycache__/
