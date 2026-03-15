@@ -1,0 +1,30 @@
+---
+name: Setup OpenSCAD
+description: Install system dependencies, OpenSCAD, and libraries with caching
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+        cache: 'pip'
+        cache-dependency-path: cmd/scadm/pyproject.toml
+
+    - name: Install system dependencies
+      uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+      with:
+        packages: xvfb libglu1-mesa libfuse2 libegl1 libxcb-cursor0
+
+    - name: Cache OpenSCAD and libraries
+      uses: actions/cache@v5
+      with:
+        path: bin/openscad
+        key: openscad-${{ runner.os }}-${{ hashFiles('scadm.json', 'cmd/scadm/scadm/constants.py') }}
+
+    - name: Install OpenSCAD and dependencies
+      shell: bash
+      run: |
+        pip install -e cmd/scadm
+        scadm install
