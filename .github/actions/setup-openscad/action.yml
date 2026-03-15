@@ -1,6 +1,19 @@
 ---
 name: Setup OpenSCAD
-description: Install system dependencies, OpenSCAD, and libraries with caching
+description: >
+  Install system dependencies, OpenSCAD, and libraries with caching.
+  Requires ubuntu runners.
+
+inputs:
+  scadm-version:
+    description: Pinned scadm PyPI version. Also used in the cache key.
+    required: false
+    default: '0.4.10'
+  scadm-source:
+    description: >
+      Local path to install scadm from (editable install).
+      When set, overrides the PyPI version and re-runs scadm install.
+    required: false
 
 runs:
   using: composite
@@ -9,8 +22,6 @@ runs:
       uses: actions/setup-python@v6
       with:
         python-version: '3.x'
-        cache: 'pip'
-        cache-dependency-path: cmd/scadm/pyproject.toml
 
     - name: Install system dependencies
       uses: awalsh128/cache-apt-pkgs-action@v1.6.0
@@ -21,10 +32,14 @@ runs:
       uses: actions/cache@v5
       with:
         path: bin/openscad
-        key: openscad-${{ runner.os }}-${{ hashFiles('scadm.json', 'cmd/scadm/scadm/constants.py') }}
+        key: openscad-${{ runner.os }}-${{ inputs.scadm-version }}-${{ hashFiles('scadm.json', inputs.scadm-source && format('{0}/**/constants.py', inputs.scadm-source) || 'scadm.json') }}
 
     - name: Install OpenSCAD and dependencies
       shell: bash
       run: |
-        pip install -e cmd/scadm
+        if [[ -n "${{ inputs.scadm-source }}" ]]; then
+          pip install -e "${{ inputs.scadm-source }}"
+        else
+          pip install scadm==${{ inputs.scadm-version }}
+        fi
         scadm install
