@@ -14,20 +14,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.x'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb libglu1-mesa libfuse2 libegl1 libxcb-cursor0
-
-      - name: Install OpenSCAD and dependencies
-        run: |
-          pip install -e cmd/scadm
-          scadm install
+      - name: Setup OpenSCAD
+        uses: ./.github/actions/setup-openscad
 
       - name: Make scripts executable
         run: chmod +x cmd/export/export-core-models.sh .githooks/makerworld-export
