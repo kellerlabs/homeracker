@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.8.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.8...homeracker-v1.8.0) (2026-03-15)
+
+
+### ✨ Features
+
+* **ci:** switch BOSL2 to release tags & add SessionStart hook ([#265](https://github.com/kellerlabs/homeracker/issues/265)) ([020cf14](https://github.com/kellerlabs/homeracker/commit/020cf1492aba0c00f9e580a832a9cca949b85f2e))
+* **core:** extended lockpin with neck extensions and grip types ([#259](https://github.com/kellerlabs/homeracker/issues/259)) ([4720f98](https://github.com/kellerlabs/homeracker/commit/4720f982537fdbd2fdf97548173c62e1962d124e))
+
+
+### 🐛 Bug Fixes
+
+* **renovate:** disable prHourlyLimit ([#266](https://github.com/kellerlabs/homeracker/issues/266)) ([3b0894c](https://github.com/kellerlabs/homeracker/commit/3b0894c3e2975422d751f668a413a1339b6ba74e))
+
+
+### 📦 Dependencies
+
+* update actions/create-github-app-token action to v3 ([#268](https://github.com/kellerlabs/homeracker/issues/268)) ([75d0098](https://github.com/kellerlabs/homeracker/commit/75d009856e314c25cb399ecba3709ae3dccd6711))
+* update belfryscad/bosl2 digest to bfc4e74 ([#260](https://github.com/kellerlabs/homeracker/issues/260)) ([a571590](https://github.com/kellerlabs/homeracker/commit/a57159047591fd9f9ad5b9ccbf38e87495bbfa7f))
+* update camunda/infra-global-github-actions digest to f5807d2 ([#261](https://github.com/kellerlabs/homeracker/issues/261)) ([612947b](https://github.com/kellerlabs/homeracker/commit/612947b1a3a6a94ca78dc52df4a7797d759a535e))
+* update dependency belfryscad/bosl2 to v2.0.727 ([#267](https://github.com/kellerlabs/homeracker/issues/267)) ([8f85820](https://github.com/kellerlabs/homeracker/commit/8f858200162e312e54a5dd470dc1e1594b816d66))
+* update openscad nightly to v2026.03.14 ([#263](https://github.com/kellerlabs/homeracker/issues/263)) ([7a0aead](https://github.com/kellerlabs/homeracker/commit/7a0aead7d97c07fee22003efd0268cf83d016726))
+* update pre-commit hooks ([#264](https://github.com/kellerlabs/homeracker/issues/264)) ([c55691d](https://github.com/kellerlabs/homeracker/commit/c55691d52b719b2d69238c1b4789813f027046c5))
+
+
+### 🔄 CI/CD
+
+* cache CI environments & add PR template ([#269](https://github.com/kellerlabs/homeracker/issues/269)) ([ca78385](https://github.com/kellerlabs/homeracker/commit/ca783858fbc69842d064dbb92e608504b11784fc))
+
 ## [1.7.8](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.7...homeracker-v1.7.8) (2026-03-08)
 
 
