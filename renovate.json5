@@ -9,6 +9,8 @@
   "ignorePresets": [":all"],
   // Disable platform-native automerge, let Renovate handle merges directly
   "platformAutomerge": false,
+  // Disable hourly PR limit (default from config:recommended is 2)
+  "prHourlyLimit": 0,
   "schedule": ["* * * * 0,6"],
   // Use "deps" as commit type instead of "chore(deps)"
   "semanticCommits": "enabled",
