@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.8.0...homeracker-v1.9.0) (2026-03-15)
+
+
+### ✨ Features
+
+* **setup-openscad:** make action reusable across repositories ([#273](https://github.com/kellerlabs/homeracker/issues/273)) ([055e784](https://github.com/kellerlabs/homeracker/commit/055e78444f59d351e8a943ab7c8ae04d8c34f259))
+
+
+### 📦 Dependencies
+
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.76.1 ([#270](https://github.com/kellerlabs/homeracker/issues/270)) ([5391857](https://github.com/kellerlabs/homeracker/commit/53918579eecfbca2db0e0040cd7d0ee61f7c9bf0))
+
 ## [1.8.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.7.8...homeracker-v1.8.0) (2026-03-15)
 
 

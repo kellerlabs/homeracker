@@ -1,5 +1,5 @@
 {
-  ".": "1.8.0",
+  ".": "1.9.0",
   "cmd/scadm": "0.4.11",
-  ".github/actions/setup-openscad": "0.0.0"
+  ".github/actions/setup-openscad": "1.0.0"
 }
