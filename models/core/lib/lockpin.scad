@@ -46,19 +46,21 @@ grip_base_length = grip_thickness_inner + grip_thickness_outer + grip_distance +
  * Creates a lock pin for the HomeRacker modular rack system.
  *
  * Parameters:
- *   grip_type (string, default="standard"): Type of grip for the lock pin.
- *       - "standard": Two grip arms on both sides.
- *       - "extended": Standard grip with an extended outer arm for improved stability.
- *       - "no_grip": No grip arms.
- *
- * Produces:
- *   A lock pin with a bidirectional tension hole and optional grip arms.
+ *   grip_type (number, default=LP_GRIP_STANDARD): Type of grip.
+ *       - LP_GRIP_STANDARD (0): Two grip arms on both sides.
+ *       - LP_GRIP_EXTENDED (1): Standard grip with an extended outer arm.
+ *       - LP_GRIP_NO_GRIP (2): No grip arms.
+ *   neck_extension (number, default=LP_NECK_EXT_NONE): Neck extension mode.
+ *       - LP_NECK_EXT_NONE (0): No extension (standard lockpin).
+ *       - LP_NECK_EXT_GRIP (1): Grip-side neck extension.
+ *       - LP_NECK_EXT_BOTH (2): Both sides extended.
  *
  * Usage:
- *   Call lockpin(grip_type) to generate a lock pin of desired grip type.
- *   Example: lockpin(grip_type="no_grip");
+ *   lockpin();
+ *   lockpin(grip_type=LP_GRIP_NO_GRIP);
+ *   lockpin(neck_extension=LP_NECK_EXT_GRIP);
  */
-module lockpin(grip_type = "standard") {
+module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
   rotate([90,0,0])
   difference() {
     // Create the lockpin shape
@@ -67,10 +69,13 @@ module lockpin(grip_type = "standard") {
       color(HR_YELLOW)
       tension_shape();
       // End part
-      end_parts(grip_type);
+      end_parts(grip_type, neck_extension);
+      // Neck extension
+      color(HR_BLUE)
+      neck(neck_extension, grip_type);
       // Grip part
       color(HR_GREEN)
-      grip(grip_type);
+      grip(grip_type, neck_extension);
     }
     // Subtract the tension hole
     color(HR_RED)
@@ -82,34 +87,70 @@ module lockpin(grip_type = "standard") {
  * 📐 grip module
  *
  * Creates the grip part of the lock pin.
- * If grip_type is "no_grip", no grip arms are created.
- * If grip_type is "standard", a symmetric two-stage grip is created.
- * If grip_type is "extended", standard grip with an extended outer arm for improved stability.
- * If grip_type is "z_grip", a Z-shaped grip variant is created (not implemented yet).
+ * LP_GRIP_NO_GRIP: no grip arms.
+ * LP_GRIP_STANDARD: a symmetric two-stage grip.
+ * LP_GRIP_EXTENDED: standard grip with an extended outer arm.
  */
-module grip(grip_type = "standard") {
-  if (grip_type != "no_grip") {
+module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
+  if (grip_type != LP_GRIP_NO_GRIP) {
+    grip_side_extension = neck_extension >= LP_NECK_EXT_GRIP ? LP_NECK_EXTENSION_UNIT : 0;
     grip_base_dimensions = [lockpin_width_outer, lockpin_height, grip_base_length];
-    grip_outer_dimensions = [grip_type == "extended"?grip_width * 1.5:grip_width, lockpin_height, grip_thickness_outer];
+    grip_outer_dimensions = [grip_type == LP_GRIP_EXTENDED ? grip_width * 1.5 : grip_width, lockpin_height, grip_thickness_outer];
     grip_inner_dimensions = [grip_width, lockpin_height, grip_thickness_inner];
 
-    base_translation = lockpin_prismoid_length + lockpin_endpart_length - lockpin_chamfer - TOLERANCE/2;
+    base_translation = lockpin_prismoid_length + lockpin_endpart_length - lockpin_chamfer - TOLERANCE/2 + grip_side_extension;
 
     union() {
       // Base part of the grip
       translate([0, 0, -base_translation - grip_base_length / 2])
         cuboid(grip_base_dimensions, chamfer=lockpin_chamfer, except=TOP);
 
-      if(grip_type == "standard" || grip_type == "extended") {
+      if(grip_type == LP_GRIP_STANDARD || grip_type == LP_GRIP_EXTENDED) {
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer / 2])
-          cuboid(grip_outer_dimensions, chamfer=lockpin_chamfer, except=TOP);
+          cuboid(grip_outer_dimensions, chamfer=lockpin_chamfer, edges=BOTTOM);
         // Inner part of the grip
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer + grip_thickness_inner / 2 + grip_distance])
-          cuboid(grip_inner_dimensions, chamfer=lockpin_chamfer, except=TOP);
-      } else if (grip_type == "z_grip") {
-        // TODO: Z-Grip variant has only 1 arm on each side but each arm is thicker
-        echo("Z-Grip variant not implemented yet.");
+          cuboid(grip_inner_dimensions, chamfer=lockpin_chamfer, edges=BOTTOM);
       }
+    }
+  }
+}
+
+/**
+ * 📐 neck module
+ *
+ * Creates neck extensions on the lock pin.
+ *   LP_NECK_EXT_GRIP: grip-side extension only.
+ *   LP_NECK_EXT_BOTH: both grip-side and front-side extensions.
+ * Each extension adds LP_NECK_EXTENSION_UNIT.
+ * Outer ends get chamfer + fillet; connected ends stay flush.
+ */
+module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
+  lockpin_fillet = lockpin_width_outer / 3;
+  neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
+  neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE/2 + LP_NECK_EXTENSION_UNIT / 2;
+
+  // Grip-side neck extension
+  if (neck_extension >= LP_NECK_EXT_GRIP) {
+    translate([0, 0, -neck_z])
+    if (grip_type != LP_GRIP_NO_GRIP) {
+      // Grip base overlaps into neck — no finishing on outer (BOTTOM) end
+      cuboid(neck_dimensions, chamfer=lockpin_chamfer, except=[TOP, BOTTOM]);
+    } else {
+      // No grip — fillet and chamfer the outer (BOTTOM) end
+      intersection() {
+        cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[BOTTOM + LEFT, BOTTOM + RIGHT]);
+        cuboid(neck_dimensions, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=TOP);
+      }
+    }
+  }
+  // Front-side neck extension
+  if (neck_extension >= LP_NECK_EXT_BOTH) {
+    translate([0, 0, neck_z])
+    // Always fillet and chamfer the outer (TOP) end
+    intersection() {
+      cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[TOP + LEFT, TOP + RIGHT]);
+      cuboid(neck_dimensions, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=BOTTOM);
     }
   }
 }
@@ -119,11 +160,11 @@ module grip(grip_type = "standard") {
  *
  * Creates the complete end part of the lock pin with chamfered and filleted edges.
  * The front half has filleted top edges for better grip, while the back half has chamfered edges.
- * If grip_type is "no_grip", both halves will have chamfered edges.
+ * Fillets are suppressed on ends that connect to a neck extension.
  */
-module end_parts(grip_type = "standard") {
-  end_part_half(true);
-  mirror([0, 0, 1]) end_part_half(grip_type == "no_grip");
+module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
+  end_part_half(true, neck_extension >= LP_NECK_EXT_BOTH);
+  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, neck_extension >= LP_NECK_EXT_GRIP);
 }
 
 /**
@@ -131,8 +172,9 @@ module end_parts(grip_type = "standard") {
  *
  * Creates one half of the end part of the lock pin with chamfered and filleted edges.
  * The front half has filleted top edges for better grip, while the back half has chamfered edges.
+ * When has_neck is true, the TOP edge is not chamfered/filleted for a flush neck connection.
  */
-module end_part_half(front = false) {
+module end_part_half(front = false, has_neck = false) {
 
   lockpin_fillet_front = lockpin_width_outer / 3;
   lockpin_endpart_dimension = [lockpin_width_outer, lockpin_height, lockpin_endpart_length]; // cubic
@@ -142,8 +184,8 @@ module end_part_half(front = false) {
   // Since it's not possible to have both chamfer and fillet on the same edges,
   // we use an intersection of two shapes to achieve the desired effect.
   intersection() {
-    cuboid(lockpin_endpart_dimension, rounding=front ? lockpin_fillet_front : 0, edges=[TOP + LEFT, TOP + RIGHT]);
-    cuboid(lockpin_endpart_dimension, chamfer=lockpin_chamfer, edges=[FRONT,BACK], except=BOTTOM);
+    cuboid(lockpin_endpart_dimension, rounding=front && !has_neck ? lockpin_fillet_front : 0, edges=[TOP + LEFT, TOP + RIGHT]);
+    cuboid(lockpin_endpart_dimension, chamfer=lockpin_chamfer, edges=[FRONT,BACK], except=has_neck ? [BOTTOM, TOP] : BOTTOM);
   }
 }
 

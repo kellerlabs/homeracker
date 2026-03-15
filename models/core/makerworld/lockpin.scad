@@ -3,19 +3,10 @@ include <BOSL2/std.scad>
 /* [Parameters] */
 
 // Type of grip for the lock pin
-grip_type = "standard"; // ["standard","no_grip"]
+grip_type = 0; // [0:Standard, 1:Extended, 2:No Grip]
 
-// --- Examples ---
-
-// Example 1: Create a default lock pin (uses default grip_type)
-// lockpin();
-
-// Example 2: Create a lock pin with no grip
-// lockpin(grip_type="no_grip");
-
-// Example 3: Create a lock pin with grip_type as set above
-color(HR_YELLOW)
-lockpin(grip_type=grip_type);
+// Neck extension mode
+neck_extension = 0; // [0:None, 1:Grip Side, 2:Both Sides]
 
 /* [Hidden] */
 TOLERANCE = 0.2;
@@ -27,6 +18,13 @@ BASE_CHAMFER = 1;
 LOCKPIN_HOLE_CHAMFER = 0.8;
 LOCKPIN_HOLE_SIDE_LENGTH = 4;
 LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION = [LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH];
+LP_GRIP_STANDARD = 0;
+LP_GRIP_EXTENDED = 1;
+LP_GRIP_NO_GRIP = 2;
+LP_NECK_EXT_NONE = 0;
+LP_NECK_EXT_GRIP = 1;
+LP_NECK_EXT_BOTH = 2;
+LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE/2;
 HR_YELLOW = "#f7b600";
 HR_BLUE = "#0056b3";
 HR_RED = "#c41e3a";
@@ -285,7 +283,7 @@ grip_thickness_inner = PRINTING_LAYER_WIDTH*2;
 grip_thickness_outer = BASE_STRENGTH / 2;
 grip_distance = BASE_STRENGTH / 2;
 grip_base_length = grip_thickness_inner + grip_thickness_outer + grip_distance + lockpin_chamfer + TOLERANCE/2;
-module lockpin(grip_type = "standard") {
+module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
   rotate([90,0,0])
   difference() {
 
@@ -294,10 +292,13 @@ module lockpin(grip_type = "standard") {
       color(HR_YELLOW)
       tension_shape();
 
-      end_parts(grip_type);
+      end_parts(grip_type, neck_extension);
+
+      color(HR_BLUE)
+      neck(neck_extension, grip_type);
 
       color(HR_GREEN)
-      grip(grip_type);
+      grip(grip_type, neck_extension);
     }
 
     color(HR_RED)
@@ -305,39 +306,66 @@ module lockpin(grip_type = "standard") {
   }
 }
 
-module grip(grip_type = "standard") {
-  if (grip_type != "no_grip") {
+module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
+  if (grip_type != LP_GRIP_NO_GRIP) {
+    grip_side_extension = neck_extension >= LP_NECK_EXT_GRIP ? LP_NECK_EXTENSION_UNIT : 0;
     grip_base_dimensions = [lockpin_width_outer, lockpin_height, grip_base_length];
-    grip_outer_dimensions = [grip_type == "extended"?grip_width * 1.5:grip_width, lockpin_height, grip_thickness_outer];
+    grip_outer_dimensions = [grip_type == LP_GRIP_EXTENDED ? grip_width * 1.5 : grip_width, lockpin_height, grip_thickness_outer];
     grip_inner_dimensions = [grip_width, lockpin_height, grip_thickness_inner];
 
-    base_translation = lockpin_prismoid_length + lockpin_endpart_length - lockpin_chamfer - TOLERANCE/2;
+    base_translation = lockpin_prismoid_length + lockpin_endpart_length - lockpin_chamfer - TOLERANCE/2 + grip_side_extension;
 
     union() {
 
       translate([0, 0, -base_translation - grip_base_length / 2])
         cuboid(grip_base_dimensions, chamfer=lockpin_chamfer, except=TOP);
 
-      if(grip_type == "standard" || grip_type == "extended") {
+      if(grip_type == LP_GRIP_STANDARD || grip_type == LP_GRIP_EXTENDED) {
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer / 2])
-          cuboid(grip_outer_dimensions, chamfer=lockpin_chamfer, except=TOP);
+          cuboid(grip_outer_dimensions, chamfer=lockpin_chamfer, edges=BOTTOM);
 
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer + grip_thickness_inner / 2 + grip_distance])
-          cuboid(grip_inner_dimensions, chamfer=lockpin_chamfer, except=TOP);
-      } else if (grip_type == "z_grip") {
-
-        echo("Z-Grip variant not implemented yet.");
+          cuboid(grip_inner_dimensions, chamfer=lockpin_chamfer, edges=BOTTOM);
       }
     }
   }
 }
 
-module end_parts(grip_type = "standard") {
-  end_part_half(true);
-  mirror([0, 0, 1]) end_part_half(grip_type == "no_grip");
+module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
+  lockpin_fillet = lockpin_width_outer / 3;
+  neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
+  neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE/2 + LP_NECK_EXTENSION_UNIT / 2;
+
+  if (neck_extension >= LP_NECK_EXT_GRIP) {
+    translate([0, 0, -neck_z])
+    if (grip_type != LP_GRIP_NO_GRIP) {
+
+      cuboid(neck_dimensions, chamfer=lockpin_chamfer, except=[TOP, BOTTOM]);
+    } else {
+
+      intersection() {
+        cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[BOTTOM + LEFT, BOTTOM + RIGHT]);
+        cuboid(neck_dimensions, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=TOP);
+      }
+    }
+  }
+
+  if (neck_extension >= LP_NECK_EXT_BOTH) {
+    translate([0, 0, neck_z])
+
+    intersection() {
+      cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[TOP + LEFT, TOP + RIGHT]);
+      cuboid(neck_dimensions, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=BOTTOM);
+    }
+  }
 }
 
-module end_part_half(front = false) {
+module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
+  end_part_half(true, neck_extension >= LP_NECK_EXT_BOTH);
+  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, neck_extension >= LP_NECK_EXT_GRIP);
+}
+
+module end_part_half(front = false, has_neck = false) {
 
   lockpin_fillet_front = lockpin_width_outer / 3;
   lockpin_endpart_dimension = [lockpin_width_outer, lockpin_height, lockpin_endpart_length];
@@ -346,8 +374,8 @@ module end_part_half(front = false) {
   color(HR_BLUE)
 
   intersection() {
-    cuboid(lockpin_endpart_dimension, rounding=front ? lockpin_fillet_front : 0, edges=[TOP + LEFT, TOP + RIGHT]);
-    cuboid(lockpin_endpart_dimension, chamfer=lockpin_chamfer, edges=[FRONT,BACK], except=BOTTOM);
+    cuboid(lockpin_endpart_dimension, rounding=front && !has_neck ? lockpin_fillet_front : 0, edges=[TOP + LEFT, TOP + RIGHT]);
+    cuboid(lockpin_endpart_dimension, chamfer=lockpin_chamfer, edges=[FRONT,BACK], except=has_neck ? [BOTTOM, TOP] : BOTTOM);
   }
 }
 
@@ -377,5 +405,6 @@ module tension_hole_half(){
   prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
 }
 
+$fn = 100;
 color(HR_YELLOW)
-lockpin(grip_type=grip_type);
+lockpin(grip_type=grip_type, neck_extension=neck_extension);
