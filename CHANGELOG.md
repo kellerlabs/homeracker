@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.9.0...homeracker-v1.9.1) (2026-03-16)
+
+
+### 📦 Dependencies
+
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.76.2 ([#274](https://github.com/kellerlabs/homeracker/issues/274)) ([86aadda](https://github.com/kellerlabs/homeracker/commit/86aaddaf47cba165fdf8a571eb1e3aaacacc77d3))
+
 ## [1.9.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.8.0...homeracker-v1.9.0) (2026-03-15)
 
 
