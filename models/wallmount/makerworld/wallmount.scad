@@ -14,7 +14,7 @@ bore_head_diameter=8.5;
 
 
 /* [Finetuning] */
-// Defines the countersink angle of the screw head. 90° is ISO standard. (only relevant if bore_type=countersunk)
+// Defines the angle of the head rejuvenation. 90° is ISO standard. (only relevant if bore_type=countersunk)
 countersunk_angle=90;
 // Tolerance (in mm) for the bore holes. This is a sane default.
 bore_tolerance=0.2;
