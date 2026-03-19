@@ -1,28 +1,22 @@
-# HomeRacker Gridfinity
+# 📦 HomeRacker Gridfinity
+
+## 📌 What
 
 Gridfinity-compatible baseplates and bin bases implemented as reusable OpenSCAD modules for anyone to use.
-This library is intended to make it easier to integrate Gridfinity interfaces to your models.
+This library makes it easy to integrate Gridfinity interfaces into your models.
 
-If you want to create a Gridfinity compatible shelf or drawer, use the `baseplate` module.
-If you want to create a custom Gridfinity bin, use the `binbase` module.
+- **Baseplate**: Use for Gridfinity-compatible shelves or drawers
+- **Bin Base**: Use as a foundation for custom Gridfinity bins
 
-## 📁 Structure
+## 🤔 Why
 
-```
-gridfinity/
-├── base.scad           # Legacy entry point (deprecated - use lib/ modules)
-├── lib/                # Gridfinity module definitions (implementation)
-│   ├── baseplate.scad  # Baseplate module implementation (for surfaces)
-│   └── binbase.scad    # Bin base module implementation (for containers)
-├── parts/              # Single customizable instances of `lib` modules
-│   ├── baseplate.scad  # Fully customizable baseplate (use OpenSCAD Customizer)
-│   └── binbase.scad    # Fully customizable bin base
-└── makerworld/         # Export-ready variants for MakerWorld
-    ├── baseplate.scad  # Pre-configured baseplate variants
-    └── binbase.scad    # Pre-configured bin base variants
-```
+Mainly because I can, but also other implementations I found were pretty complicated and I just wanted simple interfaces.
 
-## 🚀 Quick Start
+- Standard 42mm Gridfinity grid — compatible with the entire ecosystem
+- Parametric OpenSCAD modules — include in your own projects
+- Spec-compliant with [grizzie17's Gridfinity specification](https://www.printables.com/model/417152-gridfinity-specification)
+
+## 🔧 How
 
 ### Using the Library
 
@@ -53,7 +47,7 @@ Open any file in `parts/` with OpenSCAD and use the **Customizer** panel to adju
 
 The `makerworld/` folder contains pre-configured variants for export as self-contained files to MakerWorld or other platforms.
 
-## 🔧 Core Components
+## 🧩 Core Components
 
 ### 1. **Baseplate**
 Mounting surface for Gridfinity bins and organizers.
@@ -73,11 +67,24 @@ Bottom mounting component for custom Gridfinity-compatible containers.
 
 All dimensions follow [grizzie17's Gridfinity specification](https://www.printables.com/model/417152-gridfinity-specification) for maximum compatibility.
 
+## 📸 Catalog
+
+| Part | Preview |
+|------|---------|
+| Baseplate | ![Baseplate](parts/baseplate.png) |
+| Bin Base | ![Bin Base](parts/binbase.png) |
+
+To generate or refresh previews:
+
+```bash
+./cmd/export/export-png.sh models/gridfinity/parts/<part>.scad
+```
+
 ## 📝 License
 
 - **Source Code**: MIT License
 
-## 🔗 Resources
+## 📚 References
 
 - [BOSL2 Library Documentation](https://github.com/BelfrySCAD/BOSL2/wiki)
 - [Gridfinity Specification](https://www.printables.com/model/417152-gridfinity-specification)

@@ -1,19 +1,6 @@
 // import BOSL2
 include <BOSL2/std.scad>
 
-/* [Hidden] */
-$fn=100;
-CAGE_BOLT_DIAMETER=6.5;
-RACK_BORE_DISTANCE_VERTICAL=15.875;
-RACK_BORE_DISTANCE_TOP_BOTTOM=6.35;
-RACK_MOUNT_SURFACE_WIDTH=15.875;
-RACK_BORE_DISTANCE_HORIZONTAL=RACK_MOUNT_SURFACE_WIDTH/2;
-RACK_HEIGHT_UNIT=44.5; // mm
-
-RACK_WIDTH_10_INCH_INNER=222.25; // mm
-RACK_WIDTH_10_INCH_OUTER=254; // mm
-RACK_WIDTH_19_INCH=482.6; // mm
-
 /* [Base] */
 // automatically chooses the tightest fit for the rackmount ears based on the device width. If true, rack_size will be ignored.
 autosize=true;
@@ -53,30 +40,42 @@ device_bore_rows=2;
 // If true, the device will be aligned to the center of the rackmount ear. Otherwise it will be aligned to the bottom of the rackmount ear.
 center_device_bore_alignment=false;
 
-/* [Derived] */
+/* [Hidden] */
+CAGE_BOLT_DIAMETER=6.5;
+RACK_BORE_DISTANCE_VERTICAL=15.875;
+RACK_BORE_DISTANCE_TOP_BOTTOM=6.35;
+RACK_MOUNT_SURFACE_WIDTH=15.875;
+RACK_BORE_DISTANCE_HORIZONTAL=RACK_MOUNT_SURFACE_WIDTH/2;
+RACK_HEIGHT_UNIT=44.5; // mm
+
+RACK_WIDTH_10_INCH_INNER=222.25; // mm
+RACK_WIDTH_10_INCH_OUTER=254; // mm
+RACK_WIDTH_19_INCH=482.6; // mm
+
 CHAMFER=min(strength/3,0.5);
 RACK_BORE_WIDTH=RACK_MOUNT_SURFACE_WIDTH-2*max(strength,2);
 RACK_HEIGHT_UNIT_COUNT=max(1,ceil(device_height/RACK_HEIGHT_UNIT));
 RACK_HEIGHT=RACK_HEIGHT_UNIT_COUNT*RACK_HEIGHT_UNIT; // actual height calculated by height unit size x number of units
 RACK_BORE_COUNT=RACK_HEIGHT_UNIT_COUNT*3; // 3 holes for each units
 
+// Calculate the depth of the ear (get_bore_depth defined below — OpenSCAD hoists functions)
+depth=device_bore_distance_front*2+get_bore_depth(device_bore_margin_horizontal,device_bore_columns);
+device_screw_alignment_vertical = center_device_bore_alignment ? RACK_HEIGHT / 2 : device_bore_margin_vertical / 2 + device_bore_distance_bottom;
+device_screw_alignment = [strength,depth/2,device_screw_alignment_vertical];
+
+// Ear distance
+ear_distance = show_distance ? -device_width : -CAGE_BOLT_DIAMETER;
+x_mirror_plane = [1,0,0];
+
+$fn=100;
+
 // Debug
 echo("Height: ", RACK_HEIGHT);
 echo("Rack Bore Count: ", RACK_BORE_COUNT);
 
-
-
 function get_bore_depth(device_bore_margin_horizontal,device_bore_columns) =
     (device_bore_columns - 1) * device_bore_margin_horizontal
 ;
-// Calculate the depth of the ear
-depth=device_bore_distance_front*2+get_bore_depth(device_bore_margin_horizontal,device_bore_columns);
-device_screw_alignment_vertical=
-    center_device_bore_alignment ?
-        RACK_HEIGHT / 2 :
-        device_bore_margin_vertical / 2 + device_bore_distance_bottom
-;
-device_screw_alignment = [strength,depth/2,device_screw_alignment_vertical];
 
 module base_ear(width,strength,height) {
     union() {
@@ -100,12 +99,10 @@ module screws_countersunk(length, diameter_head, length_head, diameter_shaft) {
 
 // Assemble the rackmount ear
 module rackmount_ear(asym=0){
-    ear_width_19_inch=(RACK_WIDTH_19_INCH - device_width) / 2 + asym;
-    ear_width_10_inch=(RACK_WIDTH_10_INCH_OUTER - device_width) / 2 + asym;
     // Calculate the width of the ear
     rack_ear_width = device_width > RACK_WIDTH_10_INCH_INNER || autosize == false && rack_size == 19 ?
-            ear_width_19_inch:
-            ear_width_10_inch
+            (RACK_WIDTH_19_INCH - device_width) / 2 + asym:
+            (RACK_WIDTH_10_INCH_OUTER - device_width) / 2 + asym
     ;
     difference() {
         difference() {
@@ -121,13 +118,9 @@ module rackmount_ear(asym=0){
     }
 }
 
-// Ear distance
-ear_distance = show_distance ? -device_width : -CAGE_BOLT_DIAMETER;
-
 // Place the ears
 rackmount_ear(asymetry);
 
-x_mirror_plane = [1,0,0];
 translate([ear_distance,0,0])
 mirror(x_mirror_plane){
     rackmount_ear(-asymetry);

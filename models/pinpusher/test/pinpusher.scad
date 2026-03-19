@@ -2,4 +2,4 @@
 //
 // Test file for pin pusher module.
 
-include <../pinpusher.scad>
+include <../parts/pinpusher.scad>

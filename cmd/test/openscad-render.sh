@@ -112,7 +112,7 @@ main() {
     if [[ $# -gt 0 ]]; then
         test_files=("$@")
     else
-        test_files=("${WORKSPACE_ROOT}/models/wallmount/wallmount.scad")
+        test_files=("${WORKSPACE_ROOT}/models/wallmount/parts/wallmount.scad")
     fi
 
     # Run tests
