@@ -86,9 +86,14 @@
       // Since we have a test-suite running (pre-commit), we can safely automerge the following dependencies
       // If checks fail, Renovate will not automerge
       "matchPackageNames": [
-        "camunda/infra-global-github-actions",
         "BelfrySCAD/BOSL2"
       ],
+      "automerge": true
+    },
+    {
+      // infra-global-github-actions uses per-component semver tags (e.g. pull-request-1.0.0)
+      "matchPackageNames": ["camunda/infra-global-github-actions"],
+      "versioning": "regex:^pull-request-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
       "automerge": true
     },
     {
