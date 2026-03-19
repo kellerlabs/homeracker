@@ -5,6 +5,8 @@
 // Use the main homeracker library file
 include <../main.scad>
 
-grip_type = LP_GRIP_STANDARD;
-neck_extension = LP_NECK_EXT_BOTH;
-lockpin(grip_type=grip_type, neck_extension=neck_extension);
+// Test all neck extension types
+for (i = [0:3]) {
+  translate([i * 20, 0, 0])
+  lockpin(grip_type=LP_GRIP_STANDARD, neck_extension=i);
+}

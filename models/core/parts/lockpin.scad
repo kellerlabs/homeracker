@@ -11,7 +11,7 @@ include <../main.scad>
 grip_type = 0; // [0:Standard, 1:Extended, 2:No Grip]
 
 // Neck extension mode
-neck_extension = 0; // [0:None, 1:Grip Side, 2:Both Sides]
+neck_extension = 0; // [0:None, 1:Grip Side, 2:Both Sides, 3:Foot Side]
 
 /* [Hidden] */
 $fn = 100;
