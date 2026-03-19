@@ -21,47 +21,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 INSTALL_DIR="${WORKSPACE_ROOT}/bin/openscad"
 
-# Detect platform
-detect_platform() {
-    case "$(uname -s)" in
-        Linux*|Darwin*)     echo "linux";;
-        CYGWIN*|MINGW*|MSYS*)    echo "windows";;
-        *)          echo "unknown";;
-    esac
-}
-
-PLATFORM=$(detect_platform)
-
-# Source common functions
+# Source common functions (provides detect_platform, find_openscad_exe, logging)
 # shellcheck source=../lib/common.sh disable=SC1091
 source "${SCRIPT_DIR}/../lib/common.sh"
 
-# Find OpenSCAD executable path
-find_openscad_exe() {
-    if [[ "${PLATFORM}" == "windows" ]]; then
-        if [[ -f "${INSTALL_DIR}/openscad.exe" ]]; then
-            echo "${INSTALL_DIR}/openscad.exe"
-            return 0
-        fi
-    elif [[ "${PLATFORM}" == "macos" ]]; then
-        if [[ -f "${INSTALL_DIR}/openscad" ]]; then
-            echo "${INSTALL_DIR}/openscad"
-            return 0
-        elif [[ -f "${INSTALL_DIR}/OpenSCAD.app/Contents/MacOS/OpenSCAD" ]]; then
-            echo "${INSTALL_DIR}/OpenSCAD.app/Contents/MacOS/OpenSCAD"
-            return 0
-        fi
-    else
-        if [[ -f "${INSTALL_DIR}/openscad" ]]; then
-            echo "${INSTALL_DIR}/openscad"
-            return 0
-        elif [[ -f "${INSTALL_DIR}/OpenSCAD.AppImage" ]]; then
-            echo "${INSTALL_DIR}/OpenSCAD.AppImage"
-            return 0
-        fi
-    fi
-    return 1
-}
+PLATFORM=$(detect_platform)
 
 # Test a single model file
 test_model() {

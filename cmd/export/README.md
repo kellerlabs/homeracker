@@ -1,4 +1,6 @@
-# MakerWorld Export Tool
+# Export Tools
+
+## MakerWorld Export
 
 Exports OpenSCAD models for MakerWorld's parametric feature by inlining all local includes into a single file.
 
@@ -130,3 +132,26 @@ To add a new model type (e.g., `models/newtype/`):
 3. Commit - the pre-commit hook will automatically export to `models/newtype/makerworld/`
 
 No other configuration needed - the export script auto-detects model types from paths.
+
+## PNG Export
+
+Exports an isometric preview PNG from any OpenSCAD model.
+
+```bash
+./cmd/export/export-png.sh <input.scad> [--camera CAM] [--imgsize WxH] [--colorscheme NAME]
+```
+
+Output is written next to the input file as `<basename>.png`.
+
+### Examples
+
+```bash
+# Default diagonal view
+./cmd/export/export-png.sh models/pinpusher/pinpusher.scad
+
+# Custom camera and size
+./cmd/export/export-png.sh models/core/parts/connector.scad --imgsize 1200,900
+
+# Custom camera angle
+./cmd/export/export-png.sh models/core/parts/lockpin.scad --camera 0,0,0,45,0,25,100
+```
