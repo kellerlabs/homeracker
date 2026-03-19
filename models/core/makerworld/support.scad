@@ -35,6 +35,7 @@ LP_GRIP_NO_GRIP = 2;
 LP_NECK_EXT_NONE = 0;
 LP_NECK_EXT_GRIP = 1;
 LP_NECK_EXT_BOTH = 2;
+LP_NECK_EXT_FOOT = 3;
 LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE/2;
 HR_YELLOW = "#f7b600";
 HR_BLUE = "#0056b3";
@@ -319,7 +320,8 @@ module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) 
 
 module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
   if (grip_type != LP_GRIP_NO_GRIP) {
-    grip_side_extension = neck_extension >= LP_NECK_EXT_GRIP ? LP_NECK_EXTENSION_UNIT : 0;
+    has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
+    grip_side_extension = has_grip_neck ? LP_NECK_EXTENSION_UNIT : 0;
     grip_base_dimensions = [lockpin_width_outer, lockpin_height, grip_base_length];
     grip_outer_dimensions = [grip_type == LP_GRIP_EXTENDED ? grip_width * 1.5 : grip_width, lockpin_height, grip_thickness_outer];
     grip_inner_dimensions = [grip_width, lockpin_height, grip_thickness_inner];
@@ -346,8 +348,10 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
   lockpin_fillet = lockpin_width_outer / 3;
   neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
   neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE/2 + LP_NECK_EXTENSION_UNIT / 2;
+  has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
+  has_foot_neck = neck_extension == LP_NECK_EXT_FOOT || neck_extension == LP_NECK_EXT_BOTH;
 
-  if (neck_extension >= LP_NECK_EXT_GRIP) {
+  if (has_grip_neck) {
     translate([0, 0, -neck_z])
     if (grip_type != LP_GRIP_NO_GRIP) {
 
@@ -361,7 +365,7 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
     }
   }
 
-  if (neck_extension >= LP_NECK_EXT_BOTH) {
+  if (has_foot_neck) {
     translate([0, 0, neck_z])
 
     intersection() {
@@ -372,8 +376,10 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
 }
 
 module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
-  end_part_half(true, neck_extension >= LP_NECK_EXT_BOTH);
-  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, neck_extension >= LP_NECK_EXT_GRIP);
+  has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
+  has_foot_neck = neck_extension == LP_NECK_EXT_FOOT || neck_extension == LP_NECK_EXT_BOTH;
+  end_part_half(true, has_foot_neck);
+  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_grip_neck);
 }
 
 module end_part_half(front = false, has_neck = false) {

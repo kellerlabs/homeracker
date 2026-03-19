@@ -54,6 +54,7 @@ grip_base_length = grip_thickness_inner + grip_thickness_outer + grip_distance +
  *       - LP_NECK_EXT_NONE (0): No extension (standard lockpin).
  *       - LP_NECK_EXT_GRIP (1): Grip-side neck extension.
  *       - LP_NECK_EXT_BOTH (2): Both sides extended.
+ *       - LP_NECK_EXT_FOOT (3): Foot-side neck extension (opposite of grip).
  *
  * Usage:
  *   lockpin();
@@ -93,7 +94,8 @@ module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) 
  */
 module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
   if (grip_type != LP_GRIP_NO_GRIP) {
-    grip_side_extension = neck_extension >= LP_NECK_EXT_GRIP ? LP_NECK_EXTENSION_UNIT : 0;
+    has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
+    grip_side_extension = has_grip_neck ? LP_NECK_EXTENSION_UNIT : 0;
     grip_base_dimensions = [lockpin_width_outer, lockpin_height, grip_base_length];
     grip_outer_dimensions = [grip_type == LP_GRIP_EXTENDED ? grip_width * 1.5 : grip_width, lockpin_height, grip_thickness_outer];
     grip_inner_dimensions = [grip_width, lockpin_height, grip_thickness_inner];
@@ -121,7 +123,8 @@ module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
  *
  * Creates neck extensions on the lock pin.
  *   LP_NECK_EXT_GRIP: grip-side extension only.
- *   LP_NECK_EXT_BOTH: both grip-side and front-side extensions.
+ *   LP_NECK_EXT_BOTH: both grip-side and foot-side extensions.
+ *   LP_NECK_EXT_FOOT: foot-side extension only (opposite of grip).
  * Each extension adds LP_NECK_EXTENSION_UNIT.
  * Outer ends get chamfer + fillet; connected ends stay flush.
  */
@@ -129,9 +132,11 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
   lockpin_fillet = lockpin_width_outer / 3;
   neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
   neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE/2 + LP_NECK_EXTENSION_UNIT / 2;
+  has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
+  has_foot_neck = neck_extension == LP_NECK_EXT_FOOT || neck_extension == LP_NECK_EXT_BOTH;
 
   // Grip-side neck extension
-  if (neck_extension >= LP_NECK_EXT_GRIP) {
+  if (has_grip_neck) {
     translate([0, 0, -neck_z])
     if (grip_type != LP_GRIP_NO_GRIP) {
       // Grip base overlaps into neck — no finishing on outer (BOTTOM) end
@@ -144,8 +149,8 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
       }
     }
   }
-  // Front-side neck extension
-  if (neck_extension >= LP_NECK_EXT_BOTH) {
+  // Foot-side neck extension
+  if (has_foot_neck) {
     translate([0, 0, neck_z])
     // Always fillet and chamfer the outer (TOP) end
     intersection() {
@@ -163,8 +168,10 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
  * Fillets are suppressed on ends that connect to a neck extension.
  */
 module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
-  end_part_half(true, neck_extension >= LP_NECK_EXT_BOTH);
-  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, neck_extension >= LP_NECK_EXT_GRIP);
+  has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
+  has_foot_neck = neck_extension == LP_NECK_EXT_FOOT || neck_extension == LP_NECK_EXT_BOTH;
+  end_part_half(true, has_foot_neck);
+  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_grip_neck);
 }
 
 /**
