@@ -193,7 +193,7 @@ Schematics:
 
 > I may tweak the pin grip in future versions to make it easier to pull out again. But the base dimensions will remain the same for compatibility.
 
-> 💡 **Tip**: Pulling out Lock Pins one at a time can be tedious. Check out the [Pinpusher](models/pinpusher/) — a tool that lets you push Lock Pins into place more efficiently.
+> 💡 **Tip**: Pulling out Lock Pins one at a time can be tedious. Check out the [Pinpusher](models/pinpusher/) — a tool designed to push Lock Pins back out quickly, especially when removing several at once.
 
 ## 🌍 Open Specs
 

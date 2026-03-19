@@ -34,4 +34,4 @@ To generate or refresh previews:
 ## 📚 References
 
 - [HomeRacker Core](../core/README.md)
-- [MakerWorld: Universal Mount for HomeRacker](https://makerworld.com) — closed-source successor
+- [MakerWorld: Customizable Rackmount](https://makerworld.com/en/models/2128492-customizable-rackmount-any-racksize#profileId-2304669) — closed-source implementation on MakerWorld
