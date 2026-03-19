@@ -29,39 +29,18 @@ EXPORT_PATHS=(
     "models/wallmount/parts"
 )
 
-# Cross-platform SHA256 helper
-compute_sha256() {
-    if command -v sha256sum &> /dev/null; then
-        cat "$@" | sha256sum | awk '{print $1}'
-    else
-        cat "$@" | shasum -a 256 | awk '{print $1}'
-    fi
-}
-
-# Compute combined checksum for a model's inputs:
-#   part .scad + model type's lib/*.scad (sorted) + export script
+# Compute checksum from transitive local include dependencies via Python.
+# Uses the same include-resolution logic as export_makerworld.py.
 compute_model_checksum() {
     local part_file="$1"
-    local model_type
-    model_type=$(echo "$part_file" | sed "s|${PROJECT_ROOT}/models/||" | cut -d'/' -f1)
-    local lib_dir="${PROJECT_ROOT}/models/${model_type}/lib"
-
-    local input_files=("$part_file")
-    if [ -d "$lib_dir" ]; then
-        while IFS= read -r -d '' lib_file; do
-            input_files+=("$lib_file")
-        done < <(find "$lib_dir" -name "*.scad" -type f -print0 | sort -z)
-    fi
-    input_files+=("$EXPORT_SCRIPT")
-
-    compute_sha256 "${input_files[@]}"
+    python "$EXPORT_SCRIPT" --checksum "$part_file"
 }
 
 # Get stored checksum for a model from checksums file
 get_stored_checksum() {
     local rel_path="$1"
     if [ -f "$CHECKSUMS_FILE" ]; then
-        grep "  ${rel_path}$" "$CHECKSUMS_FILE" 2>/dev/null | awk '{print $1}' || true
+        awk -v rel_path="$rel_path" '$2 == rel_path { print $1 }' "$CHECKSUMS_FILE" || true
     fi
 }
 
