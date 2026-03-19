@@ -5,6 +5,8 @@
 # Shared utilities for installation scripts.
 # Usage: source "${SCRIPT_DIR}/lib/common.sh"
 #
+# Requires WORKSPACE_ROOT and INSTALL_DIR to be set before sourcing.
+#
 
 # Colors for output
 RED='\033[0;31m'
@@ -28,6 +30,32 @@ log_warning() {
 
 log_error() {
     echo -e "${RED}✗${NC} $*"
+}
+
+# Platform detection
+detect_platform() {
+    case "$(uname -s)" in
+        Linux*|Darwin*)       echo "linux";;
+        CYGWIN*|MINGW*|MSYS*) echo "windows";;
+        *)                    echo "unknown";;
+    esac
+}
+
+# Find OpenSCAD executable in INSTALL_DIR
+find_openscad_exe() {
+    local platform
+    platform=$(detect_platform)
+    if [[ "${platform}" == "windows" ]]; then
+        [[ -f "${INSTALL_DIR}/openscad.com" ]] && echo "${INSTALL_DIR}/openscad.com" && return 0
+        [[ -f "${INSTALL_DIR}/openscad.exe" ]] && echo "${INSTALL_DIR}/openscad.exe" && return 0
+    elif [[ "${platform}" == "macos" ]]; then
+        [[ -f "${INSTALL_DIR}/openscad" ]] && echo "${INSTALL_DIR}/openscad" && return 0
+        [[ -f "${INSTALL_DIR}/OpenSCAD.app/Contents/MacOS/OpenSCAD" ]] && echo "${INSTALL_DIR}/OpenSCAD.app/Contents/MacOS/OpenSCAD" && return 0
+    else
+        [[ -f "${INSTALL_DIR}/openscad" ]] && echo "${INSTALL_DIR}/openscad" && return 0
+        [[ -f "${INSTALL_DIR}/OpenSCAD.AppImage" ]] && echo "${INSTALL_DIR}/OpenSCAD.AppImage" && return 0
+    fi
+    return 1
 }
 
 # Version file helpers
