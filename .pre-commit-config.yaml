@@ -58,5 +58,5 @@ repos:
         entry: .githooks/makerworld-export
         language: script
         pass_filenames: false
-        always_run: true
+        files: '^(models/.*\.scad|models/\.makerworld-checksums|cmd/export/)'
 ...

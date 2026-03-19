@@ -18,12 +18,12 @@ if ! "${PROJECT_ROOT}/cmd/export/export-core-models.sh"; then
     exit 1
 fi
 
-# Check if exported files have uncommitted/unstaged changes
+# Check if exported files or checksums have uncommitted/unstaged changes
 cd "${PROJECT_ROOT}"
 # Modified tracked files (not staged)
-MODIFIED=$(git diff --name-only models/*/makerworld/ 2>/dev/null || true)
+MODIFIED=$(git diff --name-only models/*/makerworld/ models/.makerworld-checksums 2>/dev/null || true)
 # Untracked files
-UNTRACKED=$(git ls-files --others --exclude-standard models/*/makerworld/ 2>/dev/null || true)
+UNTRACKED=$(git ls-files --others --exclude-standard models/*/makerworld/ models/.makerworld-checksums 2>/dev/null || true)
 
 if [ -n "$MODIFIED" ] || [ -n "$UNTRACKED" ]; then
     echo ""
@@ -39,7 +39,7 @@ if [ -n "$MODIFIED" ] || [ -n "$UNTRACKED" ]; then
     fi
     echo ""
     echo "Run the following to stage them:"
-    echo "  git add models/*/makerworld/"
+    echo "  git add models/*/makerworld/ models/.makerworld-checksums"
     exit 1
 fi
 

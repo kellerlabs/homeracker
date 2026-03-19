@@ -7,6 +7,7 @@ This script merges all local includes into a single file while preserving
 BOSL2 library references and the root file's parameters.
 """
 
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -136,6 +137,56 @@ def resolve_path(current_file: Path, include_path: str) -> Path:
         Absolute resolved path to the included file
     """
     return (current_file.parent / include_path).resolve()
+
+
+def collect_local_deps(file_path: Path, visited: Set[Path]) -> Set[Path]:
+    """Recursively collect all local (non-BOSL2) include dependencies.
+
+    Walks the include/use tree starting from file_path, collecting all local
+    files that contribute to the export output.
+
+    Args:
+        file_path: Absolute path to starting file
+        visited: Set of already-visited files to prevent cycles
+
+    Returns:
+        Set of absolute paths to all local dependencies (including file_path itself)
+    """
+    if file_path in visited or not file_path.exists():
+        return set()
+
+    visited.add(file_path)
+    deps = {file_path}
+
+    content = file_path.read_text(encoding="utf-8")
+    for _, path in get_includes(content):
+        if not is_bosl2(path):
+            resolved = resolve_path(file_path, path)
+            deps |= collect_local_deps(resolved, visited)
+
+    return deps
+
+
+def compute_checksum(input_file: Path, script_file: Path) -> str:
+    """Compute SHA256 checksum of all transitive local dependencies.
+
+    Hashes the input file, all its local includes (recursively), and the
+    export script itself. Used for cache invalidation.
+
+    Args:
+        input_file: Absolute path to root .scad file
+        script_file: Absolute path to this export script
+
+    Returns:
+        Hex SHA256 digest of combined file contents
+    """
+    deps = collect_local_deps(input_file, set())
+    deps.add(script_file)
+
+    hasher = hashlib.sha256()
+    for dep in sorted(deps):
+        hasher.update(dep.read_bytes())
+    return hasher.hexdigest()
 
 
 def has_parameter_section(content: str) -> bool:
@@ -379,14 +430,23 @@ def export_for_makerworld(input_file: Path, output_file: Path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <input.scad>")
+    checksum_mode = "--checksum" in sys.argv
+    args = [a for a in sys.argv[1:] if a != "--checksum"]
+
+    if len(args) != 1:
+        print(f"Usage: {sys.argv[0]} [--checksum] <input.scad>")
         sys.exit(1)
 
-    input_path = Path(sys.argv[1])
+    input_path = Path(args[0])
     if not input_path.exists():
         print(f"Error: {input_path} not found")
         sys.exit(1)
+
+    script_path = Path(__file__).resolve()
+
+    if checksum_mode:
+        print(compute_checksum(input_path.resolve(), script_path))
+        sys.exit(0)
 
     # Output to models/<model_type>/makerworld/
     project_root = input_path
