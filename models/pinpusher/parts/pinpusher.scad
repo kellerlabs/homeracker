@@ -30,17 +30,22 @@
 // Note: this is just a makeshift solution. Not 100% happy with it but it'll do for now.
 
 include <BOSL2/std.scad>
-include <../core/lib/constants.scad>
+include <../../core/lib/constants.scad>
 
 /* [Hidden] */
 $fn = 100;
 
-pusher_length = BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
-pusher_side = LOCKPIN_HOLE_SIDE_LENGTH - TOLERANCE;
+pusher_length =
+    BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
+pusher_side =
+    LOCKPIN_HOLE_SIDE_LENGTH - TOLERANCE;
 
-grip_width = BASE_UNIT/2;
-grip_mid_width = grip_width - BASE_STRENGTH;
-grip_depth = BASE_UNIT / 2;
+grip_width =
+    BASE_UNIT/2;
+grip_mid_width =
+    grip_width - BASE_STRENGTH;
+grip_depth =
+    BASE_UNIT / 2;
 
 /**
  * 📐 pinpusher module

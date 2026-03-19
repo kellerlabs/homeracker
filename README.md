@@ -32,6 +32,7 @@ The parametric models are available in the [HomeRacker GitHub Repository](https:
 - [🧪 Tests](#-tests)
   - [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
   - [🔬 How I tested](#-how-i-tested)
+- [🏷️ Logo](#%EF%B8%8F-logo)
 
 # 🔧 Use Cases
 I created HomeRacker because I was dissatisfied with the existing solutions available online.
@@ -54,7 +55,7 @@ Aside from the basic [building blocks](#-tech-specs), the rack above also contai
   * [Raspi 5 Mount Kit](https://makerworld.com/en/models/1324096-pi-5-snapcase-for-homeracker#profileId-1360937):
     * Vertical Mount Adapter for HomeRacker
     * Front panel for 10" racks
-  * Rackmount ears for the switch. These are fully customizable rackmount ears I created as an [OpenSCAD file](https://github.com/kellerlabs/homeracker/blob/main/models/rackmount_ears/rackmount_ears.scad). You can customize it directly [here](https://makerworld.com/en/models/1259227-fully-customizable-rackmount-ears#profileId-1283271).
+  * Rackmount ears for the switch. These are fully customizable rackmount ears I created as an [OpenSCAD file](https://github.com/kellerlabs/homeracker/blob/main/models/rackmount_ears/parts/rackmount_ears.scad). You can customize it directly [here](https://makerworld.com/en/models/1259227-fully-customizable-rackmount-ears#profileId-1283271).
   * [HomeRacker Airflow Kit](https://makerworld.com/en/models/1353730-modular-10-server-rack#profileId-1396904) (currently part of the 10" rack model), which consists of:
     * Front/back panels
     * Side panels
@@ -72,7 +73,7 @@ The `HomeRacker - Core` features:
 * **OpenSource** – Build your own adapters and use the system in personal or commercial projects (see [🌍 Open Specs](#-open-specs) and [📜 Licensing](#-licensing) for details).
 
 ## ⚙️ How it works
-> **tl;dr** Think of a rack shape you want to build, download the model (insert link), print it, assemble it, and add your own mounts/adapters/whatever-you-like.
+> **tl;dr** Think of a rack shape you want to build, download the [Core model on MakerWorld](https://makerworld.com/en/models/1317298-homeracker-core) (or customize it there or from [this repo](models/core/)), print it, assemble it, and add your own mounts/adapters/whatever-you-like.
 
 I might post a YouTube video here to show how it works.
 
@@ -82,14 +83,14 @@ I might post a YouTube video here to show how it works.
 
 Assembly is straightforward and requires no tools:
 
-1. **Prepare the components**: Download the HomeRacker - Core (❗Todo: insert link), and print all required parts. Clean off any debris.
+1. **Prepare the components**: Download the [HomeRacker - Core](https://makerworld.com/en/models/1317298-homeracker-core) (or customize it on MakerWorld / from [this repo](models/core/)), and print all required parts. Clean off any debris.
 2. **Connect supports and connectors**: Attach connectors to supports based on your desired configuration.
 3. **Secure with Lock Pins**: Use Lock Pins to lock parts in place. They can be inserted horizontally or vertically thanks to their square profile.
 4. **Add features**: Attach panels, shelves, and other accessories as needed.
 
 ### 💡 Assembly Tips
 
-> 💡 **Pro Tip**: I created a sample 10" Cyberpunk-themed 3D model on MakerWorld (❗Todo: insert link) for inspiration.
+> 💡 **Pro Tip**: I created a sample [10" Cyberpunk-themed 3D model on MakerWorld](https://makerworld.com/en/models/1353730-modular-10-server-rack#profileId-1396904) for inspiration.
 
 1. Plan ahead! Otherwise, you'll end up with an army of unused parts like me:
 
@@ -98,7 +99,7 @@ Assembly is straightforward and requires no tools:
    Make a parts list:
    * How many supports of what lengths (in `base units`)?
    * How many connectors of each type (pull-throughs, feet, regular)?
-   * Print a ton of Lock Pins. You’ll need more than you might think. The model (❗Todo: insert link) on Makerworld should include a 100-pin plate and a [Gridfinity](https://gridfinity.xyz/) box for storage.
+   * Print a ton of Lock Pins. You'll need more than you might think. The [Core model](https://makerworld.com/en/models/1317298-homeracker-core) on MakerWorld includes a 100-pin plate and a [Gridfinity](https://gridfinity.xyz/) box for storage.
 
 2. Build layer by layer: Start with the base frame, add vertical supports, then stack intermediate/top frames.
 3. Make sure Lock Pins are fully inserted—gentle force might be needed.
@@ -172,25 +173,27 @@ Schematics:
 **Top View – Inner**
 ![Connector Inner Measurements](./img/core_connector_inner_measurement.png)
 
-### 📏 lock Pins
+### 📏 Lock Pins
 
 Lock Pins hold the system together.
 
-![lock Pin 3D](./img/core_lock_pin_3d.png)
+![Lock Pin 3D](./img/core_lock_pin_3d.png)
 
 They rely on tension from their convex shape to stay in place.
 
 Schematics:
 
 **Top View**
-![lock Pin Top](./img/core_lock_pin_top.png)
+![Lock Pin Top](./img/core_lock_pin_top.png)
 
 **Side View**
-> Don’t ask why the height is 3.791mm—it works. I left it as-is.
+> Don't ask why the height is 3.791mm—it works. I left it as-is.
 
-![lock Pin Side](./img/core_lock_pin_side.png)
+![Lock Pin Side](./img/core_lock_pin_side.png)
 
-> I may tweak the pin grip in future versions for to make it easier to pull-out again. But the base dimensions will remain the same for compatibility.
+> I may tweak the pin grip in future versions to make it easier to pull out again. But the base dimensions will remain the same for compatibility.
+
+> 💡 **Tip**: Pulling out Lock Pins one at a time can be tedious. Check out the [Pinpusher](models/pinpusher/) — a tool that lets you push Lock Pins into place more efficiently.
 
 ## 🌍 Open Specs
 
@@ -230,12 +233,12 @@ So, "HomeRacker" was born—part practical, part tongue-in-cheek. It fits the ho
 * Source code: `MIT License` ([LICENSE](https://github.com/kellerlabs/homeracker/blob/main/LICENSE))
 * 3D models & creative assets (`/models/`): `CC BY-SA 4.0 License` ([/models/LICENSE](https://github.com/kellerlabs/homeracker/blob/main/models/LICENSE))
 
-These licenses apply to the `HomeRacker - Core` system and customizable rackmount ears.
+These licenses apply to all models in this repository (Core, Gridfinity, Rackmount Ears, Wall Mount, Pinpusher, etc.).
 
 > ❗ **Important**
 > Other models I publish may have more restrictive licenses. This will be stated clearly on Makerworld.
 
-HomeRacker is an unregistered trademark of Patrick Pötz (), first used publicly on 12.04.2025.
+HomeRacker is an unregistered trademark of Patrick Pötz, first used publicly on 12.04.2025.
 
 # 🛠️ Developer Tools
 
@@ -261,15 +264,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions.
 
 # 🚀 Releases
 
-HomeRacker uses automated releases powered by Camunda's GitHub actions:
+Releases are fully automated:
 
 - **Automated versioning**: Follows [Semantic Versioning](https://semver.org/) based on [Conventional Commits](https://www.conventionalcommits.org/)
 - **Changelog generation**: Automatically generated from commit messages
-- **Release schedule**: Weekly auto-merge of release PRs (or manual trigger)
+- **Release schedule**: Weekly auto-merge of release PRs (Mondays) or manual trigger
 - **GitHub releases**: Tagged releases with changelog and version information
 - **PR validation**: Pull request titles are validated to ensure Conventional Commits compliance
 
-The release automation uses [Camunda's infra-global-github-actions](https://github.com/camunda/infra-global-github-actions/tree/main/teams/infra/pull-request) for release management and auto-merging.
+The release automation is powered by [Camunda's infra-global-github-actions](https://github.com/camunda/infra-global-github-actions/tree/main/teams/infra/pull-request).
 
 To contribute and trigger releases, use conventional commit messages. See [CONTRIBUTING.md](CONTRIBUTING.md#-commit-conventions) for details.
 
@@ -300,14 +303,14 @@ My setup is as follows:
   * PLA Matte (I love the charcoal color. Looks so silky)
   * PLA Basic
   * ABS
-* mostly I used the Textured PEI plate. It just works (provided you regularly clean it using Isopropyl alcohol). For the rest of the time I tried out the Cold Plate Super Track (it's nice but very hard to get your prints of the plates when it cools)
+* mostly I used the Textured PEI plate. It just works (provided you regularly clean it using Isopropyl alcohol). For the rest of the time I tried out the Cold Plate Super Track (it's nice but very hard to get your prints off the plates when it cools)
 
 All above's filament types can be be combined in any possible way (just make sure you do flow calibration before using new filaments. First ABS print turned out horribly just because I forgot to click the calibration checkbox).
 E.g.: you could print a connector in ABS, a support in PLA Matte and a Lock Pin in PLA and they will just fit when being assembled.
 
 > 🛠️ **Btw:** I am not affiliated with Bambu in any way besides uploading my models to MakerWorld and occasionally making use of their Exclusive Model program. But they don't pay me for naming their products anywhere else (I wish 😉).
 
-# Logo
+# 🏷️ Logo
 This logo will also be used as an overlay image for the thumbnails of all my 3D models that are compatible with HomeRacker.
 I encourage you to do the same if you create models for HomeRacker. That way, it’ll be immediately visible to users that a model is designed to be mounted on a HomeRacker system.
 I also svg'ed this logo [here](img/homeracker_logo.svg) and [here](img/homeracker_logo_single_color.svg).

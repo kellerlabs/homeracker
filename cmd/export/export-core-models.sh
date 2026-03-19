@@ -20,6 +20,9 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 EXPORT_PATHS=(
     "models/core/parts"
     "models/gridfinity/parts"
+    "models/pinpusher/parts"
+    "models/rackmount_ears/parts"
+    "models/wallmount/parts"
 )
 
 echo "Exporting HomeRacker models for MakerWorld..."

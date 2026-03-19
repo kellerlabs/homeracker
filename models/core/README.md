@@ -1,28 +1,19 @@
-# HomeRacker Core
+# 🧱 HomeRacker Core
 
-The core building system for HomeRacker - the fully modular 3D-printable rack-building platform.
+## 📌 What
 
-## 📁 Structure
+The core building system for HomeRacker — the fully modular 3D-printable rack-building platform.
+Provides supports, connectors, and lock pins as parametric OpenSCAD modules.
 
-```
-core/
-├── main.scad          # Main library entry point - include this to use base HomeRacker modules from `lib`
-├── lib/               # Core module definitions (implementation)
-│   ├── connector.scad  # Connector module implementation
-│   ├── support.scad    # Support beam module implementation
-│   ├── lockpin.scad    # Lock pin module implementation
-│   └── constants.scad  # Shared constants and dimensions
-├── parts/              # Single customizable instances of `lib` modules
-│   ├── connector.scad  # Fully customizable connector (use OpenSCAD Customizer)
-│   ├── support.scad    # Fully customizable support beam
-│   └── lockpin.scad    # Fully customizable lock pin
-└── presets/            # Pre-configured variant collections
-    ├── connectors.scad # All useful connector variants for export
-    ├── supports.scad   # All useful support variants for export
-    └── lockpins.scad   # All useful lock pin variants for export
-```
+## 🤔 Why
 
-## 🚀 Quick Start
+- **Modularity**: Snap-together system using standardized 15mm units — no glue, no screws
+- **Parametric**: Every component is fully customizable via OpenSCAD Customizer
+- **Extensible**: Library modules (`lib/`) can be included in your own projects
+
+See the [main README's Tech Specs](../../README.md#-tech-specs) for dimensional rationale and assembly basics.
+
+## 🔧 How
 
 ### Using the Library
 
@@ -57,7 +48,7 @@ The `presets/` folder contains modules for batch-exporting all logical variants:
 - **`supports.scad`**: Various support lengths with different hole configurations
 - **`lockpins.scad`**: Standard grip, extended and no-grip variants
 
-## 🔧 Core Components
+## 🧩 Core Components
 
 ### 1. **Supports** (Beams)
 Structural elements with standardized connection points.
@@ -88,12 +79,26 @@ Junction pieces that join supports in multiple directions.
 - **Standard Chamfer**: 1mm
 - **Lock Pin Chamfer**: 0.8mm
 
+## 📸 Catalog
+
+| Part | Preview |
+|------|---------|
+| Connector | ![Connector](parts/connector.png) |
+| Support | ![Support](parts/support.png) |
+| Lock Pin | ![Lock Pin](parts/lockpin.png) |
+
+To generate or refresh previews:
+
+```bash
+./cmd/export/export-png.sh models/core/parts/<part>.scad
+```
+
 ## 📝 License
 
 - **Source Code**: MIT License
 - **3D Models**: CC BY-SA 4.0
 
-## 🔗 Resources
+## 📚 References
 
 - [Main Repository](https://github.com/kellerlabs/homeracker)
 - [BOSL2 Library Documentation](https://github.com/BelfrySCAD/BOSL2/wiki)
