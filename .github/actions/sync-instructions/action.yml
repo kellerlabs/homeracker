@@ -1,0 +1,18 @@
+---
+name: Sync Copilot Instructions
+description: >
+  Download the canonical Copilot instruction set from kellerlabs/homeracker
+  and overwrite local copies. Does not commit — caller handles git operations.
+
+inputs:
+  ref:
+    description: Branch or tag to sync from (e.g., main, sync-instructions-v1.0.0).
+    required: false
+    default: main
+
+runs:
+  using: composite
+  steps:
+    - name: Sync instructions
+      shell: bash
+      run: bash "${{ github.action_path }}/sync-instructions.sh" "${{ inputs.ref }}"
