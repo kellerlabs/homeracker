@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.1](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.0...scadm-v0.5.1) (2026-03-20)
+
+
+### 📚 Documentation
+
+* **scadm:** add flatten file structure conventions ([7d644bc](https://github.com/kellerlabs/homeracker/commit/7d644bc56b84edceb3f758f0746544183ebdbefc))
+
+
+### 🔧 Miscellaneous
+
+* **sync-instructions:** address PR review feedback ([00f4b4c](https://github.com/kellerlabs/homeracker/commit/00f4b4c1c450cdccdcfe07f07e46165a1efdc0a6))
+
+
+### ♻️ Code Refactoring
+
+* rename makerworld/ directories to flattened/ ([#284](https://github.com/kellerlabs/homeracker/issues/284)) ([8c937db](https://github.com/kellerlabs/homeracker/commit/8c937db5ace61cc3a0bade19aa258587db86cdff))
+
 ## [0.5.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.4.11...scadm-v0.5.0) (2026-03-20)
 
 
