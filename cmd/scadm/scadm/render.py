@@ -31,11 +31,17 @@ def _find_openscad_exe(install_dir: Path) -> Optional[Path]:
         exe = install_dir / "openscad.com"
         if exe.exists():
             return exe
+        exe = install_dir / "openscad.exe"
+        if exe.exists():
+            return exe
     else:
         exe = install_dir / "openscad"
         if exe.exists():
             return exe
-        # AppImage
+        exe = install_dir / "OpenSCAD.AppImage"
+        if exe.exists():
+            return exe
+        # Versioned AppImage, e.g. OpenSCAD-2025.03.17.ai22092-x86_64.AppImage
         for candidate in sorted(install_dir.glob("OpenSCAD-*.AppImage")):
             return candidate
     return None

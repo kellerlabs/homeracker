@@ -200,6 +200,7 @@ def _extract_definitions(content: str) -> str:
     in_definition = False
     in_variable = False
     brace_count = 0
+    seen_brace = False
 
     for line in lines:
         stripped = line.strip()
@@ -207,6 +208,7 @@ def _extract_definitions(content: str) -> str:
         # e.g. module connector(...), function get_color(...)
         if re.match(r"^(module|function)\s+\w+", stripped):
             in_definition = True
+            seen_brace = False
 
         # e.g. HR_YELLOW = [1,1,0];, BASE_UNIT = 15;
         if not in_definition and not in_variable and re.match(r"^\w+\s*=", stripped):
@@ -225,7 +227,9 @@ def _extract_definitions(content: str) -> str:
         if in_definition:
             result.append(line)
             brace_count += line.count("{") - line.count("}")
-            if brace_count == 0 and "{" in line:
+            if "{" in line:
+                seen_brace = True
+            if seen_brace and brace_count == 0:
                 in_definition = False
 
     return "\n".join(result)
@@ -615,7 +619,7 @@ def flatten_all(
     new_checksums: list[str] = []
 
     for input_file, output_file in all_files:
-        rel_path = str(input_file.relative_to(workspace_root))
+        rel_path = input_file.relative_to(workspace_root).as_posix()
         current_checksum = compute_checksum(input_file, workspace_root)
 
         if stored.get(rel_path) == current_checksum:

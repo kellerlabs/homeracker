@@ -61,7 +61,6 @@ module baseplate_cutout() {
     attach(TOP,BOTTOM) cuboid([BP_MID_PART_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, BP_MID_PART_HEIGHT], rounding=BP_MID_PART_ROUNDING, except=[BOTTOM,TOP])
     attach(TOP,BOTTOM) prismoid(BP_MID_PART_SIDE_LENGTH, BP_TOP_PART_SIDE_LENGTH, rounding1=BP_MID_PART_ROUNDING, rounding2=BP_TOP_PART_ROUNDING, h=BP_TOP_PART_HEIGHT);
 }
-
 module baseplate(units_x=1, units_y=1) {
   assert(is_int(units_x), "units_x must be an integer");
   assert(is_int(units_y), "units_y must be an integer");
