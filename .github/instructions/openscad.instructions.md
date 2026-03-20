@@ -26,7 +26,7 @@ applyTo: "**/*.scad"
 - **Parts**: Printable models go in `models/<type>/parts/`.
 - **Libraries**: Shared modules/functions go in `models/<type>/lib/` or `models/core/lib/`.
 - **Tests**: Test files go in `models/<type>/test/`.
-- **Flattened exports**: Auto-generated via `scadm flatten` into `models/<type>/makerworld/` — never edit these manually.
+- **Flattened exports**: Auto-generated via `scadm flatten` into `models/<type>/flattened/` — never edit these manually.
 
 ## Include Conventions
 

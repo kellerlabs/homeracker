@@ -106,7 +106,7 @@ Batch mode reads `"flatten"` entries from `scadm.json`:
 ```json
 {
   "flatten": [
-    {"src": "models/core/parts", "dest": "models/core/makerworld"}
+    {"src": "models/core/parts", "dest": "models/core/flattened"}
   ]
 }
 ```

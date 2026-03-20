@@ -19,7 +19,7 @@ scadm install --check
 # Render a single model (validates syntax + geometry)
 scadm render models/core/parts/connector.scad
 
-# Discover and render all models (test/ + makerworld/ dirs)
+# Discover and render all models (test/ + flattened/ dirs)
 ./cmd/test/test-models.sh
 
 # Flatten include trees for single-file platforms (e.g. MakerWorld)
