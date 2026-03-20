@@ -8,14 +8,14 @@ Exports OpenSCAD models for MakerWorld's parametric feature by inlining all loca
 
 ```bash
 # Preferred: use scadm (see cmd/scadm/README.md for full docs)
-scadm flatten models/core/parts/connector.scad -o models/core/makerworld/connector.scad
+scadm flatten models/core/parts/connector.scad -o models/core/flattened/connector.scad
 scadm flatten --all  # batch-flatten from scadm.json config
 
 # Legacy: standalone script (still works but scadm is preferred)
 python cmd/export/export_makerworld.py <input.scad>
 ```
 
-Output is written to `models/<model_type>/makerworld/<filename>.scad` where `<model_type>` is auto-detected from the input path (e.g., `core`, `gridfinity`).
+Output is written to `models/<model_type>/flattened/<filename>.scad` where `<model_type>` is auto-detected from the input path (e.g., `core`, `gridfinity`).
 
 ## File Structure Assumptions
 
@@ -51,10 +51,10 @@ This script is opinionated about file structure, following **OpenSCAD Customizer
 
 ```bash
 python cmd/export/export_makerworld.py models/core/parts/connector.scad
-# → models/core/makerworld/connector.scad
+# → models/core/flattened/connector.scad
 
 python cmd/export/export_makerworld.py models/gridfinity/parts/baseplate.scad
-# → models/gridfinity/makerworld/baseplate.scad
+# → models/gridfinity/flattened/baseplate.scad
 ```
 
 ## Testing
@@ -63,11 +63,11 @@ python cmd/export/export_makerworld.py models/gridfinity/parts/baseplate.scad
 # Flatten and validate all configured models
 scadm flatten --all
 
-# Discover and render all models (test/ + makerworld/ dirs)
+# Discover and render all models (test/ + flattened/ dirs)
 ./cmd/test/test-models.sh
 
 # Render a single flattened export
-scadm render models/core/makerworld/connector.scad
+scadm render models/core/flattened/connector.scad
 ```
 
 ## Automated Export System
@@ -105,8 +105,8 @@ pre-commit install
 # Run all pre-commit hooks
 pre-commit run --all-files
 
-# Run only the MakerWorld export validation
-pre-commit run validate-makerworld-exports --all-files
+# Run only the flatten validation
+pre-commit run validate-flatten-exports --all-files
 ```
 
 ### Adding New Model Types
@@ -118,12 +118,12 @@ To add a new model type (e.g., `models/newtype/`):
    ```json
    {
      "flatten": [
-       {"src": "models/core/parts", "dest": "models/core/makerworld"},
-       {"src": "models/newtype/parts", "dest": "models/newtype/makerworld"}
+       {"src": "models/core/parts", "dest": "models/core/flattened"},
+       {"src": "models/newtype/parts", "dest": "models/newtype/flattened"}
      ]
    }
    ```
-3. Commit — the pre-commit hook will automatically flatten to `models/newtype/makerworld/`
+3. Commit — the pre-commit hook will automatically flatten to `models/newtype/flattened/`
 
 ## PNG Export
 

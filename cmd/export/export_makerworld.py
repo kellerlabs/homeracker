@@ -448,7 +448,7 @@ if __name__ == "__main__":
         print(compute_checksum(input_path.resolve(), script_path))
         sys.exit(0)
 
-    # Output to models/<model_type>/makerworld/
+    # Output to models/<model_type>/flattened/
     project_root = input_path
     while project_root.parent != project_root and not (project_root / "models").exists():
         project_root = project_root.parent
@@ -458,7 +458,7 @@ if __name__ == "__main__":
     relative_path = input_path.relative_to(models_dir)
     model_type = relative_path.parts[0]  # First component is model type (core, gridfinity, etc.)
 
-    output_path = models_dir / model_type / "makerworld" / input_path.name
+    output_path = models_dir / model_type / "flattened" / input_path.name
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     export_for_makerworld(input_path, output_path)

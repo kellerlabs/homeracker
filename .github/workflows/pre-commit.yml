@@ -22,7 +22,7 @@ jobs:
           scadm-source: cmd/scadm
 
       - name: Make scripts executable
-        run: chmod +x .githooks/makerworld-export
+        run: chmod +x .githooks/flatten-validate
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1

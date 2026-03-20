@@ -53,9 +53,9 @@ repos:
           ]
   - repo: local
     hooks:
-      - id: validate-makerworld-exports
-        name: Validate MakerWorld Exports
-        entry: .githooks/makerworld-export
+      - id: validate-flatten-exports
+        name: Validate Flatten Exports
+        entry: .githooks/flatten-validate
         language: script
         pass_filenames: false
         files: '^(scadm\.json|models/.*\.scad|models/\.flatten-checksums|cmd/scadm/scadm/flatten\.py)'
