@@ -1,10 +1,13 @@
 """Tests for scadm.flatten module."""
 
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from scadm.flatten import flatten_file
+import scadm.flatten as flatten_mod
+from scadm.flatten import compute_checksum, flatten_file
 
 
 class FlattenTests(unittest.TestCase):
@@ -171,6 +174,36 @@ class FlattenTests(unittest.TestCase):
 
             self.assertTrue(out.endswith("\n"))
             self.assertFalse(out.endswith("\n\n"))
+
+    def test_checksum_independent_of_flatten_py_location(self):
+        """compute_checksum sorts deps by relative path, so moving flatten.py
+        outside the workspace (as pip does on different platforms) must not
+        change the digest.
+        """
+        with tempfile.TemporaryDirectory() as tmp_workspace, tempfile.TemporaryDirectory() as tmp_site:
+            root = Path(tmp_workspace)
+
+            (root / "bin" / "openscad" / "libraries").mkdir(parents=True)
+            (root / "scadm.json").write_text('{"dependencies": []}\n', encoding="utf-8")
+
+            src_dir = root / "src"
+            src_dir.mkdir()
+            input_file = src_dir / "simple.scad"
+            input_file.write_text("cube(1);\n", encoding="utf-8")
+
+            checksum = compute_checksum(input_file, workspace_root=root)
+
+            # Place flatten.py completely outside the workspace tree so the
+            # fallback sort key (filename) is exercised instead of relative path.
+            alt_dir = Path(tmp_site) / "alt_site_packages" / "scadm"
+            alt_dir.mkdir(parents=True)
+            alt_flatten = alt_dir / "flatten.py"
+            shutil.copy2(flatten_mod.__file__, alt_flatten)
+
+            with patch.object(flatten_mod, "__file__", str(alt_flatten)):
+                checksum_alt = compute_checksum(input_file, workspace_root=root)
+
+            self.assertEqual(checksum, checksum_alt)
 
 
 if __name__ == "__main__":

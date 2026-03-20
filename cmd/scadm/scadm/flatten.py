@@ -420,8 +420,16 @@ def compute_checksum(input_file: Path, workspace_root: Optional[Path] = None) ->
     # Include flatten.py itself so code changes invalidate cache
     deps.add(Path(__file__).resolve())
 
+    resolved_root = workspace_root.resolve()
+
+    def _sort_key(dep: Path) -> tuple[str, str]:
+        try:
+            return (dep.relative_to(resolved_root).as_posix(), "")
+        except ValueError:
+            return (dep.name, hashlib.sha256(dep.read_bytes()).hexdigest())
+
     hasher = hashlib.sha256()
-    for dep in sorted(deps):
+    for dep in sorted(deps, key=_sort_key):
         hasher.update(dep.read_bytes())
     return hasher.hexdigest()
 
