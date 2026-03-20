@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.10.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.9.1...homeracker-v1.10.0) (2026-03-20)
+
+
+### ✨ Features
+
+* **export:** add per-model checksum caching for makerworld exports ([#282](https://github.com/kellerlabs/homeracker/issues/282)) ([127ae46](https://github.com/kellerlabs/homeracker/commit/127ae462b1bb7dc85f79dbcc8d892dce4672b29e))
+* lockpin pusher tool and PNG export script ([#276](https://github.com/kellerlabs/homeracker/issues/276)) ([825ad85](https://github.com/kellerlabs/homeracker/commit/825ad8541152d7cb15b6b97ac712c27c61702cbe))
+* **lockpin:** add foot-side neck extension option ([#280](https://github.com/kellerlabs/homeracker/issues/280)) ([9a239f4](https://github.com/kellerlabs/homeracker/commit/9a239f46c31ebaab139d13e20455e815c9a670cf))
+* **scadm:** add flatten and render subcommands ([#283](https://github.com/kellerlabs/homeracker/issues/283)) ([9816c3c](https://github.com/kellerlabs/homeracker/commit/9816c3ccebf0c0a012376dc4158a6c2dcfd70bd3))
+
+
+### 📦 Dependencies
+
+* update camunda/infra-global-github-actions action to pull-request-1.0.1 ([#279](https://github.com/kellerlabs/homeracker/issues/279)) ([a81c7e4](https://github.com/kellerlabs/homeracker/commit/a81c7e4b4c2b14c5aec68d43b311a82aa727dc51))
+
+
+### 📚 Documentation
+
+* restructure models and update documentation ([#281](https://github.com/kellerlabs/homeracker/issues/281)) ([f82249e](https://github.com/kellerlabs/homeracker/commit/f82249e18346350cf86865e04046a288759be439))
+
+
+### 🔄 CI/CD
+
+* **renovate:** switch infra-global-github-actions to semver tags ([#278](https://github.com/kellerlabs/homeracker/issues/278)) ([1b9e9b5](https://github.com/kellerlabs/homeracker/commit/1b9e9b57a92d9b0215a76ce6c4e8b0e1ed327d64))
+
 ## [1.9.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.9.0...homeracker-v1.9.1) (2026-03-16)
 
 
