@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.3](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.2...scadm-v0.5.3) (2026-03-20)
+
+
+### 🐛 Bug Fixes
+
+* **scadm:** hash flatten.py at fixed position in compute_checksum ([#289](https://github.com/kellerlabs/homeracker/issues/289)) ([a584dc2](https://github.com/kellerlabs/homeracker/commit/a584dc29201019840ca389d2f0420de8b704d136))
+
 ## [0.5.2](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.1...scadm-v0.5.2) (2026-03-20)
 
 

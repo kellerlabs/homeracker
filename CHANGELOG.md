@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.10.2...homeracker-v1.10.3) (2026-03-20)
+
+
+### 🐛 Bug Fixes
+
+* **scadm:** hash flatten.py at fixed position in compute_checksum ([#289](https://github.com/kellerlabs/homeracker/issues/289)) ([a584dc2](https://github.com/kellerlabs/homeracker/commit/a584dc29201019840ca389d2f0420de8b704d136))
+
 ## [1.10.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.10.1...homeracker-v1.10.2) (2026-03-20)
 
 
