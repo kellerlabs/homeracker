@@ -7,6 +7,11 @@ Exports OpenSCAD models for MakerWorld's parametric feature by inlining all loca
 ## Usage
 
 ```bash
+# Preferred: use scadm (see cmd/scadm/README.md for full docs)
+scadm flatten models/core/parts/connector.scad -o models/core/makerworld/connector.scad
+scadm flatten --all  # batch-flatten from scadm.json config
+
+# Legacy: standalone script (still works but scadm is preferred)
 python cmd/export/export_makerworld.py <input.scad>
 ```
 
@@ -54,21 +59,15 @@ python cmd/export/export_makerworld.py models/gridfinity/parts/baseplate.scad
 
 ## Testing
 
-Use the automated export system:
-
 ```bash
-# Export all configured models and validate
-./cmd/export/export-core-models.sh
-```
+# Flatten and validate all configured models
+scadm flatten --all
 
-Or test a single model:
+# Discover and render all models (test/ + makerworld/ dirs)
+./cmd/test/test-models.sh
 
-```bash
-python cmd/export/export_makerworld.py models/core/parts/connector.scad
-# → models/core/makerworld/connector.scad
-
-python cmd/export/export_makerworld.py models/gridfinity/parts/baseplate.scad
-# → models/gridfinity/makerworld/baseplate.scad
+# Render a single flattened export
+scadm render models/core/makerworld/connector.scad
 ```
 
 ## Automated Export System
@@ -87,21 +86,16 @@ pre-commit install
 
 ### Components
 
-**`export-core-models.sh`** - Orchestrates the export process:
-- **Auto-discovers** all `.scad` files from configured paths (`models/core/parts`, `models/gridfinity/parts`)
-- Exports each via `export_makerworld.py` (auto-detects model type from path)
-- Validates exports with `test-models.sh`
+**`scadm flatten --all`** - Orchestrates the flatten process:
+- Reads `"flatten"` entries from `scadm.json` for src/dest path mappings
+- Flattens each `.scad` file by inlining all local includes
+- Skips unchanged files via SHA256 checksums (`models/.flatten-checksums`)
 
 **Pre-commit hook** - Configured in `.pre-commit-config.yaml`:
-- Runs `export-core-models.sh` **automatically on every commit**
-- Validates exports are in sync with source files
-- Only runs when model files in `models/**/*.scad` change
-- **You don't need to manually export** - just commit and the hook does it for you
-
-**Model type detection**:
-- Input: `models/<model_type>/parts/file.scad` → Output: `models/<model_type>/makerworld/file.scad`
-- Works for any model type (core, gridfinity, or future additions)
-- Just add your `.scad` files to `<model_type>/parts/` and they'll be auto-exported
+- Runs `scadm flatten --all` **automatically on every commit**
+- Validates flattened files are in sync with source files
+- Only runs when model files in `models/**/*.scad` or `cmd/scadm/scadm/flatten.py` change
+- **You don't need to manually flatten** - just commit and the hook does it for you
 
 **GitHub Actions** - CI workflow runs all pre-commit hooks on PRs
 
@@ -120,18 +114,16 @@ pre-commit run validate-makerworld-exports --all-files
 To add a new model type (e.g., `models/newtype/`):
 
 1. Create your model files in `models/newtype/parts/*.scad`
-2. Edit `cmd/export/export-core-models.sh` and add to `EXPORT_PATHS`:
-   ```bash
-   EXPORT_PATHS=(
-       "models/core/parts"           # Folder: auto-discovers .scad files
-       "models/gridfinity/parts"     # Folder: auto-discovers .scad files
-       "models/newtype/parts"        # Your new model type
-       # "models/newtype/special.scad" # Or: specific file only
-   )
+2. Add a flatten entry to `scadm.json`:
+   ```json
+   {
+     "flatten": [
+       {"src": "models/core/parts", "dest": "models/core/makerworld"},
+       {"src": "models/newtype/parts", "dest": "models/newtype/makerworld"}
+     ]
+   }
    ```
-3. Commit - the pre-commit hook will automatically export to `models/newtype/makerworld/`
-
-No other configuration needed - the export script auto-detects model types from paths.
+3. Commit — the pre-commit hook will automatically flatten to `models/newtype/makerworld/`
 
 ## PNG Export
 

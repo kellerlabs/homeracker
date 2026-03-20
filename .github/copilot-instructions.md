@@ -22,6 +22,10 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Docs: Essential info only - what/why/how in <100 lines when possible
   - GitHub issues/PRs: Clear problem/solution, skip verbose explanations
 - **Use Emojis**: Supplement PR descriptions, issue comments, and review comments with emojis for easier reading (e.g. ✅ ❌ 🔧 📦 💡 🚀 ⚠️)
+- **Documentation Policy**:
+  - Every code change that adds, modifies, or removes functionality **must** include a documentation update.
+  - Follow the What / Why / How / References structure defined in the markdown instructions.
+  - When renaming or restructuring code, update or rename the associated docs to keep everything tidy.
 - **Commits**: Use [Conventional Commits](https://www.conventionalcommits.org/) format
   - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
   - Format: `type(scope): description` or `type: description`
@@ -46,27 +50,8 @@ Before terminal operations, consider running these steps (use best judgement):
 9. **Creating PRs**: Use the **GitHub MCP Server** (never `gh` CLI). Read `.github/pull_request_template.md` and fill in every section. Keep it brief per project conventions.
 10. **On errors**: Step back, check docs, ask user if stuck—don't iterate blindly
 
-## OpenSCAD Guidelines
-- Use BOSL2 for complex geometry
-- Set `$fn=100` for production
-- Group parameters with `/* [Section] */` comments
-- Include sanity checks for critical params
-- Test parameter ranges for edge cases
-
-## Python Guidelines
-- **Docstrings**: Use [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for all functions
-  - Brief summary on first line
-  - `Args:` section describing each parameter
-  - `Returns:` section describing return value
-  - `Raises:` section for exceptions (if applicable)
-  - Example: See `cmd/export/export_makerworld.py`
-- Keep code self-documenting with clear variable names
-- Add inline comments only for complex regex patterns or non-obvious logic
-
-## Renovate Guidelines
-- **Version Pinning**: MANDATORY for all dependencies (Renovate manages updates)
-  - Pin exact versions, never use version ranges or `latest`
-  - New pinning patterns: Research Renovate docs first to ensure proper tracking
-  - Examples: Docker tags, Python packages, GitHub Actions, OpenSCAD versions
-- **Testing**: Run `cmd/test/test-renovate-local.sh` to verify config changes
-- **Important**: Changes MUST be pushed to the current branch before running the test (script runs in Docker context)
+## Technology-Specific Guidelines
+- Documentation: See .github/instructions/markdown.instructions.md
+- OpenSCAD: See .github/instructions/openscad.instructions.md
+- Python: See .github/instructions/python.instructions.md
+- Renovate: See .github/instructions/renovate.instructions.md

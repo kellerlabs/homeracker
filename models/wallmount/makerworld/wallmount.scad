@@ -11,8 +11,6 @@ bore_shaft_diameter=4;
 // Bore Head Diameter in mm (only relevant if bore_type=countersunk)
 bore_head_diameter=8.5;
 
-
-
 /* [Finetuning] */
 // Defines the angle of the head rejuvenation. 90° is ISO standard. (only relevant if bore_type=countersunk)
 countersunk_angle=90;
@@ -56,8 +54,11 @@ bore_head_radius=(bore_head_diameter+bore_tolerance)/2;
 bore_position_x=BASE_STRENGTH+BASE_UNIT/2+TOLERANCE/2+BASE_UNIT;
 
 $fn=100;
+
 echo("head_depth: ", head_depth);
 echo("bore_position_x: ", bore_position_x);
+
+// Support Interface
 module mount(){
   difference() {
     union(){
@@ -68,7 +69,10 @@ module mount(){
     cuboid([connector_width_net,mount_height,connector_width_net],anchor=CENTER+BOTTOM);
   }
 }
+
+// Lock pin Holes
 module lock_pin_hole(){
+  // fix for negative chamfer. Otherwise the holes would not reach the surface
   translate([0,0,-NEGATIVE_CHAMFER_TRANSLATE/2])
   cuboid(
     size=[LOCK_PIN_SIDE,LOCK_PIN_SIDE,connector_width_gross+0.01],
@@ -76,25 +80,37 @@ module lock_pin_hole(){
     chamfer=-LOCK_PIN_CHAMFER,edges=[TOP,BOTTOM]
     );
 }
+
 module lock_pin_holes(){
+  // ycopies
   ycopies(BASE_UNIT,mount_units)
+  // Create cross
   union(){
     lock_pin_hole();
     yrot(90,cp=[0,0,connector_width_gross/2])
     lock_pin_hole();
   }
 }
+
+//// Bores
+// Shafts
 module bore(){
   if (bore_type=="flathead") {
     cylinder(r=bore_shaft_radius,h=mount_thickness,anchor=CENTER+BOTTOM);
   } else if (bore_type=="countersunk") {
+    // Countersunk
     union() {
+      // Head
       translate([0,0,mount_thickness])
       cylinder(r1=bore_shaft_radius,r2=bore_head_radius,h=head_depth,anchor=CENTER+TOP);
+      // Shaft
       cylinder(r=bore_shaft_radius,h=mount_thickness,anchor=CENTER+BOTTOM);
     }
+
   }
 }
+
+// Assembly
  translate([0,0,BASE_UNIT]) rotate([90,0,0])
 union(){
   difference() {
@@ -103,6 +119,9 @@ union(){
     bore();
     translate([bore_position_x,0,0])
     bore();
+
+    // Lock Pin Holes
     lock_pin_holes();
   }
+
 }

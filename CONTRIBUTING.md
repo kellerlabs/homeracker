@@ -50,7 +50,10 @@ pip install pre-commit
 sudo apt install libopengl0 shellcheck
 
 # Verify installation
-./cmd/test/openscad-render.sh
+scadm render models/wallmount/parts/wallmount.scad
+
+# Discover and render all models
+./cmd/test/test-models.sh
 
 # Install the git hooks
 pre-commit install --install-hooks -t commit-msg -t pre-commit
@@ -103,17 +106,18 @@ The hooks can be found here: [.pre-commit-config.yaml](.pre-commit-config.yaml)
           ValueError: Description of when this exception is raised
       """
   ```
-- See `cmd/export/export_makerworld.py` for real examples
+- See `cmd/scadm/scadm/flatten.py` for real examples
 - Use type hints for function parameters and return values
 - Keep inline comments minimal - code should be self-documenting
 
 ### Testing
-- Render in OpenSCAD without errors
+- Run `./cmd/test/test-models.sh` to discover and render all models
+- Run `scadm render <file.scad>` to validate individual files
+- "Render" = compile .scad to binary STL via OpenSCAD (validates syntax, geometry, includes)
 - Test edge cases (min/max parameter values)
-- Export to STL and verify mesh integrity
 
-### MakerWorld Exports
-Files in `models/<model_type>/parts/` are automatically exported on commit. See [cmd/export/README.md](cmd/export/README.md) for details.
+### Flattened Exports
+Files in `models/<model_type>/parts/` are automatically flattened on commit via `scadm flatten --all`. Configuration is in the `"flatten"` key of `scadm.json`. See [cmd/scadm/README.md](cmd/scadm/README.md) for details.
 
 ## 📝 Commit Conventions
 

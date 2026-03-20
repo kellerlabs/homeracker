@@ -6,5 +6,12 @@
       "version": "v2.0.727",
       "source": "github"
     }
+  ],
+  "flatten": [
+    {"src": "models/core/parts", "dest": "models/core/makerworld"},
+    {"src": "models/gridfinity/parts", "dest": "models/gridfinity/makerworld"},
+    {"src": "models/pinpusher/parts", "dest": "models/pinpusher/makerworld"},
+    {"src": "models/rackmount_ears/parts", "dest": "models/rackmount_ears/makerworld"},
+    {"src": "models/wallmount/parts", "dest": "models/wallmount/makerworld"}
   ]
 }

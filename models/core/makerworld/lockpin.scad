@@ -69,7 +69,6 @@ module support(units=3, x_holes=false) {
         }
     }
 }
-
 module lock_pin_hole() {
     lock_pin_center_side = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
     lock_pin_center_dimension = [lock_pin_center_side, lock_pin_center_side];
@@ -168,7 +167,6 @@ module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=f
     }
   }
 }
-
 module connector_raw(config, is_foot=false) {
   difference() {
 
@@ -192,7 +190,6 @@ module connector_raw(config, is_foot=false) {
     if (config[5]) translate([0, -core_to_arm_translation, 0]) rotate([90, 0, 0]) connectorArmInner();
   }
 }
-
 module connectorArmOuter(is_foot=false) {
 
   arm_dimensions_outer = [connector_outer_side_length, connector_outer_side_length, BASE_UNIT];
@@ -207,20 +204,17 @@ module connectorArmOuter(is_foot=false) {
     }
   }
 }
-
 module connectorArmInner() {
 
   arm_dimensions_inner = [arm_side_length_inner, arm_side_length_inner, BASE_UNIT];
   color(HR_GREEN)
   cuboid(arm_dimensions_inner, chamfer=BASE_CHAMFER,edges=BOTTOM);
 }
-
 module connectorCore() {
   core_dimensions = [connector_outer_side_length, connector_outer_side_length, connector_outer_side_length];
   color(HR_BLUE)
   cuboid(core_dimensions, chamfer=BASE_CHAMFER);
 }
-
 module print_interface_3d() {
 
   side_length = BASE_UNIT - TOLERANCE/2 - BASE_STRENGTH/2;
@@ -244,7 +238,6 @@ module print_interface_3d() {
   translate([translation, translation, translation])
   polyhedron(points=points, faces=faces, convexity=2);
 }
-
 module print_interface_base() {
   base_height = BASE_UNIT * 3;
   side_length = connector_outer_side_length *2;
@@ -255,7 +248,6 @@ module print_interface_base() {
   translate([connector_outer_side_length/2,connector_outer_side_length/2,0])
   cuboid([side_length, side_length, base_height], chamfer=chamfer, edges=LEFT+FRONT);
 }
-
 module pull_through_hole(axis="none", is_foot=false) {
 
   hole_length = BASE_UNIT * 3;
@@ -306,7 +298,6 @@ module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) 
     tension_hole();
   }
 }
-
 module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
   if (grip_type != LP_GRIP_NO_GRIP) {
     has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
@@ -332,7 +323,6 @@ module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
     }
   }
 }
-
 module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
   lockpin_fillet = lockpin_width_outer / 3;
   neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
@@ -363,14 +353,12 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
     }
   }
 }
-
 module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
   has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
   has_foot_neck = neck_extension == LP_NECK_EXT_FOOT || neck_extension == LP_NECK_EXT_BOTH;
   end_part_half(true, has_foot_neck);
   mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_grip_neck);
 }
-
 module end_part_half(front = false, has_neck = false) {
 
   lockpin_fillet_front = lockpin_width_outer / 3;
@@ -384,12 +372,10 @@ module end_part_half(front = false, has_neck = false) {
     cuboid(lockpin_endpart_dimension, chamfer=lockpin_chamfer, edges=[FRONT,BACK], except=has_neck ? [BOTTOM, TOP] : BOTTOM);
   }
 }
-
 module tension_shape() {
     tension_shape_half();
     mirror([0, 0, 1]) tension_shape_half();
 }
-
 module tension_shape_half() {
   lockpin_inner_dimension = [lockpin_width_inner, lockpin_height];
   lockpin_outer_dimension = [lockpin_width_outer, lockpin_height];
@@ -397,12 +383,10 @@ module tension_shape_half() {
 
   prismoid(lockpin_inner_dimension, lockpin_outer_dimension, height=lockpin_prismoid_length, chamfer=lockpin_chamfer);
 }
-
 module tension_hole(){
   tension_hole_half();
   mirror([0,0,1]) tension_hole_half();
 }
-
 module tension_hole_half(){
   lockpin_tension_angle = 86.5;
   lockpin_tension_hole_width_inner = PRINTING_LAYER_WIDTH * 4;
@@ -410,7 +394,20 @@ module tension_hole_half(){
   lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height];
   prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
 }
-
 $fn = 100;
+
+// --- Examples ---
+
+// Example 1: Create a default lock pin (uses default grip_type)
+// lockpin();
+
+// Example 2: Create a lock pin with no grip
+// lockpin(grip_type=LP_GRIP_NO_GRIP);
+
+// Example 3: Create a lock pin with neck extension for panel mounting
+// lockpin(neck_extension=LP_NECK_EXT_GRIP);
+
+// Example 4: Create a lock pin with grip_type and neck_extension as set above
+
 color(HR_YELLOW)
 lockpin(grip_type=grip_type, neck_extension=neck_extension);

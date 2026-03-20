@@ -21,7 +21,7 @@ runs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.x'
+        python-version: '3.14'
 
     - name: Install system dependencies
       uses: awalsh128/cache-apt-pkgs-action@v1.6.0

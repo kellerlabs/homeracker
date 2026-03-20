@@ -7,9 +7,6 @@ grid_x = 1; // [1:1:10]
 grid_y = 2; // [1:1:10]
 
 /* [Hidden] */
-// Optimized for 0.4mm nozzle 3D printing (allegedly according to Sonnet 4.5's research)
-// Preview: Faster but still smooth
-// Render: Based on typical 0.4mm nozzle capabilities
 TOLERANCE = 0.2;
 PRINTING_LAYER_WIDTH = 0.4;
 PRINTING_LAYER_HEIGHT = 0.2;
@@ -64,7 +61,6 @@ module baseplate_cutout() {
     attach(TOP,BOTTOM) cuboid([BP_MID_PART_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, BP_MID_PART_HEIGHT], rounding=BP_MID_PART_ROUNDING, except=[BOTTOM,TOP])
     attach(TOP,BOTTOM) prismoid(BP_MID_PART_SIDE_LENGTH, BP_TOP_PART_SIDE_LENGTH, rounding1=BP_MID_PART_ROUNDING, rounding2=BP_TOP_PART_ROUNDING, h=BP_TOP_PART_HEIGHT);
 }
-
 module baseplate(units_x=1, units_y=1) {
   assert(is_int(units_x), "units_x must be an integer");
   assert(is_int(units_y), "units_y must be an integer");
@@ -82,8 +78,15 @@ module baseplate(units_x=1, units_y=1) {
       baseplate_cutout();
   }
 }
-
+// Optimized for 0.4mm nozzle 3D printing (allegedly according to Sonnet 4.5's research)
+// Preview: Faster but still smooth
+// Render: Based on typical 0.4mm nozzle capabilities
 $fs = $preview ? 0.8 : 0.4;
 $fa = $preview ? 6 : 2;
+// I normally use $fn = 100 for good results, but it's really performance heavy
+// when being used in multiples (like here in a grid).
+// The Makerworld PMM cannot handle that well (only up to 6x6 which might be too little for some folks).
+// $fn = $preview ? 32 : 100;  // Fixed segments (less adaptive and friggin performance heavy)
+
 color(HR_YELLOW)
 baseplate(grid_x, grid_y);
