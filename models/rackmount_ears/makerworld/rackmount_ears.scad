@@ -17,7 +17,6 @@ device_height=40;
 // Thickness of the rackmount ear.
 strength=3;
 
-
 /* [Device Bores] */
 // Distance (in mm) of the device's front bores(s) to the front of the device
 device_bore_distance_front=9.5;
@@ -68,17 +67,25 @@ ear_distance = show_distance ? -device_width : -CAGE_BOLT_DIAMETER;
 x_mirror_plane = [1,0,0];
 
 $fn=100;
+
+// Debug
+
 echo("Height: ", RACK_HEIGHT);
 echo("Rack Bore Count: ", RACK_BORE_COUNT);
+
 function get_bore_depth(device_bore_margin_horizontal,device_bore_columns) =
     (device_bore_columns - 1) * device_bore_margin_horizontal
 ;
+
 module base_ear(width,strength,height) {
     union() {
+        // Front face
         cuboid([width,strength,height],anchor=LEFT+BOTTOM+FRONT,chamfer=CHAMFER);
+        // Side face
         cuboid([strength,depth,height],anchor=LEFT+BOTTOM+FRONT,chamfer=CHAMFER);
     }
 }
+
 module screws_countersunk(length, diameter_head, length_head, diameter_shaft) {
     translate(device_screw_alignment)
     yrot(-90)
@@ -88,22 +95,31 @@ module screws_countersunk(length, diameter_head, length_head, diameter_shaft) {
         translate([0,0,length_head]) cylinder(h=length-length_head, r=diameter_shaft/2);
     }
 }
+
+// Assemble the rackmount ear
 module rackmount_ear(asym=0){
+    // Calculate the width of the ear
     rack_ear_width = device_width > RACK_WIDTH_10_INCH_INNER || autosize == false && rack_size == 19 ?
             (RACK_WIDTH_19_INCH - device_width) / 2 + asym:
             (RACK_WIDTH_10_INCH_OUTER - device_width) / 2 + asym
     ;
     difference() {
         difference() {
+            // Create the base of the ear
             base_ear(rack_ear_width,strength,RACK_HEIGHT);
+            // Create the holes for the device screws
             screws_countersunk(length=strength,diameter_head=device_bore_hole_head_diameter,length_head=device_bore_hole_head_length,diameter_shaft=device_bore_hole_diameter);
         }
+        // Create the holes for the rackmount screws
         zcopies(spacing=RACK_HEIGHT_UNIT,n=RACK_HEIGHT_UNIT_COUNT,sp=[0,0,0])
         zcopies(spacing=RACK_BORE_DISTANCE_VERTICAL,n=3,sp=[rack_ear_width-RACK_BORE_DISTANCE_HORIZONTAL,0,RACK_BORE_DISTANCE_TOP_BOTTOM])
         cuboid([RACK_BORE_WIDTH,strength+1,CAGE_BOLT_DIAMETER], rounding=CAGE_BOLT_DIAMETER/2, edges=[TOP+LEFT,TOP+RIGHT,BOTTOM+LEFT,BOTTOM+RIGHT], anchor=FRONT);
     }
 }
+
+// Place the ears
 rackmount_ear(asymetry);
+
 translate([ear_distance,0,0])
 mirror(x_mirror_plane){
     rackmount_ear(-asymetry);

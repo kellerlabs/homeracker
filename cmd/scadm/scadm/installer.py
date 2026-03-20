@@ -140,6 +140,7 @@ def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[
         cmd = [str(exe), "--version"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         output = result.stderr + result.stdout
+        # e.g. "OpenSCAD version 2024.12.06.ai20515"
         match = re.search(r"OpenSCAD version ([^\s]+)", output)
         if match:
             return match.group(1)

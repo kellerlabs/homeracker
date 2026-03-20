@@ -8,7 +8,7 @@ on:
       - '.github/workflows/validate-models.yml'
       - 'cmd/scadm/**'
       - 'scadm.json'
-      - 'cmd/test/openscad-render.sh'
+      - 'cmd/test/test-models.sh'
 
 jobs:
   validate:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Validate models
         run: |
-          chmod +x cmd/test/test-models.sh cmd/test/openscad-render.sh
+          chmod +x cmd/test/test-models.sh
           ./cmd/test/test-models.sh
 
       - name: Upload logs on failure

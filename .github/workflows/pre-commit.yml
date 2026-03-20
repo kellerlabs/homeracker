@@ -20,7 +20,7 @@ jobs:
           scadm-source: cmd/scadm
 
       - name: Make scripts executable
-        run: chmod +x cmd/export/export-core-models.sh .githooks/makerworld-export
+        run: chmod +x .githooks/makerworld-export
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1

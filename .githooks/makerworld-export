@@ -1,33 +1,31 @@
 #!/usr/bin/env bash
-# Pre-commit hook for MakerWorld exports
+# Pre-commit hook for flattened exports
 #
-# Exports all configured models and validates they are committed.
+# Flattens all configured models and validates they are committed.
 # This is the entry point called by pre-commit framework.
 #
 # Exit codes:
 #   0 - All exports generated and committed
-#   1 - Export failed or uncommitted changes detected
+#   1 - Flatten failed or uncommitted changes detected
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Run the export script
-if ! "${PROJECT_ROOT}/cmd/export/export-core-models.sh"; then
-    exit 1
-fi
+# Run the flatten
+scadm flatten --all
 
-# Check if exported files or checksums have uncommitted/unstaged changes
+# Check if flattened files or checksums have uncommitted/unstaged changes
 cd "${PROJECT_ROOT}"
 # Modified tracked files (not staged)
-MODIFIED=$(git diff --name-only models/*/makerworld/ models/.makerworld-checksums 2>/dev/null || true)
+MODIFIED=$(git diff --name-only models/*/makerworld/ models/.flatten-checksums 2>/dev/null || true)
 # Untracked files
-UNTRACKED=$(git ls-files --others --exclude-standard models/*/makerworld/ models/.makerworld-checksums 2>/dev/null || true)
+UNTRACKED=$(git ls-files --others --exclude-standard models/*/makerworld/ models/.flatten-checksums 2>/dev/null || true)
 
 if [ -n "$MODIFIED" ] || [ -n "$UNTRACKED" ]; then
     echo ""
-    echo "ERROR: Exported MakerWorld files have uncommitted/unstaged changes"
+    echo "ERROR: Flattened files have uncommitted/unstaged changes"
     echo ""
     if [ -n "$MODIFIED" ]; then
         echo "Modified files (not staged):"
@@ -39,8 +37,8 @@ if [ -n "$MODIFIED" ] || [ -n "$UNTRACKED" ]; then
     fi
     echo ""
     echo "Run the following to stage them:"
-    echo "  git add models/*/makerworld/ models/.makerworld-checksums"
+    echo "  git add models/*/makerworld/ models/.flatten-checksums"
     exit 1
 fi
 
-echo "✓ All exports are committed"
+echo "✓ All flattened files are committed"

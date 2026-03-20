@@ -419,12 +419,19 @@ module tension_hole_half(){
   lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height];
   prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
 }
-
 $fn = 100;
+
+// Color based on configuration:
+// HR_GREEN - standard (no pull through, no foot)
+// HR_YELLOW - pull-through (x/y/z pull through, no foot)
+// HR_BLUE - foot (no pull through, has foot)
+// HR_RED - pull-through foot (pull through and foot)
+
 function get_connector_color(pull_through_axis="none", is_foot=false) =
   is_foot && pull_through_axis != "none" ? HR_RED :
   is_foot ? HR_BLUE :
   pull_through_axis != "none" ? HR_YELLOW :
   HR_GREEN;
+
 color(get_connector_color(pull_through_axis, is_foot))
 connector(dimensions, directions, pull_through_axis, is_foot, optimal_orientation);

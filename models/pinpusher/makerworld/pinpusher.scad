@@ -40,18 +40,27 @@ base_chamfer = BASE_CHAMFER;
 lockpin_hole_chamfer = LOCKPIN_HOLE_CHAMFER;
 lockpin_hole_side_length = LOCKPIN_HOLE_SIDE_LENGTH;
 lockpin_hole_side_length_dimension = LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION;
-
 $fn = 100;
+
 pusher_length =
     BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
 pusher_side =
     LOCKPIN_HOLE_SIDE_LENGTH - TOLERANCE;
+
 grip_width =
     BASE_UNIT/2;
 grip_mid_width =
     grip_width - BASE_STRENGTH;
 grip_depth =
     BASE_UNIT / 2;
+
+/**
+ * 📐 pinpusher module
+ *
+ * Creates a lockpin pusher tool for the HomeRacker system.
+ * Lies flat for optimal printing. Shaft pushes lockpins out of connectors.
+ * Prismoid grip for pinching between thumb and index finger.
+ */
 module pinpusher() {
   color(HR_YELLOW)
   xrot(90)
@@ -78,4 +87,5 @@ module pinpusher() {
     except = [BOTTOM,TOP]
   );
 }
+
 pinpusher();

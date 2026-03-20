@@ -86,6 +86,44 @@ scadm install --openscad-only
 scadm install --libs-only
 ```
 
+### Flatten .scad files
+
+Flatten include trees into single files — useful for platforms that require single-file uploads (e.g. MakerWorld Customizer).
+
+```bash
+# Single file
+scadm flatten models/core/parts/connector.scad -o out/connector.scad
+
+# Batch-flatten all files configured in scadm.json
+scadm flatten --all
+
+# Compute transitive dependency checksum (for caching)
+scadm flatten --checksum models/core/parts/connector.scad
+```
+
+Batch mode reads `"flatten"` entries from `scadm.json`:
+
+```json
+{
+  "flatten": [
+    {"src": "models/core/parts", "dest": "models/core/makerworld"}
+  ]
+}
+```
+
+Unchanged files are skipped via SHA256 checksums stored in `models/.flatten-checksums`.
+
+### Render .scad files
+
+Validate .scad files by rendering them through the bundled OpenSCAD binary.
+"Rendering" means compiling the .scad source into a binary STL — this validates syntax,
+geometry, and that all includes resolve correctly. A non-zero exit code means something is broken.
+
+```bash
+scadm render models/core/parts/connector.scad
+scadm render file1.scad file2.scad
+```
+
 ### Configure VS Code extensions
 
 These are opinionated QoL improvements to install nifty VSCode extensions which improve DevEx.

@@ -1,13 +1,13 @@
 # 🔧 OpenSCAD Installation and Testing
 
-This directory contains testing scripts for OpenSCAD models.
+This directory contains tooling scripts for OpenSCAD models.
 
-For installation, use the **scadm** package (see `cmd/scadm/` or install via `pip install scadm`).
+For installation, use the **scadm** package (see `cmd/scadm/`).
 
 ## 📦 Quick Start
 
 ```bash
-# Install scadm (if not already installed)
+# Install scadm from local source
 pip install -e cmd/scadm
 
 # Install OpenSCAD + dependencies from scadm.json
@@ -16,11 +16,14 @@ scadm install
 # Check if updates are available
 scadm install --check
 
-# Run smoke test - validates the current openscad installation against local models
-./cmd/test/openscad-render.sh models/core/parts/connector.scad
+# Render a single model (validates syntax + geometry)
+scadm render models/core/parts/connector.scad
 
-# Run automated test suite (all models in test/ and makerworld/ directories)
+# Discover and render all models (test/ + makerworld/ dirs)
 ./cmd/test/test-models.sh
+
+# Flatten include trees for single-file platforms (e.g. MakerWorld)
+scadm flatten --all
 ```
 
 ## 🤖 Automatic Updates

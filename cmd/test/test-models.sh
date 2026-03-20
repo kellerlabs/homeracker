@@ -1,42 +1,35 @@
 #!/bin/bash
 # Automated Test Suite - All Models
 #
-# Discovers and tests all .scad files in:
-#   - models/*/test/     - Unit tests for model components
-#   - models/*/makerworld/ - Exported parametric models
+# Discovers and renders all .scad files in:
+#   - models/*/test/       — unit tests for model components
+#   - models/*/makerworld/ — flattened exports for single-file platforms
 #
-# This wrapper uses openscad-render.sh to render each discovered file.
-# Use this for CI/CD or comprehensive validation.
-# For testing specific files, call openscad-render.sh directly.
+# Render = OpenSCAD compile to binary STL. Validates syntax, geometry,
+# and that all includes resolve. A non-zero exit means something is broken.
+#
+# Uses `scadm render` for the actual rendering.
 
 set -euo pipefail
 
-# Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../lib/common.sh disable=SC1091
-source "${SCRIPT_DIR}/../lib/common.sh"
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
 
-# Change to repository root
-cd "${SCRIPT_DIR}/../.."
-
-# Find all .scad files in test/ subdirectories
+# Discover files
 MODELS=()
 
 while IFS= read -r -d '' model; do
   MODELS+=("${model}")
 done < <(find models -path "*/test/*.scad" -type f -print0)
 
-# Also find all .scad files in makerworld/ export directory
 while IFS= read -r -d '' model; do
   MODELS+=("${model}")
 done < <(find models -path "*/makerworld/*.scad" -type f -print0)
 
 if [ ${#MODELS[@]} -eq 0 ]; then
-  echo "No test models found in models/*/test/ or models/*/makerworld/ directories"
+  echo "No models found in models/*/test/ or models/*/makerworld/"
   exit 1
 fi
 
-echo "Found ${#MODELS[@]} test models to validate"
+echo "Found ${#MODELS[@]} model(s) to validate"
 
-# Test all models
-"${SCRIPT_DIR}/openscad-render.sh" "${MODELS[@]}"
+scadm render "${MODELS[@]}"
