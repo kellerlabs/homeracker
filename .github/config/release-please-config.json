@@ -29,6 +29,12 @@
       "package-name": "setup-openscad",
       "component": "setup-openscad",
       "bump-minor-pre-major": false
+    },
+    ".github/actions/sync-instructions": {
+      "release-type": "simple",
+      "package-name": "sync-instructions",
+      "component": "sync-instructions",
+      "bump-minor-pre-major": false
     }
   }
 }
