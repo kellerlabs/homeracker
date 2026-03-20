@@ -26,12 +26,17 @@ FILES=(
 
 echo "Syncing Copilot instructions from ${REPO}@${REF}..."
 
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "${TMPDIR}"' EXIT
+
 FAILED=0
 for file in "${FILES[@]}"; do
-    dir=$(dirname "${file}")
-    mkdir -p "${dir}"
+    tmpfile="${TMPDIR}/$(basename "${file}")"
 
-    if curl -fsSL "${BASE_URL}/${file}" -o "${file}"; then
+    if curl -fsSL "${BASE_URL}/${file}" -o "${tmpfile}"; then
+        dir=$(dirname "${file}")
+        mkdir -p "${dir}"
+        mv "${tmpfile}" "${file}"
         echo "  ✓ ${file}"
     else
         echo "  ✗ ${file} (download failed)"

@@ -33,7 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/kellerlabs/homeracker/main/.github/
 Pass a ref to sync from a specific branch or tag:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kellerlabs/homeracker/main/.github/actions/sync-instructions/sync-instructions.sh | bash -s -- sync-instructions-v1.0.0
+curl -fsSL https://raw.githubusercontent.com/kellerlabs/homeracker/sync-instructions-v1.0.0/.github/actions/sync-instructions/sync-instructions.sh | bash -s -- sync-instructions-v1.0.0
 ```
 
 ### Reusable action
@@ -62,7 +62,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: kellerlabs/homeracker/.github/actions/sync-instructions@sync-instructions-v1.0.0
 
