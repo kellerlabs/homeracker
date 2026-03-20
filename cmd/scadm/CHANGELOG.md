@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.1...scadm-v0.5.2) (2026-03-20)
+
+
+### 🐛 Bug Fixes
+
+* **scadm:** sort deps by relative path in compute_checksum ([#287](https://github.com/kellerlabs/homeracker/issues/287)) ([b0a6be7](https://github.com/kellerlabs/homeracker/commit/b0a6be7c682728cda729950855bec71ebd473296))
+
 ## [0.5.1](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.0...scadm-v0.5.1) (2026-03-20)
 
 
