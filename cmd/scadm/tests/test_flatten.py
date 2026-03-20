@@ -176,25 +176,36 @@ class FlattenTests(unittest.TestCase):
             self.assertFalse(out.endswith("\n\n"))
 
     def test_checksum_independent_of_flatten_py_location(self):
-        """compute_checksum sorts deps by relative path, so moving flatten.py
-        outside the workspace (as pip does on different platforms) must not
-        change the digest.
+        """compute_checksum hashes flatten.py at a fixed position, so its
+        install location never affects the digest — even when library deps
+        in bin/openscad/libraries/ would sort between possible flatten.py
+        positions.
         """
         with tempfile.TemporaryDirectory() as tmp_workspace, tempfile.TemporaryDirectory() as tmp_site:
             root = Path(tmp_workspace)
 
-            (root / "bin" / "openscad" / "libraries").mkdir(parents=True)
-            (root / "scadm.json").write_text('{"dependencies": []}\n', encoding="utf-8")
+            # Set up a scadm dependency so bin/openscad/libraries/ files
+            # are included in the transitive dep tree.
+            lib_dir = root / "bin" / "openscad" / "libraries" / "mylib" / "lib"
+            lib_dir.mkdir(parents=True)
+            (lib_dir / "helper.scad").write_text("function h() = 1;\n", encoding="utf-8")
+
+            (root / "scadm.json").write_text(
+                '{"dependencies": [{"name": "mylib"}]}\n',
+                encoding="utf-8",
+            )
 
             src_dir = root / "src"
             src_dir.mkdir()
-            input_file = src_dir / "simple.scad"
-            input_file.write_text("cube(1);\n", encoding="utf-8")
+            input_file = src_dir / "main.scad"
+            input_file.write_text(
+                "include <mylib/lib/helper.scad>\ncube(1);\n",
+                encoding="utf-8",
+            )
 
             checksum = compute_checksum(input_file, workspace_root=root)
 
-            # Place flatten.py completely outside the workspace tree so the
-            # fallback sort key (filename) is exercised instead of relative path.
+            # Place flatten.py completely outside the workspace tree.
             alt_dir = Path(tmp_site) / "alt_site_packages" / "scadm"
             alt_dir.mkdir(parents=True)
             alt_flatten = alt_dir / "flatten.py"
