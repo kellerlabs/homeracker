@@ -113,6 +113,27 @@ Batch mode reads `"flatten"` entries from `scadm.json`:
 
 Unchanged files are skipped via SHA256 checksums stored in `models/.flatten-checksums`.
 
+#### File structure conventions
+
+The flattener expects source `.scad` files to follow OpenSCAD Customizer conventions:
+
+**Root files** (the files being flattened):
+
+1. **Parameter sections** — `/* [SectionName] */` blocks with customizable variables
+2. **Hidden section** — `/* [Hidden] */` with constants/variables hidden from the Customizer UI
+3. **Main code** — module/function calls that generate geometry
+
+Variable placement rules:
+
+- Variables between `/* [Hidden] */` and the first `module`/`function` → included in the Hidden section
+- Variables after main code (after the last module call) → filtered out
+
+**Library files** (resolved via `include <...>`):
+
+- Must contain **only** module/function definitions and constants
+- Must **not** contain parameter section markers (`/* [SectionName] */`)
+- The flattener raises an error if parameter markers are detected in a library file
+
 ### Render .scad files
 
 Validate .scad files by rendering them through the bundled OpenSCAD binary.
