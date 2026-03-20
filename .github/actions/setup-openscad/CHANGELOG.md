@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v1.0.0...setup-openscad-v1.1.0) (2026-03-20)
+
+
+### ✨ Features
+
+* **scadm:** add flatten and render subcommands ([#283](https://github.com/kellerlabs/homeracker/issues/283)) ([9816c3c](https://github.com/kellerlabs/homeracker/commit/9816c3ccebf0c0a012376dc4158a6c2dcfd70bd3))
+
 ## 1.0.0 (2026-03-15)
 
 
