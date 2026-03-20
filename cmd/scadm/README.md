@@ -126,7 +126,8 @@ The flattener expects source `.scad` files to follow OpenSCAD Customizer convent
 Variable placement rules:
 
 - Variables between `/* [Hidden] */` and the first `module`/`function` → included in the Hidden section
-- Variables after main code (after the last module call) → filtered out
+- Leading standalone variable assignments immediately after the last parameter/hidden section marker and before the first `module`/`function` call may be stripped from the flattened output
+- Variables that appear later in the file (including after the main code) are preserved as-is in the flattened file; do not rely on them being automatically filtered out
 
 **Library files** (resolved via `include <...>`):
 
