@@ -417,19 +417,19 @@ def compute_checksum(input_file: Path, workspace_root: Optional[Path] = None) ->
         libraries_dir=libraries_dir,
         scadm_dep_names=scadm_dep_names,
     )
-    # Include flatten.py itself so code changes invalidate cache
-    deps.add(Path(__file__).resolve())
-
     resolved_root = workspace_root.resolve()
 
-    def _sort_key(dep: Path) -> tuple[str, str]:
-        try:
-            return (dep.relative_to(resolved_root).as_posix(), "")
-        except ValueError:
-            return (dep.name, hashlib.sha256(dep.read_bytes()).hexdigest())
+    # Filter out any deps that resolved outside the workspace (shouldn't
+    # happen, but avoids a ValueError from relative_to).
+    workspace_deps = {d for d in deps if d.is_relative_to(resolved_root)}
 
+    # Hash flatten.py first (always at a fixed position) so its install
+    # location (.venv inside workspace on Windows vs system site-packages
+    # on Linux CI) never affects the sort order of other dependencies.
     hasher = hashlib.sha256()
-    for dep in sorted(deps, key=_sort_key):
+    hasher.update(Path(__file__).resolve().read_bytes())
+
+    for dep in sorted(workspace_deps, key=lambda d: d.relative_to(resolved_root).as_posix()):
         hasher.update(dep.read_bytes())
     return hasher.hexdigest()
 
