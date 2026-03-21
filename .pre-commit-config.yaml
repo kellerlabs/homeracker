@@ -59,4 +59,10 @@ repos:
         language: script
         pass_filenames: false
         files: '^(scadm\.json|models/.*\.scad|models/\.flatten-checksums|cmd/scadm/scadm/flatten\.py)'
+      - id: scadm-tests
+        name: scadm Python Tests
+        entry: python -m pytest cmd/scadm/tests/ -v
+        language: system
+        pass_filenames: false
+        files: '^cmd/scadm/'
 ...

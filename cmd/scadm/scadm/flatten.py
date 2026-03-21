@@ -534,7 +534,7 @@ def flatten_file(  # pylint: disable=too-many-branches
 # ---------------------------------------------------------------------------
 
 
-def _load_flatten_config(workspace_root: Path) -> list[dict]:
+def load_flatten_config(workspace_root: Path) -> list[dict]:
     """Load flatten config entries from scadm.json.
 
     Args:
@@ -595,7 +595,7 @@ def flatten_all(
     if checksums_file is None:
         checksums_file = workspace_root / "models" / ".flatten-checksums"
 
-    entries = _load_flatten_config(workspace_root)
+    entries = load_flatten_config(workspace_root)
 
     # Load existing checksums
     stored: dict[str, str] = {}

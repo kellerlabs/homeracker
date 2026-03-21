@@ -142,9 +142,21 @@ Validate .scad files by rendering them through the bundled OpenSCAD binary.
 geometry, and that all includes resolve correctly. A non-zero exit code means something is broken.
 
 ```bash
+# Explicit files
 scadm render models/core/parts/connector.scad
 scadm render file1.scad file2.scad
+
+# Render flattened output files (from scadm.json flatten dest dirs)
+scadm render --flattened
+
+# Render source files that feed into flatten (from scadm.json flatten src dirs)
+scadm render --source
+
+# Both at once
+scadm render --source --flattened
 ```
+
+The `--source` and `--flattened` flags discover files from `scadm.json` `"flatten"` entries automatically. They cannot be combined with explicit file arguments.
 
 ### Configure VS Code extensions
 
