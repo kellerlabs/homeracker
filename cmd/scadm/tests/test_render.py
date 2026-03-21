@@ -134,6 +134,12 @@ class DiscoverFlattenFilesTests(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 discover_flatten_files(Path(tmp), source=True)
 
+    def test_neither_flag_raises(self):
+        """Raises ValueError when neither source nor flattened is set."""
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ValueError, msg="At least one of source or flattened must be True."):
+                discover_flatten_files(Path(tmp))
+
 
 if __name__ == "__main__":
     unittest.main()

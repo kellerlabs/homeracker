@@ -558,7 +558,7 @@ def load_flatten_config(workspace_root: Path) -> list[dict]:
     return entries
 
 
-def _discover_scad_files(src_dir: Path, dest_dir: Path) -> list[Path]:
+def discover_scad_files(src_dir: Path, dest_dir: Path) -> list[Path]:
     """Discover .scad files in src_dir, excluding dest_dir subtree."""
     files = []
     for scad in sorted(src_dir.rglob("*.scad")):
@@ -612,7 +612,7 @@ def flatten_all(
         if not src_dir.is_dir():
             logger.error("Source directory not found: %s", src_dir)
             return False
-        for scad in _discover_scad_files(src_dir, dest_dir):
+        for scad in discover_scad_files(src_dir, dest_dir):
             all_files.append((scad, _resolve_output_path(scad, src_dir, dest_dir)))
 
     if not all_files:

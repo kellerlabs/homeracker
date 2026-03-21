@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-from scadm.flatten import load_flatten_config
+from scadm.flatten import discover_scad_files, load_flatten_config
 from scadm.installer import get_install_paths, get_system_platform, get_workspace_root
 
 logger = logging.getLogger(__name__)
@@ -151,8 +151,11 @@ def discover_flatten_files(
 
     Raises:
         FileNotFoundError: If scadm.json not found.
-        ValueError: If no flatten config or no files found.
+        ValueError: If neither flag is set, no flatten config, or no files found.
     """
+    if not source and not flattened:
+        raise ValueError("At least one of source or flattened must be True.")
+
     if workspace_root is None:
         workspace_root = get_workspace_root()
 
@@ -164,11 +167,7 @@ def discover_flatten_files(
         dest_dir = (workspace_root / entry["dest"]).resolve()
 
         if source and src_dir.is_dir():
-            for scad in sorted(src_dir.rglob("*.scad")):
-                try:
-                    scad.relative_to(dest_dir)
-                except ValueError:
-                    files.append(scad)
+            files.extend(discover_scad_files(src_dir, dest_dir))
 
         if flattened and dest_dir.is_dir():
             files.extend(sorted(dest_dir.rglob("*.scad")))
