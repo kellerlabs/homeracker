@@ -140,6 +140,32 @@ class DiscoverFlattenFilesTests(unittest.TestCase):
             with self.assertRaises(ValueError, msg="At least one of source or flattened must be True."):
                 discover_flatten_files(Path(tmp))
 
+    def test_missing_configured_dir_raises(self):
+        """Raises ValueError when a configured flatten dir doesn't exist."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = {"dependencies": [], "flatten": [{"src": "missing/src", "dest": "missing/dest"}]}
+            (root / "scadm.json").write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaises(ValueError, msg="Configured flatten directories not found"):
+                discover_flatten_files(root, flattened=True)
+
+    def test_malformed_flatten_entry_raises(self):
+        """Raises ValueError when a flatten entry is missing src or dest."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = {"dependencies": [], "flatten": [{"src": "models/parts"}]}
+            (root / "scadm.json").write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                discover_flatten_files(root, source=True)
+
+    def test_invalid_json_raises(self):
+        """Raises ValueError when scadm.json contains invalid JSON."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "scadm.json").write_text("{invalid json", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                discover_flatten_files(root, source=True)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -545,16 +545,27 @@ def load_flatten_config(workspace_root: Path) -> list[dict]:
 
     Raises:
         FileNotFoundError: If scadm.json not found.
-        ValueError: If no flatten config exists.
+        ValueError: If JSON is malformed, no flatten config, or entries are invalid.
     """
     scadm_path = workspace_root / "scadm.json"
     if not scadm_path.exists():
         raise FileNotFoundError(f"scadm.json not found at {workspace_root}")
 
-    data = json.loads(scadm_path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(scadm_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in {scadm_path}: {e}") from e
+
     entries = data.get("flatten", [])
     if not entries:
         raise ValueError('No "flatten" entries in scadm.json. Add a "flatten" key with src/dest pairs.')
+
+    for i, entry in enumerate(entries):
+        if not isinstance(entry, dict) or not entry.get("src") or not entry.get("dest"):
+            raise ValueError(
+                f'Invalid flatten entry at index {i} in scadm.json: expected {{"src": "...", "dest": "..."}}'
+            )
+
     return entries
 
 

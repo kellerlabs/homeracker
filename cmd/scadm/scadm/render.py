@@ -161,16 +161,26 @@ def discover_flatten_files(
 
     entries = load_flatten_config(workspace_root)
     files: list[Path] = []
+    missing: list[str] = []
 
     for entry in entries:
         src_dir = (workspace_root / entry["src"]).resolve()
         dest_dir = (workspace_root / entry["dest"]).resolve()
 
-        if source and src_dir.is_dir():
-            files.extend(discover_scad_files(src_dir, dest_dir))
+        if source:
+            if src_dir.is_dir():
+                files.extend(discover_scad_files(src_dir, dest_dir))
+            else:
+                missing.append(f"src: {entry['src']}")
 
-        if flattened and dest_dir.is_dir():
-            files.extend(sorted(dest_dir.rglob("*.scad")))
+        if flattened:
+            if dest_dir.is_dir():
+                files.extend(sorted(dest_dir.rglob("*.scad")))
+            else:
+                missing.append(f"dest: {entry['dest']}")
+
+    if missing:
+        raise ValueError(f"Configured flatten directories not found: {', '.join(missing)}")
 
     if not files:
         raise ValueError("No .scad files found in flatten config directories.")
