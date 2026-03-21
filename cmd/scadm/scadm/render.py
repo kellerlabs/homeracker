@@ -12,6 +12,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
+from scadm.flatten import discover_scad_files, load_flatten_config
 from scadm.installer import get_install_paths, get_system_platform, get_workspace_root
 
 logger = logging.getLogger(__name__)
@@ -130,3 +131,57 @@ def render_files(files: list[Path], workspace_root: Optional[Path] = None) -> bo
     else:
         logger.info("All %d render(s) passed", len(files))
     return failed == 0
+
+
+def discover_flatten_files(
+    workspace_root: Optional[Path] = None,
+    *,
+    source: bool = False,
+    flattened: bool = False,
+) -> list[Path]:
+    """Discover .scad files from scadm.json flatten config.
+
+    Args:
+        workspace_root: Project root (auto-detected if None).
+        source: Include source files (flatten src dirs).
+        flattened: Include flattened output files (flatten dest dirs).
+
+    Returns:
+        Sorted list of absolute .scad file paths.
+
+    Raises:
+        FileNotFoundError: If scadm.json not found.
+        ValueError: If neither flag is set, no flatten config, or no files found.
+    """
+    if not source and not flattened:
+        raise ValueError("At least one of source or flattened must be True.")
+
+    if workspace_root is None:
+        workspace_root = get_workspace_root()
+
+    entries = load_flatten_config(workspace_root)
+    files: list[Path] = []
+    missing: list[str] = []
+
+    for entry in entries:
+        src_dir = (workspace_root / entry["src"]).resolve()
+        dest_dir = (workspace_root / entry["dest"]).resolve()
+
+        if source:
+            if src_dir.is_dir():
+                files.extend(discover_scad_files(src_dir, dest_dir))
+            else:
+                missing.append(f"src: {entry['src']}")
+
+        if flattened:
+            if dest_dir.is_dir():
+                files.extend(sorted(dest_dir.rglob("*.scad")))
+            else:
+                missing.append(f"dest: {entry['dest']}")
+
+    if missing:
+        raise ValueError(f"Configured flatten directories not found: {', '.join(missing)}")
+
+    if not files:
+        raise ValueError("No .scad files found in flatten config directories.")
+    return sorted(set(files))

@@ -24,5 +24,8 @@ jobs:
       - name: Make scripts executable
         run: chmod +x .githooks/flatten-validate
 
+      - name: Install test dependencies
+        run: pip install pytest
+
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1

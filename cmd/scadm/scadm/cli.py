@@ -8,7 +8,7 @@ from pathlib import Path
 
 from scadm.flatten import compute_checksum, flatten_all, flatten_file
 from scadm.installer import install_libraries, install_openscad
-from scadm.render import render_files
+from scadm.render import discover_flatten_files, render_files
 from scadm.vscode import setup_openscad_extension, setup_python_extension
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s", handlers=[logging.StreamHandler()])
@@ -86,6 +86,30 @@ def _handle_flatten(args, flatten_parser):
         sys.exit(1)
 
 
+def _handle_render(args, render_parser):
+    """Handle the render subcommand."""
+    has_flags = args.source or args.flattened
+
+    if args.files and has_flags:
+        logger.error("Cannot combine explicit files with --source/--flattened")
+        sys.exit(1)
+
+    if not args.files and not has_flags:
+        render_parser.print_help()
+        sys.exit(1)
+
+    try:
+        if has_flags:
+            files = discover_flatten_files(source=args.source, flattened=args.flattened)
+        else:
+            files = [f.resolve() for f in args.files]
+
+        sys.exit(0 if render_files(files) else 1)
+    except (FileNotFoundError, ValueError) as e:
+        logger.error("%s", e)
+        sys.exit(1)
+
+
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -135,7 +159,13 @@ def main():
     render_parser = subparsers.add_parser(
         "render", help="Render .scad files via OpenSCAD to validate syntax and geometry"
     )
-    render_parser.add_argument("files", nargs="+", type=Path, help=".scad files to render")
+    render_parser.add_argument("files", nargs="*", type=Path, help=".scad files to render")
+    render_parser.add_argument(
+        "--source", action="store_true", help="Render source files from scadm.json flatten src dirs"
+    )
+    render_parser.add_argument(
+        "--flattened", action="store_true", help="Render flattened output files from scadm.json flatten dest dirs"
+    )
 
     args = parser.parse_args()
 
@@ -148,7 +178,7 @@ def main():
         "vscode": lambda: _handle_vscode(args, vscode_parser),
         "install": lambda: _handle_install(args),
         "flatten": lambda: _handle_flatten(args, flatten_parser),
-        "render": lambda: sys.exit(0 if render_files([f.resolve() for f in args.files]) else 1),
+        "render": lambda: _handle_render(args, render_parser),
     }
 
     handlers[args.command]()

@@ -534,7 +534,7 @@ def flatten_file(  # pylint: disable=too-many-branches
 # ---------------------------------------------------------------------------
 
 
-def _load_flatten_config(workspace_root: Path) -> list[dict]:
+def load_flatten_config(workspace_root: Path) -> list[dict]:
     """Load flatten config entries from scadm.json.
 
     Args:
@@ -545,20 +545,31 @@ def _load_flatten_config(workspace_root: Path) -> list[dict]:
 
     Raises:
         FileNotFoundError: If scadm.json not found.
-        ValueError: If no flatten config exists.
+        ValueError: If JSON is malformed, no flatten config, or entries are invalid.
     """
     scadm_path = workspace_root / "scadm.json"
     if not scadm_path.exists():
         raise FileNotFoundError(f"scadm.json not found at {workspace_root}")
 
-    data = json.loads(scadm_path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(scadm_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in {scadm_path}: {e}") from e
+
     entries = data.get("flatten", [])
     if not entries:
         raise ValueError('No "flatten" entries in scadm.json. Add a "flatten" key with src/dest pairs.')
+
+    for i, entry in enumerate(entries):
+        if not isinstance(entry, dict) or not entry.get("src") or not entry.get("dest"):
+            raise ValueError(
+                f'Invalid flatten entry at index {i} in scadm.json: expected {{"src": "...", "dest": "..."}}'
+            )
+
     return entries
 
 
-def _discover_scad_files(src_dir: Path, dest_dir: Path) -> list[Path]:
+def discover_scad_files(src_dir: Path, dest_dir: Path) -> list[Path]:
     """Discover .scad files in src_dir, excluding dest_dir subtree."""
     files = []
     for scad in sorted(src_dir.rglob("*.scad")):
@@ -595,7 +606,7 @@ def flatten_all(
     if checksums_file is None:
         checksums_file = workspace_root / "models" / ".flatten-checksums"
 
-    entries = _load_flatten_config(workspace_root)
+    entries = load_flatten_config(workspace_root)
 
     # Load existing checksums
     stored: dict[str, str] = {}
@@ -612,7 +623,7 @@ def flatten_all(
         if not src_dir.is_dir():
             logger.error("Source directory not found: %s", src_dir)
             return False
-        for scad in _discover_scad_files(src_dir, dest_dir):
+        for scad in discover_scad_files(src_dir, dest_dir):
             all_files.append((scad, _resolve_output_path(scad, src_dir, dest_dir)))
 
     if not all_files:
