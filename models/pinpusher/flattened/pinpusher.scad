@@ -69,7 +69,7 @@ module pinpusher() {
     size2 = [grip_mid_width, grip_mid_width],
     h = grip_depth,
     shift = [0, -BASE_STRENGTH/2],
-    chamfer = BASE_CHAMFER,
+    chamfer = BASE_CHAMFER
   )
   attach(TOP, BOTTOM)
   prismoid(
