@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.11.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.10.3...homeracker-v1.11.0) (2026-03-22)
+
+
+### ✨ Features
+
+* **scadm:** add --source and --flattened flags to render command ([#294](https://github.com/kellerlabs/homeracker/issues/294)) ([98a53ed](https://github.com/kellerlabs/homeracker/commit/98a53ed447be7a698d976dd44b41c9ae998fc436))
+
+
+### 🐛 Bug Fixes
+
+* pinpusher model syntax with invalid trailing comma ([#299](https://github.com/kellerlabs/homeracker/issues/299)) ([fce4046](https://github.com/kellerlabs/homeracker/commit/fce4046f08af0d7e41217c6f3af2c8b4af39d9c0))
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.03.20 ([#291](https://github.com/kellerlabs/homeracker/issues/291)) ([a42cc01](https://github.com/kellerlabs/homeracker/commit/a42cc01b3b7ccf7b2d8fcb01ae5af95161a6b618))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.84.2 ([#292](https://github.com/kellerlabs/homeracker/issues/292)) ([7ae007a](https://github.com/kellerlabs/homeracker/commit/7ae007a0a8b2361c5a58b98e45f8ed4046e6f543))
+
 ## [1.10.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.10.2...homeracker-v1.10.3) (2026-03-20)
 
 
