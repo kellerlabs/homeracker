@@ -33,6 +33,7 @@
 
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
+include <../lib/constants.scad>
 
 // all units in mm
 BP_BOTTOM_LIP_SIDE_LENGTH = 36.3; // mid part side length - bottom lip height * 2
@@ -43,7 +44,7 @@ BP_MID_PART_SIDE_LENGTH = 37.7; // top side length - top height * 2
 BP_MID_PART_ROUNDING = 1.85; // radius
 BP_MID_PART_HEIGHT = 1.8;
 
-BP_TOP_PART_SIDE_LENGTH = 42;
+BP_TOP_PART_SIDE_LENGTH = GRIDFINITY_BASE_UNIT;
 BP_TOP_PART_ROUNDING = 4; // radius
 BP_TOP_PART_HEIGHT = 2.15;
 

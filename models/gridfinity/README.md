@@ -32,8 +32,8 @@ baseplate(units_x=3, units_y=2);
 // Create a 1×2 bin base
 binbase(units_x=3, units_y=2);
 
-// This is a nice example as it places the binbase exactly onto the baseplate.
-// Lets you examine tolerances :-D
+// Create a bin base with a flat top plate (useful as foundation for custom geometry)
+binbase_with_topplate(units_x=2, units_y=2, topplate_thickness=2);
 ```
 
 ### Customizing Parts
@@ -61,7 +61,8 @@ Bottom mounting component for custom Gridfinity-compatible containers.
 - Standard Gridfinity 42mm grid spacing
 - Matches baseplate cutout geometry
 - Stack securely on Gridfinity baseplates
-- Build custom bins on top of this foundation
+- `binbase_with_topplate()` adds a flat plate on top — handy as a foundation for custom geometry
+- All modules are BOSL2-attachable (`anchor`, `spin`, `orient`)
 
 ## 📐 Dimensional Standards
 
