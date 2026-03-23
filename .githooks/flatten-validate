@@ -16,12 +16,13 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # Run the flatten
 scadm flatten --all
 
-# Check if flattened files or checksums have uncommitted/unstaged changes
+# Check if flattened files have uncommitted/unstaged changes
+# Note: models/.flatten-checksums is gitignored and cached in CI.
 cd "${PROJECT_ROOT}"
 # Modified tracked files (not staged)
-MODIFIED=$(git diff --name-only models/*/flattened/ models/.flatten-checksums 2>/dev/null || true)
+MODIFIED=$(git diff --name-only models/*/flattened/ 2>/dev/null || true)
 # Untracked files
-UNTRACKED=$(git ls-files --others --exclude-standard models/*/flattened/ models/.flatten-checksums 2>/dev/null || true)
+UNTRACKED=$(git ls-files --others --exclude-standard models/*/flattened/ 2>/dev/null || true)
 
 if [ -n "$MODIFIED" ] || [ -n "$UNTRACKED" ]; then
     echo ""
@@ -37,7 +38,7 @@ if [ -n "$MODIFIED" ] || [ -n "$UNTRACKED" ]; then
     fi
     echo ""
     echo "Run the following to stage them:"
-    echo "  git add models/*/flattened/ models/.flatten-checksums"
+    echo "  git add models/*/flattened/"
     exit 1
 fi
 

@@ -7,6 +7,9 @@ renovate_cache/
 renovate_base/
 .venv/
 
+# Flatten checksums (cached in CI, not tracked)
+models/.flatten-checksums
+
 # Python
 __pycache__/
 *.py[cod]
