@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.3...scadm-v0.6.0) (2026-03-23)
+
+
+### ✨ Features
+
+* **scadm:** add --source and --flattened flags to render command ([#294](https://github.com/kellerlabs/homeracker/issues/294)) ([98a53ed](https://github.com/kellerlabs/homeracker/commit/98a53ed447be7a698d976dd44b41c9ae998fc436))
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.03.20 ([#291](https://github.com/kellerlabs/homeracker/issues/291)) ([a42cc01](https://github.com/kellerlabs/homeracker/commit/a42cc01b3b7ccf7b2d8fcb01ae5af95161a6b618))
+* update openscad nightly to v2026.03.22 ([#297](https://github.com/kellerlabs/homeracker/issues/297)) ([5901af2](https://github.com/kellerlabs/homeracker/commit/5901af28d0968a7a2b2526f540fb674f6e74ff45))
+
 ## [0.5.3](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.2...scadm-v0.5.3) (2026-03-20)
 
 
