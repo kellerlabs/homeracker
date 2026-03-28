@@ -26,6 +26,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Every code change that adds, modifies, or removes functionality **must** include a documentation update.
   - Follow the What / Why / How / References structure defined in the markdown instructions.
   - When renaming or restructuring code, update or rename the associated docs to keep everything tidy.
+  - When adding or modifying model parts (`parts/*.scad`), **generate preview PNGs** with `cmd/export/export-png.sh` and update both the model's README 📸 Catalog and the parent `models/README.md` index.
 - **Commits**: Use [Conventional Commits](https://www.conventionalcommits.org/) format
   - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
   - Format: `type(scope): description` or `type: description`
