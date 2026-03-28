@@ -89,7 +89,7 @@ pre-commit install
 **`scadm flatten --all`** - Orchestrates the flatten process:
 - Reads `"flatten"` entries from `scadm.json` for src/dest path mappings
 - Flattens each `.scad` file by inlining all local includes
-- Skips unchanged files via SHA256 checksums (`models/.flatten-checksums`)
+- Skips unchanged files via SHA256 checksums (`models/.flatten-checksums`, gitignored; cached in CI)
 
 **Pre-commit hook** - Configured in `.pre-commit-config.yaml`:
 - Runs `scadm flatten --all` **automatically on every commit**

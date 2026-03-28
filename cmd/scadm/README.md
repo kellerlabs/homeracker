@@ -111,7 +111,7 @@ Batch mode reads `"flatten"` entries from `scadm.json`:
 }
 ```
 
-Unchanged files are skipped via SHA256 checksums stored in `models/.flatten-checksums`.
+Unchanged files are skipped via SHA256 checksums stored in `models/.flatten-checksums` (gitignored; cached in CI).
 
 #### File structure conventions
 
