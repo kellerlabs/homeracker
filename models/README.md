@@ -2,9 +2,9 @@
 
 This folder contains all `scad` 3D models which come with the HomeRacker project.
 
-## Contents
+## 📑 Contents
 
-### Core
+### 🧱 Core
 
 The fundamental HomeRacker building system with modular components:
 
@@ -16,7 +16,7 @@ The fundamental HomeRacker building system with modular components:
 
 See [core/README.md](core/README.md) for details.
 
-### Gridfinity
+### 📐 Gridfinity
 
 Gridfinity-compatible components for modular storage integration:
 
@@ -27,7 +27,7 @@ Gridfinity-compatible components for modular storage integration:
 
 See [gridfinity/README.md](gridfinity/README.md) for details.
 
-### Rackmount Ears
+### 🔩 Rackmount Ears
 
 Fully customizable rackmount ears for standard 10" and 19" rack mounting.
 
@@ -35,7 +35,7 @@ Fully customizable rackmount ears for standard 10" and 19" rack mounting.
 
 See [rackmount_ears/README.md](rackmount_ears/README.md) for details.
 
-### Wall Mount
+### 🧲 Wall Mount
 
 Wall-mountable bracket for attaching HomeRacker supports to vertical surfaces.
 
@@ -43,7 +43,7 @@ Wall-mountable bracket for attaching HomeRacker supports to vertical surfaces.
 
 See [wallmount/README.md](wallmount/README.md) for details.
 
-### Pinpusher
+### 📌 Pinpusher
 
 A utility tool for removing lock pins from connectors.
 
@@ -56,6 +56,15 @@ See [pinpusher/README.md](pinpusher/README.md) for details.
 Universal device mount — deprecated in favor of the [Customizable Rackmount](https://makerworld.com/en/models/2128492-customizable-rackmount-any-racksize#profileId-2304669) on MakerWorld.
 
 See [flexmount/README.md](flexmount/README.md) for details.
+
+### 🔄 Inception
+
+Meta models for organizing HomeRacker parts within the HomeRacker ecosystem — Gridfinity bins and frame-mounted grids for storing supports and other bits.
+
+![Support Bin](./inception/parts/supportbin.png)
+![Support Grid](./inception/parts/supportgrid.png)
+
+See [inception/README.md](inception/README.md) for details.
 
 ## 📁 Standard Model Structure
 

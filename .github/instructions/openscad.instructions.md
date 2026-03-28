@@ -33,3 +33,9 @@ applyTo: "**/*.scad"
 - Use `include <BOSL2/std.scad>` for BOSL2 (resolved by OpenSCAD library path).
 - Use `include <homeracker/...>` for cross-model library includes (resolved by scadm).
 - Use relative paths (`include <../lib/foo.scad>`) for same-model includes.
+
+## Preview PNGs
+
+- When adding or modifying a parts file, **generate a preview PNG** with `cmd/export/export-png.sh`.
+- PNGs are stored next to their source `.scad` file (e.g., `parts/foo.scad` → `parts/foo.png`).
+- Update the model's README 📸 Catalog table and the `models/README.md` index accordingly.
