@@ -59,7 +59,10 @@ See [flexmount/README.md](flexmount/README.md) for details.
 
 ### 🔄 Inception
 
-Meta models for organizing HomeRacker parts within the HomeRacker ecosystem — Gridfinity bins for storing supports and other bits.
+Meta models for organizing HomeRacker parts within the HomeRacker ecosystem — Gridfinity bins and frame-mounted grids for storing supports and other bits.
+
+![Support Bin](./inception/parts/supportbin.png)
+![Support Grid](./inception/parts/supportgrid.png)
 
 See [inception/README.md](inception/README.md) for details.
 

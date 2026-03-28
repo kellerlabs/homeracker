@@ -27,12 +27,7 @@
 include <../../gridfinity/lib/binbase.scad>
 include <../../core/lib/constants.scad>
 
-/* [Hidden] */
-// Optimized for 0.4mm nozzle 3D printing (allegedly according to Sonnet 4.5's research)
-// Preview: Faster but still smooth
-// Render: Based on typical 0.4mm nozzle capabilities
-$fs = $preview ? 0.8 : 0.4;
-$fa = $preview ? 6 : 2;
+
 HR_SB_EPSILON = 0.01;
 
 HR_GRID_STYLE_RISER = 0;
@@ -40,6 +35,8 @@ HR_GRID_STYLE_FULL = 1;
 
 HR_SB_DEFAULT_HEIGHT = BASE_UNIT;
 HR_SB_TIP_CUT = BASE_STRENGTH/2;
+
+HR_SB_PRIMARY_COLOR = HR_YELLOW;
 
 /**
  * Calculate the difference between the Gridfinity pocket grid length and the actual length occupied by the support units.
@@ -56,6 +53,22 @@ function get_gridfinity_pocketgrid_diff(gridfinity_units, support_units, div_str
     support_unit = BASE_UNIT + div_strength + TOLERANCE
   )
   length - (support_units*support_unit+div_strength);
+
+/**
+ * Calculate the maximum number of HomeRacker support units that fit into the given HomeRacker frame length.
+ *
+ * @param hr_units Number of HomeRacker units (1 unit = 15mm)
+ * @param div_strength Divider wall thickness in mm
+ * @param frame_chamfer Optional chamfer size to subtract (x2) from the frame length for better fit (default: 0)
+ * @return Number of support units that fit
+ */
+function support_per_hr_unit(hr_units, div_strength, frame_chamfer=0) =
+  let(
+    length = BASE_UNIT * hr_units,
+    spacing = BASE_UNIT + div_strength + TOLERANCE,
+    supports_net = floor((length - PRINTING_LAYER_WIDTH - frame_chamfer*2) / spacing)
+  )
+  (supports_net*spacing+PRINTING_LAYER_WIDTH) > length ? supports_net-1 : supports_net;
 
 /**
  * Calculate the maximum number of HomeRacker support units that fit into the given Gridfinity grid length.
@@ -109,13 +122,14 @@ module cross_riser(height, arm_length, width) {
  * @param height Height of the riser grid
  * @param rounding Corner rounding radius of the outer boundary
  */
-module riser_grid(supports_x, supports_y, div_strength, height=HR_SB_DEFAULT_HEIGHT, rounding=BB_TOP_PART_ROUNDING, anchor=CENTER, spin=0, orient=UP) {
+module riser_grid(supports_x, supports_y, div_strength, height=HR_SB_DEFAULT_HEIGHT, rounding=BB_TOP_PART_ROUNDING, debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
   spacing = BASE_UNIT + div_strength + TOLERANCE;
 
   length_x = spacing*supports_x+div_strength;
   length_y = spacing*supports_y+div_strength;
 
   attachable(anchor=CENTER, spin=0, orient=UP, size=[length_x, length_y, height]){
+    color_this(debug_colors ? HR_GREEN : HR_SB_PRIMARY_COLOR)
     down(height/2)
     difference() {
       intersection() {
@@ -141,7 +155,7 @@ module riser_grid(supports_x, supports_y, div_strength, height=HR_SB_DEFAULT_HEI
  */
 module full_grid(supports_x, supports_y, div_strength,
   height=HR_SB_DEFAULT_HEIGHT/2, rounding=BB_TOP_PART_ROUNDING,
-  anchor=CENTER, spin=0, orient=UP) {
+  debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
   spacing = BASE_UNIT + div_strength + TOLERANCE;
   cell = BASE_UNIT + TOLERANCE;
   chamfer = div_strength/2-PRINTING_LAYER_WIDTH;
@@ -150,6 +164,7 @@ module full_grid(supports_x, supports_y, div_strength,
   length_y = spacing*supports_y+PRINTING_LAYER_WIDTH;
 
   attachable(anchor=CENTER, spin=0, orient=UP, size=[length_x, length_y, height]){
+    color(debug_colors ? HR_GREEN : HR_SB_PRIMARY_COLOR)
     diff()
     cuboid([length_x, length_y, height], rounding=rounding, except=[BOTTOM,TOP])
       tag("remove")
@@ -172,11 +187,11 @@ module full_grid(supports_x, supports_y, div_strength,
  * @param rounding Corner rounding radius of the outer boundary
  * @param style Grid style: HR_GRID_STYLE_RISER (cross ridges) or HR_GRID_STYLE_FULL (solid walls)
  */
-module pocket_grid(supports_x, supports_y, div_strength, height=HR_SB_DEFAULT_HEIGHT, rounding=BB_TOP_PART_ROUNDING, style=HR_GRID_STYLE_RISER, anchor=CENTER, spin=0, orient=UP) {
+module pocket_grid(supports_x, supports_y, div_strength, height=HR_SB_DEFAULT_HEIGHT, rounding=BB_TOP_PART_ROUNDING, style=HR_GRID_STYLE_RISER, debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
   if (style == HR_GRID_STYLE_RISER)
-    riser_grid(supports_x, supports_y, div_strength, height, rounding, anchor, spin, orient) children();
+    riser_grid(supports_x, supports_y, div_strength, height, rounding, debug_colors, anchor, spin, orient) children();
   else if (style == HR_GRID_STYLE_FULL)
-    full_grid(supports_x, supports_y, div_strength, height, rounding, anchor, spin, orient) children();
+    full_grid(supports_x, supports_y, div_strength, height, rounding, debug_colors, anchor, spin, orient) children();
 }
 
 /**
@@ -188,16 +203,15 @@ module pocket_grid(supports_x, supports_y, div_strength, height=HR_SB_DEFAULT_HE
  * @param height Height of the pocket grid
  * @param style Grid style: HR_GRID_STYLE_RISER (cross ridges) or HR_GRID_STYLE_FULL (solid walls)
  */
-module supportbin(grid_x, grid_y, div_strength, height=HR_SB_DEFAULT_HEIGHT, style=HR_GRID_STYLE_RISER) {
+module supportbin(grid_x, grid_y, div_strength, height=HR_SB_DEFAULT_HEIGHT, style=HR_GRID_STYLE_RISER, debug_colors=false) {
   supports_x = support_per_gridfinity_unit(grid_x, div_strength);
   supports_y = support_per_gridfinity_unit(grid_y, div_strength);
 
   bigger_rounding_diff = max(get_gridfinity_pocketgrid_diff(grid_x, supports_x, div_strength), get_gridfinity_pocketgrid_diff(grid_y, supports_y, div_strength));
   rounding_diff = bigger_rounding_diff > BB_TOP_PART_ROUNDING ? BB_TOP_PART_ROUNDING*2 : bigger_rounding_diff;
 
-  color_this(HR_BLUE)
+  color_this(debug_colors ? HR_BLUE : HR_CHARCOAL)
   binbase_with_topplate(grid_x, grid_y, 1)
   attach(TOP,BOTTOM)
-  color_this(HR_YELLOW)
-  pocket_grid(supports_x, supports_y, div_strength, height=height, rounding=BB_TOP_PART_ROUNDING-rounding_diff/2, style=style);
+  pocket_grid(supports_x, supports_y, div_strength, height=height, rounding=BB_TOP_PART_ROUNDING-rounding_diff/2, style=style, debug_colors=debug_colors);
 }
