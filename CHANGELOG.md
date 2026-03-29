@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.12.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.11.0...homeracker-v1.12.0) (2026-03-29)
+
+
+### ✨ Features
+
+* **inception:** add support bin and support grid with gridfinity bin base improvements ([#295](https://github.com/kellerlabs/homeracker/issues/295)) ([4f81177](https://github.com/kellerlabs/homeracker/commit/4f8117796be9b2a2f1bac3050b8eb1cf4ea43865))
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.03.28 ([#304](https://github.com/kellerlabs/homeracker/issues/304)) ([ce843da](https://github.com/kellerlabs/homeracker/commit/ce843da3951053badac8de6d6fe63c2154828874))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.96.0 ([#302](https://github.com/kellerlabs/homeracker/issues/302)) ([8fa723d](https://github.com/kellerlabs/homeracker/commit/8fa723d6882cfc65e016aa5ca557bb4006c0fef8))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.98.0 ([#305](https://github.com/kellerlabs/homeracker/issues/305)) ([2e0f5c5](https://github.com/kellerlabs/homeracker/commit/2e0f5c53afa67079b59b928b30465d723f897bdf))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.99.0 ([#306](https://github.com/kellerlabs/homeracker/issues/306)) ([f0ae82d](https://github.com/kellerlabs/homeracker/commit/f0ae82dbbc45d62f41cde0929e55cfebb37236f0))
+
+
+### 🔧 Miscellaneous
+
+* inception lib fixes & model-polish agent ([#308](https://github.com/kellerlabs/homeracker/issues/308)) ([8a6fdcd](https://github.com/kellerlabs/homeracker/commit/8a6fdcdc64ffe31aa0185467041a4c9ca571a130))
+* untrack .flatten-checksums and cache it in CI ([#301](https://github.com/kellerlabs/homeracker/issues/301)) ([c2438c2](https://github.com/kellerlabs/homeracker/commit/c2438c290fd8a5fbfd94b61477226be0ef01e953))
+
 ## [1.11.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.10.3...homeracker-v1.11.0) (2026-03-23)
 
 
