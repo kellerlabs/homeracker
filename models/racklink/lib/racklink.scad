@@ -2,7 +2,7 @@
 //
 // This file is part of HomeRacker implementation by KellerLab.
 // It contains the racklink module which can connect independent rack columns together.
-// The racklink are basically 2 connected 3-sided sleeves to wrap vertical supports of each rack column.
+// The racklink is basically 2 connected 3-sided sleeves to wrap vertical supports of each rack column.
 // Besides connecting the columns for better stability, the racklink also gives a clean look to the front/back of the rack.
 // Use case: Creating very big racks affords a lot of planning ahead and is error-prone.
 //           The idea is to create small independent rack columns and then connect them together with the racklink.
@@ -40,7 +40,7 @@
 /** Features
 * connects rack columns together
 * due to its double u-shape, it is easy to mount and gives a clean look to the front/back of the rack
-* The cover plate extends 1,5 homeracker units on top/bottom to cover half of the ajoining connector
+* The cover plate extends 1.5 homeracker units on top/bottom to cover half of the adjoining connector
 * Each u-shape can be customized in terms of where to start and end.
   So if your left and right rack column have different heights but at least share one support unit,
   you can still use the racklink to connect them together.
@@ -59,7 +59,7 @@ HR_RL_PRIMARY_COLOR = HR_YELLOW;
 SLEEVE_WIDTH = BASE_UNIT + 2*BASE_STRENGTH + TOLERANCE; // to fit around the vertical support of the rack column
 
 module support_sleeve(length, debug_colors=false, disable_chamfer=false, anchor=CENTER, orient=UP, spin=0) {
-  assert(length > 0, "Length must be greater than 0");
+  assert(is_int(length) && length > 0, "Length must be a positive integer");
 
   attachable_width = SLEEVE_WIDTH; // to fit around the vertical support of the rack column
   attachable_depth = BASE_UNIT + BASE_STRENGTH + TOLERANCE/2; // to fit around the vertical support of the rack column
@@ -82,10 +82,10 @@ module cover_plate(length, distance, debug_colors=false, disable_chamfer=false, 
   assert(length > 0, "Length must be greater than 0");
   assert(distance > 0, "Distance must be greater than 0");
 
-
   attachable_width = distance*BASE_UNIT - BASE_STRENGTH*2 - TOLERANCE; // width of the cover plate, determined by the input distance in HomeRacker units, minus the horizontal offset of the sleeves on both sides to ensure the cover plate fits between the sleeves
+  assert(attachable_width > 0, "Distance too small: cover_plate width becomes non-positive. Increase distance.");
   attachable_depth = BASE_STRENGTH;
-  attachable_height = length * BASE_UNIT + BASE_UNIT*3; // 1.5 HomeRacker units extension on top and bottom to cover half of the ajoining connector, determined by the input length in HomeRacker units
+  attachable_height = length * BASE_UNIT + BASE_UNIT*3; // 1.5 HomeRacker units extension on top and bottom to cover half of the adjoining connector, determined by the input length in HomeRacker units
 
   attachable(anchor=anchor, orient=orient, spin=spin, size=[attachable_width, attachable_depth, attachable_height]){
     color(debug_colors ? HR_BLUE : HR_RL_PRIMARY_COLOR)
@@ -117,11 +117,12 @@ function get_sleeve_length_units(start, end, total_length) =
 
 module racklink(height, distance, left_start=0, left_end=0, right_start=0, right_end=0,
   debug_colors=false, disable_chamfer=false) {
-  // instead of failing when start>end, we should just ignore the custom values and use the default full coverage of the racklink for that side.
-  // (a warning should be printed in this case to inform the user about the ignored custom values)
-
   assert(height > 0, "Height must be greater than 0");
   assert(distance > 0, "Distance must be greater than 0");
+
+  // Warn when custom sleeve ranges are ignored (fallback to full coverage)
+  if (left_start > 0 && left_start >= left_end) echo("WARNING: left_start >= left_end, ignoring custom range — using full coverage for left sleeve.");
+  if (right_start > 0 && right_start >= right_end) echo("WARNING: right_start >= right_end, ignoring custom range — using full coverage for right sleeve.");
 
   default_offset = BASE_UNIT*1.5; // default offset for the cover plate to extend beyond the sleeves
 
