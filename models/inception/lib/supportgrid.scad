@@ -25,6 +25,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+include <BOSL2/std.scad>
 include <supportbin.scad>
 include <../../core/lib/constants.scad>
 
