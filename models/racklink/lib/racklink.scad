@@ -63,15 +63,17 @@ module support_sleeve(length, debug_colors=false, disable_chamfer=false, anchor=
 
   attachable_width = SLEEVE_WIDTH; // to fit around the vertical support of the rack column
   attachable_depth = BASE_UNIT + BASE_STRENGTH + TOLERANCE/2; // to fit around the vertical support of the rack column
-  attachable_height = length * BASE_UNIT; // height of the sleeve, determined by the input length in HomeRacker units
+  attachable_height = length * BASE_UNIT - TOLERANCE; // height of the sleeve, determined by the input length in HomeRacker units
+  lockpin_chamfer = LOCKPIN_HOLE_CHAMFER;
   tag_scope("sleeve")
   attachable(anchor=anchor, orient=orient, spin=spin, size=[attachable_width, attachable_depth, attachable_height]){
-    color(debug_colors ? HR_GREEN : HR_RL_PRIMARY_COLOR)
+    color_this(debug_colors ? HR_GREEN : HR_RL_PRIMARY_COLOR)
     diff()
     cuboid([attachable_width, attachable_depth, attachable_height], chamfer=disable_chamfer ? 0 : BASE_CHAMFER){
-      align(BACK, inside=true) tag("remove") cuboid([BASE_UNIT+TOLERANCE, BASE_UNIT+TOLERANCE/2, attachable_height+EPSILON]);
-      zcopies(BASE_UNIT,n=length) tag("remove")  cuboid([attachable_width+EPSILON, LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH]){
-        align(RIGHT, inside=true) cuboid([LOCKPIN_HOLE_CHAMFER, LOCKPIN_HOLE_SIDE_LENGTH+LOCKPIN_HOLE_CHAMFER, LOCKPIN_HOLE_SIDE_LENGTH+LOCKPIN_HOLE_CHAMFER], chamfer=LOCKPIN_HOLE_CHAMFER, edges=LEFT);
+      align(BACK, inside=true) tag("remove") color_this(debug_colors ? HR_WHITE : HR_RL_PRIMARY_COLOR) cuboid([BASE_UNIT+TOLERANCE, BASE_UNIT+TOLERANCE/2, attachable_height+EPSILON]);
+      zcopies(BASE_UNIT,n=length) tag("remove") back((BASE_STRENGTH+TOLERANCE/2)/2) color(debug_colors ? HR_RED : HR_RL_PRIMARY_COLOR) cuboid([attachable_width+EPSILON, LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH]){
+        align(RIGHT, inside=true) cuboid([lockpin_chamfer, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2], chamfer=lockpin_chamfer, edges=LEFT);
+        align(LEFT, inside=true) cuboid([lockpin_chamfer, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2], chamfer=lockpin_chamfer, edges=RIGHT);
       }
     }
     children();
@@ -84,12 +86,16 @@ module cover_plate(length, distance, debug_colors=false, disable_chamfer=false, 
 
   attachable_width = distance*BASE_UNIT - BASE_STRENGTH*2 - TOLERANCE; // width of the cover plate, determined by the input distance in HomeRacker units, minus the horizontal offset of the sleeves on both sides to ensure the cover plate fits between the sleeves
   assert(attachable_width > 0, "Distance too small: cover_plate width becomes non-positive. Increase distance.");
-  attachable_depth = BASE_STRENGTH;
+  attachable_depth = BASE_STRENGTH*2;
   attachable_height = length * BASE_UNIT + BASE_UNIT*3; // 1.5 HomeRacker units extension on top and bottom to cover half of the adjoining connector, determined by the input length in HomeRacker units
-
+  tag_scope("cover_plate")
   attachable(anchor=anchor, orient=orient, spin=spin, size=[attachable_width, attachable_depth, attachable_height]){
-    color(debug_colors ? HR_BLUE : HR_RL_PRIMARY_COLOR)
-    cuboid([attachable_width, attachable_depth, attachable_height], chamfer=disable_chamfer ? 0 : BASE_CHAMFER, except=BACK);
+    color_this(debug_colors ? HR_BLUE : HR_RL_PRIMARY_COLOR)
+    diff()
+    cuboid([attachable_width, attachable_depth, attachable_height], chamfer=disable_chamfer ? 0 : BASE_CHAMFER){
+      align(BACK, inside=true) tag("remove") color_this(debug_colors ? HR_WHITE : HR_RL_PRIMARY_COLOR)
+        cuboid([attachable_width-BASE_STRENGTH*2, attachable_depth-BASE_STRENGTH, attachable_height-BASE_STRENGTH*2]);
+    }
     children();
   }
 }
@@ -124,7 +130,7 @@ module racklink(height, distance, left_start=0, left_end=0, right_start=0, right
   if (left_start > 0 && left_start >= left_end) echo("WARNING: left_start >= left_end, ignoring custom range — using full coverage for left sleeve.");
   if (right_start > 0 && right_start >= right_end) echo("WARNING: right_start >= right_end, ignoring custom range — using full coverage for right sleeve.");
 
-  default_offset = BASE_UNIT*1.5; // default offset for the cover plate to extend beyond the sleeves
+  default_offset = BASE_UNIT*1.5 + TOLERANCE/2; // default offset for the cover plate to extend beyond the sleeves
 
   start_left = get_sleeve_start_offset(left_start, left_end, height) + default_offset; // calculate the start offset for the left sleeve, adding the default offset for the cover plate
   start_right = get_sleeve_start_offset(right_start, right_end, height) + default_offset; // calculate the start offset for the right sleeve, adding the default offset for the cover plate
@@ -133,7 +139,7 @@ module racklink(height, distance, left_start=0, left_end=0, right_start=0, right
 
   horizontal_offset = SLEEVE_WIDTH; // horizontal offset to position the sleeves on the left and right side of the racklink, ensuring they wrap around the vertical supports of the rack columns
 
-  cover_plate(length = height, distance = distance, debug_colors=debug_colors, disable_chamfer=disable_chamfer){
+  cover_plate(length = height, distance = distance, debug_colors=debug_colors, disable_chamfer=disable_chamfer) {
     up(start_left) left(horizontal_offset) align(FRONT,LEFT+BOTTOM,inside=true) support_sleeve(length = length_left, debug_colors=debug_colors, disable_chamfer=disable_chamfer);
     up(start_right) right(horizontal_offset) align(FRONT,RIGHT+BOTTOM,inside=true) support_sleeve(length = length_right, debug_colors=debug_colors, disable_chamfer=disable_chamfer);
   }
