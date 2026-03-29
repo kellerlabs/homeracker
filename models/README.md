@@ -43,6 +43,14 @@ Wall-mountable bracket for attaching HomeRacker supports to vertical surfaces.
 
 See [wallmount/README.md](wallmount/README.md) for details.
 
+### 🔗 Racklink
+
+Connects independent rack columns together via double U-shaped sleeves for better stability and a clean look. Build small columns, join them later.
+
+![Racklink](./racklink/parts/racklink.png)
+
+See [racklink/README.md](racklink/README.md) for details.
+
 ### 📌 Pinpusher
 
 A utility tool for removing lock pins from connectors.
