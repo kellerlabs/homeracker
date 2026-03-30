@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.1](https://github.com/kellerlabs/homeracker/compare/scadm-v0.6.0...scadm-v0.6.1) (2026-03-29)
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.03.28 ([#304](https://github.com/kellerlabs/homeracker/issues/304)) ([ce843da](https://github.com/kellerlabs/homeracker/commit/ce843da3951053badac8de6d6fe63c2154828874))
+
+
+### 🔧 Miscellaneous
+
+* untrack .flatten-checksums and cache it in CI ([#301](https://github.com/kellerlabs/homeracker/issues/301)) ([c2438c2](https://github.com/kellerlabs/homeracker/commit/c2438c290fd8a5fbfd94b61477226be0ef01e953))
+
 ## [0.6.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.5.3...scadm-v0.6.0) (2026-03-23)
 
 
