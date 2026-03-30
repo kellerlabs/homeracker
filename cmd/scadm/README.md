@@ -55,12 +55,17 @@ scadm --version
 ### Install everything (OpenSCAD + libraries)
 
 ```bash
-scadm install                # Install nightly build (default - RECOMMENDED)
-scadm install --stable       # Install stable release (2021.01)
+scadm install                # Install based on scadm.json config (default: nightly latest)
 ```
 
 > [!NOTE]
-> Nightly builds are installed by default since the stable release (2021.01) is outdated and missing modern features. All nightly versions pass rendering tests before being published to ensure quality.
+> By default, scadm installs the latest nightly build of OpenSCAD. Configure the build type and version in `scadm.json` (see [Configuration](#configuration)). Nightly builds are recommended since the stable release (2021.01) is outdated and missing modern features.
+
+### Show version info
+
+```bash
+scadm install --info         # Show configured, resolved, and installed versions
+```
 
 ### Check installation status
 
@@ -190,6 +195,10 @@ scadm vscode --python     # Install and configure Python extension
 
 ```json
 {
+  "openscad": {
+    "type": "nightly",
+    "version": "latest"
+  },
   "dependencies": [
     {
       "name": "BOSL2",
@@ -207,7 +216,14 @@ scadm vscode --python     # Install and configure Python extension
 }
 ```
 
-**Fields:**
+**OpenSCAD fields** (optional — defaults to nightly/latest if omitted):
+- `type`: `"nightly"` (default) or `"stable"` — which build channel to use
+- `version`: `"latest"` (default) or a pinned version string (e.g., `"2026.03.28"`)
+  - `"latest"` resolves dynamically by scraping the [OpenSCAD snapshots page](https://files.openscad.org/snapshots/) (nightly) or the [GitHub releases API](https://api.github.com/repos/openscad/openscad/releases/latest) (stable)
+  - Pinned versions are used as-is without network access
+  - Resolved versions are cached in `bin/openscad/.resolved-version`; use `--force` to bypass cache
+
+**Dependency fields:**
 - `name`: Library name (creates `bin/openscad/libraries/{name}/`)
 - `repository`: GitHub repository in `owner/repo` format
 - `version`: Git tag, commit SHA, or branch name
