@@ -20,36 +20,14 @@
   "customManagers": [
     {
       "customType": "regex",
-      // Track OpenSCAD nightly Windows version - extracts from Windows .zip filenames
-      "managerFilePatterns": ["/^cmd/scadm/scadm/constants\\.py$/"],
+      // Track pinned OpenSCAD nightly version in scadm.json (skipped when "latest")
+      "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "OPENSCAD_NIGHTLY_VERSION_WINDOWS = \"(?<currentValue>[^\"]+)\""
+        "\"openscad\":\\s*\\{[^}]*\"version\":\\s*\"(?<currentValue>\\d{4}\\.\\d{2}\\.\\d{2})\"[^}]*\\}"
       ],
       "datasourceTemplate": "custom.openscad-snapshots",
-      "depNameTemplate": "OpenSCAD-Windows",
-      "extractVersionTemplate": "^OpenSCAD-(?<version>\\d{4}\\.\\d{2}\\.\\d{2})-x86-64\\.zip$",
-      "versioningTemplate": "loose"
-    },
-    {
-      "customType": "regex",
-      // Track OpenSCAD nightly Linux version - extracts from Linux .AppImage filenames
-      "managerFilePatterns": ["/^cmd/scadm/scadm/constants\\.py$/"],
-      "matchStrings": [
-        "OPENSCAD_NIGHTLY_VERSION_LINUX = \"(?<currentValue>[^\"]+)\""
-      ],
-      "datasourceTemplate": "custom.openscad-snapshots",
-      "depNameTemplate": "OpenSCAD-Linux",
+      "depNameTemplate": "OpenSCAD",
       "extractVersionTemplate": "^OpenSCAD-(?<version>\\d{4}\\.\\d{2}\\.\\d{2})-x86_64\\.AppImage$",
-      "versioningTemplate": "loose"
-    },
-    {
-      "customType": "regex",
-      // Track OpenSCAD stable version in constants
-      "managerFilePatterns": ["/^cmd/scadm/scadm/constants\\.py$/"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\nOPENSCAD_STABLE_VERSION = \"(?<currentValue>.*?)\""
-      ],
-      "datasourceTemplate": "github-releases",
       "versioningTemplate": "loose"
     }
   ],

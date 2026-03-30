@@ -40,13 +40,13 @@ def _handle_install(args):
 
     try:
         if not args.libs_only:
-            if not install_openscad(nightly=args.nightly, force=args.force, check_only=args.check):
+            if not install_openscad(force=args.force, check_only=args.check, info=args.info):
                 success = False
-                if not args.check:
+                if not args.check and not args.info:
                     logger.error("OpenSCAD installation failed. Aborting.")
                     sys.exit(1)
 
-        if not args.openscad_only:
+        if not args.openscad_only and not args.info:
             if not install_libraries(force=args.force, check_only=args.check):
                 success = False
     except FileNotFoundError as e:
@@ -131,13 +131,7 @@ def main():
     install_parser = subparsers.add_parser("install", help="Install OpenSCAD and libraries")
     install_parser.add_argument("--check", action="store_true", help="Check installation status only")
     install_parser.add_argument("--force", action="store_true", help="Force reinstall")
-    install_parser.add_argument(
-        "--stable",
-        action="store_false",
-        dest="nightly",
-        default=True,
-        help="Install stable release (2021.01) instead of nightly",
-    )
+    install_parser.add_argument("--info", action="store_true", help="Show OpenSCAD version info")
     install_parser.add_argument("--openscad-only", action="store_true", help="Install only OpenSCAD binary")
     install_parser.add_argument("--libs-only", action="store_true", help="Install only libraries")
 
