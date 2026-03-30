@@ -86,6 +86,7 @@ module cover_plate(length, distance, debug_colors=false, disable_chamfer=false, 
 
   attachable_width = distance*BASE_UNIT - BASE_STRENGTH*2 - TOLERANCE; // width of the cover plate, determined by the input distance in HomeRacker units, minus the horizontal offset of the sleeves on both sides to ensure the cover plate fits between the sleeves
   assert(attachable_width > 0, "Distance too small: cover_plate width becomes non-positive. Increase distance.");
+  assert(attachable_width > BASE_STRENGTH*2, "Distance too small: cover_plate inner width becomes non-positive. Increase distance.");
   attachable_depth = BASE_STRENGTH*2;
   attachable_height = length * BASE_UNIT + BASE_UNIT*3; // 1.5 HomeRacker units extension on top and bottom to cover half of the adjoining connector, determined by the input length in HomeRacker units
   tag_scope("cover_plate")
@@ -102,10 +103,13 @@ module cover_plate(length, distance, debug_colors=false, disable_chamfer=false, 
 
 /**
 * Calculates the vertical start offset (in mm) for a sleeve within the racklink.
-* Invalid or out-of-range inputs are normalized to 0 (centered), giving full sleeve coverage:
-*   - start >= end  → 0 (custom range ignored, full coverage)
+* Invalid or out-of-range inputs are normalized to 0 (no additional vertical shift), giving full sleeve coverage:
+*   - start >= end          → 0 (custom range ignored, full coverage)
 *   - start >= total_length → 0 (out of bounds, full coverage)
-* A valid offset shifts the sleeve upward from center. Returns start * BASE_UNIT.
+* A valid offset applies a vertical shift relative to the default position:
+*   - start < 0  → sleeve is shifted downward
+*   - start > 0  → sleeve is shifted upward
+* Returns start * BASE_UNIT.
 */
 function get_sleeve_start_offset(start, end, total_length) =
   (start >= end || start >= total_length) ? 0 : start * BASE_UNIT;
