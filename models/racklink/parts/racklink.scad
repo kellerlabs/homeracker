@@ -11,11 +11,11 @@ height = 3; // [1:1:20]
 // horizontal distance between the two u-shapes in HomeRacker units
 distance = 1; // [1:1:5]
 // start of the left u-shape in units. 0 = centered (full coverage). A valid value shifts the sleeve upward from center. Ignored (falls back to full coverage) if start >= end or start >= height.
-left_start = 0; // [0:1:19]
+left_start = 0; // [-10:1:19]
 // end of the left u-shape in units. Clamped to height if it exceeds it. Ignored (falls back to full coverage) if start >= end.
 left_end = 20; // [0:1:20]
 // start of the right u-shape in units. 0 = centered (full coverage). A valid value shifts the sleeve upward from center. Ignored (falls back to full coverage) if start >= end or start >= height.
-right_start = 0; // [0:1:19]
+right_start = 0; // [-10:1:19]
 // end of the right u-shape in units. Clamped to height if it exceeds it. Ignored (falls back to full coverage) if start >= end.
 right_end = 20; // [0:1:20]
 

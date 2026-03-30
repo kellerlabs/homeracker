@@ -125,6 +125,8 @@ module racklink(height, distance, left_start=0, left_end=0, right_start=0, right
   debug_colors=false, disable_chamfer=false) {
   assert(height > 0, "Height must be greater than 0");
   assert(distance > 0, "Distance must be greater than 0");
+  assert(left_end >= 0, "left_end must not be negative");
+  assert(right_end >= 0, "right_end must not be negative");
 
   // Warn when custom sleeve ranges are ignored (fallback to full coverage)
   if (left_start > 0 && left_start >= left_end) echo("WARNING: left_start >= left_end, ignoring custom range — using full coverage for left sleeve.");

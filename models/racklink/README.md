@@ -18,12 +18,12 @@ Open `parts/racklink.scad` in OpenSCAD and use the **Customizer** panel.
 |-----------|---------|-------|-------------|
 | `height` | 3 | 1–20 | Support height to cover (HR units) |
 | `distance` | 1 | 1–5 | Horizontal gap between columns (HR units) |
-| `left_start` | 0 | 0–19 | Left sleeve start offset (0 = full coverage) |
+| `left_start` | 0 | -10–19 | Left sleeve start offset (0 = full coverage, negative = shift down for misaligned columns) |
 | `left_end` | 20 | 0–20 | Left sleeve end offset (clamped to height) |
-| `right_start` | 0 | 0–19 | Right sleeve start offset (0 = full coverage) |
+| `right_start` | 0 | -10–19 | Right sleeve start offset (0 = full coverage, negative = shift down for misaligned columns) |
 | `right_end` | 20 | 0–20 | Right sleeve end offset (clamped to height) |
 
-**Sleeve customization:** Each U-shaped sleeve can start/end at different heights. This lets you connect columns of different heights — as long as they share at least one support unit. Invalid ranges (start ≥ end) fall back to full coverage automatically.
+**Sleeve customization:** Each U-shaped sleeve can start/end at different heights. This lets you connect columns of different heights — as long as they share at least one support unit. Negative start values shift the sleeve downward, useful when predecessor column stages have different heights and the columns don't align vertically. Invalid ranges (start ≥ end) fall back to full coverage automatically.
 
 ## 📸 Catalog
 
