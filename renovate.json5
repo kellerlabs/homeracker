@@ -23,7 +23,7 @@
       // Track pinned OpenSCAD nightly version in scadm.json (skipped when "latest")
       "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "\"openscad\":\\s*\\{[^}]*\"type\":\\s*\"nightly\"[^}]*\"version\":\\s*\"(?<currentValue>\\d{4}\\.\\d{2}\\.\\d{2})\""
+        "\"openscad\":\\s*\\{[^}]*\"version\":\\s*\"(?<currentValue>\\d{4}\\.\\d{2}\\.\\d{2})\"[^}]*\\}"
       ],
       "datasourceTemplate": "custom.openscad-snapshots",
       "depNameTemplate": "OpenSCAD",

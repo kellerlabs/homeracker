@@ -71,8 +71,7 @@ def resolve_latest_stable() -> str:
         raise RuntimeError("No tag_name found in GitHub API response")
 
     # Strip leading 'openscad-' prefix if present (e.g., 'openscad-2021.01' -> '2021.01')
-    if tag.startswith("openscad-"):
-        tag = tag[len("openscad-"):]
+    tag = tag.removeprefix("openscad-")
 
     return tag
 
