@@ -1,4 +1,8 @@
 {
+  "openscad": {
+    "type": "nightly",
+    "version": "latest"
+  },
   "dependencies": [
     {
       "name": "BOSL2",
