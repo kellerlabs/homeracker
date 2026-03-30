@@ -31,6 +31,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
   - Format: `type(scope): description` or `type: description`
   - Breaking changes: Add `!` (e.g., `feat!: change base unit`)
+- **Releases**: Fully automated via release-please. **NEVER** manually edit `CHANGELOG.md` or bump versions in `pyproject.toml` — both are managed by release-please based on conventional commit messages.
 
 ## Terminal Session Setup
 Before terminal operations, consider running these steps (use best judgement):
