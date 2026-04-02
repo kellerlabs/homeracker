@@ -32,7 +32,7 @@
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
 
-/* [Hidden] */
+// Hidden constants for sleeve library (no Customizer section marker)
 EPSILON = 0.01;
 HR_SLEEVE_PRIMARY_COLOR = HR_YELLOW;
 SLEEVE_WIDTH = BASE_UNIT + 2*BASE_STRENGTH + TOLERANCE;

@@ -21,7 +21,7 @@ Open `parts/sleeve.scad` in OpenSCAD and use the **Customizer** panel.
 **Library usage** — include in your own model:
 
 ```scad
-include <homeracker/sleeve/lib/sleeve.scad>
+include <../sleeve/lib/sleeve.scad>
 
 sleeve(length=3);
 ```
