@@ -51,6 +51,14 @@ Connects independent rack columns together via double U-shaped sleeves for bette
 
 See [racklink/README.md](racklink/README.md) for details.
 
+### 🧤 Sleeve
+
+A 3-sided U-shaped sleeve that wraps around a vertical HomeRacker support. Reusable attachment primitive with lock pin holes on both sides.
+
+![Sleeve](./sleeve/parts/sleeve.png)
+
+See [sleeve/README.md](sleeve/README.md) for details.
+
 ### 📌 Pinpusher
 
 A utility tool for removing lock pins from connectors.
