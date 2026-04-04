@@ -12,13 +12,13 @@ grid = 5; // Total number of lock pins to create
 grip_type = 0; // [0:Standard, 1:Extended, 2:No Grip]
 
 // Neck extension mode
-neck_extension = 0; // [0:None, 1:Grip Side, 2:Both Sides]
+neck_extension = 0; // [0:None, 1:Neck Side, 2:Both Sides]
 
 /* [Hidden] */
 $fn = 100;
 
 module lockpins_grid(grid=10, grip_type=LP_GRIP_STANDARD, neck_extension=LP_NECK_EXT_NONE) {
-    ext = neck_extension >= LP_NECK_EXT_GRIP ? LP_NECK_EXTENSION_UNIT : 0;
+    ext = neck_extension >= LP_NECK_EXT_NECK ? LP_NECK_EXTENSION_UNIT : 0;
     front_ext = neck_extension >= LP_NECK_EXT_BOTH ? LP_NECK_EXTENSION_UNIT : 0;
     spacing = [ grip_width + PRINTING_LAYER_WIDTH * 2, BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE + PRINTING_LAYER_WIDTH * 2 + grip_base_length + ext + front_ext];
     grid_copies(spacing, n=grid) {
