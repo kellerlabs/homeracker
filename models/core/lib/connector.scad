@@ -80,7 +80,7 @@ CONNECTOR_CONFIGS = [
   *   The connector can span multiple dimensions and directions, with optional pull-through functionality.
   *
   * Usage:
-  *   connector_piece = homeRackerConnector(dimensions=2, directions=4, pull_through_axis="y");
+  *   connector(dimensions=2, directions=4, pull_through_axis="y");
   */
 
 module connector(dimensions=3, directions=6, pull_through_axis="none", optimal_orientation=false) {

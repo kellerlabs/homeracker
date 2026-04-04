@@ -10,7 +10,7 @@ x_holes = false;
 
 /* [Debug Parameters] */
 debug_colors = false; // If true, uses bright colors to visualize different features (e.g. holes, main body) for testing purposes.
-disable_chamfer = false; // If true
+disable_chamfer = false; // If true, disables chamfered edges for debugging and testing.
 
 /* [Hidden] */
 TOLERANCE = 0.2;
