@@ -51,6 +51,14 @@ Connects independent rack columns together via double U-shaped sleeves for bette
 
 See [racklink/README.md](racklink/README.md) for details.
 
+### 🦶 Foot
+
+Modular foot insert that plugs into any connector arm used as contact surface at the bottom of a rack. Decoupled from the connector for maximum flexibility — print in TPU for better grip and load distribution.
+
+![Foot](./foot/parts/foot.png)
+
+See [foot/README.md](foot/README.md) for details.
+
 ### 🧤 Sleeve
 
 A 3-sided U-shaped sleeve that wraps around a vertical HomeRacker support. Reusable attachment primitive with lock pin holes on both sides.

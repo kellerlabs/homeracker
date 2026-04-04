@@ -36,7 +36,7 @@ lockpin(grip_type="standard");
 
 Open any file in `parts/` with OpenSCAD and use the **Customizer** panel to adjust parameters:
 
-- **`connector.scad`**: Customize dimensions, directions, pull-through axes, feet, and orientation
+- **`connector.scad`**: Customize dimensions, directions, pull-through axes, and orientation
 - **`support.scad`**: Customize length and hole configurations
 - **`lockpin.scad`**: Customize grip type (standard, extended or no-grip)
 
@@ -44,7 +44,7 @@ Open any file in `parts/` with OpenSCAD and use the **Customizer** panel to adju
 
 The `presets/` folder contains modules for batch-exporting all logical variants:
 
-- **`connectors.scad`**: Organized collections (standard, feet, pull-through, etc.)
+- **`connectors.scad`**: Organized collections (standard, pull-through)
 - **`supports.scad`**: Various support lengths with different hole configurations
 - **`lockpins.scad`**: Standard grip, extended and no-grip variants
 
@@ -59,9 +59,9 @@ Structural elements with standardized connection points.
 ### 2. **Connectors**
 Junction pieces that join supports in multiple directions.
 - 1D, 2D, or 3D variants (up to 6 directions)
-- Optional feet for vertical stability
 - Optional pull-through axes for complex builds
 - Lock pin holes (4mm square pins)
+- Use [foot inserts](../foot/README.md) to create a stable contact interface to the ground
 
 ### 3. **Lock Pins**
 4mm square pins that secure connectors to supports via tension fit.

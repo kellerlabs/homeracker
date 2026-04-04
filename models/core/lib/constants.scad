@@ -48,9 +48,9 @@ LP_GRIP_NO_GRIP = 2;
 
 // Lock pin neck extension types
 LP_NECK_EXT_NONE = 0;
-LP_NECK_EXT_GRIP = 1;
+LP_NECK_EXT_NECK = 1;
 LP_NECK_EXT_BOTH = 2;
-LP_NECK_EXT_FOOT = 3;
+LP_NECK_EXT_TAIL = 3;
 
 // Lock pin neck extension length per unit
 LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE/2;

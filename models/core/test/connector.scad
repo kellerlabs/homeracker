@@ -8,7 +8,6 @@ include <../main.scad>
 dimensions = 3;
 directions = 6;
 pull_through_axis = "x";
-is_foot = true;
 optimal_orientation = true;
 
-connector(dimensions, directions, pull_through_axis, is_foot, optimal_orientation);
+connector(dimensions, directions, pull_through_axis, optimal_orientation);

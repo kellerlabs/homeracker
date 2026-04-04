@@ -73,8 +73,6 @@ CONNECTOR_CONFIGS = [
   *       - No worries, invalid dimension/direction combinations will be corrected to the min/max valid values.
   *   pull_through_axis (string, default="none"): Axis along which items can be pulled through.
   *       - Options: "none", "x", "y", "z".
-  *   is_foot (bool, default=false): If true, configures the connector as a foot piece.
-  *       - Note: If set to true, it overrides pull_through_axis when set to "z".
   *   optimal_orientation (bool, default=false): If true, rotates the connector for optimal print orientation.
   *
   * Produces:
@@ -82,10 +80,10 @@ CONNECTOR_CONFIGS = [
   *   The connector can span multiple dimensions and directions, with optional pull-through functionality.
   *
   * Usage:
-  *   connector_piece = homeRackerConnector(dimensions=2, directions=4, pull_through_axis="y", is_foot=false);
+  *   connector_piece = homeRackerConnector(dimensions=2, directions=4, pull_through_axis="y");
   */
 
-module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=false, optimal_orientation=false) {
+module connector(dimensions=3, directions=6, pull_through_axis="none", optimal_orientation=false) {
 
   // Validate and correct dimensions (1-3)
   valid_dimensions = max(1, min(3, dimensions));
@@ -101,9 +99,6 @@ module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=f
   // Array index: [dimensions-1][directions-min_directions]
   config = CONNECTOR_CONFIGS[valid_dimensions - 1][valid_directions - min_directions];
 
-  // for nicer optics, mirror the whole connector along the xy plane when it's a foot
-
-
   // Subtract Pull-Through Hole if applicable
   difference() {
     // Combine connector with Printing interfaces
@@ -115,17 +110,17 @@ module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=f
         rotate(rotation_1) rotate(rotation_2)
         difference() {
           union() {
-            connector_raw(config, is_foot);
+            connector_raw(config);
             print_interface_3d();
           }
-          pull_through_hole(pull_through_axis, is_foot);
+          pull_through_hole(pull_through_axis);
         }
       } else if (valid_directions == 4 && valid_dimensions == 2) {
         rotation = optimal_orientation ? [0,-135,0] : [0,0,0];
         rotate(rotation)
         difference() {
-          connector_raw(config, is_foot);
-          pull_through_hole(pull_through_axis, is_foot);
+          connector_raw(config);
+          pull_through_hole(pull_through_axis);
         }
 
       } else {
@@ -134,17 +129,17 @@ module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=f
         rotate(rotation)
         difference() {
           intersection() {
-            connector_raw(config, is_foot);
+            connector_raw(config);
             print_interface_base();
           }
-          pull_through_hole(pull_through_axis, is_foot);
+          pull_through_hole(pull_through_axis);
         }
       }
     }
   }
 }
 
-module connector_raw(config, is_foot=false) {
+module connector_raw(config) {
   difference() {
     // Core + Outer Arms
     union() {
@@ -153,7 +148,7 @@ module connector_raw(config, is_foot=false) {
 
       // Place arms based on configuration
       // Order: +Z, -Z, +X, -X, +Y, -Y
-      if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmOuter(is_foot);  // +Z
+      if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmOuter();  // +Z
       if (config[1]) translate([0, 0, -core_to_arm_translation]) rotate([180, 0, 0]) connectorArmOuter();  // -Z
       if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmOuter();  // +X
       if (config[3]) translate([-core_to_arm_translation, 0, 0]) rotate([0, -90, 0]) connectorArmOuter();  // -X
@@ -162,7 +157,7 @@ module connector_raw(config, is_foot=false) {
     }
     // Subract Inner Arms
     // Order: +Z, -Z, +X, -X, +Y, -Y
-    if (config[0] && !is_foot) translate([0, 0, core_to_arm_translation]) connectorArmInner();  // +Z
+    if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmInner();  // +Z
     if (config[1]) translate([0, 0, -core_to_arm_translation]) rotate([180, 0, 0]) connectorArmInner();  // -Z
     if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmInner();  // +X
     if (config[3]) translate([-core_to_arm_translation, 0, 0]) rotate([0, -90, 0]) connectorArmInner();  // -X
@@ -177,7 +172,7 @@ module connector_raw(config, is_foot=false) {
   * Produces a single arm of the connector to define the outer geometry.
   * It also creates the lock pin holes.
   */
-module connectorArmOuter(is_foot=false) {
+module connectorArmOuter() {
 
   arm_dimensions_outer = [connector_outer_side_length, connector_outer_side_length, BASE_UNIT];
   arm_side_length_inner = connector_outer_side_length - BASE_STRENGTH*2;
@@ -186,10 +181,8 @@ module connectorArmOuter(is_foot=false) {
   // outer cuboid
   difference() {
     color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer=BASE_CHAMFER,except=BOTTOM);
-    if(!is_foot){
-      color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-      color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-    }
+    color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
+    color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
   }
 }
 
@@ -267,7 +260,7 @@ module print_interface_base() {
   *
   * Produces a pull-through hole along the specified axis.
   */
-module pull_through_hole(axis="none", is_foot=false) {
+module pull_through_hole(axis="none") {
   // Determine hole orientation and dimensions based on axis
   hole_length = BASE_UNIT * 3;
   hole_dimensions = [hole_length, arm_side_length_inner, arm_side_length_inner];
@@ -276,7 +269,7 @@ module pull_through_hole(axis="none", is_foot=false) {
   if (axis == "y") {
     rotate([0, 0, 90])
     cuboid(hole_dimensions);
-  } else if (axis == "z" && !is_foot) {
+  } else if (axis == "z") {
     rotate([0, -90, 0])
     cuboid(hole_dimensions);
   } else if (axis == "x") {

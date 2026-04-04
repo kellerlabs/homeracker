@@ -11,9 +11,6 @@ directions = 3; // [1:1:6]
 // Pull-through axis (none, x,y,z)
 pull_through_axis = "none"; // ["none","x","y","z"]
 
-// Is-Foot. Might clash with pull-through axis when set to "z". is_foot has priority then.
-is_foot = false; // [true,false]
-
 // Optimal Printing Orientation
 optimal_orientation = true; // [true,false]
 
@@ -31,9 +28,9 @@ LP_GRIP_STANDARD = 0;
 LP_GRIP_EXTENDED = 1;
 LP_GRIP_NO_GRIP = 2;
 LP_NECK_EXT_NONE = 0;
-LP_NECK_EXT_GRIP = 1;
+LP_NECK_EXT_NECK = 1;
 LP_NECK_EXT_BOTH = 2;
-LP_NECK_EXT_FOOT = 3;
+LP_NECK_EXT_TAIL = 3;
 LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE/2;
 HR_YELLOW = "#f7b600";
 HR_BLUE = "#0056b3";
@@ -58,27 +55,33 @@ lockpin_hole_chamfer = LOCKPIN_HOLE_CHAMFER;
 lockpin_hole_side_length = LOCKPIN_HOLE_SIDE_LENGTH;
 lockpin_hole_side_length_dimension = LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION;
 
-module support(units=3, x_holes=false) {
+HR_CORE_SUPPORT_PRIMARY_COLOR = HR_CHARCOAL;
+module support(units=3, x_holes=false,
+    debug_colors=false, disable_chamfer=false,
+    anchor=CENTER, spin=0, orient=UP) {
+
     support_dimensions = [BASE_UNIT, BASE_UNIT*units, BASE_UNIT];
+    attachable(anchor=anchor, spin=spin, orient=orient, size=support_dimensions) {
+        difference() {
 
-    difference() {
+            color(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_PRIMARY_COLOR)
+            cuboid(support_dimensions, chamfer=disable_chamfer ? 0 : BASE_CHAMFER);
 
-        color("darkslategray")
-        cuboid(support_dimensions, chamfer=BASE_CHAMFER);
-
-        ycopies(spacing=BASE_UNIT, n=units) {
-
-            color("red") lock_pin_hole();
-        }
-        if (x_holes) {
             ycopies(spacing=BASE_UNIT, n=units) {
 
-                color("red") rotate([0,90,0]) lock_pin_hole();
+                color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) lockpin_hole_support();
+            }
+            if (x_holes) {
+                ycopies(spacing=BASE_UNIT, n=units) {
+
+                    color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) rotate([0,90,0]) lockpin_hole_support();
+                }
             }
         }
+        children();
     }
 }
-module lock_pin_hole() {
+module lockpin_hole_support() {
     lock_pin_center_side = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
     lock_pin_center_dimension = [lock_pin_center_side, lock_pin_center_side];
 
@@ -127,7 +130,7 @@ CONNECTOR_CONFIGS = [
         [true, true, true, true, true, true]
     ]
 ];
-module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=false, optimal_orientation=false) {
+module connector(dimensions=3, directions=6, pull_through_axis="none", optimal_orientation=false) {
 
   valid_dimensions = max(1, min(3, dimensions));
 
@@ -148,17 +151,17 @@ module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=f
         rotate(rotation_1) rotate(rotation_2)
         difference() {
           union() {
-            connector_raw(config, is_foot);
+            connector_raw(config);
             print_interface_3d();
           }
-          pull_through_hole(pull_through_axis, is_foot);
+          pull_through_hole(pull_through_axis);
         }
       } else if (valid_directions == 4 && valid_dimensions == 2) {
         rotation = optimal_orientation ? [0,-135,0] : [0,0,0];
         rotate(rotation)
         difference() {
-          connector_raw(config, is_foot);
-          pull_through_hole(pull_through_axis, is_foot);
+          connector_raw(config);
+          pull_through_hole(pull_through_axis);
         }
 
       } else {
@@ -167,23 +170,23 @@ module connector(dimensions=3, directions=6, pull_through_axis="none", is_foot=f
         rotate(rotation)
         difference() {
           intersection() {
-            connector_raw(config, is_foot);
+            connector_raw(config);
             print_interface_base();
           }
-          pull_through_hole(pull_through_axis, is_foot);
+          pull_through_hole(pull_through_axis);
         }
       }
     }
   }
 }
-module connector_raw(config, is_foot=false) {
+module connector_raw(config) {
   difference() {
 
     union() {
 
       connectorCore();
 
-      if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmOuter(is_foot);
+      if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmOuter();
       if (config[1]) translate([0, 0, -core_to_arm_translation]) rotate([180, 0, 0]) connectorArmOuter();
       if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmOuter();
       if (config[3]) translate([-core_to_arm_translation, 0, 0]) rotate([0, -90, 0]) connectorArmOuter();
@@ -191,7 +194,7 @@ module connector_raw(config, is_foot=false) {
       if (config[5]) translate([0, -core_to_arm_translation, 0]) rotate([90, 0, 0]) connectorArmOuter();
     }
 
-    if (config[0] && !is_foot) translate([0, 0, core_to_arm_translation]) connectorArmInner();
+    if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmInner();
     if (config[1]) translate([0, 0, -core_to_arm_translation]) rotate([180, 0, 0]) connectorArmInner();
     if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmInner();
     if (config[3]) translate([-core_to_arm_translation, 0, 0]) rotate([0, -90, 0]) connectorArmInner();
@@ -199,7 +202,7 @@ module connector_raw(config, is_foot=false) {
     if (config[5]) translate([0, -core_to_arm_translation, 0]) rotate([90, 0, 0]) connectorArmInner();
   }
 }
-module connectorArmOuter(is_foot=false) {
+module connectorArmOuter() {
 
   arm_dimensions_outer = [connector_outer_side_length, connector_outer_side_length, BASE_UNIT];
   arm_side_length_inner = connector_outer_side_length - BASE_STRENGTH*2;
@@ -207,10 +210,8 @@ module connectorArmOuter(is_foot=false) {
 
   difference() {
     color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer=BASE_CHAMFER,except=BOTTOM);
-    if(!is_foot){
-      color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-      color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-    }
+    color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
+    color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
   }
 }
 module connectorArmInner() {
@@ -257,7 +258,7 @@ module print_interface_base() {
   translate([connector_outer_side_length/2,connector_outer_side_length/2,0])
   cuboid([side_length, side_length, base_height], chamfer=chamfer, edges=LEFT+FRONT);
 }
-module pull_through_hole(axis="none", is_foot=false) {
+module pull_through_hole(axis="none") {
 
   hole_length = BASE_UNIT * 3;
   hole_dimensions = [hole_length, arm_side_length_inner, arm_side_length_inner];
@@ -266,7 +267,7 @@ module pull_through_hole(axis="none", is_foot=false) {
   if (axis == "y") {
     rotate([0, 0, 90])
     cuboid(hole_dimensions);
-  } else if (axis == "z" && !is_foot) {
+  } else if (axis == "z") {
     rotate([0, -90, 0])
     cuboid(hole_dimensions);
   } else if (axis == "x") {
@@ -309,8 +310,8 @@ module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) 
 }
 module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
   if (grip_type != LP_GRIP_NO_GRIP) {
-    has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
-    grip_side_extension = has_grip_neck ? LP_NECK_EXTENSION_UNIT : 0;
+    has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
+    grip_side_extension = has_neck_ext ? LP_NECK_EXTENSION_UNIT : 0;
     grip_base_dimensions = [lockpin_width_outer, lockpin_height, grip_base_length];
     grip_outer_dimensions = [grip_type == LP_GRIP_EXTENDED ? grip_width * 1.5 : grip_width, lockpin_height, grip_thickness_outer];
     grip_inner_dimensions = [grip_width, lockpin_height, grip_thickness_inner];
@@ -336,10 +337,10 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
   lockpin_fillet = lockpin_width_outer / 3;
   neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
   neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE/2 + LP_NECK_EXTENSION_UNIT / 2;
-  has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
-  has_foot_neck = neck_extension == LP_NECK_EXT_FOOT || neck_extension == LP_NECK_EXT_BOTH;
+  has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
+  has_tail_neck = neck_extension == LP_NECK_EXT_TAIL || neck_extension == LP_NECK_EXT_BOTH;
 
-  if (has_grip_neck) {
+  if (has_neck_ext) {
     translate([0, 0, -neck_z])
     if (grip_type != LP_GRIP_NO_GRIP) {
 
@@ -353,7 +354,7 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
     }
   }
 
-  if (has_foot_neck) {
+  if (has_tail_neck) {
     translate([0, 0, neck_z])
 
     intersection() {
@@ -363,10 +364,10 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
   }
 }
 module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
-  has_grip_neck = neck_extension == LP_NECK_EXT_GRIP || neck_extension == LP_NECK_EXT_BOTH;
-  has_foot_neck = neck_extension == LP_NECK_EXT_FOOT || neck_extension == LP_NECK_EXT_BOTH;
-  end_part_half(true, has_foot_neck);
-  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_grip_neck);
+  has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
+  has_tail_neck = neck_extension == LP_NECK_EXT_TAIL || neck_extension == LP_NECK_EXT_BOTH;
+  end_part_half(true, has_tail_neck);
+  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_neck_ext);
 }
 module end_part_half(front = false, has_neck = false) {
 
@@ -406,16 +407,12 @@ module tension_hole_half(){
 $fn = 100;
 
 // Color based on configuration:
-// HR_GREEN - standard (no pull through, no foot)
-// HR_YELLOW - pull-through (x/y/z pull through, no foot)
-// HR_BLUE - foot (no pull through, has foot)
-// HR_RED - pull-through foot (pull through and foot)
+// HR_GREEN - standard (no pull through)
+// HR_YELLOW - pull-through (x/y/z pull through)
 
-function get_connector_color(pull_through_axis="none", is_foot=false) =
-  is_foot && pull_through_axis != "none" ? HR_RED :
-  is_foot ? HR_BLUE :
+function get_connector_color(pull_through_axis="none") =
   pull_through_axis != "none" ? HR_YELLOW :
   HR_GREEN;
 
-color(get_connector_color(pull_through_axis, is_foot))
-connector(dimensions, directions, pull_through_axis, is_foot, optimal_orientation);
+color(get_connector_color(pull_through_axis))
+connector(dimensions, directions, pull_through_axis, optimal_orientation);
