@@ -73,6 +73,7 @@
       "groupName": "OpenSCAD nightly",
       "groupSlug": "openscad-nightly",
       "separateMajorMinor": false,
+      "schedule": ["* * * * 6"],
       "automerge": true
     },
     {
@@ -88,6 +89,7 @@
       "matchPackageNames": [
         "BelfrySCAD/BOSL2"
       ],
+      "schedule": ["* * * * 6"],
       "automerge": true
     },
     {
