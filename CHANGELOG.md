@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.13.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.12.0...homeracker-v1.13.0) (2026-04-05)
+
+
+### ✨ Features
+
+* **racklink:** add racklink model for connecting rack columns ([#307](https://github.com/kellerlabs/homeracker/issues/307)) ([8d533c9](https://github.com/kellerlabs/homeracker/commit/8d533c96d0348618b26842afbfa256377beb3cf7))
+* **sleeve:** extract sleeve into standalone model ([#312](https://github.com/kellerlabs/homeracker/issues/312)) ([9683aa1](https://github.com/kellerlabs/homeracker/commit/9683aa1d9dd876a4ca1a5854ffeb658c9a69ec67))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.731 ([#318](https://github.com/kellerlabs/homeracker/issues/318)) ([5ab447e](https://github.com/kellerlabs/homeracker/commit/5ab447e499d61e3afbc156a50a0e2ecb554cecf2))
+* update openscad nightly to v2026.04.03 ([#313](https://github.com/kellerlabs/homeracker/issues/313)) ([d3e23fe](https://github.com/kellerlabs/homeracker/commit/d3e23fe663f83f83b1ac922adb1e60f28a608acc))
+* update openscad nightly to v2026.04.04 ([#315](https://github.com/kellerlabs/homeracker/issues/315)) ([97d4093](https://github.com/kellerlabs/homeracker/commit/97d40934437f7269ce0f691232bb2230e1a3bd52))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.104.3 ([#317](https://github.com/kellerlabs/homeracker/issues/317)) ([a472bcd](https://github.com/kellerlabs/homeracker/commit/a472bcdeb9b4942ad9aa1eb4ff988695d63eaac6))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.104.4 ([#319](https://github.com/kellerlabs/homeracker/issues/319)) ([da955bb](https://github.com/kellerlabs/homeracker/commit/da955bbb77ce6a7ce6268cc1ddbd68b4cdd99c10))
+* update pre-commit hooks ([#314](https://github.com/kellerlabs/homeracker/issues/314)) ([85e92ac](https://github.com/kellerlabs/homeracker/commit/85e92ac2334f9b3f876e21e4be442fe8c7272907))
+
 ## [1.12.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.11.0...homeracker-v1.12.0) (2026-03-29)
 
 
