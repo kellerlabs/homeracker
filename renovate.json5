@@ -103,6 +103,7 @@
       "groupName": "pre-commit hooks",
       "groupSlug": "pre-commit-hooks",
       "separateMajorMinor": false,
+      "schedule": ["before 5am on the first day of the month"],
       "automerge": true
     }
   ]
