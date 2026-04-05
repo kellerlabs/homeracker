@@ -3,7 +3,7 @@
 // This model is part of the HomeRacker - Core system.
 //
 // MIT License
-// Copyright (c) 2025 Patrick Pötz
+// Copyright (c) Patrick Pötz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
 include <BOSL2/std.scad>
 include <constants.scad>
 
+HR_CORE_SUPPORT_PRIMARY_COLOR = HR_CHARCOAL;
+
 /**
  * HomeRacker Support Module
  *
@@ -44,37 +46,42 @@ include <constants.scad>
  *   Call support(units) to generate a support of desired length.
  *   Example: support(units=5, x_holes=true);
  */
-module support(units=3, x_holes=false) {
+module support(units=3, x_holes=false,
+    debug_colors=false, disable_chamfer=false,
+    anchor=CENTER, spin=0, orient=UP) {
+
     support_dimensions = [BASE_UNIT, BASE_UNIT*units, BASE_UNIT]; // support dimensions (multi-unit)
+    attachable(anchor=anchor, spin=spin, orient=orient, size=support_dimensions) {
+        difference() {
+            // Single support block
+            color(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_PRIMARY_COLOR)
+            cuboid(support_dimensions, chamfer=disable_chamfer ? 0 : BASE_CHAMFER);
 
-    difference() {
-        // Single support block
-        color("darkslategray")
-        cuboid(support_dimensions, chamfer=BASE_CHAMFER);
-
-        // Create a lock pin hole for each unit of length
-        ycopies(spacing=BASE_UNIT, n=units) {
-            // the color is for testing purposes only when someone wants to visualize the hole
-            color("red") lock_pin_hole();
-        }
-        if (x_holes) {
+            // Create a lock pin hole for each unit of length
             ycopies(spacing=BASE_UNIT, n=units) {
                 // the color is for testing purposes only when someone wants to visualize the hole
-                color("red") rotate([0,90,0]) lock_pin_hole();
+                color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) lockpin_hole_support();
+            }
+            if (x_holes) {
+                ycopies(spacing=BASE_UNIT, n=units) {
+                    // the color is for testing purposes only when someone wants to visualize the hole
+                    color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) rotate([0,90,0]) lockpin_hole_support();
+                }
             }
         }
+        children();
     }
 }
 
 /**
- * 📐 lock_pin_hole module
+ * 📐 lockpin_hole_support module
  *
  * Creates a bidirectional chamfered hole for lock pins, used in HomeRacker connectors and supports.
  * The geometry consists of two mirrored prismoids forming a square hole with chamfered edges on both sides,
  * allowing for easy insertion and secure locking of 4mm square lock pins.
  * This ensures printability and mechanical strength while maintaining standard HomeRacker tolerances.
  */
-module lock_pin_hole() {
+module lockpin_hole_support() {
     lock_pin_center_side = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
     lock_pin_center_dimension = [lock_pin_center_side, lock_pin_center_side];
 
