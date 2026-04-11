@@ -51,7 +51,7 @@ steps:
 1. Sets up Python 3.x
 2. Installs system dependencies (`xvfb`, `libglu1-mesa`, `libfuse2`, `libegl1`, `libxcb-cursor0`)
 3. Resolves scadm version from inputs (source > explicit version > requirements file)
-4. Caches `bin/openscad/` keyed on runner OS, resolved scadm version, `scadm.json`, and local source hash (when `scadm-source` is set)
+4. Caches `bin/openscad/` keyed on runner OS, resolved scadm version, `scadm.json`, and `**/constants.py` under `scadm-source` (when set)
 5. Installs [scadm](../../../cmd/scadm/README.md) — pinned from PyPI, or from a local path if `scadm-source` is set
 6. Runs `scadm install` to download OpenSCAD and libraries
 
@@ -60,5 +60,5 @@ steps:
 This action is independently versioned via [release-please](https://github.com/googleapis/release-please). Use a pinned tag:
 
 ```yaml
-uses: kellerlabs/homeracker/.github/actions/setup-openscad@setup-openscad-v1.0.0
+uses: kellerlabs/homeracker/.github/actions/setup-openscad@setup-openscad-v2.0.0
 ```

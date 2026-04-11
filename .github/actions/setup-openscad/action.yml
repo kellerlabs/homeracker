@@ -47,9 +47,13 @@ runs:
             echo "::error::scadm-requirements file not found: ${{ inputs.scadm-requirements }}"
             exit 1
           fi
-          version=$(grep -oP '^scadm==\K[0-9.]+' "${{ inputs.scadm-requirements }}" || true)
+          version=$(sed -n 's/^[[:space:]]*scadm==\([^[:space:]#]*\).*/\1/p' "${{ inputs.scadm-requirements }}")
           if [[ -z "$version" ]]; then
             echo "::error::scadm not found in ${{ inputs.scadm-requirements }}"
+            exit 1
+          fi
+          if [[ $(echo "$version" | wc -l) -ne 1 ]]; then
+            echo "::error::Multiple scadm entries found in ${{ inputs.scadm-requirements }}"
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
