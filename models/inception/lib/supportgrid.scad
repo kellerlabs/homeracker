@@ -29,7 +29,6 @@ include <BOSL2/std.scad>
 include <supportbin.scad>
 include <../../core/lib/constants.scad>
 
-/* [Hidden] */
 HR_SG_PRIMARY_COLOR = HR_YELLOW;
 
 HR_SG_MOUNTING_AXIS_VERTICAL = 1;

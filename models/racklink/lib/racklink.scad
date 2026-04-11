@@ -54,7 +54,6 @@ include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
 include <../../sleeve/lib/sleeve.scad>
 
-/* [Hidden] */
 HR_RL_PRIMARY_COLOR = HR_YELLOW;
 
 module cover_plate(length, distance, debug_colors=false, disable_chamfer=false, anchor=CENTER, orient=UP, spin=0) {
