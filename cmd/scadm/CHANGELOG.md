@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/kellerlabs/homeracker/compare/scadm-v0.6.2...scadm-v0.6.3) (2026-04-11)
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.04.08 ([#322](https://github.com/kellerlabs/homeracker/issues/322)) ([ab8340f](https://github.com/kellerlabs/homeracker/commit/ab8340f163deb35015fcdcb4d37729e6f60bdbd8))
+
 ## [0.6.2](https://github.com/kellerlabs/homeracker/compare/scadm-v0.6.1...scadm-v0.6.2) (2026-04-06)
 
 
