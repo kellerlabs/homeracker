@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v2.0.0...homeracker-v2.0.1) (2026-04-11)
+
+
+### 🐛 Bug Fixes
+
+* remove Customizer section markers from lib files ([#325](https://github.com/kellerlabs/homeracker/issues/325)) ([1530e6c](https://github.com/kellerlabs/homeracker/commit/1530e6c97ba22f65fdda0eb64904ef7f2f446cad))
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.04.08 ([#322](https://github.com/kellerlabs/homeracker/issues/322)) ([ab8340f](https://github.com/kellerlabs/homeracker/commit/ab8340f163deb35015fcdcb4d37729e6f60bdbd8))
+
 ## [2.0.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v1.12.0...homeracker-v2.0.0) (2026-04-06)
 
 
