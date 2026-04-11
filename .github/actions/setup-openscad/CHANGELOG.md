@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v1.1.0...setup-openscad-v2.0.0) (2026-04-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **setup-openscad:** add scadm-requirements input, remove default version ([#329](https://github.com/kellerlabs/homeracker/issues/329))
+
+### ✨ Features
+
+* **setup-openscad:** add scadm-requirements input, remove default version ([#329](https://github.com/kellerlabs/homeracker/issues/329)) ([85fa9f8](https://github.com/kellerlabs/homeracker/commit/85fa9f8c289be47bfa0d56ec9590606aa8d8fa83))
+
 ## [1.1.0](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v1.0.0...setup-openscad-v1.1.0) (2026-03-20)
 
 
