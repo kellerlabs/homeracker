@@ -1,0 +1,74 @@
+---
+name: Test Setup OpenSCAD Action
+
+on:
+  pull_request:
+    paths:
+      - '.github/actions/setup-openscad/**'
+      - '.github/workflows/test-setup-openscad.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: scadm-source
+            scadm-source: cmd/scadm
+            scadm-version: ''
+            scadm-requirements: ''
+            expect-failure: false
+          - name: scadm-version
+            scadm-source: ''
+            scadm-version: '0.6.3'
+            scadm-requirements: ''
+            expect-failure: false
+          - name: scadm-requirements
+            scadm-source: ''
+            scadm-version: ''
+            scadm-requirements: test-requirements.txt
+            expect-failure: false
+          - name: no-inputs
+            scadm-source: ''
+            scadm-version: ''
+            scadm-requirements: ''
+            expect-failure: true
+          - name: missing-requirements-file
+            scadm-source: ''
+            scadm-version: ''
+            scadm-requirements: nonexistent.txt
+            expect-failure: true
+    name: test (${{ matrix.name }})
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Create test requirements file
+        if: matrix.name == 'scadm-requirements'
+        run: echo "scadm==0.6.3" > test-requirements.txt
+
+      - name: Setup OpenSCAD
+        id: setup
+        uses: ./.github/actions/setup-openscad
+        continue-on-error: ${{ matrix.expect-failure }}
+        with:
+          scadm-source: ${{ matrix.scadm-source }}
+          scadm-version: ${{ matrix.scadm-version }}
+          scadm-requirements: ${{ matrix.scadm-requirements }}
+
+      - name: Assert expected failure
+        if: ${{ matrix.expect-failure }}
+        run: |
+          if [[ "${{ steps.setup.outcome }}" != "failure" ]]; then
+            echo "::error::Expected setup to fail but it succeeded"
+            exit 1
+          fi
+
+      - name: Verify installation
+        if: ${{ !matrix.expect-failure }}
+        run: |
+          scadm --version
+          test -d bin/openscad
