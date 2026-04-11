@@ -609,10 +609,6 @@ def flatten_file(input_file: Path, output_file: Path, workspace_root: Optional[P
     needed_names |= _find_used_names(params)
     needed_names |= _find_used_names(hidden)
     needed_names |= _find_used_names(main_code)
-    # Also include names from root hidden/main that are defined as root variables
-    # (they may reference lib constants)
-    hidden_content_raw = re.sub(r"/\*\s*\[Hidden\]\s*\*/", "", hidden).strip() if hidden else ""
-    needed_names |= _find_used_names(hidden_content_raw)
 
     used_defs = _resolve_dependencies(needed_names, all_lib_defs)
 
