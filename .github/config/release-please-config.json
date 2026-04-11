@@ -17,7 +17,13 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "homeracker"
+      "package-name": "homeracker",
+      "exclude-paths": [
+        "cmd/scadm",
+        ".github/actions/setup-openscad",
+        ".github/actions/sync-instructions",
+        ".github/workflows"
+      ]
     },
     "cmd/scadm": {
       "release-type": "python",
