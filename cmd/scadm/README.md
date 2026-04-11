@@ -125,15 +125,16 @@ The flattener expects source `.scad` files to follow OpenSCAD Customizer convent
 
 Variable placement rules:
 
-- Variables between `/* [Hidden] */` and the first `module`/`function` → included in the Hidden section
-- Leading standalone variable assignments immediately after the last parameter/hidden section marker and before the first `module`/`function` call may be stripped from the flattened output
-- Variables that appear later in the file (including after the main code) are preserved as-is in the flattened file; do not rely on them being automatically filtered out
+- Variables inside `/* [SectionName] */` blocks → preserved in their respective sections
+- Variables in `/* [Hidden] */` section → included in the Hidden section
+- Variables can be defined anywhere in any file — the flattener handles them regardless of position
 
 **Library files** (resolved via `include <...>`):
 
-- Must contain **only** module/function definitions and constants
-- Must **not** contain parameter section markers (`/* [SectionName] */`)
-- The flattener raises an error if parameter markers are detected in a library file
+- May contain module/function definitions, constants, and variables in any order
+- Section markers (`/* [SectionName] */`) in library files are silently ignored — only root file sections are preserved in the output
+- Only **effectively used** definitions (modules, functions, variables) from the dependency chain are included — unused code is omitted
+- Library variables appear in the Hidden section with an origin comment (e.g. `// --- from constants.scad ---`)
 
 ### Render .scad files
 

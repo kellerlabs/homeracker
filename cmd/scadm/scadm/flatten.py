@@ -548,9 +548,7 @@ def compute_checksum(input_file: Path, workspace_root: Optional[Path] = None) ->
 # ---------------------------------------------------------------------------
 
 
-def flatten_file(
-    input_file: Path, output_file: Path, workspace_root: Optional[Path] = None
-) -> None:
+def flatten_file(input_file: Path, output_file: Path, workspace_root: Optional[Path] = None) -> None:
     """Flatten a .scad file by inlining only effectively used dependencies.
 
     Produces a single-file output with structure:

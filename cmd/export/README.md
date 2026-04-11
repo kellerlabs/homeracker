@@ -19,7 +19,7 @@ Output is written to `models/<model_type>/flattened/<filename>.scad` where `<mod
 
 ## File Structure Assumptions
 
-This script is opinionated about file structure, following **OpenSCAD Customizer** conventions:
+This script follows **OpenSCAD Customizer** conventions:
 
 **Root files** (files being exported, e.g., `parts/*.scad`):
 1. Parameter sections: `/* [SectionName] */` with customizable variables
@@ -27,25 +27,27 @@ This script is opinionated about file structure, following **OpenSCAD Customizer
 3. Main code: module/function calls that generate geometry
 
 **Variable placement behavior:**
-- Variables between `/* [Hidden] */` and first module/function → included in Hidden section (hidden from UI)
-- Variables after main code (after last module call) → filtered out (not included in export)
-- Best practice: Keep all non-parameter variables in `/* [Hidden] */` section before the first module call
+- Variables inside `/* [SectionName] */` blocks → preserved in their respective sections
+- Variables in `/* [Hidden] */` section → included in the Hidden section
+- Variables can be defined anywhere in any file
 
 **Library files** (included via `include <...>`):
-- Must contain ONLY module/function definitions and constants
-- Must NOT have parameter section markers (`/* [Name] */`)
-- The script validates this and fails with an error if violated
+- May contain module/function definitions, constants, and variables in any order
+- Section markers in library files are silently ignored — only root file sections matter
+- Only **effectively used** definitions are included — unused code is omitted
+- Library variables appear in the Hidden section with an origin comment
 
 > [!NOTE]
-> Library files (included via `include <...>`) **must not** contain parameter section markers like `/* [Parameters] */` or `/* [Hidden] */`. Only the root file being exported should have these markers. The script will fail with a clear error if it detects parameter sections in library files.
+> Section markers (`/* [Name] */`) in library files are silently ignored. Only the root file's sections are preserved in the output. Unused modules, functions, and variables from the dependency chain are automatically omitted.
 
 ## What it does
 
 - Preserves BOSL2 library references (required by MakerWorld)
 - Keeps parameter sections with their comments (for MakerWorld customizer)
-- Inlines all local includes recursively
+- Inlines only effectively used definitions from local includes
 - Strips comments from inlined library code
 - Prevents duplicate includes
+- Adds origin comments for library variables
 
 ## Example
 
