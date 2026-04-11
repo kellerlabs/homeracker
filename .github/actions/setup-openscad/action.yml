@@ -6,13 +6,19 @@ description: >
 
 inputs:
   scadm-version:
-    description: Pinned scadm PyPI version. Also used in the cache key.
+    description: Pinned scadm PyPI version. Takes precedence over scadm-requirements.
     required: false
-    default: '0.4.10'
+    default: ''
+  scadm-requirements:
+    description: >
+      Path to a requirements.txt containing a pinned scadm version (e.g. scadm==0.6.3).
+      Used when scadm-version is not set.
+    required: false
+    default: ''
   scadm-source:
     description: >
       Local path to install scadm from (editable install).
-      When set, overrides the PyPI version and re-runs scadm install.
+      When set, overrides both scadm-version and scadm-requirements.
     required: false
 
 runs:
@@ -28,11 +34,35 @@ runs:
       with:
         packages: xvfb libglu1-mesa libfuse2 libegl1 libxcb-cursor0
 
+    - name: Resolve scadm version
+      id: resolve-scadm
+      shell: bash
+      run: |
+        if [[ -n "${{ inputs.scadm-source }}" ]]; then
+          echo "version=source" >> "$GITHUB_OUTPUT"
+        elif [[ -n "${{ inputs.scadm-version }}" ]]; then
+          echo "version=${{ inputs.scadm-version }}" >> "$GITHUB_OUTPUT"
+        elif [[ -n "${{ inputs.scadm-requirements }}" ]]; then
+          if [[ ! -f "${{ inputs.scadm-requirements }}" ]]; then
+            echo "::error::scadm-requirements file not found: ${{ inputs.scadm-requirements }}"
+            exit 1
+          fi
+          version=$(grep -oP '^scadm==\K[0-9.]+' "${{ inputs.scadm-requirements }}" || true)
+          if [[ -z "$version" ]]; then
+            echo "::error::scadm not found in ${{ inputs.scadm-requirements }}"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+        else
+          echo "::error::One of scadm-version, scadm-requirements, or scadm-source must be provided"
+          exit 1
+        fi
+
     - name: Cache OpenSCAD and libraries
       uses: actions/cache@v5
       with:
         path: bin/openscad
-        key: openscad-${{ runner.os }}-${{ inputs.scadm-version }}-${{ hashFiles('scadm.json', inputs.scadm-source && format('{0}/**/constants.py', inputs.scadm-source) || 'scadm.json') }}
+        key: openscad-${{ runner.os }}-${{ steps.resolve-scadm.outputs.version }}-${{ hashFiles('scadm.json', inputs.scadm-source && format('{0}/**/constants.py', inputs.scadm-source) || 'scadm.json') }}
 
     - name: Install OpenSCAD and dependencies
       shell: bash
@@ -40,6 +70,6 @@ runs:
         if [[ -n "${{ inputs.scadm-source }}" ]]; then
           pip install -e "${{ inputs.scadm-source }}"
         else
-          pip install scadm==${{ inputs.scadm-version }}
+          pip install scadm==${{ steps.resolve-scadm.outputs.version }}
         fi
         scadm install
