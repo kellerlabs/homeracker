@@ -29,9 +29,6 @@ jobs:
           restore-keys: |
             flatten-checksums-main
 
-      - name: Make scripts executable
-        run: chmod +x .githooks/flatten-validate
-
       - name: Install test dependencies
         run: pip install pytest
 
