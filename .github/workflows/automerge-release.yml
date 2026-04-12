@@ -15,14 +15,17 @@ jobs:
     steps:
       - name: Generate GitHub App Token
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@v3.1.1
         with:
-          app-id: ${{ secrets.RELEASES_APP_ID }}
+          client-id: ${{ secrets.RELEASES_APP_ID }}
           private-key: ${{ secrets.RELEASES_APP_PRIVATE_KEY }}
 
-      - name: Enable auto-merge for release PRs
+      - name: Enable auto-merge for labeled PRs
         run: |
-          gh pr merge --auto --squash release-please--branches--main || true
+          set -euo pipefail
+          while read -r pr; do
+            gh pr merge --auto --squash "$pr" || true
+          done < <(gh pr list --label automerge --state open --json number --jq '.[].number')
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           GH_REPO: ${{ github.repository }}

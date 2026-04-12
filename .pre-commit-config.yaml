@@ -51,14 +51,13 @@ repos:
           [
             "--rcfile=.lint/pylint/.pylintrc"
           ]
+  - repo: https://github.com/kellerlabs/pre-commit-hooks
+    rev: pre-commit-hooks-v0.2.2
+    hooks:
+      - id: flatten-validate
+        files: '^(scadm\.json|models/.*\.scad|cmd/scadm/scadm/flatten\.py)'
   - repo: local
     hooks:
-      - id: validate-flatten-exports
-        name: Validate Flatten Exports
-        entry: .githooks/flatten-validate
-        language: script
-        pass_filenames: false
-        files: '^(scadm\.json|models/.*\.scad|cmd/scadm/scadm/flatten\.py)'
       - id: scadm-tests
         name: scadm Python Tests
         entry: bash -c 'cd cmd/scadm && python -m pytest tests/ -v'
