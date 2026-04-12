@@ -13,7 +13,12 @@ set -euo pipefail
 REPO="kellerlabs/homeracker"
 REF="${1:-main}"
 BASE_URL="https://raw.githubusercontent.com/${REPO}/${REF}"
-API_URL="https://api.github.com/repos/${REPO}/contents/.github/instructions?ref=${REF}"
+API_BASE="https://api.github.com/repos/${REPO}/contents/.github/instructions"
+
+AUTH_ARGS=()
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    AUTH_ARGS=(-H "Authorization: token ${GITHUB_TOKEN}")
+fi
 
 # Explicit files outside .github/instructions/
 EXPLICIT_FILES=(
@@ -24,10 +29,20 @@ EXPLICIT_FILES=(
 echo "Syncing Copilot instructions from ${REPO}@${REF}..."
 
 # Discover all .instructions.md files dynamically
-instruction_names="$(curl -fsSL "${API_URL}" | jq -r '.[].name' | grep '\.instructions\.md$')"
+instruction_names="$(
+    curl -fsSL "${AUTH_ARGS[@]}" --get --data-urlencode "ref=${REF}" "${API_BASE}" \
+    | jq -r '
+        if type == "array" then
+            .[].name | select(endswith(".instructions.md"))
+        else
+            error("Expected array from GitHub contents API")
+        end
+    '
+)"
 
 FILES=("${EXPLICIT_FILES[@]}")
 while read -r name; do
+    [[ -z "${name}" ]] && continue
     FILES+=(".github/instructions/${name}")
 done <<< "${instruction_names}"
 

@@ -11,6 +11,11 @@ Synced files:
 - `.github/instructions/*.instructions.md` — all path-specific guidelines (discovered dynamically via GitHub API)
 - `.github/pull_request_template.md` — PR template
 
+### Requirements
+
+- `curl`, `jq` — both pre-installed on GitHub Actions runners
+- `GITHUB_TOKEN` (optional) — used for API authentication to avoid rate limits; automatically available in GitHub Actions via `${{ github.token }}`
+
 ## 🤔 Why
 
 HomeRacker maintains a well-proven, optimized instruction set that ensures consistent AI behavior
