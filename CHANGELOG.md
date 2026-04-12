@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.1.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.0.0...homeracker-v3.1.0) (2026-04-12)
+
+
+### ✨ Features
+
+* use shared pre-commit-hooks from kellerlabs/pre-commit-hooks ([#334](https://github.com/kellerlabs/homeracker/issues/334)) ([bb0e23a](https://github.com/kellerlabs/homeracker/commit/bb0e23aa9c0dbbd8dee044f5e8359e1bbd0fcfa0))
+
+
+### 🐛 Bug Fixes
+
+* guard against empty PR list in automerge ([#335](https://github.com/kellerlabs/homeracker/issues/335)) ([a6343b5](https://github.com/kellerlabs/homeracker/commit/a6343b5fefb96887f2ea06a6f5862e6e3f5658ec))
+
+
+### 🔄 CI/CD
+
+* **release-please:** exclude sub-packages and workflows from root release ([#331](https://github.com/kellerlabs/homeracker/issues/331)) ([d11275d](https://github.com/kellerlabs/homeracker/commit/d11275d2dce7bd08d651f20d940ac85213c6d651))
+
 ## [3.0.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v2.0.1...homeracker-v3.0.0) (2026-04-11)
 
 
