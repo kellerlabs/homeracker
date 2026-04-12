@@ -30,6 +30,7 @@ done < <(gh pr list --json number --jq '.[].number')
 
 # Good — command failure is caught before iterating
 prs="$(gh pr list --json number --jq '.[].number')"
+[[ -z "$prs" ]] && exit 0
 while read -r pr; do ...
 done <<< "$prs"
 ```

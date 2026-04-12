@@ -24,6 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           prs="$(gh pr list --label automerge --state open --json number --jq '.[].number')"
+          [[ -z "$prs" ]] && exit 0
           while read -r pr; do
             gh pr merge --auto --squash "$pr" || true
           done <<< "$prs"
