@@ -13,18 +13,23 @@ set -euo pipefail
 REPO="kellerlabs/homeracker"
 REF="${1:-main}"
 BASE_URL="https://raw.githubusercontent.com/${REPO}/${REF}"
+API_URL="https://api.github.com/repos/${REPO}/contents/.github/instructions?ref=${REF}"
 
-# Files to sync (source path relative to repo root)
-FILES=(
+# Explicit files outside .github/instructions/
+EXPLICIT_FILES=(
     ".github/copilot-instructions.md"
-    ".github/instructions/markdown.instructions.md"
-    ".github/instructions/openscad.instructions.md"
-    ".github/instructions/python.instructions.md"
-    ".github/instructions/renovate.instructions.md"
     ".github/pull_request_template.md"
 )
 
 echo "Syncing Copilot instructions from ${REPO}@${REF}..."
+
+# Discover all .instructions.md files dynamically
+instruction_names="$(curl -fsSL "${API_URL}" | jq -r '.[].name' | grep '\.instructions\.md$')"
+
+FILES=("${EXPLICIT_FILES[@]}")
+while read -r name; do
+    FILES+=(".github/instructions/${name}")
+done <<< "${instruction_names}"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "${TMPDIR}"' EXIT
@@ -44,7 +49,7 @@ for file in "${FILES[@]}"; do
     fi
 done
 
-if [ "${FAILED}" -eq 1 ]; then
+if [[ "${FAILED}" -eq 1 ]]; then
     echo ""
     echo "ERROR: One or more files failed to download"
     exit 1
