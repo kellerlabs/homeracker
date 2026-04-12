@@ -8,8 +8,13 @@ and overwrites local copies.
 Synced files:
 
 - `.github/copilot-instructions.md` — repo-wide Copilot instructions
-- `.github/instructions/*.instructions.md` — path-specific guidelines (markdown, openscad, python, renovate)
+- `.github/instructions/*.instructions.md` — all path-specific guidelines (discovered dynamically via GitHub API)
 - `.github/pull_request_template.md` — PR template
+
+### Requirements
+
+- `curl`, `jq` — both pre-installed on GitHub Actions runners
+- `GITHUB_TOKEN` (optional) — used for API authentication to avoid rate limits; automatically available in GitHub Actions via `${{ github.token }}`
 
 ## 🤔 Why
 
