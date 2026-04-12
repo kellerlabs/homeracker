@@ -55,6 +55,7 @@ repos:
     rev: pre-commit-hooks-v0.2.2
     hooks:
       - id: flatten-validate
+        pass_filenames: false
         files: '^(scadm\.json|models/.*\.scad|cmd/scadm/scadm/flatten\.py)'
   - repo: local
     hooks:

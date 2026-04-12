@@ -23,9 +23,10 @@ jobs:
       - name: Enable auto-merge for labeled PRs
         run: |
           set -euo pipefail
+          prs="$(gh pr list --label automerge --state open --json number --jq '.[].number')"
           while read -r pr; do
             gh pr merge --auto --squash "$pr" || true
-          done < <(gh pr list --label automerge --state open --json number --jq '.[].number')
+          done <<< "$prs"
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           GH_REPO: ${{ github.repository }}

@@ -16,17 +16,22 @@ set -euo pipefail
 - `set -u`: Treat unset variables as errors.
 - `set -o pipefail`: Fail on first error in a pipeline.
 
-## Pipes vs Process Substitution
+## Error-Safe Iteration
 
-Prefer process substitution over pipes when the exit code of the producing command matters:
+Capture command output before iterating so failures are caught by `set -e`:
 
 ```bash
-# Bad — pipe masks gh failure
+# Bad — pipe masks command failure
 gh pr list --json number --jq '.[].number' | while read -r pr; do ...
 
-# Good — gh failure propagates
+# Bad — process substitution does not reliably trip set -e
 while read -r pr; do ...
 done < <(gh pr list --json number --jq '.[].number')
+
+# Good — command failure is caught before iterating
+prs="$(gh pr list --json number --jq '.[].number')"
+while read -r pr; do ...
+done <<< "$prs"
 ```
 
 ## Best Practices
