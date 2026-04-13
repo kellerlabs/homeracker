@@ -95,7 +95,7 @@ def convert_youtube_embeds(html: str) -> str:
         return (
             f'<figure class="media">'
             f'<div data-oembed-url="{watch_url}">'
-            f'<div style="position: relative; padding-bottom: 100%; height: 0; padding-bottom: 56.2493%;">'
+            f'<div style="position: relative; height: 0; padding-bottom: 56.2493%;">'
             f'<iframe src="https://www.youtube.com/embed/{video_id}" '
             f'style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;" '
             f'frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>'
@@ -141,6 +141,13 @@ def convert(input_path: Path) -> str:
     html = embed_local_images(html, input_path.parent)
     html = convert_youtube_embeds(html)
     html = add_block_spacing(html)
+
+    footer = (
+        "\n&nbsp;\n<p><em>This description was generated from Markdown using "
+        '<a href="https://github.com/kellerlabs/homeracker/blob/main/docs/makerworld-workflow.md">'
+        "md-to-mw</a> — version-controlled descriptions for easier maintenance.</em></p>"
+    )
+    html += footer
 
     return html
 

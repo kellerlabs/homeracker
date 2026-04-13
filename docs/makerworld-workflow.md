@@ -23,6 +23,7 @@ Use the `@makerworld-description` Copilot skill to extract a description from a 
 ### Publish (Git → MakerWorld)
 
 ```bash
+pip install -r requirements.txt
 python cmd/export/md-to-mw.py models/<name>/makerworld/DESCRIPTION.md
 ```
 

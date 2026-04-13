@@ -52,7 +52,11 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
      ```html
      <a href="https://target-url"><img src="https://raw.githubusercontent.com/.../image.webp" alt="Alt" width="400"></a>
      ```
-   - **Preserve alignment** using inline HTML blocks for elements that are centered or styled on MakerWorld. Ask the user to check the MakerWorld page for centered elements. Use:
+   - **Alignment is lost during extraction**: `fetch_webpage` strips `style` attributes, so centered text/headings from MakerWorld come through as plain markdown. This is a known limitation. After extraction, add a note at the bottom of the DESCRIPTION.md:
+     ```markdown
+     <!-- TODO: Review alignment — fetch_webpage strips style attributes. Compare with MakerWorld page and wrap centered elements in HTML blocks. -->
+     ```
+     When fixing alignment, use:
      - `<h2 style="text-align: center">Title</h2>` for centered headings
      - `<p style="text-align: center">...</p>` for centered paragraphs, images, or links
      - This renders correctly on GitHub (HTML passthrough) and in `md-to-mw.py`
