@@ -133,7 +133,7 @@ Exports an isometric preview PNG from any OpenSCAD model.
 ./cmd/export/export-png.sh <input.scad> [--camera CAM] [--imgsize WxH] [--colorscheme NAME]
 ```
 
-Output is written next to the input file as `<basename>.png`.
+Output is written to a `renders/` subfolder next to the input file as `renders/<basename>.png`.
 
 ### Examples
 

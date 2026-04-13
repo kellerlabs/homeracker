@@ -29,7 +29,7 @@ Open `parts/racklink.scad` in OpenSCAD and use the **Customizer** panel.
 
 | Part | Preview |
 |------|---------|
-| Racklink | ![Racklink](parts/racklink.png) |
+| Racklink | ![Racklink](parts/renders/racklink.png) |
 
 To generate or refresh previews:
 

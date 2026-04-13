@@ -10,6 +10,23 @@ renovate_base/
 # Flatten checksums (cached in CI, not tracked)
 models/.flatten-checksums
 
+# Generated MakerWorld HTML (from md-to-mw.py)
+DESCRIPTION.html
+
+# Images — hosted in kellerlabs/assets repo
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.ico
+*.xcf
+
+# Whitelist: auto-generated render previews + favicon
+!**/renders/*.png
+!favicon.ico
+
 # Python
 __pycache__/
 *.py[cod]

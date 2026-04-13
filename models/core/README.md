@@ -83,9 +83,9 @@ Junction pieces that join supports in multiple directions.
 
 | Part | Preview |
 |------|---------|
-| Connector | ![Connector](parts/connector.png) |
-| Support | ![Support](parts/support.png) |
-| Lock Pin | ![Lock Pin](parts/lockpin.png) |
+| Connector | ![Connector](parts/renders/connector.png) |
+| Support | ![Support](parts/renders/support.png) |
+| Lock Pin | ![Lock Pin](parts/renders/lockpin.png) |
 
 To generate or refresh previews:
 

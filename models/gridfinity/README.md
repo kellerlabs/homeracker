@@ -72,8 +72,8 @@ All dimensions follow [grizzie17's Gridfinity specification](https://www.printab
 
 | Part | Preview |
 |------|---------|
-| Baseplate | ![Baseplate](parts/baseplate.png) |
-| Bin Base | ![Bin Base](parts/binbase.png) |
+| Baseplate | ![Baseplate](parts/renders/baseplate.png) |
+| Bin Base | ![Bin Base](parts/renders/binbase.png) |
 
 To generate or refresh previews:
 

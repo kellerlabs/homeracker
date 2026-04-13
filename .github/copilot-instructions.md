@@ -27,6 +27,11 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Follow the What / Why / How / References structure defined in the markdown instructions.
   - When renaming or restructuring code, update or rename the associated docs to keep everything tidy.
   - When adding or modifying model parts (`parts/*.scad`), **generate preview PNGs** with `cmd/export/export-png.sh` and update both the model's README 📸 Catalog and the parent `models/README.md` index.
+- **Assets Policy**: All manually-created images (photos, diagrams, logos, MakerWorld description images) are hosted in [`kellerlabs/assets`](https://github.com/kellerlabs/assets). Push directly to its `main` branch. Reference via `https://raw.githubusercontent.com/kellerlabs/assets/main/<repo>/<path>`. Only auto-generated render PNGs (`**/renders/*.png`) are tracked in source repos. See [ADR-001](docs/decisions/ADR-001-image-hosting-assets-repo.md).
+- **Architecture Decision Records (ADRs)**:
+  - When the user makes an architectural or design decision during a session, create an ADR in `docs/decisions/`.
+  - Format: `ADR-NNN-<slug>.md`, numbered sequentially.
+  - Cross-link the ADR from related docs (READMEs, instructions, other ADRs) where viable.
 - **Commits**: Use [Conventional Commits](https://www.conventionalcommits.org/) format
   - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
   - Format: `type(scope): description` or `type: description`
@@ -40,16 +45,18 @@ Before terminal operations, consider running these steps (use best judgement):
 > **Note**: `scadm` upgrade and `scadm install` run automatically via a `SessionStart` hook (see `.github/hooks/`).
 
 ## **MANDATORY** Workflow
+> [!IMPORTANT]
+> **On errors**: Step back, check docs, ask user if stuck—don't iterate blindly
+
 1. **Check repo patterns** first for consistency
-2. **Consult online docs** (especially BOSL2: https://github.com/BelfrySCAD/BOSL2/wiki). Use Context7 MCP Server for quick access to docs and codebase where applicable.
-3. **Ask before proceeding** if requirements conflict with best practices or patterns in the repo
-4. **Provide outline** before implementation for confirmation
-5. **Make the change** and immediately test it - do NOT announce completion before testing
-6. **Update** existing documentation (.md files) and create new ones where applicable
-7. **Run pre-commit hooks** to catch formatting/linting issues before commit. Fix any issues found (no ignores allowed).
-8. **Code review**: Review ALL changes made in the session — check for consistency, missed edge cases, and unintended side effects before presenting to the user.
-9. **Creating PRs**: Use the **GitHub MCP Server** (never `gh` CLI). Read `.github/pull_request_template.md` and fill in every section. Keep it brief per project conventions.
-10. **On errors**: Step back, check docs, ask user if stuck—don't iterate blindly
+1. **Consult online docs** (especially BOSL2: https://github.com/BelfrySCAD/BOSL2/wiki). Use Context7 MCP Server for quick access to docs and codebase where applicable.
+1. **Ask before proceeding** if requirements conflict with best practices or patterns in the repo
+1. **Provide outline** before implementation for confirmation
+1. **Make the change** and immediately test it - do NOT announce completion before testing
+1. **Update** existing documentation (.md files) and create new ones where applicable
+1. **Run pre-commit hooks** to catch formatting/linting issues before commit. Fix any issues found (no ignores allowed).
+1. **Code review**: When done implementing review ALL changes made from a holistic perspective — check for consistency, missed edge cases, and unintended side effects before presenting to the user.
+1. **Creating PRs**: Use the **GitHub MCP Server** (never `gh` CLI). Read `.github/pull_request_template.md` and fill in every section. Keep it brief per project conventions.
 
 ## Technology-Specific Guidelines
 - Documentation: See .github/instructions/markdown.instructions.md

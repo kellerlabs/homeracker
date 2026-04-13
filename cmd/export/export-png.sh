@@ -3,7 +3,7 @@
 # OpenSCAD PNG Export Tool
 #
 # Exports an isometric preview PNG from an OpenSCAD model file.
-# Output is written next to the input file as <basename>.png.
+# Output is written to a renders/ subfolder as renders/<basename>.png.
 #
 # Usage:
 #   ./cmd/export/export-png.sh <input.scad> [options]
@@ -65,8 +65,12 @@ if [[ ! -f "${INPUT_FILE}" ]]; then
     exit 1
 fi
 
-# Resolve output path: same dir, same name, .png extension
-OUTPUT_FILE="${INPUT_FILE%.scad}.png"
+# Resolve output path: renders/ subdir, same name, .png extension
+INPUT_DIR=$(dirname "${INPUT_FILE}")
+INPUT_BASE=$(basename "${INPUT_FILE}" .scad)
+RENDERS_DIR="${INPUT_DIR}/renders"
+mkdir -p "${RENDERS_DIR}"
+OUTPUT_FILE="${RENDERS_DIR}/${INPUT_BASE}.png"
 
 # Find OpenSCAD
 if ! OPENSCAD_EXE=$(find_openscad_exe); then

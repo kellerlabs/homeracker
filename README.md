@@ -1,6 +1,6 @@
 [📚 What's it for?](#-use-cases) | [⚙️ How does it work?](#-features) | [🌐 Free & OpenSource](#-open-specs) | [🤝 Contributing](CONTRIBUTING.md)
 
-[![What is HomeRacker - YouTube video](./img/homeracker_watch_on_youtube.png)](https://youtu.be/g8k6X_axYug)
+[![What is HomeRacker - YouTube video](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_watch_on_youtube.png)](https://youtu.be/g8k6X_axYug)
 
 HomeRacker is a fully modular 3D-printable rack-building system for virtually any “racking needs” (server rack, shoe rack, bookshelf, you name it).
 
@@ -46,7 +46,7 @@ As it is my nature to overengineer everything, I came up with a more generic sol
 
 To give you an idea of how this may look (10" rack, half-constructed Pi mini-rack, bookshelf):
 
-![Real Life Example](./img/real_life_example.jpg)
+![Real Life Example](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/real_life_example.jpg)
 
 Aside from the basic [building blocks](#-tech-specs), the rack above also contains the following parts:
 
@@ -79,7 +79,7 @@ I might post a YouTube video here to show how it works.
 
 ### 🛠️ Assembly Basics
 
-![Assembly Basics 4 White](./img/assembly_basics_4_white.png)
+![Assembly Basics 4 White](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/assembly_basics_4_white.png)
 
 Assembly is straightforward and requires no tools:
 
@@ -94,7 +94,7 @@ Assembly is straightforward and requires no tools:
 
 1. Plan ahead! Otherwise, you'll end up with an army of unused parts like me:
 
-   ![Army of Parts](./img/homeracker_army.jpg)
+   ![Army of Parts](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_army.jpg)
 
    Make a parts list:
    * How many supports of what lengths (in `base units`)?
@@ -128,7 +128,7 @@ The system is based on 4 core measurements:
 
 Supports are the structural spine of HomeRacker.
 
-![Core Support 3D Transparent](./img/core_support_3d_transparent.png)
+![Core Support 3D Transparent](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_support_3d_transparent.png)
 
 Height is a multiple of 15mm (base units).
 E.g.: A 3-unit support = 45mm tall, a 17-unit = 255mm.
@@ -141,20 +141,20 @@ Each unit height includes a 4mm hole for a Lock Pin.
 Schematics:
 
 **Front View**
-![Support Front View](./img/core_support_front_profile.png)
+![Support Front View](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_support_front_profile.png)
 
 **Side View**
-![Support Side View](./img/core_support_side_profile.png)
+![Support Side View](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_support_side_profile.png)
 
 **Top View**
-![Support Top View](./img/core_support_top_profile.png)
+![Support Top View](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_support_top_profile.png)
 
 ### 🔗 Connectors
 
 Connectors join supports in 1 to 3 dimensions.
 From straight extenders to 6-way junctions.
 
-![3D Shot of All Connectors](./img/3d_shot_all_connectors.png)
+![3D Shot of All Connectors](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/3d_shot_all_connectors.png)
 
 Types:
 * **Standard** – Solid center; best for load-bearing.
@@ -168,28 +168,28 @@ Types:
 Schematics:
 
 **Top View – Outer**
-![Connector Outer Measurements](./img/core_connector_outer_measurement.png)
+![Connector Outer Measurements](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_connector_outer_measurement.png)
 
 **Top View – Inner**
-![Connector Inner Measurements](./img/core_connector_inner_measurement.png)
+![Connector Inner Measurements](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_connector_inner_measurement.png)
 
 ### 📏 Lock Pins
 
 Lock Pins hold the system together.
 
-![Lock Pin 3D](./img/core_lock_pin_3d.png)
+![Lock Pin 3D](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_lock_pin_3d.png)
 
 They rely on tension from their convex shape to stay in place.
 
 Schematics:
 
 **Top View**
-![Lock Pin Top](./img/core_lock_pin_top.png)
+![Lock Pin Top](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_lock_pin_top.png)
 
 **Side View**
 > Don't ask why the height is 3.791mm—it works. I left it as-is.
 
-![Lock Pin Side](./img/core_lock_pin_side.png)
+![Lock Pin Side](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/core_lock_pin_side.png)
 
 > I may tweak the pin grip in future versions to make it easier to pull out again. But the base dimensions will remain the same for compatibility.
 
@@ -280,7 +280,7 @@ To contribute and trigger releases, use conventional commit messages. See [CONTR
 
 Of course I tested stuff... It took ~4 months from idea to this release.
 Look at all the prototypes:
-![Photo showing a variety of HomeRacker prototypes lined up](./img/prototypes.jpg)
+![Photo showing a variety of HomeRacker prototypes lined up](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/prototypes.jpg)
 
 ## ⚠️ Disclaimer
 
@@ -313,6 +313,6 @@ E.g.: you could print a connector in ABS, a support in PLA Matte and a Lock Pin 
 # 🏷️ Logo
 This logo will also be used as an overlay image for the thumbnails of all my 3D models that are compatible with HomeRacker.
 I encourage you to do the same if you create models for HomeRacker. That way, it’ll be immediately visible to users that a model is designed to be mounted on a HomeRacker system.
-I also svg'ed this logo [here](img/homeracker_logo.svg) and [here](img/homeracker_logo_single_color.svg).
+I also svg'ed this logo [here](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_logo.svg) and [here](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_logo_single_color.svg).
 
-![HomeRacker Logo](./img/homeracker_logo.png)
+![HomeRacker Logo](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_logo.png)

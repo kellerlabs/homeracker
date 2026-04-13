@@ -23,7 +23,7 @@ The model auto-calculates gap fillers and offsets to snap to the HomeRacker 15mm
 
 | Part | Preview |
 |------|---------|
-| Flexmount | ![Flexmount](flexmount.png) |
+| Flexmount | ![Flexmount](renders/flexmount.png) |
 
 To generate or refresh previews:
 
