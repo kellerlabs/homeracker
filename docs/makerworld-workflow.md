@@ -36,6 +36,8 @@ This generates `DESCRIPTION.html` (gitignored). Open it in a browser, `Ctrl+A`, 
 
 ## 📁 Image Hosting
 
+> ⚠️ **Cross-repo workflow**: This skill requires both the source repo and [`kellerlabs/assets`](https://github.com/kellerlabs/assets). Maintainers push images directly to `assets/main`. Outside collaborators must open a PR on the assets repo for image changes.
+
 Images are stored in **[kellerlabs/assets](https://github.com/kellerlabs/assets)**, not in the source repos.
 
 ```

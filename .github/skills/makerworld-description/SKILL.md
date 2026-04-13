@@ -122,6 +122,7 @@ assets/<repo>/models/<name>/makerworld/images/
 
 ## ⚠️ Important Notes
 
+- **Cross-repo skill**: Requires both the source repo (`homeracker` or `homeracker-exclusive`) and the [`kellerlabs/assets`](https://github.com/kellerlabs/assets) repo. Maintainers push images directly to `assets/main`. Outside collaborators must open a PR on the assets repo for image changes.
 - `DESCRIPTION.md` is the **source of truth**. Always edit it in git, never in MakerWorld directly.
 - After editing `DESCRIPTION.md`, re-run `md-to-mw.py` and re-paste into MakerWorld.
 - The conversion script embeds local images as base64 data URIs so the HTML is fully self-contained — no broken links, no browser permissions needed. External image URLs (http/https) are passed through unchanged.
