@@ -18,6 +18,13 @@ repos:
           [
             "--line-length=121"
           ]
+  - repo: https://github.com/kellerlabs/pre-commit-hooks
+    rev: pre-commit-hooks-v0.3.0
+    hooks:
+      - id: optimize-images
+      - id: flatten-validate
+        pass_filenames: false
+        files: '^(scadm\.json|models/.*\.scad|cmd/scadm/scadm/flatten\.py)'
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -51,12 +58,6 @@ repos:
           [
             "--rcfile=.lint/pylint/.pylintrc"
           ]
-  - repo: https://github.com/kellerlabs/pre-commit-hooks
-    rev: pre-commit-hooks-v0.2.2
-    hooks:
-      - id: flatten-validate
-        pass_filenames: false
-        files: '^(scadm\.json|models/.*\.scad|cmd/scadm/scadm/flatten\.py)'
   - repo: local
     hooks:
       - id: scadm-tests

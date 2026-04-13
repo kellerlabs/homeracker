@@ -52,8 +52,8 @@ A frame-mounted pocket grid that clips directly into a HomeRacker rack opening v
 
 | Part | Preview |
 |------|---------|
-| Support Bin | ![Support Bin](parts/supportbin.png) |
-| Support Grid | ![Support Grid](parts/supportgrid.png) |
+| Support Bin | ![Support Bin](parts/renders/supportbin.png) |
+| Support Grid | ![Support Grid](parts/renders/supportgrid.png) |
 
 To generate or refresh previews:
 

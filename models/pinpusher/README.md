@@ -18,7 +18,7 @@ Open `parts/pinpusher.scad` in OpenSCAD and export as STL. Print flat — optimi
 
 | Part | Preview |
 |------|---------|
-| Pinpusher | ![Pinpusher](parts/pinpusher.png) |
+| Pinpusher | ![Pinpusher](parts/renders/pinpusher.png) |
 
 To generate or refresh previews:
 

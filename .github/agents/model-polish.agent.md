@@ -48,8 +48,8 @@ Review **every** `.scad` file in `lib/` and `parts/`:
    ```bash
    ./cmd/export/export-png.sh models/<name>/parts/<part>.scad
    ```
-2. Verify the PNG was created next to the source file.
-3. Update the model README 📸 Catalog table to reference each PNG.
+2. Verify the PNG was created in the `renders/` subfolder (e.g., `parts/renders/<part>.png`).
+3. Update the model README 📸 Catalog table to reference each PNG from `parts/renders/`.
 
 ### Phase 5 — Test File
 

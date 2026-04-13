@@ -49,7 +49,7 @@ foot(disable_chamfer=true);
 
 | Part | Preview |
 |------|---------|
-| Foot | ![Foot](parts/foot.png) |
+| Foot | ![Foot](parts/renders/foot.png) |
 
 To generate or refresh previews:
 

@@ -22,14 +22,14 @@ The model auto-calculates height units (1 HU = 44.5mm) and rack bore positions.
 
 | Part | Preview |
 |------|---------|
-| Rackmount Ears | ![Rackmount Ears](parts/rackmount_ears.png) |
+| Rackmount Ears | ![Rackmount Ears](parts/renders/rackmount_ears.png) |
 
 Example configurations:
 
 | Variant | Preview |
 |---------|---------|
-| 1 Bore Row | ![1 Bore Row](parts/rackmount_ear_1_bore_row_example.png) |
-| 2 Height Units | ![2 Height Units](parts/rackmount_ear_2hu_example.png) |
+| 1 Bore Row | ![1 Bore Row](parts/renders/rackmount_ear_1_bore_row_example.png) |
+| 2 Height Units | ![2 Height Units](parts/renders/rackmount_ear_2hu_example.png) |
 
 To generate or refresh previews:
 

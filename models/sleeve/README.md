@@ -32,7 +32,7 @@ Implemented as a [BOSL2 attachable](https://github.com/BelfrySCAD/BOSL2/wiki/Tut
 
 | Part | Preview |
 |------|---------|
-| Sleeve | ![Sleeve](parts/sleeve.png) |
+| Sleeve | ![Sleeve](parts/renders/sleeve.png) |
 
 To generate or refresh previews:
 

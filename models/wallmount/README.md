@@ -22,7 +22,7 @@ Mount with appropriate wall anchors. The connector slot accepts a standard HomeR
 
 | Part | Preview |
 |------|---------|
-| Wall Mount | ![Wall Mount](parts/wallmount.png) |
+| Wall Mount | ![Wall Mount](parts/renders/wallmount.png) |
 
 To generate or refresh previews:
 
