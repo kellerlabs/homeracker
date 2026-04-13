@@ -2,7 +2,7 @@
 
 ## 📌 Status
 
-**Accepted** — 2025-04-13
+**Accepted** — 2026-04-13
 
 ## 🤔 Context
 

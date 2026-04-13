@@ -4,7 +4,13 @@
 
 How to manage MakerWorld model descriptions as git-tracked `DESCRIPTION.md` files and publish them to MakerWorld.
 
-## 🔧 Workflow
+## 🤔 Why
+
+- ✅ Keep MakerWorld descriptions versioned, reviewable, and easy to update alongside model changes
+- 🖼️ Store images in the shared assets repo so source repos stay lean and links remain stable
+- 🔁 Use one Markdown source that can be edited in Git and republished to MakerWorld as HTML
+
+## 🔧 How
 
 ### Extract (MakerWorld → Git)
 

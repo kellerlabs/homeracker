@@ -31,10 +31,9 @@ def strip_frontmatter(text: str) -> str:
     Returns:
         Markdown content without frontmatter.
     """
-    if text.startswith("---"):
-        end = text.find("---", 3)
-        if end != -1:
-            return text[end + 3 :].lstrip("\n")
+    match = re.match(r"^---[ \t]*\r?\n.*?\r?\n---[ \t]*(?:\r?\n|$)", text, flags=re.DOTALL)
+    if match:
+        return text[match.end() :]
     return text
 
 
@@ -57,6 +56,9 @@ def embed_local_images(html: str, base_path: Path) -> str:
         if src.startswith(("http://", "https://", "data:")):
             return match.group(0)
         abs_path = (base_path / src).resolve()
+        if not abs_path.is_relative_to(base_path.resolve()):
+            print(f"Warning: path escapes base directory, skipping embed: {src}", file=sys.stderr)
+            return match.group(0)
         if not abs_path.is_file():
             print(f"Warning: local image not found, skipping embed: {abs_path}", file=sys.stderr)
             return match.group(0)
