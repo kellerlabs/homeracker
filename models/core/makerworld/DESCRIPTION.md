@@ -3,17 +3,17 @@ makerworld_url: https://makerworld.com/en/models/1317298-homeracker-core
 extracted: 2026-04-13
 ---
 
-## HomeRacker - Core
+<h2 style="text-align: center">HomeRacker - Core</h2>
 
-[![HomeRacker Logo](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/homeracker_logo_banner.webp)](https://homeracker.org/)
+<p style="text-align: center"><a href="https://homeracker.org/"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/homeracker_logo_banner.webp" alt="HomeRacker Logo" width="300"></a></p>
 
-[https://homeracker.org/](https://homeracker.org/)
+<p style="text-align: center"><a href="https://homeracker.org/">https://homeracker.org/</a></p>
 
 [![HomeRacker Core Video](https://img.youtube.com/vi/g8k6X_axYug/maxresdefault.jpg)](https://www.youtube.com/watch?v=g8k6X_axYug)
 
-**Boost Me (for free)**
+<p style="text-align: center"><strong>Boost Me (for free)</strong></p>
 
-Help me overengineer more stuff if you like this one!
+<p style="text-align: center">Help me overengineer more stuff if you like this one!</p>
 
 A fully modular universal rack building system for virtually any "racking needs"
 (Server Rack, bookshelf, shoe rack, you name it).
@@ -28,7 +28,7 @@ really limits to how big you want to build.
 You can for example build a Cyberpunk-themed 10" Rack with airflow optimization
 for your RaspPis like this:
 
-![Cyberpunk 10" Rack Showcase](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/cyberpunk_rack_showcase.webp)
+<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/cyberpunk_rack_showcase.webp" alt="Cyberpunk 10&quot; Rack Showcase" width="4032">
 
 This one can be found [HERE](https://makerworld.com/en/models/1353730-modular-10-server-rack#profileId-1396904). It contains all parts from the projects below (HomeRacker Core, PiMount, 10"
 Mount, Airflow Kit) and is a perfect showcase on how HomeRacker can be used.
@@ -91,7 +91,7 @@ or as parametric f3d file in
 
 parametric Fusion360 files - f3d
 
-![Diagonal Supports](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/diagonal_supports.webp)
+<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/diagonal_supports.webp" alt="Diagonal Supports" width="1115">
 
 ## Projects
 
@@ -99,13 +99,13 @@ For the full and always up-to-date project catalog, please see the
 
 ### [The Official HomeRacker Collection](https://makerworld.com/collections/5970240)
 
-[![Official HomeRacker Collection](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/collection_banner.webp)](https://makerworld.com/en/collections/5970240-homeracker-official-catalog)
+<a href="https://makerworld.com/en/collections/5970240-homeracker-official-catalog"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/collection_banner.webp" alt="Official HomeRacker Collection" width="7333"></a>
 
 Here's some highlight projects I created using HomeRacker-Core as the base:
 
-[![Modular Gridfinity Drawers](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/gridfinity_drawers.webp)](https://makerworld.com/en/models/1895418-modular-gridfinity-drawers#profileId-2030731)
+<a href="https://makerworld.com/en/models/1895418-modular-gridfinity-drawers#profileId-2030731"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/gridfinity_drawers.webp" alt="Modular Gridfinity Drawers" width="1440"></a>
 
-[![Dry Filament Shelf](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/dry_filament_shelf.webp)](https://makerworld.com/en/models/1545372-dry-filament-shelf#profileId-1622562)
+<a href="https://makerworld.com/en/models/1545372-dry-filament-shelf#profileId-1622562"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/dry_filament_shelf.webp" alt="Dry Filament Shelf" width="4032"></a>
 
 ## ⚙️ Technical Specs
 
@@ -156,7 +156,7 @@ If you appreciate this model and wanna buy me coffee, you can do so here: [https
 
 Or simply scan this QR-Code:
 
-![Ko-fi QR Code](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/kofi_qr_code.webp)
+<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/kofi_qr_code.webp" alt="Ko-fi QR Code" width="328">
 
 ## 📜 Changelog
 [2026-03-15]

@@ -34,7 +34,7 @@ This generates `DESCRIPTION.html` (gitignored). Open it in a browser, `Ctrl+A`, 
 2. Re-run `md-to-mw.py` to regenerate HTML
 3. Re-paste into MakerWorld
 
-## 📁 Image Hosting
+## 📁 Image & Layout Formatting
 
 > ⚠️ **Cross-repo workflow**: This skill requires both the source repo and [`kellerlabs/assets`](https://github.com/kellerlabs/assets). Maintainers push images directly to `assets/main`. Outside collaborators must open a PR on the assets repo for image changes.
 
@@ -43,6 +43,10 @@ Images are stored in **[kellerlabs/assets](https://github.com/kellerlabs/assets)
 ```
 https://raw.githubusercontent.com/kellerlabs/assets/main/<repo>/models/<name>/makerworld/images/<file>
 ```
+
+- Use `<img>` tags with `width` (no `height`) so images scale proportionally
+- Use `<h2 style="text-align: center">` and `<p style="text-align: center">` for centered elements
+- These HTML blocks render correctly on GitHub and pass through to `md-to-mw.py`
 
 `md-to-mw.py` passes absolute URLs through unchanged. Base64 embedding only applies to local relative paths.
 

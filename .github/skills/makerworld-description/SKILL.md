@@ -44,6 +44,18 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
    - Preserve: headings (##, ###), bold/italic, bullet lists, numbered lists, links, images, linked images (`[![alt](img)](url)`), horizontal rules
    - Strip: `[Image: Image]` placeholders, duplicate blank lines, trailing whitespace
    - Keep image URLs as-is initially (they'll be downloaded next)
+   - **Use `<img>` tags instead of markdown image syntax** for all images. This allows preserving the `width` attribute. After downloading an image (step 5), read its actual pixel width and set `width` on the tag (do NOT set `height` — omitting it lets the browser scale proportionally). The user can then adjust the width to match the MakerWorld layout. Example:
+     ```html
+     <img src="https://raw.githubusercontent.com/.../logo.webp" alt="Logo" width="800">
+     ```
+     For linked images, wrap the `<img>` in an `<a>` tag:
+     ```html
+     <a href="https://target-url"><img src="https://raw.githubusercontent.com/.../image.webp" alt="Alt" width="400"></a>
+     ```
+   - **Preserve alignment** using inline HTML blocks for elements that are centered or styled on MakerWorld. Ask the user to check the MakerWorld page for centered elements. Use:
+     - `<h2 style="text-align: center">Title</h2>` for centered headings
+     - `<p style="text-align: center">...</p>` for centered paragraphs, images, or links
+     - This renders correctly on GitHub (HTML passthrough) and in `md-to-mw.py`
    - **Detect orphan linked images**: `fetch_webpage` drops `<img>` elements inside `<a>` tags, producing empty links like `[](https://...)`. Collect all such `[](url)` patterns — these are linked images whose `src` was lost. See step 5a for resolution
    - **Be aware of invisible drops**: `fetch_webpage` silently drops `<iframe>` embeds (YouTube videos, etc.) with no trace at all — just blank whitespace. See step 5b for resolution
 
@@ -52,7 +64,8 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
    - Skip external reference images (e.g. `encrypted-tbn0.gstatic.com` meme images) — keep those as URLs
    - Download MakerWorld CDN images to the **assets repo**: `assets/<target-repo>/models/<name>/makerworld/images/`
    - Use descriptive filenames based on context (e.g. `diagonal_supports.png`, `showcase_rack.jpg`)
-   - Reference images using absolute URLs: `![alt](https://raw.githubusercontent.com/kellerlabs/assets/main/<target-repo>/models/<name>/makerworld/images/filename.png)`
+   - After downloading, read the actual pixel width of each image and use `<img>` tags with `width` set to the image's native width (omit `height` for proper scaling)
+   - Reference images using absolute URLs in `<img>` tags: `<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/<target-repo>/models/<name>/makerworld/images/filename.png" alt="Description" width="W">`
 
 5a. **Resolve orphan linked images** (from step 4):
    - For each `[](url)` pattern found, present the user with a numbered list showing the link target URL
@@ -127,6 +140,8 @@ assets/<repo>/models/<name>/makerworld/images/
 - After editing `DESCRIPTION.md`, re-run `md-to-mw.py` and re-paste into MakerWorld.
 - The conversion script embeds local images as base64 data URIs so the HTML is fully self-contained — no broken links, no browser permissions needed. External image URLs (http/https) are passed through unchanged.
 - Since images are now hosted in the `kellerlabs/assets` repo with absolute URLs, `md-to-mw.py` passes them through directly — no base64 encoding needed for assets-hosted images.
+- **Alignment**: Use inline HTML blocks (`<h2 style="text-align: center">`, `<p style="text-align: center">`) to preserve centered headings, images, and text from MakerWorld. These render correctly on GitHub and pass through to `md-to-mw.py` HTML output.
+- **Image sizing**: `fetch_webpage` strips HTML attributes, so image dimensions are not available from the source page. Use `<img>` tags with `width` set to the actual downloaded image width (omit `height` so images scale proportionally). The user can then adjust the width to match the MakerWorld layout.
 - MakerWorld CDN images (from `makerworld.bblmw.com`) should be downloaded to the assets repo during extraction. External reference images (memes, badges, etc.) can stay as external URLs.
 
 ## 🐛 Known Limitations
