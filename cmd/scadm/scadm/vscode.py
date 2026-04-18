@@ -50,6 +50,16 @@ class Extension(Enum):
             return _get_python_settings()
         return {}
 
+    def get_deprecated_keys(self) -> list[str]:
+        """Get settings keys that should be removed on update.
+
+        Returns:
+            List of settings keys to remove from settings.json.
+        """
+        if self == Extension.OPENSCAD:
+            return ["scad-lsp.searchPaths"]
+        return []
+
 
 def _get_openscad_settings(workspace_root: Path) -> dict:
     """Get OpenSCAD extension settings.
@@ -149,6 +159,12 @@ def update_vscode_settings(workspace_root: Path, extension: Extension) -> bool:
             settings[key].update(value)
         else:
             settings[key] = value
+
+    # Remove deprecated keys
+    for key in extension.get_deprecated_keys():
+        if key in settings:
+            logger.info("Removing deprecated setting: %s", key)
+            del settings[key]
 
     # Write settings
     vscode_dir.mkdir(parents=True, exist_ok=True)

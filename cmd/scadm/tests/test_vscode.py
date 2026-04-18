@@ -89,8 +89,8 @@ class UpdateSettingsTests(unittest.TestCase):
             self.assertEqual(settings["editor.fontSize"], 14)
             self.assertIn("scad-lsp.launchPath", settings)
 
-    def test_removes_stale_search_paths(self):
-        """Running update should NOT re-introduce searchPaths."""
+    def test_removes_stale_search_paths_from_settings_file(self):
+        """update_vscode_settings removes existing scad-lsp.searchPaths entries."""
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "bin" / "openscad" / "libraries").mkdir(parents=True)
@@ -98,14 +98,15 @@ class UpdateSettingsTests(unittest.TestCase):
 
             vscode_dir = root / ".vscode"
             vscode_dir.mkdir()
-            (vscode_dir / "settings.json").write_text('{"scad-lsp.searchPaths": "/old/path"}', encoding="utf-8")
+            (vscode_dir / "settings.json").write_text(
+                '{"scad-lsp.searchPaths": "/old/path", "editor.fontSize": 14}', encoding="utf-8"
+            )
 
             update_vscode_settings(root, Extension.OPENSCAD)
 
-            # update merges, doesn't remove keys — old searchPaths stays
-            # but the extension settings themselves must not contain it
-            new_settings = Extension.OPENSCAD.get_settings(root)
-            self.assertNotIn("scad-lsp.searchPaths", new_settings)
+            settings = json.loads((vscode_dir / "settings.json").read_text(encoding="utf-8"))
+            self.assertNotIn("scad-lsp.searchPaths", settings)
+            self.assertEqual(settings["editor.fontSize"], 14)
 
 
 if __name__ == "__main__":
