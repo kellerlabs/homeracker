@@ -4,8 +4,8 @@
 Reads image headers directly — no external dependencies required.
 
 Usage:
-    python cmd/export/image-dimensions.py path/to/images/
-    python cmd/export/image-dimensions.py path/to/single-image.webp
+    python cmd/export/image_dimensions.py path/to/images/
+    python cmd/export/image_dimensions.py path/to/single-image.webp
 """
 
 import struct
@@ -107,16 +107,31 @@ def get_dimensions(path: Path) -> tuple[int, int] | None:
 
 
 def main():
+    """Print dimensions for supported image files passed on the command line.
+
+    Raises:
+        SystemExit: If no input paths are provided.
+    """
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <path> [path ...]", file=sys.stderr)
         sys.exit(1)
 
     for arg in sys.argv[1:]:
         target = Path(arg)
-        files = sorted(target.iterdir()) if target.is_dir() else [target]
+        if not target.exists():
+            print(f"{arg}: <not found>", file=sys.stderr)
+            continue
+        try:
+            files = sorted(target.iterdir()) if target.is_dir() else [target]
+        except OSError as exc:
+            print(f"{arg}: {exc}", file=sys.stderr)
+            continue
         for f in files:
             if f.suffix.lower() in READERS:
-                dims = get_dimensions(f)
+                try:
+                    dims = get_dimensions(f)
+                except OSError:
+                    dims = None
                 if dims:
                     print(f"{f.name}: {dims[0]}x{dims[1]}")
                 else:

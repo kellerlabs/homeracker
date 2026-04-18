@@ -148,7 +148,10 @@ def github_source_url(file_path: Path) -> str | None:
     if not match:
         return None
     owner_repo = match.group(1)
-    rel_path = file_path.relative_to(repo_root).as_posix()
+    try:
+        rel_path = file_path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return None
     return f"https://github.com/{owner_repo}/blob/main/{rel_path}"
 
 

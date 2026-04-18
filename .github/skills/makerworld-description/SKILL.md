@@ -44,7 +44,7 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
    - Preserve: headings (##, ###), bold/italic, bullet lists, numbered lists, links, images, linked images (`[![alt](img)](url)`), horizontal rules
    - Strip: `[Image: Image]` placeholders, duplicate blank lines, trailing whitespace
    - Keep image URLs as-is initially (they'll be downloaded next)
-   - **Use `<img>` tags instead of markdown image syntax** for all images. This allows preserving the `width` attribute. After downloading an image (step 5), read its actual pixel width and set `width` on the tag (do NOT set `height` — omitting it lets the browser scale proportionally). The user can then adjust the width to match the MakerWorld layout. Example:
+   - **Use `<img>` tags instead of markdown image syntax** for all images. This allows preserving the `width` attribute. Use `width="800"` for images whose native width is ≥ 800px; for smaller images use their native width. Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`). Do NOT set `height` — omitting it lets the browser scale proportionally. Example:
      ```html
      <img src="https://raw.githubusercontent.com/.../logo.webp" alt="Logo" width="800">
      ```
@@ -71,7 +71,7 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
    - After downloading, get pixel dimensions with `python cmd/export/image_dimensions.py <images-dir>` (for reference only — do not use native dimensions for `width`)
    - **Standard image width**: Use `width="800"` for all description images whose native width is ≥ 800px. For smaller images, use their native width. Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`). This ensures a uniform look across all model descriptions.
    - **Check for common images**: Some images are shared across all models (e.g. `collection_banner.webp`, `kofi_qr_code.webp`). These live in `assets/common/makerworld/images/`. If a downloaded image already exists there (same content), delete the per-model copy and reference the common one: `https://raw.githubusercontent.com/kellerlabs/assets/main/common/makerworld/images/filename.webp`
-   - Reference model-specific images using absolute URLs in `<img>` tags: `<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/<target-repo>/models/<name>/makerworld/images/filename.png" alt="Description" width="W">`
+   - Reference model-specific images using absolute URLs in `<img>` tags, applying the standard width rule above: use `width="800"` when the native width is ≥ 800px; otherwise use the native width. Example: `<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/<target-repo>/models/<name>/makerworld/images/filename.png" alt="Description" width="800">`
 
 5a. **Resolve orphan linked images** (from step 4):
    - For each `[](url)` pattern found, present the user with a numbered list showing the link target URL
