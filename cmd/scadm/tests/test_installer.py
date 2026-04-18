@@ -6,7 +6,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scadm.installer import get_openscad_config, get_openscad_version
+from scadm.installer import (
+    get_openscad_config,
+    get_openscad_version,
+    get_installed_openscad_version,
+    _write_installed_version,
+)
 
 
 class GetOpenscadConfigTests(unittest.TestCase):
@@ -95,6 +100,53 @@ class GetOpenscadVersionTests(unittest.TestCase):
             result = get_openscad_version(os_name="linux", workspace_root=Path(tmpdir))
             self.assertEqual(result, "2026.03.28")
             mock_resolve.assert_called_once()
+
+
+class GetInstalledOpenscadVersionTests(unittest.TestCase):
+    """Tests for get_installed_openscad_version."""
+
+    def test_reads_marker_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_dir = Path(tmpdir)
+            (install_dir / ".installed-version").write_text("2026.04.16", encoding="utf-8")
+
+            result = get_installed_openscad_version(install_dir, "linux")
+            self.assertEqual(result, "2026.04.16")
+
+    def test_empty_marker_returns_none(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_dir = Path(tmpdir)
+            (install_dir / ".installed-version").write_text("", encoding="utf-8")
+
+            result = get_installed_openscad_version(install_dir, "linux")
+            self.assertIsNone(result)
+
+    def test_no_marker_no_binary_returns_none(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = get_installed_openscad_version(Path(tmpdir), "linux")
+            self.assertIsNone(result)
+
+    def test_marker_takes_precedence_over_binary(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_dir = Path(tmpdir)
+            (install_dir / ".installed-version").write_text("2026.04.16", encoding="utf-8")
+            (install_dir / "openscad").write_text("fake", encoding="utf-8")
+
+            result = get_installed_openscad_version(install_dir, "linux")
+            self.assertEqual(result, "2026.04.16")
+
+
+class WriteInstalledVersionTests(unittest.TestCase):
+    """Tests for _write_installed_version."""
+
+    def test_writes_marker(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_dir = Path(tmpdir)
+            _write_installed_version(install_dir, "2026.04.16")
+
+            marker = install_dir / ".installed-version"
+            self.assertTrue(marker.exists())
+            self.assertEqual(marker.read_text(encoding="utf-8"), "2026.04.16")
 
 
 if __name__ == "__main__":

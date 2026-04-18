@@ -161,6 +161,10 @@ def get_openscad_version(os_name: str = "linux", workspace_root: Optional[Path] 
 def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[str]:
     """Get currently installed OpenSCAD version.
 
+    Reads the ``.installed-version`` marker written after a successful
+    install.  Falls back to executing the binary when the marker is
+    missing (legacy installs).
+
     Args:
         install_dir: OpenSCAD installation directory.
         os_name: Operating system name.
@@ -168,10 +172,14 @@ def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[
     Returns:
         Version string if installed, None otherwise.
     """
+    marker = install_dir / ".installed-version"
+    if marker.exists():
+        return marker.read_text(encoding="utf-8").strip() or None
+
     if os_name == "windows":
         exe = install_dir / "openscad.exe"
     else:
-        exe = install_dir / "openscad"  # symlink to AppImage
+        exe = install_dir / "openscad"
         if not exe.exists():
             exe = install_dir / "OpenSCAD.AppImage"
 
@@ -182,14 +190,17 @@ def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[
         cmd = [str(exe), "--version"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         output = result.stderr + result.stdout
-        # e.g. "OpenSCAD version 2024.12.06.ai20515"
-        match = re.search(r"OpenSCAD version ([^\s]+)", output)
+        match = re.search(r"OpenSCAD version (\d{4}\.\d{2}\.\d{2})", output)
         if match:
             return match.group(1)
     except (OSError, subprocess.SubprocessError) as e:
-        # Executable exists but can't run (permissions, missing libs, etc.) - treat as not installed
         logger.debug("Failed to get OpenSCAD version: %s", e)
     return None
+
+
+def _write_installed_version(install_dir: Path, version: str) -> None:
+    """Write installed version marker."""
+    (install_dir / ".installed-version").write_text(version, encoding="utf-8")
 
 
 def install_openscad_windows(install_dir: Path, version: str, nightly: bool) -> bool:
@@ -328,8 +339,13 @@ def install_openscad(
     install_dir.mkdir(parents=True, exist_ok=True)
 
     if os_name == "windows":
-        return install_openscad_windows(install_dir, target_version, nightly)
-    return install_openscad_linux(install_dir, target_version, nightly)
+        success = install_openscad_windows(install_dir, target_version, nightly)
+    else:
+        success = install_openscad_linux(install_dir, target_version, nightly)
+
+    if success:
+        _write_installed_version(install_dir, target_version)
+    return success
 
 
 def _show_version_info(config: dict, install_dir: Path, os_name: str, force: bool = False) -> None:
