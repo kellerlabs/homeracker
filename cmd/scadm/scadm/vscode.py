@@ -60,21 +60,18 @@ def _get_openscad_settings(workspace_root: Path) -> dict:
     Returns:
         Dictionary of OpenSCAD settings.
     """
-    install_dir, libraries_dir = get_install_paths(workspace_root)
+    install_dir, _ = get_install_paths(workspace_root)
 
     system = platform.system()
     if system == "Windows":
         openscad_path = str(install_dir / "openscad.exe").replace("/", "\\")
-        search_paths = str(libraries_dir).replace("/", "\\")
     else:
         openscad_path = str(workspace_root / "cmd" / "linux" / "openscad-wrapper.sh")
-        search_paths = str(libraries_dir)
 
     return {
         "files.associations": {"*.scad": "scad"},
         "files.eol": "\n",
         "scad-lsp.launchPath": openscad_path,
-        "scad-lsp.searchPaths": search_paths,
     }
 
 
