@@ -15,11 +15,7 @@ import zipfile
 from pathlib import Path
 from typing import Optional
 
-from scadm.constants import (
-    OPENSCAD_NIGHTLY_VERSION_LINUX,
-    OPENSCAD_NIGHTLY_VERSION_WINDOWS,
-    OPENSCAD_STABLE_VERSION,
-)
+from scadm.resolver import resolve_version
 
 logger = logging.getLogger(__name__)
 
@@ -98,26 +94,76 @@ def get_system_platform() -> str:
     return "unknown"
 
 
-def get_openscad_version(nightly: bool = True, os_name: str = "linux") -> str:
-    """Get target OpenSCAD version.
+def get_openscad_config(workspace_root: Optional[Path] = None) -> dict:
+    """Read OpenSCAD configuration from scadm.json.
 
     Args:
-        nightly: Whether to use nightly build.
+        workspace_root: Workspace root directory (auto-detected if None).
+
+    Returns:
+        Dict with 'type' and 'version' keys. Defaults to nightly/latest if not configured.
+    """
+    defaults = {"type": "nightly", "version": "latest"}
+
+    try:
+        if workspace_root is None:
+            workspace_root = get_workspace_root()
+    except FileNotFoundError:
+        return defaults
+
+    config_file = workspace_root / "scadm.json"
+    if not config_file.exists():
+        return defaults
+
+    try:
+        with open(config_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return defaults
+
+    openscad_config = data.get("openscad", {})
+    config_type = openscad_config.get("type", defaults["type"])
+    config_version = openscad_config.get("version", defaults["version"])
+
+    valid_types = ("nightly", "stable")
+    if config_type not in valid_types:
+        raise ValueError(f"Invalid openscad.type: {config_type!r}. Expected one of {valid_types}.")
+
+    return {"type": config_type, "version": config_version}
+
+
+def get_openscad_version(os_name: str = "linux", workspace_root: Optional[Path] = None, force: bool = False) -> str:
+    """Get target OpenSCAD version from config.
+
+    Args:
         os_name: Operating system name.
+        workspace_root: Workspace root directory (auto-detected if None).
+        force: Force re-resolve (bypass cache).
 
     Returns:
         Version string.
     """
-    if not nightly:
-        return OPENSCAD_STABLE_VERSION
+    config = get_openscad_config(workspace_root)
 
-    if os_name == "windows":
-        return OPENSCAD_NIGHTLY_VERSION_WINDOWS
-    return OPENSCAD_NIGHTLY_VERSION_LINUX
+    if workspace_root is None:
+        try:
+            workspace_root = get_workspace_root()
+        except FileNotFoundError:
+            pass
+
+    install_dir = None
+    if workspace_root:
+        install_dir, _ = get_install_paths(workspace_root)
+
+    return resolve_version(config["type"], config["version"], os_name, install_dir=install_dir, force=force)
 
 
 def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[str]:
     """Get currently installed OpenSCAD version.
+
+    Reads the ``.installed-version`` marker written after a successful
+    install.  Falls back to executing the binary when the marker is
+    missing (legacy installs).
 
     Args:
         install_dir: OpenSCAD installation directory.
@@ -126,10 +172,14 @@ def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[
     Returns:
         Version string if installed, None otherwise.
     """
+    marker = install_dir / ".installed-version"
+    if marker.exists():
+        return marker.read_text(encoding="utf-8").strip() or None
+
     if os_name == "windows":
         exe = install_dir / "openscad.exe"
     else:
-        exe = install_dir / "openscad"  # symlink to AppImage
+        exe = install_dir / "openscad"
         if not exe.exists():
             exe = install_dir / "OpenSCAD.AppImage"
 
@@ -140,14 +190,22 @@ def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[
         cmd = [str(exe), "--version"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         output = result.stderr + result.stdout
-        # e.g. "OpenSCAD version 2024.12.06.ai20515"
-        match = re.search(r"OpenSCAD version ([^\s]+)", output)
+        match = re.search(r"OpenSCAD version (\d{4}\.\d{2}\.\d{2}(?:\.\S*)?)", output)
         if match:
             return match.group(1)
     except (OSError, subprocess.SubprocessError) as e:
-        # Executable exists but can't run (permissions, missing libs, etc.) - treat as not installed
         logger.debug("Failed to get OpenSCAD version: %s", e)
     return None
+
+
+def _write_installed_version(install_dir: Path, version: str) -> None:
+    """Write the installed version marker file.
+
+    Args:
+        install_dir: OpenSCAD installation directory.
+        version: Installed OpenSCAD version string.
+    """
+    (install_dir / ".installed-version").write_text(version, encoding="utf-8")
 
 
 def install_openscad_windows(install_dir: Path, version: str, nightly: bool) -> bool:
@@ -233,15 +291,15 @@ def install_openscad_linux(install_dir: Path, version: str, nightly: bool) -> bo
 
 
 def install_openscad(
-    nightly: bool = True, force: bool = False, check_only: bool = False, workspace_root: Optional[Path] = None
+    force: bool = False, check_only: bool = False, workspace_root: Optional[Path] = None, info: bool = False
 ) -> bool:
     """Install OpenSCAD binary.
 
     Args:
-        nightly: Whether to install nightly build.
         force: Force reinstall even if version matches.
         check_only: Only check installation status.
         workspace_root: Workspace root directory (auto-detected if None).
+        info: Display version info and exit.
 
     Returns:
         True if successful or up to date, False otherwise.
@@ -251,16 +309,27 @@ def install_openscad(
         logger.error("Unsupported platform")
         return False
 
+    if workspace_root is None:
+        workspace_root = get_workspace_root()
+
+    config = get_openscad_config(workspace_root)
     install_dir, _ = get_install_paths(workspace_root)
-    target_version = get_openscad_version(nightly, os_name)
+
+    if info:
+        _show_version_info(config, install_dir, os_name, force)
+        return True
+
+    target_version = resolve_version(config["type"], config["version"], os_name, install_dir=install_dir, force=force)
+    nightly = config["type"] == "nightly"
     current_version = get_installed_openscad_version(install_dir, os_name)
 
     if check_only:
-        if current_version == target_version:
+        up_to_date = current_version == target_version
+        if up_to_date:
             logger.info("OpenSCAD: Up to date (%s)", target_version)
-            return True
-        logger.warning("OpenSCAD: Update available (%s -> %s)", current_version or "none", target_version)
-        return False
+        else:
+            logger.warning("OpenSCAD: Update available (%s -> %s)", current_version or "none", target_version)
+        return up_to_date
 
     if current_version == target_version and not force:
         logger.info("OpenSCAD is up to date (%s)", target_version)
@@ -275,8 +344,37 @@ def install_openscad(
     install_dir.mkdir(parents=True, exist_ok=True)
 
     if os_name == "windows":
-        return install_openscad_windows(install_dir, target_version, nightly)
-    return install_openscad_linux(install_dir, target_version, nightly)
+        success = install_openscad_windows(install_dir, target_version, nightly)
+    else:
+        success = install_openscad_linux(install_dir, target_version, nightly)
+
+    if success:
+        _write_installed_version(install_dir, target_version)
+    return success
+
+
+def _show_version_info(config: dict, install_dir: Path, os_name: str, force: bool = False) -> None:
+    """Display OpenSCAD version information.
+
+    Args:
+        config: OpenSCAD configuration dict.
+        install_dir: Installation directory.
+        os_name: Operating system name.
+        force: Bypass cache and re-resolve.
+    """
+    current_version = get_installed_openscad_version(install_dir, os_name)
+
+    logger.info("OpenSCAD Version Info:")
+    logger.info("  Configured type:    %s", config["type"])
+    logger.info("  Configured version: %s", config["version"])
+    if config["version"] == "latest":
+        try:
+            resolved = resolve_version(config["type"], config["version"], os_name, install_dir=install_dir, force=force)
+            logger.info("  Resolved version:   %s", resolved)
+        except RuntimeError as e:
+            logger.info("  Resolved version:   (unavailable: %s)", e)
+    logger.info("  Installed version:  %s", current_version or "not installed")
+    logger.info("  Install path:       %s", install_dir)
 
 
 def get_installed_lib_version(lib_path: Path) -> Optional[str]:

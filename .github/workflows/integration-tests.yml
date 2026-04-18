@@ -1,0 +1,46 @@
+---
+name: Integration Tests
+
+on:
+  pull_request:
+    paths:
+      - 'cmd/scadm/**'
+      - 'scadm.json'
+      - '.github/workflows/integration-tests.yml'
+      - '.github/actions/setup-openscad/**'
+
+jobs:
+  integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install scadm from source
+        run: pip install -e cmd/scadm pytest pytest-timeout
+
+      - name: Install libfuse2 (Linux AppImage support)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfuse2
+
+      - name: Run integration tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cmd/scadm
+          python -m pytest tests/test_cli_integration.py -m integration -v --timeout=300

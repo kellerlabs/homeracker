@@ -30,9 +30,11 @@ runs:
         python-version: '3.14'
 
     - name: Install system dependencies
-      uses: awalsh128/cache-apt-pkgs-action@v1.6.0
-      with:
-        packages: xvfb libglu1-mesa libfuse2 libegl1 libxcb-cursor0
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends xvfb libglu1-mesa libfuse2 libegl1 libxcb-cursor0
 
     - name: Resolve scadm version
       id: resolve-scadm
@@ -66,7 +68,7 @@ runs:
       uses: actions/cache@v5
       with:
         path: bin/openscad
-        key: openscad-${{ runner.os }}-${{ steps.resolve-scadm.outputs.version }}-${{ hashFiles('scadm.json', inputs.scadm-source && format('{0}/**/constants.py', inputs.scadm-source) || 'scadm.json') }}
+        key: openscad-${{ runner.os }}-${{ steps.resolve-scadm.outputs.version }}-${{ hashFiles('scadm.json') }}
 
     - name: Install OpenSCAD and dependencies
       shell: bash

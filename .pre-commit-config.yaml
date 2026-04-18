@@ -68,7 +68,7 @@ repos:
     hooks:
       - id: scadm-tests
         name: scadm Python Tests
-        entry: bash -c 'cd cmd/scadm && python -m pytest tests/ -v'
+        entry: bash -c 'cd cmd/scadm && python -m pytest tests/ -v -m "not integration"'
         language: system
         pass_filenames: false
         files: '^cmd/scadm/'

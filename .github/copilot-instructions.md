@@ -16,6 +16,8 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
 
 ## Core Principles
 - **Test-Driven Development**: NO change without a test. EVERY change MUST be tested before completion. No exceptions for "simple" changes.
+  - **Unit tests**: run via pre-commit hooks (fast, mocked). Always run before commit.
+  - **Integration tests**: run via CI workflow on ubuntu + windows (`integration-tests.yml`). Update when adding/modifying CLI commands or config schema. See `TESTING.md`.
 - **DRY, KISS, YAGNI**: Keep it simple, don't over-engineer
 - **Be Brief**: All outputs (code, docs, issues, PRs) should be minimal and to-the-point
   - Code: No unnecessary comments, clear variable names speak for themselves

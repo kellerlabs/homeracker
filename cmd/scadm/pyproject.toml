@@ -40,3 +40,9 @@ include = ["scadm*"]
 
 [tool.setuptools.package-data]
 scadm = ["py.typed"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: CLI integration tests (require network, run with -m integration)",
+    "slow: slow tests that download binaries (run with -m slow)",
+]
