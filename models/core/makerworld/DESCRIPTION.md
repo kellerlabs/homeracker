@@ -5,7 +5,7 @@ extracted: 2026-04-13
 
 <h2 style="text-align: center">HomeRacker - Core</h2>
 
-<p style="text-align: center"><a href="https://homeracker.org/"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/homeracker_logo_banner.webp" alt="HomeRacker Logo" width="300"></a></p>
+<p style="text-align: center"><a href="https://homeracker.org/"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/common/makerworld/images/homeracker_logo_banner.webp" alt="HomeRacker Logo" width="300"></a></p>
 
 <p style="text-align: center"><a href="https://homeracker.org/">https://homeracker.org/</a></p>
 
@@ -99,7 +99,7 @@ For the full and always up-to-date project catalog, please see the
 
 ### [The Official HomeRacker Collection](https://makerworld.com/collections/5970240)
 
-<a href="https://makerworld.com/en/collections/5970240-homeracker-official-catalog"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/collection_banner.webp" alt="Official HomeRacker Collection" width="800"></a>
+<a href="https://makerworld.com/en/collections/5970240-homeracker-official-catalog"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/common/makerworld/images/collection_banner.webp" alt="Official HomeRacker Collection" width="800"></a>
 
 Here's some highlight projects I created using HomeRacker-Core as the base:
 
@@ -154,7 +154,7 @@ If you appreciate this model and wanna buy me coffee, you can do so here: [https
 
 Or simply scan this QR-Code:
 
-<p style="text-align: center"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/core/makerworld/images/kofi_qr_code.webp" alt="Ko-fi QR Code" width="328"></p>
+<p style="text-align: center"><img src="https://raw.githubusercontent.com/kellerlabs/assets/main/common/makerworld/images/kofi_qr_code.webp" alt="Ko-fi QR Code" width="328"></p>
 
 ## 📜 Changelog
 [2026-03-15]

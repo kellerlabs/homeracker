@@ -125,6 +125,20 @@ To add a new model type (e.g., `models/newtype/`):
    ```
 3. Commit — the pre-commit hook will automatically flatten to `models/newtype/flattened/`
 
+## 📐 Image Dimensions
+
+Prints pixel dimensions of image files (WebP, PNG, JPEG) by reading file headers directly — no external dependencies.
+
+```bash
+# Directory of images
+python cmd/export/image_dimensions.py path/to/images/
+
+# Single file
+python cmd/export/image_dimensions.py path/to/image.webp
+```
+
+Output: `filename.webp: 4032x2268`
+
 ## PNG Export
 
 Exports an isometric preview PNG from any OpenSCAD model.
