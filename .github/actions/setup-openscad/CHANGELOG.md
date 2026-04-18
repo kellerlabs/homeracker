@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.0.0...setup-openscad-v2.1.0) (2026-04-18)
+
+
+### ✨ Features
+
+* **scadm:** dynamic OpenSCAD version resolution ([#311](https://github.com/kellerlabs/homeracker/issues/311)) ([026c5d8](https://github.com/kellerlabs/homeracker/commit/026c5d85cfbaa599ff6ffc838017f1eb3c8b9942))
+
 ## [2.0.0](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v1.1.0...setup-openscad-v2.0.0) (2026-04-11)
 
 

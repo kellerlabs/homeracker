@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/kellerlabs/homeracker/compare/sync-instructions-v1.1.0...sync-instructions-v1.2.0) (2026-04-18)
+
+
+### ✨ Features
+
+* migrate images to assets repo, add MakerWorld extract/publish tooling ([#337](https://github.com/kellerlabs/homeracker/issues/337)) ([5d9da76](https://github.com/kellerlabs/homeracker/commit/5d9da76d5f84bbecef7da5db18597922c3c17d41))
+
 ## [1.1.0](https://github.com/kellerlabs/homeracker/compare/sync-instructions-v1.0.0...sync-instructions-v1.1.0) (2026-04-12)
 
 
