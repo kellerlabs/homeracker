@@ -9,6 +9,7 @@ from unittest.mock import patch
 import scadm.flatten as flatten_mod
 from scadm.flatten import (
     _Definition,
+    _find_used_names,
     _parse_definitions,
     _resolve_dependencies,
     compute_checksum,
@@ -119,6 +120,62 @@ class ResolveDependenciesTests(unittest.TestCase):
         names = [d.name for d in result]
         self.assertIn("inner", names)
         self.assertIn("outer", names)
+
+
+class FindUsedNamesTests(unittest.TestCase):
+    """Unit tests for _find_used_names (comment/string stripping)."""
+
+    def test_ignores_names_in_line_comments(self):
+        names = _find_used_names("cube(1); // call foo() here")
+        self.assertIn("cube", names)
+        self.assertNotIn("foo", names)
+
+    def test_ignores_names_in_block_comments(self):
+        names = _find_used_names("sphere(2); /* Example: bar() */")
+        self.assertIn("sphere", names)
+        self.assertNotIn("bar", names)
+
+    def test_ignores_names_in_string_literals(self):
+        names = _find_used_names('echo("call baz()");')
+        self.assertIn("echo", names)
+        self.assertNotIn("baz", names)
+
+    def test_finds_dollar_variables(self):
+        names = _find_used_names("sphere($fn);")
+        self.assertIn("$fn", names)
+
+    def test_comment_only_reference_excluded_in_flatten(self):
+        """A name mentioned only in a comment must NOT pull in that definition."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _make_workspace(root)
+
+            src_dir = root / "src"
+            lib_dir = src_dir / "lib"
+            lib_dir.mkdir(parents=True)
+
+            (lib_dir / "stuff.scad").write_text(
+                "COMMENT_ONLY = 99;\nUSED_VAL = 1;\n",
+                encoding="utf-8",
+            )
+
+            input_file = src_dir / "main.scad"
+            input_file.write_text(
+                "\n".join(
+                    [
+                        "include <lib/stuff.scad>",
+                        "",
+                        "// Example: echo(COMMENT_ONLY);",
+                        "cube(USED_VAL);",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            out = _flatten(root, input_file)
+            self.assertIn("USED_VAL", out)
+            self.assertNotIn("COMMENT_ONLY", out)
 
 
 class FlattenTests(unittest.TestCase):

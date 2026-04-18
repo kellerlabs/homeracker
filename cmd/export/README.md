@@ -29,7 +29,8 @@ This script follows **OpenSCAD Customizer** conventions:
 **Variable placement behavior:**
 - Variables inside `/* [SectionName] */` blocks → preserved in their respective sections
 - Variables in `/* [Hidden] */` section → included in the Hidden section
-- Variables can be defined anywhere in any file
+- In **root files**, place top-level variables inside a section block (`/* [Hidden] */` or named) so they are preserved reliably during flattening
+- In **library files**, variables may appear anywhere — they are collected and placed in the Hidden section with an origin comment
 
 **Library files** (included via `include <...>`):
 - May contain module/function definitions, constants, and variables in any order

@@ -127,7 +127,8 @@ Variable placement rules:
 
 - Variables inside `/* [SectionName] */` blocks → preserved in their respective sections
 - Variables in `/* [Hidden] */` section → included in the Hidden section
-- Variables can be defined anywhere in any file — the flattener handles them regardless of position
+- In **root files**, place top-level variables inside a section block (`/* [Hidden] */` or named) so they are preserved reliably during flattening
+- In **library files**, variables may appear anywhere — the flattener collects them regardless of position
 
 **Library files** (resolved via `include <...>`):
 

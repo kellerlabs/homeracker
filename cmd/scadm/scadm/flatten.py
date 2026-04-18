@@ -311,10 +311,26 @@ def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
     return defs
 
 
+def _strip_comments_and_strings(text: str) -> str:
+    """Replace SCAD comments and string literals with spaces.
+
+    Prevents identifiers mentioned only in comments or strings from being
+    treated as "used" during dependency resolution.
+    """
+    pattern = re.compile(
+        r'"(?:\\.|[^"\\])*"'  # Double-quoted strings
+        r"|/\*.*?\*/"  # Block comments
+        r"|//[^\n]*",  # Line comments
+        re.DOTALL,
+    )
+    return pattern.sub(lambda m: " " * len(m.group(0)), text)
+
+
 def _find_used_names(text: str) -> Set[str]:
-    """Find all identifier-like names used in a piece of SCAD text."""
+    """Find all identifier-like names used in SCAD code (excluding comments and strings)."""
+    sanitized = _strip_comments_and_strings(text)
     # Match regular identifiers and $-prefixed special variables (e.g. $fn, $custom_var)
-    return set(re.findall(r"(?:\$[A-Za-z_]\w*|\b[A-Za-z_]\w*)\b", text))
+    return set(re.findall(r"(?:\$[A-Za-z_]\w*|\b[A-Za-z_]\w*)\b", sanitized))
 
 
 def _resolve_dependencies(
