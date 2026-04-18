@@ -39,6 +39,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends libfuse2
 
       - name: Run integration tests
+        shell: bash
         run: |
           set -euo pipefail
           cd cmd/scadm
