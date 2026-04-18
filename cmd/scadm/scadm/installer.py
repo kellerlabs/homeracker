@@ -296,21 +296,20 @@ def install_openscad(
     install_dir, _ = get_install_paths(workspace_root)
 
     if info:
-        _show_version_info(config, install_dir, os_name)
+        _show_version_info(config, install_dir, os_name, force)
         return True
 
-    target_version = resolve_version(
-        config["type"], config["version"], os_name, install_dir=install_dir, force=force
-    )
+    target_version = resolve_version(config["type"], config["version"], os_name, install_dir=install_dir, force=force)
     nightly = config["type"] == "nightly"
     current_version = get_installed_openscad_version(install_dir, os_name)
 
     if check_only:
-        if current_version == target_version:
+        up_to_date = current_version == target_version
+        if up_to_date:
             logger.info("OpenSCAD: Up to date (%s)", target_version)
-            return True
-        logger.warning("OpenSCAD: Update available (%s -> %s)", current_version or "none", target_version)
-        return False
+        else:
+            logger.warning("OpenSCAD: Update available (%s -> %s)", current_version or "none", target_version)
+        return up_to_date
 
     if current_version == target_version and not force:
         logger.info("OpenSCAD is up to date (%s)", target_version)
@@ -329,13 +328,14 @@ def install_openscad(
     return install_openscad_linux(install_dir, target_version, nightly)
 
 
-def _show_version_info(config: dict, install_dir: Path, os_name: str) -> None:
+def _show_version_info(config: dict, install_dir: Path, os_name: str, force: bool = False) -> None:
     """Display OpenSCAD version information.
 
     Args:
         config: OpenSCAD configuration dict.
         install_dir: Installation directory.
         os_name: Operating system name.
+        force: Bypass cache and re-resolve.
     """
     current_version = get_installed_openscad_version(install_dir, os_name)
 
@@ -344,7 +344,7 @@ def _show_version_info(config: dict, install_dir: Path, os_name: str) -> None:
     logger.info("  Configured version: %s", config["version"])
     if config["version"] == "latest":
         try:
-            resolved = resolve_version(config["type"], config["version"], os_name, install_dir=install_dir)
+            resolved = resolve_version(config["type"], config["version"], os_name, install_dir=install_dir, force=force)
             logger.info("  Resolved version:   %s", resolved)
         except RuntimeError as e:
             logger.info("  Resolved version:   (unavailable: %s)", e)
