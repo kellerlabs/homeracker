@@ -9,7 +9,6 @@ from unittest.mock import patch
 import scadm.flatten as flatten_mod
 from scadm.flatten import (
     _Definition,
-    _find_used_names,
     _parse_definitions,
     _resolve_dependencies,
     compute_checksum,
@@ -882,6 +881,38 @@ class FlattenTests(unittest.TestCase):
             out = _flatten(root, input_file)
             self.assertNotIn("UNUSED_CONST", out)
             self.assertNotIn("unused_mod", out)
+
+    def test_dollar_variable_only_usage_from_lib(self):
+        """A $-variable as the only usage from a lib must still be included."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _make_workspace(root)
+
+            src_dir = root / "src"
+            lib_dir = src_dir / "lib"
+            lib_dir.mkdir(parents=True)
+
+            (lib_dir / "defaults.scad").write_text(
+                "$my_resolution = 64;\nUNUSED = 999;\n",
+                encoding="utf-8",
+            )
+
+            input_file = src_dir / "main.scad"
+            input_file.write_text(
+                "\n".join(
+                    [
+                        "include <lib/defaults.scad>",
+                        "",
+                        "sphere($my_resolution);",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            out = _flatten(root, input_file)
+            self.assertIn("$my_resolution", out)
+            self.assertNotIn("UNUSED", out)
 
 
 if __name__ == "__main__":

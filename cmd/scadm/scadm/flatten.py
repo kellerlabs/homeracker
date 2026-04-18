@@ -13,7 +13,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Optional, Set
+from typing import NamedTuple, Optional, Set
 
 from scadm.installer import get_install_paths, get_workspace_root
 
@@ -219,18 +219,16 @@ def _extract_hidden_section(content: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-class _Definition:
+class _Definition(NamedTuple):
     """A single variable, module, or function definition extracted from SCAD content."""
 
-    __slots__ = ("kind", "name", "lines", "origin")
-
-    def __init__(self, kind: str, name: str, lines: list[str], origin: str = ""):
-        self.kind = kind  # "variable", "module", or "function"
-        self.name = name
-        self.lines = lines  # original source lines
-        self.origin = origin  # source file label for origin comments
+    kind: str  # "variable", "module", or "function"
+    name: str
+    lines: list[str]
+    origin: str = ""
 
 
+# pylint: disable-next=too-many-branches  # Stateful line-by-line parser for 3 def types; splitting would scatter the state machine
 def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
     """Parse all top-level definitions (modules, functions, variables) from SCAD content.
 
@@ -315,7 +313,8 @@ def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
 
 def _find_used_names(text: str) -> Set[str]:
     """Find all identifier-like names used in a piece of SCAD text."""
-    return set(re.findall(r"\b([A-Za-z_]\w*)\b", text))
+    # Match regular identifiers and $-prefixed special variables (e.g. $fn, $custom_var)
+    return set(re.findall(r"(?:\$[A-Za-z_]\w*|\b[A-Za-z_]\w*)\b", text))
 
 
 def _resolve_dependencies(
@@ -410,31 +409,29 @@ def _extract_main_code(content: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _collect_all_definitions(
-    file_path: Path,
-    processed: Set[Path],
-    bosl2_includes: Set[str],
-    all_defs: list[_Definition],
-    *,
-    libraries_dir: Path,
-    scadm_dep_names: Set[str],
-) -> None:
+class _CollectContext(NamedTuple):
+    """Shared state for recursive definition collection."""
+
+    processed: Set[Path]
+    bosl2_includes: Set[str]
+    all_defs: list[_Definition]
+    libraries_dir: Path
+    scadm_dep_names: Set[str]
+
+
+def _collect_all_definitions(file_path: Path, ctx: _CollectContext) -> None:
     """Recursively collect definitions from a library file and its includes.
 
     Section markers in library files are silently ignored (no error raised).
 
     Args:
         file_path: Absolute path to library file.
-        processed: Set of already-processed files (prevents duplicates).
-        bosl2_includes: Accumulator for BOSL2 include statements.
-        all_defs: Accumulator for parsed definitions.
-        libraries_dir: Absolute path to bin/openscad/libraries.
-        scadm_dep_names: Dependency names from scadm.json.
+        ctx: Shared collection context (accumulators + config).
     """
-    if file_path in processed:
+    if file_path in ctx.processed:
         return
 
-    processed.add(file_path)
+    ctx.processed.add(file_path)
     content = file_path.read_text(encoding="utf-8")
 
     # Section markers in library files are silently ignored
@@ -444,28 +441,21 @@ def _collect_all_definitions(
     # Process includes first (depth-first) so dependencies appear before dependents
     for directive, path in _get_includes(content):
         if _is_bosl2(path):
-            bosl2_includes.add(f"{directive} <{path}>")
+            ctx.bosl2_includes.add(f"{directive} <{path}>")
         else:
             resolved = _resolve_include_path(
                 current_file=file_path,
                 include_path=path,
-                libraries_dir=libraries_dir,
-                scadm_dep_names=scadm_dep_names,
+                libraries_dir=ctx.libraries_dir,
+                scadm_dep_names=ctx.scadm_dep_names,
             )
             if resolved is not None and resolved.exists():
-                _collect_all_definitions(
-                    resolved,
-                    processed,
-                    bosl2_includes,
-                    all_defs,
-                    libraries_dir=libraries_dir,
-                    scadm_dep_names=scadm_dep_names,
-                )
+                _collect_all_definitions(resolved, ctx)
 
     clean_content = _strip_comments(content)
     origin = file_path.name
     defs = _parse_definitions(clean_content, origin=origin)
-    all_defs.extend(defs)
+    ctx.all_defs.extend(defs)
 
 
 # ---------------------------------------------------------------------------
@@ -548,80 +538,28 @@ def compute_checksum(input_file: Path, workspace_root: Optional[Path] = None) ->
 # ---------------------------------------------------------------------------
 
 
-def flatten_file(input_file: Path, output_file: Path, workspace_root: Optional[Path] = None) -> None:
-    """Flatten a .scad file by inlining only effectively used dependencies.
-
-    Produces a single-file output with structure:
-      BOSL2 includes -> Parameters -> /* [Hidden] */ (used lib defs + root hidden) -> Main code
-
-    Section markers in library files are silently ignored (only root file
-    sections matter). Variables from library files land in the Hidden section
-    with an origin comment.
+def _assemble_output(
+    bosl2_includes: Set[str],
+    params: str,
+    hidden: str,
+    used_defs: list[_Definition],
+    main_code: str,
+) -> str:
+    """Assemble the flattened output from its constituent parts.
 
     Args:
-        input_file: Absolute path to root .scad file.
-        output_file: Absolute path for flattened output.
-        workspace_root: Project root (auto-detected if None).
+        bosl2_includes: BOSL2 include/use statements.
+        params: Extracted parameter sections.
+        hidden: Extracted hidden section content.
+        used_defs: Transitively required library definitions.
+        main_code: Root file main code.
+
+    Returns:
+        Complete flattened file content.
     """
-    if workspace_root is None:
-        workspace_root = get_workspace_root(input_file.parent)
+    lib_vars = [d for d in used_defs if d.kind == "variable"]
+    lib_code = [d for d in used_defs if d.kind != "variable"]
 
-    _, libraries_dir = get_install_paths(workspace_root)
-    scadm_dep_names = _load_scadm_dependency_names(workspace_root)
-
-    if scadm_dep_names and not libraries_dir.exists():
-        raise FileNotFoundError(
-            f"scadm libraries directory not found. Run `scadm install` first. Expected: {libraries_dir}"
-        )
-
-    root_content = input_file.read_text(encoding="utf-8")
-    params = _extract_parameters(root_content)
-    hidden = _extract_hidden_section(root_content)
-    main_code = _extract_main_code(root_content)
-
-    # Collect all definitions from library dependency chain
-    processed: Set[Path] = {input_file}
-    bosl2_includes: Set[str] = set()
-    all_lib_defs: list[_Definition] = []
-
-    for directive, path in _get_includes(root_content):
-        if _is_bosl2(path):
-            bosl2_includes.add(f"{directive} <{path}>")
-        else:
-            resolved = _resolve_include_path(
-                current_file=input_file,
-                include_path=path,
-                libraries_dir=libraries_dir,
-                scadm_dep_names=scadm_dep_names,
-            )
-            if resolved is not None and resolved.exists():
-                _collect_all_definitions(
-                    resolved,
-                    processed,
-                    bosl2_includes,
-                    all_lib_defs,
-                    libraries_dir=libraries_dir,
-                    scadm_dep_names=scadm_dep_names,
-                )
-
-    # Determine which definitions are actually needed
-    needed_names: Set[str] = set()
-    needed_names |= _find_used_names(params)
-    needed_names |= _find_used_names(hidden)
-    needed_names |= _find_used_names(main_code)
-
-    used_defs = _resolve_dependencies(needed_names, all_lib_defs)
-
-    # Separate into variables and modules/functions, preserving order
-    lib_vars: list[_Definition] = []
-    lib_code: list[_Definition] = []
-    for d in used_defs:
-        if d.kind == "variable":
-            lib_vars.append(d)
-        else:
-            lib_code.append(d)
-
-    # Assemble output
     output_parts: list[str] = []
 
     if bosl2_includes:
@@ -663,10 +601,70 @@ def flatten_file(input_file: Path, output_file: Path, workspace_root: Optional[P
 
     output_text = "\n".join(output_parts)
     output_text = "\n".join(line.rstrip() for line in output_text.split("\n"))
-    # Collapse 3+ consecutive blank lines to a single blank line
     output_text = re.sub(r"\n{3,}", "\n\n", output_text)
     if not output_text.endswith("\n"):
         output_text += "\n"
+    return output_text
+
+
+def flatten_file(input_file: Path, output_file: Path, workspace_root: Optional[Path] = None) -> None:
+    """Flatten a .scad file by inlining only effectively used dependencies.
+
+    Produces a single-file output with structure:
+      BOSL2 includes -> Parameters -> /* [Hidden] */ (used lib defs + root hidden) -> Main code
+
+    Section markers in library files are silently ignored (only root file
+    sections matter). Variables from library files land in the Hidden section
+    with an origin comment.
+
+    Args:
+        input_file: Absolute path to root .scad file.
+        output_file: Absolute path for flattened output.
+        workspace_root: Project root (auto-detected if None).
+    """
+    if workspace_root is None:
+        workspace_root = get_workspace_root(input_file.parent)
+
+    _, libraries_dir = get_install_paths(workspace_root)
+    scadm_dep_names = _load_scadm_dependency_names(workspace_root)
+
+    if scadm_dep_names and not libraries_dir.exists():
+        raise FileNotFoundError(
+            f"scadm libraries directory not found. Run `scadm install` first. Expected: {libraries_dir}"
+        )
+
+    root_content = input_file.read_text(encoding="utf-8")
+    params = _extract_parameters(root_content)
+    hidden = _extract_hidden_section(root_content)
+    main_code = _extract_main_code(root_content)
+
+    # Collect all definitions from library dependency chain
+    ctx = _CollectContext(
+        processed={input_file},
+        bosl2_includes=set(),
+        all_defs=[],
+        libraries_dir=libraries_dir,
+        scadm_dep_names=scadm_dep_names,
+    )
+
+    for directive, path in _get_includes(root_content):
+        if _is_bosl2(path):
+            ctx.bosl2_includes.add(f"{directive} <{path}>")
+        else:
+            resolved = _resolve_include_path(
+                current_file=input_file,
+                include_path=path,
+                libraries_dir=libraries_dir,
+                scadm_dep_names=scadm_dep_names,
+            )
+            if resolved is not None and resolved.exists():
+                _collect_all_definitions(resolved, ctx)
+
+    # Determine which definitions are actually needed
+    needed_names = _find_used_names(params) | _find_used_names(hidden) | _find_used_names(main_code)
+    used_defs = _resolve_dependencies(needed_names, ctx.all_defs)
+
+    output_text = _assemble_output(ctx.bosl2_includes, params, hidden, used_defs, main_code)
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(output_text, encoding="utf-8", newline="\n")
