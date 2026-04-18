@@ -36,6 +36,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
   - Format: `type(scope): description` or `type: description`
   - Breaking changes: Add `!` (e.g., `feat!: change base unit`)
+  - **NEVER amend commits** (`--amend`). PRs are squash-merged, so extra commits are fine.
 
 ## Terminal Session Setup
 Before terminal operations, consider running these steps (use best judgement):
