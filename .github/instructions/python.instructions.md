@@ -21,6 +21,18 @@ Example: See `cmd/scadm/scadm/flatten.py` for reference.
 - Add inline comments only for complex regex patterns or non-obvious logic.
 - Line length: 121 characters max (enforced by `black`).
 
+## Pylint
+
+- **No unresolved pylint warnings.** Either fix the root cause or suppress with justification.
+- When suppressing, **always add a comment explaining why** the rule doesn't apply:
+  ```python
+  # pylint: disable-next=too-many-branches  # Stateful parser for 3 types; splitting scatters the state machine
+  def _parse_definitions(...):
+  ```
+- Prefer `disable-next` (single line) over inline `# pylint: disable=...` when possible.
+- Common legitimate suppressions: data classes with no methods (`too-few-public-methods`), parsers (`too-many-branches`).
+- Never suppress without fixing first — if the code *can* be refactored to resolve the warning, do that instead.
+
 ## Testing
 
 - Use `unittest` or `pytest` for unit tests.

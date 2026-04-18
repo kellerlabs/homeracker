@@ -3,6 +3,9 @@
 Resolves and inlines all local include/use dependencies into a single .scad file.
 BOSL2 includes are preserved as-is. Useful for platforms that require single-file
 uploads (e.g. MakerWorld Customizer).
+
+Only effectively used modules, functions, and variables from the dependency chain
+are included in the output — unused definitions are omitted.
 """
 
 import hashlib
@@ -10,11 +13,20 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Optional, Set
+from typing import NamedTuple, Optional, Set
 
 from scadm.installer import get_install_paths, get_workspace_root
 
 logger = logging.getLogger(__name__)
+
+# Pattern matching OpenSCAD Customizer section markers like /* [General] */
+_SECTION_MARKER_RE = re.compile(r"/\*\s*\[(.+?)\]\s*\*/")
+# Pattern matching include/use statements
+_INCLUDE_RE = re.compile(r"^\s*(include|use)\s*<([^>]+)>\s*$", re.MULTILINE)
+# Pattern matching module/function definitions (top-level)
+_DEF_START_RE = re.compile(r"^(module|function)\s+(\w+)")
+# Pattern matching top-level variable assignments (including $-variables)
+_VAR_ASSIGN_RE = re.compile(r"^([\$\w]+)\s*=")
 
 
 # ---------------------------------------------------------------------------
@@ -97,22 +109,31 @@ def _resolve_include_path(
 def _get_includes(content: str) -> list[tuple[str, str]]:
     """Extract all include/use statements as (directive, path) tuples."""
     # e.g. include <BOSL2/std.scad>, use <lib/helper.scad>
-    return re.findall(r"^\s*(include|use)\s*<([^>]+)>\s*$", content, re.MULTILINE)
+    return _INCLUDE_RE.findall(content)
 
 
 def _strip_comments(content: str) -> str:
-    """Remove single-line and multi-line comments from SCAD content."""
-    # e.g. /* multi\nline */, /* [Hidden] */
+    """Remove single-line and multi-line comments from SCAD content.
+
+    Preserves Customizer section markers /* [Name] */ so callers can
+    detect and handle them.
+    """
+    # Temporarily protect section markers
+    markers: list[str] = []
+
+    def _protect_marker(m: re.Match) -> str:
+        markers.append(m.group(0))
+        return f"__SECTION_MARKER_{len(markers) - 1}__"
+
+    content = _SECTION_MARKER_RE.sub(_protect_marker, content)
+    # e.g. /* multi\nline */
     content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
     # e.g. // this is a comment
     content = re.sub(r"//.*?$", "", content, flags=re.MULTILINE)
+    # Restore markers
+    for i, marker in enumerate(markers):
+        content = content.replace(f"__SECTION_MARKER_{i}__", marker)
     return content
-
-
-def _has_parameter_section(content: str) -> bool:
-    """Check if content has any parameter section marker /* [Name] */."""
-    # e.g. /* [General] */, /* [Hidden] */
-    return bool(re.search(r"/\*\s*\[.+?\]\s*\*/", content))
 
 
 def _extract_parameters(content: str) -> str:
@@ -122,7 +143,7 @@ def _extract_parameters(content: str) -> str:
 
     while True:
         # e.g. /* [General] */, /* [Parameters] */
-        match = re.search(r"/\*\s*\[(.+?)\]\s*\*/", content[current_pos:])
+        match = _SECTION_MARKER_RE.search(content[current_pos:])
         if not match:
             break
 
@@ -182,7 +203,7 @@ def _extract_hidden_section(content: str) -> str:
             continue
 
         # e.g. $fn = 100;, EPSILON = 0.01;, BASE_UNIT =\n    15;
-        if re.match(r"^[\$\w]+\s*=", stripped):
+        if _VAR_ASSIGN_RE.match(stripped):
             kept.append(line)
             if ";" not in stripped:
                 in_multiline_assignment = True
@@ -193,46 +214,162 @@ def _extract_hidden_section(content: str) -> str:
     return "\n".join(kept).strip()
 
 
-def _extract_definitions(content: str) -> str:
-    """Extract module/function definitions and top-level variables from library content."""
-    lines = content.split("\n")
-    result = []
-    in_definition = False
-    in_variable = False
-    brace_count = 0
-    seen_brace = False
+# ---------------------------------------------------------------------------
+# Parsed definition types for dependency analysis
+# ---------------------------------------------------------------------------
 
-    for line in lines:
-        stripped = line.strip()
 
-        # e.g. module connector(...), function get_color(...)
-        if re.match(r"^(module|function)\s+\w+", stripped):
-            in_definition = True
-            seen_brace = False
+class _Definition(NamedTuple):
+    """A single variable, module, or function definition extracted from SCAD content."""
 
-        # e.g. HR_YELLOW = [1,1,0];, BASE_UNIT = 15;
-        if not in_definition and not in_variable and re.match(r"^\w+\s*=", stripped):
-            in_variable = True
-            result.append(line)
-            if ";" in stripped:
-                in_variable = False
+    kind: str  # "variable", "module", or "function"
+    name: str
+    lines: list[str]
+    origin: str = ""
+
+
+# pylint: disable-next=too-many-branches  # Stateful line-by-line parser for 3 def types; splitting would scatter the state machine
+def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
+    """Parse all top-level definitions (modules, functions, variables) from SCAD content.
+
+    Args:
+        content: SCAD source with comments stripped.
+        origin: Label for the source file (used in origin comments).
+
+    Returns:
+        List of _Definition objects in source order.
+    """
+    # Strip includes and section markers before parsing
+    clean = re.sub(r"^\s*(include|use)\s*<[^>]+>\s*$", "", content, flags=re.MULTILINE)
+    clean = _SECTION_MARKER_RE.sub("", clean)
+
+    lines = clean.split("\n")
+    defs: list[_Definition] = []
+    i = 0
+    while i < len(lines):
+        stripped = lines[i].strip()
+
+        # Module or function definition
+        m = _DEF_START_RE.match(stripped)
+        if m:
+            kind = m.group(1)
+            name = m.group(2)
+            def_lines = [lines[i]]
+            brace_count = lines[i].count("{") - lines[i].count("}")
+            seen_brace = "{" in lines[i]
+
+            # Function definitions: single-expression functions end with ;
+            if kind == "function" and not seen_brace:
+                # Collect until ; for single-expression functions
+                while i + 1 < len(lines) and ";" not in lines[i]:
+                    i += 1
+                    def_lines.append(lines[i])
+                defs.append(_Definition(kind, name, def_lines, origin))
+                i += 1
+                continue
+
+            # Module/function with braces
+            while seen_brace and brace_count > 0 and i + 1 < len(lines):
+                i += 1
+                def_lines.append(lines[i])
+                brace_count += lines[i].count("{") - lines[i].count("}")
+                if "{" in lines[i]:
+                    seen_brace = True
+            if not seen_brace:
+                # Multi-line signature before opening brace
+                while i + 1 < len(lines):
+                    i += 1
+                    def_lines.append(lines[i])
+                    if "{" in lines[i]:
+                        seen_brace = True
+                        brace_count += lines[i].count("{") - lines[i].count("}")
+                        break
+                while seen_brace and brace_count > 0 and i + 1 < len(lines):
+                    i += 1
+                    def_lines.append(lines[i])
+                    brace_count += lines[i].count("{") - lines[i].count("}")
+
+            defs.append(_Definition(kind, name, def_lines, origin))
+            i += 1
             continue
 
-        if in_variable:
-            result.append(line)
-            if ";" in stripped:
-                in_variable = False
+        # Top-level variable assignment (not inside a module/function)
+        vm = _VAR_ASSIGN_RE.match(stripped)
+        if vm and stripped:
+            name = vm.group(1)
+            var_lines = [lines[i]]
+            if ";" not in stripped:
+                while i + 1 < len(lines) and ";" not in lines[i]:
+                    i += 1
+                    var_lines.append(lines[i])
+            defs.append(_Definition("variable", name, var_lines, origin))
+            i += 1
             continue
 
-        if in_definition:
-            result.append(line)
-            brace_count += line.count("{") - line.count("}")
-            if "{" in line:
-                seen_brace = True
-            if seen_brace and brace_count == 0:
-                in_definition = False
+        i += 1
 
-    return "\n".join(result)
+    return defs
+
+
+def _strip_comments_and_strings(text: str) -> str:
+    """Replace SCAD comments and string literals with spaces.
+
+    Prevents identifiers mentioned only in comments or strings from being
+    treated as "used" during dependency resolution.
+    """
+    pattern = re.compile(
+        r'"(?:\\.|[^"\\])*"'  # Double-quoted strings
+        r"|/\*.*?\*/"  # Block comments
+        r"|//[^\n]*",  # Line comments
+        re.DOTALL,
+    )
+    return pattern.sub(lambda m: " " * len(m.group(0)), text)
+
+
+def _find_used_names(text: str) -> Set[str]:
+    """Find all identifier-like names used in SCAD code (excluding comments and strings)."""
+    sanitized = _strip_comments_and_strings(text)
+    # Match regular identifiers and $-prefixed special variables (e.g. $fn, $custom_var)
+    return set(re.findall(r"(?:\$[A-Za-z_]\w*|\b[A-Za-z_]\w*)\b", sanitized))
+
+
+def _resolve_dependencies(
+    needed: Set[str],
+    all_defs: list[_Definition],
+) -> list[_Definition]:
+    """Resolve the transitive closure of definitions needed by *needed* names.
+
+    Starting from the set of names used in the root file's main code and
+    parameter/hidden sections, walks the dependency graph of all collected
+    definitions and returns only those that are transitively required.
+
+    Args:
+        needed: Initial set of identifier names to resolve.
+        all_defs: All available definitions from library files.
+
+    Returns:
+        Ordered list of definitions that are transitively required.
+    """
+    by_name: dict[str, _Definition] = {}
+    for d in all_defs:
+        if d.name not in by_name:
+            by_name[d.name] = d
+
+    resolved_names: Set[str] = set()
+    queue = list(needed)
+    while queue:
+        name = queue.pop()
+        if name in resolved_names:
+            continue
+        resolved_names.add(name)
+        if name in by_name:
+            body = "\n".join(by_name[name].lines)
+            for ref in _find_used_names(body):
+                if ref not in resolved_names:
+                    queue.append(ref)
+
+    # Return in original source order, only those resolved
+    return [d for d in all_defs if d.name in resolved_names]
 
 
 def _extract_main_code(content: str) -> str:
@@ -245,7 +382,7 @@ def _extract_main_code(content: str) -> str:
     # Find last section marker on original content (markers are /* [Name] */ block comments)
     # e.g. /* [General] */, /* [Hidden] */
     last_section = None
-    for match in re.finditer(r"/\*\s*\[.+?\]\s*\*/", content):
+    for match in _SECTION_MARKER_RE.finditer(content):
         last_section = match
     if last_section:
         content = content[last_section.end() :]
@@ -271,7 +408,7 @@ def _extract_main_code(content: str) -> str:
             if re.match(r"^[\$\w]+\s*=.*;\s*(//.*)?$", stripped):
                 continue
             # e.g. pusher_length =\n    BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
-            if re.match(r"^[\$\w]+\s*=", stripped) and ";" not in stripped:
+            if _VAR_ASSIGN_RE.match(stripped) and ";" not in stripped:
                 in_multiline_assignment = True
                 continue
             # e.g. // Debug, // Example usage
@@ -284,79 +421,57 @@ def _extract_main_code(content: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Recursive file processing
+# Recursive file processing (collects definitions for dependency analysis)
 # ---------------------------------------------------------------------------
 
 
-def _process_file(
-    file_path: Path,
-    processed: Set[Path],
-    bosl2_includes: Set[str],
-    *,
-    libraries_dir: Path,
-    scadm_dep_names: Set[str],
-) -> str:
-    """Recursively process a library file and inline its local includes.
+class _CollectContext(NamedTuple):
+    """Shared state for recursive definition collection."""
+
+    processed: Set[Path]
+    bosl2_includes: Set[str]
+    all_defs: list[_Definition]
+    libraries_dir: Path
+    scadm_dep_names: Set[str]
+
+
+def _collect_all_definitions(file_path: Path, ctx: _CollectContext) -> None:
+    """Recursively collect definitions from a library file and its includes.
+
+    Section markers in library files are silently ignored (no error raised).
 
     Args:
         file_path: Absolute path to library file.
-        processed: Set of already-processed files (prevents duplicates).
-        bosl2_includes: Accumulator for BOSL2 include statements.
-        libraries_dir: Absolute path to bin/openscad/libraries.
-        scadm_dep_names: Dependency names from scadm.json.
-
-    Returns:
-        Cleaned and inlined content.
-
-    Raises:
-        ValueError: If library file contains parameter section markers.
+        ctx: Shared collection context (accumulators + config).
     """
-    if file_path in processed:
-        return ""
+    if file_path in ctx.processed:
+        return
 
-    processed.add(file_path)
+    ctx.processed.add(file_path)
     content = file_path.read_text(encoding="utf-8")
 
-    if _has_parameter_section(content):
-        raise ValueError(
-            f"Library file contains parameter section: {file_path}\n"
-            f"Library files should not have /* [SectionName] */ markers.\n"
-            f"(Re)move them and re-run the flatten!"
-        )
+    # Section markers in library files are silently ignored
+    if _SECTION_MARKER_RE.search(content):
+        logger.debug("Ignoring section markers in library file: %s", file_path)
 
-    result = []
+    # Process includes first (depth-first) so dependencies appear before dependents
     for directive, path in _get_includes(content):
         if _is_bosl2(path):
-            bosl2_includes.add(f"{directive} <{path}>")
+            ctx.bosl2_includes.add(f"{directive} <{path}>")
         else:
             resolved = _resolve_include_path(
                 current_file=file_path,
                 include_path=path,
-                libraries_dir=libraries_dir,
-                scadm_dep_names=scadm_dep_names,
+                libraries_dir=ctx.libraries_dir,
+                scadm_dep_names=ctx.scadm_dep_names,
             )
             if resolved is not None and resolved.exists():
-                inlined = _process_file(
-                    resolved,
-                    processed,
-                    bosl2_includes,
-                    libraries_dir=libraries_dir,
-                    scadm_dep_names=scadm_dep_names,
-                )
-                if inlined:
-                    result.append(inlined)
+                _collect_all_definitions(resolved, ctx)
 
     clean_content = _strip_comments(content)
-    clean_content = _extract_definitions(clean_content)
-    # e.g. include <BOSL2/std.scad>, use <lib/helper.scad>
-    clean_content = re.sub(r"^\s*(include|use)\s*<[^>]+>\s*$", "", clean_content, flags=re.MULTILINE)
-    # Collapse 3+ blank lines to one blank line
-    clean_content = re.sub(r"\n\s*\n\s*\n+", "\n\n", clean_content)
-    clean_content = clean_content.strip()
-
-    if clean_content:
-        result.append(clean_content)
-    return "\n\n".join(result)
+    origin = file_path.name
+    defs = _parse_definitions(clean_content, origin=origin)
+    ctx.all_defs.extend(defs)
 
 
 # ---------------------------------------------------------------------------
@@ -439,13 +554,84 @@ def compute_checksum(input_file: Path, workspace_root: Optional[Path] = None) ->
 # ---------------------------------------------------------------------------
 
 
-def flatten_file(  # pylint: disable=too-many-branches
-    input_file: Path, output_file: Path, workspace_root: Optional[Path] = None
-) -> None:
-    """Flatten a .scad file by inlining all local includes.
+def _assemble_output(
+    bosl2_includes: Set[str],
+    params: str,
+    hidden: str,
+    used_defs: list[_Definition],
+    main_code: str,
+) -> str:
+    """Assemble the flattened output from its constituent parts.
+
+    Args:
+        bosl2_includes: BOSL2 include/use statements.
+        params: Extracted parameter sections.
+        hidden: Extracted hidden section content.
+        used_defs: Transitively required library definitions.
+        main_code: Root file main code.
+
+    Returns:
+        Complete flattened file content.
+    """
+    lib_vars = [d for d in used_defs if d.kind == "variable"]
+    lib_code = [d for d in used_defs if d.kind != "variable"]
+
+    output_parts: list[str] = []
+
+    if bosl2_includes:
+        output_parts.extend(sorted(bosl2_includes))
+        output_parts.append("")
+
+    if params:
+        output_parts.append(params.strip())
+        output_parts.append("")
+
+    output_parts.append("/* [Hidden] */")
+
+    # Library variables (with origin comments), grouped by origin
+    if lib_vars:
+        current_origin = None
+        var_lines: list[str] = []
+        for d in lib_vars:
+            if d.origin and d.origin != current_origin:
+                var_lines.append(f"// --- from {d.origin} ---")
+                current_origin = d.origin
+            var_lines.extend(d.lines)
+        output_parts.append("\n".join(var_lines))
+
+    # Root hidden variables
+    if hidden:
+        hc = re.sub(r"/\*\s*\[Hidden\]\s*\*/", "", hidden).strip()
+        if hc:
+            output_parts.append(hc)
+
+    # Library modules/functions
+    if lib_code:
+        code_lines: list[str] = []
+        for d in lib_code:
+            code_lines.extend(d.lines)
+        output_parts.append("\n".join(code_lines))
+
+    output_parts.append("")
+    output_parts.append(main_code)
+
+    output_text = "\n".join(output_parts)
+    output_text = "\n".join(line.rstrip() for line in output_text.split("\n"))
+    output_text = re.sub(r"\n{3,}", "\n\n", output_text)
+    if not output_text.endswith("\n"):
+        output_text += "\n"
+    return output_text
+
+
+def flatten_file(input_file: Path, output_file: Path, workspace_root: Optional[Path] = None) -> None:
+    """Flatten a .scad file by inlining only effectively used dependencies.
 
     Produces a single-file output with structure:
-      BOSL2 includes -> Parameters -> /* [Hidden] */ (inlined libs + root hidden) -> Main code
+      BOSL2 includes -> Parameters -> /* [Hidden] */ (used lib defs + root hidden) -> Main code
+
+    Section markers in library files are silently ignored (only root file
+    sections matter). Variables from library files land in the Hidden section
+    with an origin comment.
 
     Args:
         input_file: Absolute path to root .scad file.
@@ -468,13 +654,18 @@ def flatten_file(  # pylint: disable=too-many-branches
     hidden = _extract_hidden_section(root_content)
     main_code = _extract_main_code(root_content)
 
-    processed: Set[Path] = {input_file}
-    bosl2_includes: Set[str] = set()
-    inlined_libs = []
+    # Collect all definitions from library dependency chain
+    ctx = _CollectContext(
+        processed={input_file},
+        bosl2_includes=set(),
+        all_defs=[],
+        libraries_dir=libraries_dir,
+        scadm_dep_names=scadm_dep_names,
+    )
 
     for directive, path in _get_includes(root_content):
         if _is_bosl2(path):
-            bosl2_includes.add(f"{directive} <{path}>")
+            ctx.bosl2_includes.add(f"{directive} <{path}>")
         else:
             resolved = _resolve_include_path(
                 current_file=input_file,
@@ -483,46 +674,13 @@ def flatten_file(  # pylint: disable=too-many-branches
                 scadm_dep_names=scadm_dep_names,
             )
             if resolved is not None and resolved.exists():
-                lib_content = _process_file(
-                    resolved,
-                    processed,
-                    bosl2_includes,
-                    libraries_dir=libraries_dir,
-                    scadm_dep_names=scadm_dep_names,
-                )
-                if lib_content:
-                    inlined_libs.append(lib_content)
+                _collect_all_definitions(resolved, ctx)
 
-    # Assemble output
-    output_parts: list[str] = []
+    # Determine which definitions are actually needed
+    needed_names = _find_used_names(params) | _find_used_names(hidden) | _find_used_names(main_code)
+    used_defs = _resolve_dependencies(needed_names, ctx.all_defs)
 
-    if bosl2_includes:
-        output_parts.extend(sorted(bosl2_includes))
-        output_parts.append("")
-
-    if params:
-        output_parts.append(params.strip())
-        output_parts.append("")
-
-    output_parts.append("/* [Hidden] */")
-    # Library code first so root Hidden assignments can reference library constants
-    if inlined_libs:
-        output_parts.append("\n\n".join(inlined_libs))
-    if hidden:
-        # e.g. /* [Hidden] */  ->  (empty)
-        hidden_content = re.sub(r"/\*\s*\[Hidden\]\s*\*/", "", hidden).strip()
-        if hidden_content:
-            output_parts.append(hidden_content)
-    output_parts.append("")
-
-    output_parts.append(main_code)
-
-    output_text = "\n".join(output_parts)
-    output_text = "\n".join(line.rstrip() for line in output_text.split("\n"))
-    # Collapse 3+ consecutive blank lines to a single blank line
-    output_text = re.sub(r"\n{3,}", "\n\n", output_text)
-    if not output_text.endswith("\n"):
-        output_text += "\n"
+    output_text = _assemble_output(ctx.bosl2_includes, params, hidden, used_defs, main_code)
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(output_text, encoding="utf-8", newline="\n")

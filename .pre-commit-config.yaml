@@ -22,8 +22,14 @@ repos:
     rev: pre-commit-hooks-v0.3.0
     hooks:
       - id: optimize-images
+  - repo: local
+    hooks:
       - id: flatten-validate
+        name: Validate Flatten Exports
+        entry: flatten-validate
+        language: system
         pass_filenames: false
+        always_run: true
         files: '^(scadm\.json|models/.*\.scad|cmd/scadm/scadm/flatten\.py)'
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

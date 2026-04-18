@@ -30,7 +30,7 @@ jobs:
             flatten-checksums-main
 
       - name: Install test dependencies
-        run: pip install pytest
+        run: pip install pytest -r requirements.txt
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
