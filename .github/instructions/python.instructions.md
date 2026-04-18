@@ -38,3 +38,25 @@ Example: See `cmd/scadm/scadm/flatten.py` for reference.
 - Use `unittest` or `pytest` for unit tests.
 - Tests live alongside the package they test (e.g., `cmd/scadm/tests/`).
 - Run tests with `python -m pytest` from the package directory.
+
+### Unit vs Integration Tests
+
+- **Unit tests** (`test_*.py` without markers): fast, no network, mocked dependencies. Run via pre-commit hooks.
+- **Integration tests** (`test_cli_integration.py`, marked `@pytest.mark.integration`): exercise real CLI commands against temp workspaces. Run via CI workflow (`.github/workflows/integration-tests.yml`) on ubuntu + windows matrix.
+  - **Slow tests** (`@pytest.mark.slow`): download binaries from the network. Subset of integration tests.
+
+### Running Integration Tests
+
+```bash
+# All integration tests (fast + slow)
+python -m pytest tests/ -m integration -v
+
+# Fast only (no downloads)
+python -m pytest tests/ -m "integration and not slow" -v
+```
+
+### When to Add/Update Integration Tests
+
+- Adding or modifying a CLI subcommand → add/update integration test.
+- Changing `scadm.json` config schema → update config-dependent tests.
+- Changing installer/resolver behavior → update relevant slow tests.

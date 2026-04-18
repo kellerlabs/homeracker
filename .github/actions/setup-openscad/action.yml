@@ -66,7 +66,7 @@ runs:
       uses: actions/cache@v5
       with:
         path: bin/openscad
-        key: openscad-${{ runner.os }}-${{ steps.resolve-scadm.outputs.version }}-${{ hashFiles('scadm.json', inputs.scadm-source && format('{0}/**/constants.py', inputs.scadm-source) || 'scadm.json') }}
+        key: openscad-${{ runner.os }}-${{ steps.resolve-scadm.outputs.version }}-${{ hashFiles('scadm.json') }}
 
     - name: Install OpenSCAD and dependencies
       shell: bash
