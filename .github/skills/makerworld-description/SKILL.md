@@ -44,7 +44,7 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
    - Preserve: headings (##, ###), bold/italic, bullet lists, numbered lists, links, images, linked images (`[![alt](img)](url)`), horizontal rules
    - Strip: `[Image: Image]` placeholders, duplicate blank lines, trailing whitespace
    - Keep image URLs as-is initially (they'll be downloaded next)
-   - **Use `<img>` tags instead of markdown image syntax** for all images. This allows preserving the `width` attribute. After downloading an image (step 5), read its actual pixel width and set `width` on the tag (do NOT set `height` — omitting it lets the browser scale proportionally). The user can then adjust the width to match the MakerWorld layout. Example:
+   - **Use `<img>` tags instead of markdown image syntax** for all images. This allows preserving the `width` attribute. Use `width="800"` for images whose native width is ≥ 800px; for smaller images use their native width. Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`). Do NOT set `height` — omitting it lets the browser scale proportionally. Example:
      ```html
      <img src="https://raw.githubusercontent.com/.../logo.webp" alt="Logo" width="800">
      ```
@@ -68,8 +68,10 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
    - Skip external reference images (e.g. `encrypted-tbn0.gstatic.com` meme images) — keep those as URLs
    - Download MakerWorld CDN images to the **assets repo**: `assets/<target-repo>/models/<name>/makerworld/images/`
    - Use descriptive filenames based on context (e.g. `diagonal_supports.png`, `showcase_rack.jpg`)
-   - After downloading, read the actual pixel width of each image and use `<img>` tags with `width` set to the image's native width (omit `height` for proper scaling)
-   - Reference images using absolute URLs in `<img>` tags: `<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/<target-repo>/models/<name>/makerworld/images/filename.png" alt="Description" width="W">`
+   - After downloading, get pixel dimensions with `python cmd/export/image_dimensions.py <images-dir>` (for reference only — do not use native dimensions for `width`)
+   - **Standard image width**: Use `width="800"` for all description images whose native width is ≥ 800px. For smaller images, use their native width. Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`). This ensures a uniform look across all model descriptions.
+   - **Check for common images**: Some images are shared across all models (e.g. `collection_banner.webp`, `kofi_qr_code.webp`). These live in `assets/common/makerworld/images/`. If a downloaded image already exists there (same content), delete the per-model copy and reference the common one: `https://raw.githubusercontent.com/kellerlabs/assets/main/common/makerworld/images/filename.webp`
+   - Reference model-specific images using absolute URLs in `<img>` tags, applying the standard width rule above: use `width="800"` when the native width is ≥ 800px; otherwise use the native width. Example: `<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/<target-repo>/models/<name>/makerworld/images/filename.png" alt="Description" width="800">`
 
 5a. **Resolve orphan linked images** (from step 4):
    - For each `[](url)` pattern found, present the user with a numbered list showing the link target URL
@@ -137,6 +139,33 @@ assets/<repo>/models/<name>/makerworld/images/
 └── diagonal_supports.png
 ```
 
+Common images shared across all models are stored in the assets repo:
+```
+assets/common/makerworld/images/
+├── homeracker_logo_banner.webp    # HomeRacker logo (linked to homeracker.org)
+├── collection_banner.webp         # Official HomeRacker Collection banner
+└── kofi_qr_code.webp              # Ko-fi donation QR code
+```
+
+Reference via: `https://raw.githubusercontent.com/kellerlabs/assets/main/common/makerworld/images/<file>`
+
+## 🔁 Common Description Elements
+
+All HomeRacker MakerWorld descriptions share recurring elements. When extracting, verify these are present:
+
+1. **Centered header block** — everything from the top of the description until the first video embed or model-specific content must be centered using HTML style blocks. The logo is always `width="300"` and linked to `homeracker.org`. Pattern:
+   ```html
+   <p style="text-align: center">Intro text</p>
+   <h2 style="text-align: center">Model Title</h2>
+   <p style="text-align: center"><a href="https://homeracker.org/"><img src=".../common/makerworld/images/homeracker_logo_banner.webp" alt="HomeRacker Logo" width="300"></a></p>
+   <p style="text-align: center">Subtitle / links</p>
+   ```
+2. **Collection banner** — linked image to the Official HomeRacker Collection. Uses `common/makerworld/images/collection_banner.webp`
+3. **Ko-fi QR code** — in the ☕ Support section. Uses `common/makerworld/images/kofi_qr_code.webp`
+4. **"🏡 What is HomeRacker?" section** (non-core models only) — includes the HomeRacker Core video embed (`g8k6X_axYug`) immediately after the heading, followed by links to homeracker.org and the collection
+
+These elements are often dropped by `fetch_webpage` (logo as orphan linked image, video as invisible iframe). Always check for them during extraction.
+
 ## ⚠️ Important Notes
 
 - **Cross-repo skill**: Requires both the source repo (`homeracker` or `homeracker-exclusive`) and the [`kellerlabs/assets`](https://github.com/kellerlabs/assets) repo. Maintainers push images directly to `assets/main`. Outside collaborators must open a PR on the assets repo for image changes.
@@ -145,7 +174,7 @@ assets/<repo>/models/<name>/makerworld/images/
 - The conversion script embeds local images as base64 data URIs so the HTML is fully self-contained — no broken links, no browser permissions needed. External image URLs (http/https) are passed through unchanged.
 - Since images are now hosted in the `kellerlabs/assets` repo with absolute URLs, `md-to-mw.py` passes them through directly — no base64 encoding needed for assets-hosted images.
 - **Alignment**: Use inline HTML blocks (`<h2 style="text-align: center">`, `<p style="text-align: center">`) to preserve centered headings, images, and text from MakerWorld. These render correctly on GitHub and pass through to `md-to-mw.py` HTML output.
-- **Image sizing**: `fetch_webpage` strips HTML attributes, so image dimensions are not available from the source page. Use `<img>` tags with `width` set to the actual downloaded image width (omit `height` so images scale proportionally). The user can then adjust the width to match the MakerWorld layout.
+- **Image sizing**: Use `width="800"` as the standard for all description images whose native width is ≥ 800px; for smaller images use their native width (omit `height` so images scale proportionally). Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`).
 - MakerWorld CDN images (from `makerworld.bblmw.com`) should be downloaded to the assets repo during extraction. External reference images (memes, badges, etc.) can stay as external URLs.
 
 ## 🐛 Known Limitations

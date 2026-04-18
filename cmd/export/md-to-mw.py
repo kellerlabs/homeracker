@@ -15,6 +15,7 @@ import argparse
 import base64
 import mimetypes
 import re
+import subprocess
 import sys
 import webbrowser
 from pathlib import Path
@@ -125,6 +126,35 @@ def add_block_spacing(html: str) -> str:
     )
 
 
+def github_source_url(file_path: Path) -> str | None:
+    """Derive a GitHub blob URL for a file from git remote and repo root.
+
+    Args:
+        file_path: Absolute path to a file inside a git repository.
+
+    Returns:
+        GitHub URL string, or None if git info unavailable.
+    """
+    try:
+        repo_root = Path(
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"], cwd=file_path.parent, text=True).strip()
+        )
+        remote = subprocess.check_output(["git", "remote", "get-url", "origin"], cwd=repo_root, text=True).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+    # Normalise git@github.com:owner/repo.git and https://github.com/owner/repo.git
+    match = re.search(r"github\.com[:/](.+?)(?:\.git)?$", remote)
+    if not match:
+        return None
+    owner_repo = match.group(1)
+    try:
+        rel_path = file_path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return None
+    return f"https://github.com/{owner_repo}/blob/main/{rel_path}"
+
+
 def convert(input_path: Path) -> str:
     """Convert a DESCRIPTION.md file to HTML with embedded local images.
 
@@ -142,10 +172,12 @@ def convert(input_path: Path) -> str:
     html = convert_youtube_embeds(html)
     html = add_block_spacing(html)
 
+    source_url = github_source_url(input_path)
+    from_md = f'from <a href="{source_url}">Markdown</a>' if source_url else "from Markdown"
     footer = (
-        "\n&nbsp;\n<p><em>This description was generated from Markdown using "
+        f"\n&nbsp;\n<p><em>This description was generated {from_md} using "
         '<a href="https://github.com/kellerlabs/homeracker/blob/main/docs/makerworld-workflow.md">'
-        "md-to-mw</a> — version-controlled descriptions for easier maintenance.</em></p>"
+        "md-to-mw</a> \u2014 version-controlled descriptions for easier maintenance.</em></p>"
     )
     html += footer
 
