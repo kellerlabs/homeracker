@@ -2,35 +2,51 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "customManagers": [
     {
-      "customType": "regex",
-      "fileMatch": ["^scadm\\.json$"],
+      "customType": "jsonata",
+      "fileFormat": "json",
+      "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "\"repository\":\\s*\"(?<depName>[^\"]+)\",\\s*\"version\":\\s*\"(?<currentDigest>[a-f0-9]{40})\""
+        "dependencies[$contains(version, /^[a-f0-9]{40}$/)].{\"depName\": repository, \"currentDigest\": version, \"currentValue\": \"master\", \"packageName\": \"https://github.com/\" & repository & \".git\"}"
       ],
-      "currentValueTemplate": "master",
-      "depNameTemplate": "{{depName}}",
-      "packageNameTemplate": "https://github.com/{{depName}}.git",
       "datasourceTemplate": "git-refs",
       "versioningTemplate": "git"
     },
     {
-      "customType": "regex",
-      "fileMatch": ["^scadm\\.json$"],
+      "customType": "jsonata",
+      "fileFormat": "json",
+      "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "\"repository\":\\s*\"kellerlabs/homeracker\"[,\\s]+\"version\":\\s*\"(?<currentValue>homeracker-v\\d+\\.\\d+\\.\\d+)\""
+        "dependencies[repository = 'kellerlabs/homeracker'].{\"depName\": repository, \"currentValue\": version}"
       ],
       "datasourceTemplate": "github-tags",
-      "depNameTemplate": "kellerlabs/homeracker",
       "versioningTemplate": "regex:^homeracker-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
     },
     {
-      "customType": "regex",
-      "fileMatch": ["^scadm\\.json$"],
+      "customType": "jsonata",
+      "fileFormat": "json",
+      "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "\"repository\":\\s*\"(?<depName>[^\"]+)\",\\s*\"version\":\\s*\"(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\""
+        "dependencies[repository != 'kellerlabs/homeracker' and $not($contains(version, /^[a-f0-9]{40}$/))].{\"depName\": repository, \"currentValue\": version}"
       ],
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "jsonata",
+      "fileFormat": "json",
+      "managerFilePatterns": ["/^scadm\\.json$/"],
+      "matchStrings": [
+        "openscad[version != 'latest'].{\"depName\": \"OpenSCAD\", \"currentValue\": version}"
+      ],
+      "datasourceTemplate": "custom.openscad-snapshots",
+      "extractVersionTemplate": "^OpenSCAD-(?<version>\\d{4}\\.\\d{2}\\.\\d{2})-x86_64\\.AppImage$",
+      "versioningTemplate": "loose"
     }
-  ]
+  ],
+  "customDatasources": {
+    "openscad-snapshots": {
+      "defaultRegistryUrlTemplate": "https://files.openscad.org/snapshots/",
+      "format": "html"
+    }
+  }
 }
