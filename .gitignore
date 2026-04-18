@@ -44,3 +44,9 @@ configurator/dist/
 site/dist/
 site/public/parts/
 _site/
+
+# Coverage / mutation testing artifacts
+htmlcov/
+.coverage
+coverage.xml
+.mutmut-cache/
