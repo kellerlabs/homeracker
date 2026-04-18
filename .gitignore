@@ -32,3 +32,9 @@ __pycache__/
 *.py[cod]
 cmd/scadm/dist/
 cmd/scadm/*.egg-info/
+
+# Coverage / mutation testing artifacts
+htmlcov/
+.coverage
+coverage.xml
+.mutmut-cache/

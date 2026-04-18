@@ -1,0 +1,41 @@
+---
+name: Code Coverage
+
+on:
+  pull_request:
+    paths:
+      - 'cmd/scadm/**'
+      - 'requirements.txt'
+      - '.github/workflows/coverage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cmd/scadm/**'
+      - 'requirements.txt'
+      - '.github/workflows/coverage.yml'
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadm -r requirements.txt
+
+      - name: Run coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./cmd/test/test-coverage.sh
