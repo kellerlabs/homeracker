@@ -60,6 +60,15 @@ class GetOpenscadConfigTests(unittest.TestCase):
             result = get_openscad_config(Path(tmpdir))
             self.assertEqual(result, {"type": "nightly", "version": "latest"})
 
+    def test_invalid_type_raises(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_file = Path(tmpdir) / "scadm.json"
+            data = {"openscad": {"type": "nigthly", "version": "latest"}, "dependencies": []}
+            config_file.write_text(json.dumps(data), encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                get_openscad_config(Path(tmpdir))
+
 
 class GetOpenscadVersionTests(unittest.TestCase):
     """Tests for get_openscad_version (config-driven)."""

@@ -1,7 +1,9 @@
 """Tests for the version resolver module."""
 
 import json
+import tempfile
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -12,7 +14,6 @@ from scadm.resolver import (
     resolve_latest_stable,
     resolve_version,
 )
-
 
 SNAPSHOT_HTML = """
 <html><body>
@@ -64,12 +65,15 @@ class ResolveLatestNightlyTests(unittest.TestCase):
 
     @patch("scadm.resolver.urllib.request.urlopen")
     def test_network_error_raises(self, mock_urlopen):
-        import urllib.error
 
         mock_urlopen.side_effect = urllib.error.URLError("connection failed")
 
         with self.assertRaises(RuntimeError):
             resolve_latest_nightly("linux")
+
+    def test_unsupported_os_raises(self):
+        with self.assertRaises(ValueError, msg="Expected 'windows' or 'linux'"):
+            resolve_latest_nightly("darwin")
 
 
 class ResolveLatestStableTests(unittest.TestCase):
@@ -150,12 +154,12 @@ class ResolveVersionTests(unittest.TestCase):
         mock_resolve.assert_called_once()
 
     @patch("scadm.resolver.resolve_latest_nightly")
-    def test_cache_read(self, mock_resolve, tmp_path=None):
-        import tempfile
+    def test_cache_read(self, mock_resolve):
 
         with tempfile.TemporaryDirectory() as tmpdir:
             install_dir = Path(tmpdir)
-            (install_dir / ".resolved-version").write_text("2026.03.20", encoding="utf-8")
+            cache = json.dumps({"type": "nightly", "os": "linux", "version": "2026.03.20"})
+            (install_dir / ".resolved-version").write_text(cache, encoding="utf-8")
 
             result = resolve_version("nightly", "latest", "linux", install_dir=install_dir)
             self.assertEqual(result, "2026.03.20")
@@ -163,12 +167,12 @@ class ResolveVersionTests(unittest.TestCase):
 
     @patch("scadm.resolver.resolve_latest_nightly")
     def test_cache_bypass_with_force(self, mock_resolve):
-        import tempfile
 
         mock_resolve.return_value = "2026.03.28"
         with tempfile.TemporaryDirectory() as tmpdir:
             install_dir = Path(tmpdir)
-            (install_dir / ".resolved-version").write_text("2026.03.20", encoding="utf-8")
+            cache = json.dumps({"type": "nightly", "os": "linux", "version": "2026.03.20"})
+            (install_dir / ".resolved-version").write_text(cache, encoding="utf-8")
 
             result = resolve_version("nightly", "latest", "linux", install_dir=install_dir, force=True)
             self.assertEqual(result, "2026.03.28")
@@ -176,7 +180,6 @@ class ResolveVersionTests(unittest.TestCase):
 
     @patch("scadm.resolver.resolve_latest_nightly")
     def test_cache_write(self, mock_resolve):
-        import tempfile
 
         mock_resolve.return_value = "2026.03.28"
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -186,37 +189,46 @@ class ResolveVersionTests(unittest.TestCase):
 
             cache_file = install_dir / ".resolved-version"
             self.assertTrue(cache_file.exists())
-            self.assertEqual(cache_file.read_text(encoding="utf-8"), "2026.03.28")
+            data = json.loads(cache_file.read_text(encoding="utf-8"))
+            self.assertEqual(data, {"type": "nightly", "os": "linux", "version": "2026.03.28"})
 
 
 class CacheTests(unittest.TestCase):
     """Tests for cache read/write helpers."""
 
     def test_read_cache_missing(self):
-        import tempfile
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            result = _read_cache(Path(tmpdir))
+            result = _read_cache(Path(tmpdir), "nightly", "linux")
             self.assertIsNone(result)
 
     def test_read_cache_exists(self):
-        import tempfile
 
         with tempfile.TemporaryDirectory() as tmpdir:
             cache_file = Path(tmpdir) / ".resolved-version"
-            cache_file.write_text("2026.03.28", encoding="utf-8")
-            result = _read_cache(Path(tmpdir))
+            cache = json.dumps({"type": "nightly", "os": "linux", "version": "2026.03.28"})
+            cache_file.write_text(cache, encoding="utf-8")
+            result = _read_cache(Path(tmpdir), "nightly", "linux")
             self.assertEqual(result, "2026.03.28")
 
+    def test_read_cache_type_mismatch(self):
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_file = Path(tmpdir) / ".resolved-version"
+            cache = json.dumps({"type": "nightly", "os": "linux", "version": "2026.03.28"})
+            cache_file.write_text(cache, encoding="utf-8")
+            result = _read_cache(Path(tmpdir), "stable", "linux")
+            self.assertIsNone(result)
+
     def test_write_cache_creates_file(self):
-        import tempfile
 
         with tempfile.TemporaryDirectory() as tmpdir:
             install_dir = Path(tmpdir) / "openscad"
-            _write_cache(install_dir, "2026.03.28")
+            _write_cache(install_dir, "nightly", "linux", "2026.03.28")
             cache_file = install_dir / ".resolved-version"
             self.assertTrue(cache_file.exists())
-            self.assertEqual(cache_file.read_text(encoding="utf-8"), "2026.03.28")
+            data = json.loads(cache_file.read_text(encoding="utf-8"))
+            self.assertEqual(data, {"type": "nightly", "os": "linux", "version": "2026.03.28"})
 
 
 if __name__ == "__main__":

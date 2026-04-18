@@ -30,9 +30,15 @@ def resolve_latest_nightly(os_name: str) -> str:
         Latest nightly version string (e.g., '2026.03.28').
 
     Raises:
+        ValueError: If os_name is not supported.
         RuntimeError: If scraping fails or no versions found.
     """
-    pattern = WINDOWS_PATTERN if os_name == "windows" else LINUX_PATTERN
+    if os_name == "windows":
+        pattern = WINDOWS_PATTERN
+    elif os_name == "linux":
+        pattern = LINUX_PATTERN
+    else:
+        raise ValueError(f"Unsupported os_name: {os_name!r}. Expected 'windows' or 'linux'.")
 
     try:
         logger.debug("Fetching snapshot listing from %s", SNAPSHOTS_URL)
@@ -97,9 +103,9 @@ def resolve_version(
     if version != "latest":
         return version
 
-    # Check cache
+    # Check cache (scoped to type + os)
     if install_dir and not force:
-        cached = _read_cache(install_dir)
+        cached = _read_cache(install_dir, openscad_type, os_name)
         if cached:
             logger.debug("Using cached resolved version: %s", cached)
             return cached
@@ -111,41 +117,49 @@ def resolve_version(
 
     logger.info("Resolved latest %s version: %s", openscad_type, resolved)
 
-    # Write cache
+    # Write cache (scoped to type + os)
     if install_dir:
-        _write_cache(install_dir, resolved)
+        _write_cache(install_dir, openscad_type, os_name, resolved)
 
     return resolved
 
 
-def _read_cache(install_dir: Path) -> Optional[str]:
+def _read_cache(install_dir: Path, openscad_type: str, os_name: str) -> Optional[str]:
     """Read cached resolved version.
 
     Args:
         install_dir: Install directory containing the cache file.
+        openscad_type: Build type ('nightly' or 'stable').
+        os_name: Operating system name.
 
     Returns:
-        Cached version string, or None if not cached.
+        Cached version string, or None if cache is missing or stale.
     """
     cache_file = install_dir / RESOLVED_VERSION_FILE
-    if cache_file.exists():
-        try:
-            return cache_file.read_text(encoding="utf-8").strip()
-        except OSError:
-            return None
-    return None
+    if not cache_file.exists():
+        return None
+    try:
+        data = json.loads(cache_file.read_text(encoding="utf-8"))
+        if data.get("type") == openscad_type and data.get("os") == os_name:
+            return data.get("version")
+        return None
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return None
 
 
-def _write_cache(install_dir: Path, version: str) -> None:
+def _write_cache(install_dir: Path, openscad_type: str, os_name: str, version: str) -> None:
     """Write resolved version to cache.
 
     Args:
         install_dir: Install directory for cache file.
+        openscad_type: Build type ('nightly' or 'stable').
+        os_name: Operating system name.
         version: Resolved version string to cache.
     """
     try:
         install_dir.mkdir(parents=True, exist_ok=True)
         cache_file = install_dir / RESOLVED_VERSION_FILE
-        cache_file.write_text(version, encoding="utf-8")
+        data = json.dumps({"type": openscad_type, "os": os_name, "version": version})
+        cache_file.write_text(data, encoding="utf-8")
     except OSError as e:
         logger.debug("Failed to write version cache: %s", e)

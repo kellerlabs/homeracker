@@ -122,10 +122,14 @@ def get_openscad_config(workspace_root: Optional[Path] = None) -> dict:
         return defaults
 
     openscad_config = data.get("openscad", {})
-    return {
-        "type": openscad_config.get("type", defaults["type"]),
-        "version": openscad_config.get("version", defaults["version"]),
-    }
+    config_type = openscad_config.get("type", defaults["type"])
+    config_version = openscad_config.get("version", defaults["version"])
+
+    valid_types = ("nightly", "stable")
+    if config_type not in valid_types:
+        raise ValueError(f"Invalid openscad.type: {config_type!r}. Expected one of {valid_types}.")
+
+    return {"type": config_type, "version": config_version}
 
 
 def get_openscad_version(os_name: str = "linux", workspace_root: Optional[Path] = None, force: bool = False) -> str:
