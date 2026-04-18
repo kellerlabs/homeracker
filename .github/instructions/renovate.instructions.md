@@ -14,8 +14,8 @@ applyTo: "renovate.json5,renovate-dependencies.json"
 ## Configuration
 
 - Main config: `renovate.json5` in project root.
-- Shared dependency preset: `renovate-dependencies.json` (consumed by downstream repos).
-- Custom datasources and managers: defined in `renovate.json5` when upstream packages lack standard tracking.
+- Shared dependency preset: `renovate-dependencies.json` — reusable custom managers and datasources for `scadm.json` tracking, consumed by downstream repos via `extends`. No `packageRules` — consumers decide grouping, schedules, and automerge.
+- Repo-specific config: `renovate.json5` — package rules, schedules, automerge, and any repo-only overrides.
 
 ## Testing
 

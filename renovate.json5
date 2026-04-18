@@ -16,29 +16,7 @@
   "semanticCommits": "enabled",
   "semanticCommitType": "deps",
   "semanticCommitScope": null,
-  // Custom managers for tracking OpenSCAD and BOSL2 versions
-  "customManagers": [
-    {
-      "customType": "jsonata",
-      "fileFormat": "json",
-      // Track pinned OpenSCAD nightly version in scadm.json (skipped when "latest")
-      "managerFilePatterns": ["/^scadm\\.json$/"],
-      "matchStrings": [
-        "openscad[version != 'latest'].{\"depName\": \"OpenSCAD\", \"currentValue\": version}"
-      ],
-      "datasourceTemplate": "custom.openscad-snapshots",
-      "extractVersionTemplate": "^OpenSCAD-(?<version>\\d{4}\\.\\d{2}\\.\\d{2})-x86_64\\.AppImage$",
-      "versioningTemplate": "loose"
-    }
-  ],
-  // Custom datasource for OpenSCAD nightly snapshots
-  "customDatasources": {
-    "openscad-snapshots": {
-      "defaultRegistryUrlTemplate": "https://files.openscad.org/snapshots/",
-      "format": "html"
-    }
-  },
-  // Package rules to group OpenSCAD updates and override semanticPrefixFixDepsChoreOthers preset
+  // Package rules to group updates and override semanticPrefixFixDepsChoreOthers preset
   "packageRules": [
     // Override the semanticPrefixFixDepsChoreOthers preset from config:recommended
     // That preset sets semanticCommitType to "chore" for everything by default
