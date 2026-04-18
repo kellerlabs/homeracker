@@ -19,14 +19,14 @@
   // Custom managers for tracking OpenSCAD and BOSL2 versions
   "customManagers": [
     {
-      "customType": "regex",
+      "customType": "jsonata",
+      "fileFormat": "json",
       // Track pinned OpenSCAD nightly version in scadm.json (skipped when "latest")
       "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "\"openscad\":\\s*\\{[^}]*\"version\":\\s*\"(?<currentValue>\\d{4}\\.\\d{2}\\.\\d{2})\"[^}]*\\}"
+        "openscad.{\"depName\": \"OpenSCAD\", \"currentValue\": version}"
       ],
       "datasourceTemplate": "custom.openscad-snapshots",
-      "depNameTemplate": "OpenSCAD",
       "extractVersionTemplate": "^OpenSCAD-(?<version>\\d{4}\\.\\d{2}\\.\\d{2})-x86_64\\.AppImage$",
       "versioningTemplate": "loose"
     }
