@@ -44,6 +44,7 @@ Example: See `cmd/scadm/scadm/flatten.py` for reference.
 - **Unit tests** (`test_*.py` without markers): fast, no network, mocked dependencies. Run via pre-commit hooks.
 - **Integration tests** (`test_cli_integration.py`, marked `@pytest.mark.integration`): exercise real CLI commands against temp workspaces. Run via CI workflow (`.github/workflows/integration-tests.yml`) on ubuntu + windows matrix.
   - **Slow tests** (`@pytest.mark.slow`): download binaries from the network. Subset of integration tests.
+  - Non-`slow` integration tests may still make lightweight network calls (e.g., version resolution) but avoid large downloads.
 
 ### Running Integration Tests
 

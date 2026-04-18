@@ -24,7 +24,7 @@ CLI integration tests exercise real `scadm` commands against temporary workspace
 
 | Marker | What | Network | Speed |
 |--------|------|---------|-------|
-| `integration` (no `slow`) | Config parsing, `--info`, `--check`, vscode settings, cache | ❌ | ~5s |
+| `integration` (no `slow`) | Config parsing, `--info`, `--check`, vscode settings, cache | ⚡ version resolution only | ~5s |
 | `integration` + `slow` | Binary download, library install | ✅ | ~60s |
 
 #### Running Locally

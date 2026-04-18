@@ -33,9 +33,13 @@ jobs:
 
       - name: Install libfuse2 (Linux AppImage support)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfuse2
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfuse2
 
       - name: Run integration tests
         run: |
+          set -euo pipefail
           cd cmd/scadm
           python -m pytest tests/test_cli_integration.py -m integration -v --timeout=300

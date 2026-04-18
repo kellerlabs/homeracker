@@ -28,7 +28,7 @@ def _run_scadm(*args, cwd, env=None):
         capture_output=True,
         text=True,
         env=merged_env,
-        timeout=120,
+        timeout=300,
         check=False,
     )
 

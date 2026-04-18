@@ -190,7 +190,7 @@ def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[
         cmd = [str(exe), "--version"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         output = result.stderr + result.stdout
-        match = re.search(r"OpenSCAD version (\d{4}\.\d{2}\.\d{2})", output)
+        match = re.search(r"OpenSCAD version (\d{4}\.\d{2}\.\d{2}(?:\.\S*)?)", output)
         if match:
             return match.group(1)
     except (OSError, subprocess.SubprocessError) as e:
@@ -199,7 +199,12 @@ def get_installed_openscad_version(install_dir: Path, os_name: str) -> Optional[
 
 
 def _write_installed_version(install_dir: Path, version: str) -> None:
-    """Write installed version marker."""
+    """Write the installed version marker file.
+
+    Args:
+        install_dir: OpenSCAD installation directory.
+        version: Installed OpenSCAD version string.
+    """
     (install_dir / ".installed-version").write_text(version, encoding="utf-8")
 
 
