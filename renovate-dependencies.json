@@ -6,7 +6,7 @@
       "fileFormat": "json",
       "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "dependencies[$contains(version, /^[a-f0-9]{40}$/)].{\"depName\": repository, \"currentDigest\": version, \"currentValue\": \"master\", \"packageName\": \"https://github.com/\" & repository & \".git\"}"
+        "dependencies[$match(version, /^[a-f0-9]{40}$/)].{\"depName\": repository, \"currentDigest\": version, \"currentValue\": \"master\", \"packageName\": \"https://github.com/\" & repository & \".git\"}"
       ],
       "datasourceTemplate": "git-refs",
       "versioningTemplate": "git"
@@ -26,7 +26,7 @@
       "fileFormat": "json",
       "managerFilePatterns": ["/^scadm\\.json$/"],
       "matchStrings": [
-        "dependencies[repository != 'kellerlabs/homeracker' and $not($contains(version, /^[a-f0-9]{40}$/))].{\"depName\": repository, \"currentValue\": version}"
+        "dependencies[repository != 'kellerlabs/homeracker' and $not($match(version, /^[a-f0-9]{40}$/))].{\"depName\": repository, \"currentValue\": version}"
       ],
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
