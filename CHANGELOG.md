@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.2.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.1.0...homeracker-v3.2.0) (2026-04-18)
+
+
+### ✨ Features
+
+* **flatten:** resilient parsing, dead-code elimination, section tolerance ([#327](https://github.com/kellerlabs/homeracker/issues/327)) ([3509d66](https://github.com/kellerlabs/homeracker/commit/3509d660beaffba18146d43faa64d78390e17944))
+* improve makerworld description tooling ([#341](https://github.com/kellerlabs/homeracker/issues/341)) ([a8417dc](https://github.com/kellerlabs/homeracker/commit/a8417dc527472f5d41252da75abe71db5b576dec))
+* migrate images to assets repo, add MakerWorld extract/publish tooling ([#337](https://github.com/kellerlabs/homeracker/issues/337)) ([5d9da76](https://github.com/kellerlabs/homeracker/commit/5d9da76d5f84bbecef7da5db18597922c3c17d41))
+* **scadm:** dynamic OpenSCAD version resolution ([#311](https://github.com/kellerlabs/homeracker/issues/311)) ([026c5d8](https://github.com/kellerlabs/homeracker/commit/026c5d85cfbaa599ff6ffc838017f1eb3c8b9942))
+
+
+### 📦 Dependencies
+
+* update dependency markdown to v3.10.2 ([#340](https://github.com/kellerlabs/homeracker/issues/340)) ([16c73d6](https://github.com/kellerlabs/homeracker/commit/16c73d6ed9afe3c7a9296294368b6d40b9e54860))
+
+
+### ♻️ Code Refactoring
+
+* **renovate:** centralize custom managers in shared preset ([#344](https://github.com/kellerlabs/homeracker/issues/344)) ([564c218](https://github.com/kellerlabs/homeracker/commit/564c218f65f6d6f01cee34f455dd37c6b8d0a0d1))
+
 ## [3.1.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.0.0...homeracker-v3.1.0) (2026-04-12)
 
 

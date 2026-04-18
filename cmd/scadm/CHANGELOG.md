@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.6.3...scadm-v0.7.0) (2026-04-18)
+
+
+### ✨ Features
+
+* **flatten:** resilient parsing, dead-code elimination, section tolerance ([#327](https://github.com/kellerlabs/homeracker/issues/327)) ([3509d66](https://github.com/kellerlabs/homeracker/commit/3509d660beaffba18146d43faa64d78390e17944))
+* **scadm:** dynamic OpenSCAD version resolution ([#311](https://github.com/kellerlabs/homeracker/issues/311)) ([026c5d8](https://github.com/kellerlabs/homeracker/commit/026c5d85cfbaa599ff6ffc838017f1eb3c8b9942))
+
+
+### 🐛 Bug Fixes
+
+* **scadm:** remove searchPaths from vscode settings ([1b09f88](https://github.com/kellerlabs/homeracker/commit/1b09f887af6cf297d4055ecac29e112776cc7ec6))
+* **scadm:** remove searchPaths from vscode settings ([#342](https://github.com/kellerlabs/homeracker/issues/342)) ([d960286](https://github.com/kellerlabs/homeracker/commit/d960286b5fcfa6d839bc5580b84c4a926599d706))
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.04.16 ([#339](https://github.com/kellerlabs/homeracker/issues/339)) ([8109557](https://github.com/kellerlabs/homeracker/commit/8109557c15c2d67418eddb5c3f118ec07476b2f2))
+
 ## [0.6.3](https://github.com/kellerlabs/homeracker/compare/scadm-v0.6.2...scadm-v0.6.3) (2026-04-11)
 
 
