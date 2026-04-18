@@ -29,7 +29,7 @@ jobs:
           python-version: '3.14'
 
       - name: Install scadm from source
-        run: pip install -e cmd/scadm pytest
+        run: pip install -e cmd/scadm pytest pytest-timeout
 
       - name: Install libfuse2 (Linux AppImage support)
         if: runner.os == 'Linux'
