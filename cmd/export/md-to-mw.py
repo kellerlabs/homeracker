@@ -155,6 +155,49 @@ def github_source_url(file_path: Path) -> str | None:
     return f"https://github.com/{owner_repo}/blob/main/{rel_path}"
 
 
+def resolve_relative_links(html: str, input_path: Path) -> str:
+    """Convert relative href links to absolute GitHub blob URLs.
+
+    MakerWorld's editor cannot follow relative file paths. This replaces any
+    relative ``href`` values (e.g. ``CUSTOMIZATION.md``) with their GitHub
+    blob URL so readers land on the correct page.
+
+    External URLs (http/https), anchors (#), and mailto: links are left as-is.
+
+    Args:
+        html: HTML content with potentially relative href values.
+        input_path: Absolute path to the DESCRIPTION.md file.
+
+    Returns:
+        HTML with relative hrefs resolved to GitHub URLs.
+    """
+    try:
+        repo_root = Path(
+            subprocess.check_output(["git", "rev-parse", "--show-toplevel"], cwd=input_path.parent, text=True).strip()
+        )
+        remote = subprocess.check_output(["git", "remote", "get-url", "origin"], cwd=repo_root, text=True).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return html
+
+    match = re.search(r"github\.com[:/](.+?)(?:\.git)?$", remote)
+    if not match:
+        return html
+    owner_repo = match.group(1)
+
+    def replace_href(m: re.Match) -> str:
+        href = m.group(1)
+        if href.startswith(("http://", "https://", "#", "mailto:")):
+            return m.group(0)
+        resolved = (input_path.parent / href).resolve()
+        try:
+            rel_path = resolved.relative_to(repo_root).as_posix()
+        except ValueError:
+            return m.group(0)
+        return f'href="https://github.com/{owner_repo}/blob/main/{rel_path}"'
+
+    return re.sub(r'href="([^"]*)"', replace_href, html)
+
+
 def convert(input_path: Path) -> str:
     """Convert a DESCRIPTION.md file to HTML with embedded local images.
 
@@ -169,6 +212,7 @@ def convert(input_path: Path) -> str:
 
     html = markdown.markdown(md_content, extensions=["tables", "fenced_code", "sane_lists"])
     html = embed_local_images(html, input_path.parent)
+    html = resolve_relative_links(html, input_path)
     html = convert_youtube_embeds(html)
     html = add_block_spacing(html)
 
