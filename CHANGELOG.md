@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.3.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.2.0...homeracker-v3.3.0) (2026-04-19)
+
+
+### ✨ Features
+
+* **agents:** add makerworld-description agent ([#350](https://github.com/kellerlabs/homeracker/issues/350)) ([2fa4850](https://github.com/kellerlabs/homeracker/commit/2fa4850fa5ce07f4a9fa56bcd67321dfacc5ffb5))
+
+
+### 🐛 Bug Fixes
+
+* **export:** resolve relative links to GitHub URLs in md-to-mw ([#351](https://github.com/kellerlabs/homeracker/issues/351)) ([a44d361](https://github.com/kellerlabs/homeracker/commit/a44d361f260b75dec5f8a117898fb2a82bc3d200))
+* **renovate:** revert $match to $contains in JSONata queries ([#345](https://github.com/kellerlabs/homeracker/issues/345)) ([a10a9bd](https://github.com/kellerlabs/homeracker/commit/a10a9bde77e208f202e4e28087bce6f1f172d8f1))
+
+
+### 📦 Dependencies
+
+* update dependency openscad to v2026.04.16 ([#347](https://github.com/kellerlabs/homeracker/issues/347)) ([411d5ba](https://github.com/kellerlabs/homeracker/commit/411d5ba8788df547104f42c5b4343460af4e0ab2))
+* update pre-commit hook renovatebot/pre-commit-hooks to v43.129.0 ([#348](https://github.com/kellerlabs/homeracker/issues/348)) ([aabbce3](https://github.com/kellerlabs/homeracker/commit/aabbce3bf3aa67934b6b659e333439de464579a4))
+
+
+### 📚 Documentation
+
+* **core:** add foot insert and update changelog in MakerWorld description ([#352](https://github.com/kellerlabs/homeracker/issues/352)) ([467a0db](https://github.com/kellerlabs/homeracker/commit/467a0dbd15c7840c53bac38dd817125b8ae57bd9))
+* **core:** slim down MakerWorld description ([#349](https://github.com/kellerlabs/homeracker/issues/349)) ([df5b4a1](https://github.com/kellerlabs/homeracker/commit/df5b4a1fae47fb180cbde11a1a6582ed53726997))
+
 ## [3.2.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.1.0...homeracker-v3.2.0) (2026-04-18)
 
 
