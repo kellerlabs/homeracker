@@ -51,8 +51,17 @@ https://raw.githubusercontent.com/kellerlabs/assets/main/<repo>/models/<name>/ma
 
 `md-to-mw.py` passes absolute URLs through unchanged. Base64 embedding only applies to local relative paths.
 
+### Create (New Description)
+
+Use the `@makerworld-description` Copilot agent to create a new `DESCRIPTION.md` from scratch:
+
+1. Invoke: `@makerworld-description foot homeracker-exclusive`
+2. The agent interviews you for model details, verifies images in the assets repo, creates `DESCRIPTION.md`, enhances `CUSTOMIZATION.md` with images, and opens a PR
+3. Optionally publish with `md-to-mw.py` (see above)
+
 ## 📚 References
 
 - [ADR-001](../decisions/ADR-001-image-hosting-assets-repo.md) — why images live in a separate repo
-- `.github/skills/makerworld-description/SKILL.md` — Copilot skill for extraction
+- `.github/agents/makerworld-description.agent.md` — Copilot agent for creating new descriptions
+- `.github/skills/makerworld-description/SKILL.md` — Copilot skill for extracting existing descriptions
 - `cmd/export/md-to-mw.py` — conversion script
