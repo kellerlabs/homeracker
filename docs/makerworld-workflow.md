@@ -35,6 +35,17 @@ This generates `DESCRIPTION.html` (gitignored). Open it in a browser, `Ctrl+A`, 
 2. Re-run `md-to-mw.py` to regenerate HTML
 3. Re-paste into MakerWorld
 
+### Update (After Model Changes)
+
+Use the `@makerworld-description` Copilot skill's **Update flow** to refresh a description after a release:
+
+1. Invoke the skill with a request like "update core description with latest changes"
+2. The skill reads `CHANGELOG.md`, filters model-relevant changes, and proposes edits
+3. Review the proposed changelog entries and feature bullet updates
+4. The skill checks the assets repo for new images and suggests placements
+5. Frontmatter gets an `updated: YYYY-MM-DD` field
+6. Publish with `md-to-mw.py` (see above)
+
 ## 📁 Image & Layout Formatting
 
 > ⚠️ **Cross-repo workflow**: This skill requires both the source repo and [`kellerlabs/assets`](https://github.com/kellerlabs/assets). Maintainers push images directly to `assets/main`. Outside collaborators must open a PR on the assets repo for image changes.

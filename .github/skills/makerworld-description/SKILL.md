@@ -2,10 +2,11 @@
 name: makerworld-description
 description: >
   Extract MakerWorld model descriptions into git-tracked DESCRIPTION.md files,
-  or convert them back to pasteable HTML for MakerWorld's CKEditor.
+  update them after model changes, or convert them back to pasteable HTML for
+  MakerWorld's CKEditor.
   USE FOR: extracting descriptions from MakerWorld model pages, creating new
-  DESCRIPTION.md files, updating existing descriptions, converting markdown
-  descriptions to HTML for MakerWorld publishing.
+  DESCRIPTION.md files, updating existing descriptions after releases,
+  converting markdown descriptions to HTML for MakerWorld publishing.
   DO NOT USE FOR: uploading files to MakerWorld, managing print profiles, or
   OpenSCAD model creation (use @makerworld-model agent instead).
 ---
@@ -14,10 +15,11 @@ description: >
 
 ## 📌 What
 
-Manages MakerWorld model descriptions as git-tracked `DESCRIPTION.md` files. Supports two flows:
+Manages MakerWorld model descriptions as git-tracked `DESCRIPTION.md` files. Supports three flows:
 
 1. **Extract** (MakerWorld → Git): Scrape a MakerWorld model page and produce a clean `DESCRIPTION.md` + images
-2. **Publish** (Git → MakerWorld): Convert `DESCRIPTION.md` to HTML for pasting into MakerWorld's CKEditor
+2. **Update** (Git ↻ Git): Update an existing `DESCRIPTION.md` after model changes — new changelog entries, feature bullets, images
+3. **Publish** (Git → MakerWorld): Convert `DESCRIPTION.md` to HTML for pasting into MakerWorld's CKEditor
 
 ## 🔧 Extract Flow
 
@@ -120,7 +122,49 @@ Convert a `DESCRIPTION.md` file to HTML for pasting into MakerWorld.
 2. This generates `DESCRIPTION.html` in the same directory (gitignored).
 3. Instruct the user to open the HTML file in a browser, select all (`Ctrl+A`), copy (`Ctrl+C`), then paste into MakerWorld's description editor.
 
-## 📁 File Convention
+## � Update Flow
+
+Update an existing `DESCRIPTION.md` after model changes (new release, new features, removed parts, etc.).
+
+### Steps
+
+1. **Locate the description**: Read the model's `DESCRIPTION.md` and its YAML frontmatter (`extracted` or `created` date, `makerworld_url`).
+
+2. **Detect the source repo**: Infer the repo from the file path (`homeracker` or `homeracker-exclusive`). Present the suggestion and ask for confirmation before proceeding.
+
+3. **Read the changelog**: Read `CHANGELOG.md` in the source repo. Identify releases since the frontmatter date (`extracted` or `created`) or, if no date is usable, since the last changelog entry already mentioned in the description.
+
+4. **Filter model-relevant changes**: From the new releases, extract only changes that affect this model's user-facing description:
+   - ✅ New features, new parts, breaking changes, removed parts
+   - ❌ CI/infra, docs-only, refactors, dependency bumps
+
+   Present a summary of relevant changes and ask the user to confirm or adjust before editing.
+
+5. **Update the description**:
+   - **Changelog section**: Add new entries at the top of the `📜 Changelog` list. Follow the existing emoji + version + dash + description pattern. Drop entries that are no longer the most recent 3–4 (keep the list concise).
+   - **Feature sections**: Add, update, or remove bullets in "What's in the Box" or equivalent sections to reflect added/removed parts or features.
+   - **Flag rewrites**: If a feature was removed or significantly changed, flag the affected section with a `<!-- TODO: verify — feature X was removed/changed in vN.N.N -->` comment and ask the user for guidance.
+
+6. **Check for new images**: Scan `assets/<repo>/models/<name>/makerworld/images/` for images added since the last update. If new images exist, suggest where to insert them. If none exist but the new features would benefit from visuals, ask the user whether to add any.
+
+7. **Update frontmatter**: Add or update the `updated` field with today's date:
+   ```yaml
+   ---
+   makerworld_url: https://makerworld.com/en/models/<id>-<slug>
+   extracted: 2026-04-13
+   updated: 2026-04-19
+   ---
+   ```
+
+8. **Verify**: Read back the file and check:
+   - Frontmatter dates are consistent (updated ≥ extracted/created)
+   - Changelog entries are in reverse-chronological order
+   - No stale feature bullets remain for removed parts
+   - Image references still resolve
+
+9. **Publish reminder**: After committing, remind the user to re-run `md-to-mw.py` and re-paste into MakerWorld if the model is already published (check `makerworld_url` ≠ `TBD`).
+
+## �📁 File Convention
 
 ```
 models/<name>/makerworld/
