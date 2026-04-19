@@ -97,7 +97,7 @@ Or simply scan this QR-Code:
 
 ## 📜 Changelog
 
-- � v2.0.0 — Standalone foot insert added to Core (was previously part of the connector)
+- 🦶 v2.0.0 — Standalone foot insert added to Core (was previously part of the connector)
 - 🫳 v1.8.0 — Lock Pins now have extended grip versions and neck extension options
 - 🌐 v1.1.0 — All core parts now customizable in OpenSCAD (connectors, supports, lock pins)
 
