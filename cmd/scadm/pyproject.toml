@@ -46,3 +46,18 @@ markers = [
     "integration: CLI integration tests (require network, run with -m integration)",
     "slow: slow tests that download binaries (run with -m slow)",
 ]
+
+[tool.coverage.run]
+source = ["scadm"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+]
+
+[tool.mutmut]
+paths_to_mutate = ["scadm/"]
+tests_dir = "tests/"
