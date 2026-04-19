@@ -61,7 +61,7 @@ Use the `@makerworld-description` Copilot agent to create a new `DESCRIPTION.md`
 
 ## 📚 References
 
-- [ADR-001](../decisions/ADR-001-image-hosting-assets-repo.md) — why images live in a separate repo
+- [ADR-001](decisions/ADR-001-image-hosting-assets-repo.md) — why images live in a separate repo
 - `.github/agents/makerworld-description.agent.md` — Copilot agent for creating new descriptions
 - `.github/skills/makerworld-description/SKILL.md` — Copilot skill for extracting existing descriptions
 - `cmd/export/md-to-mw.py` — conversion script

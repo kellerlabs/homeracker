@@ -54,7 +54,7 @@ One paragraph explaining what the model does, followed by a hero image, then 2-4
 
 These vary per model (e.g. "How It Works", "Mounting Options", "What You Get", "In Action"). Use images from the assets repo. Rules:
 - **Title images are off-limits** — the user selects these for MakerWorld's title carousel only
-- Use `<img>` tags with `width="800"` for all images (standard convention)
+- Use `<img>` tags with `width="800"` only when the image's native width is at least 800px; otherwise use the native width for smaller images (for example, logo `300`, QR `328`)
 - Describe what each image actually shows — don't make assumptions about content you can't verify
 - Link to the customization guide for printing instructions instead of duplicating them
 
@@ -133,13 +133,12 @@ Full changelog: [CHANGELOG.md](https://github.com/kellerlabs/homeracker/blob/mai
 
 ### YAML Frontmatter
 
-Every `DESCRIPTION.md` starts with:
+Every `DESCRIPTION.md` starts with YAML frontmatter. Use only the field that applies — `created` for new descriptions, `extracted` for descriptions pulled from MakerWorld (never both):
 
 ```yaml
 ---
 makerworld_url: <URL or TBD>
-created: YYYY-MM-DD  # for new descriptions
-extracted: YYYY-MM-DD  # for extracted descriptions
+created: YYYY-MM-DD
 ---
 ```
 
