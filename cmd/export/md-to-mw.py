@@ -186,12 +186,12 @@ def resolve_relative_links(html: str, input_path: Path) -> str:
 
     def replace_href(m: re.Match) -> str:
         href = m.group(1)
-        if href.startswith(("http://", "https://", "#", "mailto:")):
+        if href.startswith(("//", "#")) or re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", href):
             return m.group(0)
-        resolved = (input_path.parent / href).resolve()
         try:
+            resolved = (input_path.parent / href).resolve()
             rel_path = resolved.relative_to(repo_root).as_posix()
-        except ValueError:
+        except (ValueError, OSError):
             return m.group(0)
         return f'href="https://github.com/{owner_repo}/blob/main/{rel_path}"'
 

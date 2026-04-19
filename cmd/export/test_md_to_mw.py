@@ -93,7 +93,8 @@ class TestResolveRelativeLinks:
     def _mock_git(self, repo_root: Path):
         """Return a side_effect for subprocess.check_output that fakes git commands."""
 
-        def side_effect(cmd, **kwargs):  # pylint: disable=unused-argument  # subprocess.check_output signature
+        # pylint: disable-next=unused-argument  # subprocess.check_output signature
+        def side_effect(cmd, **kwargs):
             if "rev-parse" in cmd:
                 return str(repo_root) + "\n"
             if "get-url" in cmd:
@@ -126,6 +127,24 @@ class TestResolveRelativeLinks:
         html = '<a href="mailto:a@b.com">Email</a>'
         result = md_to_mw.resolve_relative_links(html, desc)
         assert 'href="mailto:a@b.com"' in result
+
+    def test_tel_scheme_unchanged(self, git_env):
+        _, desc = git_env
+        html = '<a href="tel:+1234567890">Call</a>'
+        result = md_to_mw.resolve_relative_links(html, desc)
+        assert 'href="tel:+1234567890"' in result
+
+    def test_ftp_scheme_unchanged(self, git_env):
+        _, desc = git_env
+        html = '<a href="ftp://files.example.com/data">FTP</a>'
+        result = md_to_mw.resolve_relative_links(html, desc)
+        assert 'href="ftp://files.example.com/data"' in result
+
+    def test_protocol_relative_unchanged(self, git_env):
+        _, desc = git_env
+        html = '<a href="//example.com/page">Link</a>'
+        result = md_to_mw.resolve_relative_links(html, desc)
+        assert 'href="//example.com/page"' in result
 
     def test_git_unavailable_returns_unchanged(self, tmp_path):
         desc = tmp_path / "DESCRIPTION.md"
