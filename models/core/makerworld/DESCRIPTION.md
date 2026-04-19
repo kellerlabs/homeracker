@@ -26,8 +26,6 @@ Check out this [Cyberpunk-themed 10" Rack](https://makerworld.com/en/models/1353
 
 ## 📦 What's in the Box?
 
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPRVc4JUmEkFLJrKs4KKTrcxTlJOTWMBnlKQWcTsaC5xwjQU4zew&s=10&ec=72940545" alt="What's in the box?" width="400">
-
 This model contains the **core parts** of HomeRacker:
 
 - **Supports** — from x2 to x17 in the print profile, customizable up to x100
@@ -69,15 +67,15 @@ Raise issues or contribute on [GitHub](https://github.com/kellerlabs/homeracker/
 
 The Core Model is, and will always remain, free for you to use! ✅
 
-It's shared under **CC-BY-SA**, which allows commercial use. You can create extensions and derivatives, and even charge money for them! 🤑 All I ask is proper attribution by linking to my MakerWorld profile: https://makerworld.com/en/@kellerlab 🙏
+It's licensed under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**: https://creativecommons.org/licenses/by-sa/4.0/ — which allows commercial use. You can create extensions and derivatives, and even charge money for them! 🤑 Please give proper attribution to **KellerLab** and include a reference to **CC BY-SA 4.0**; linking my MakerWorld profile is a great way to do that: https://makerworld.com/en/@kellerlab 🙏
 
 #### ⚠️ Important Boundary
 
-This commercial freedom applies only to the Core Model. All KellerLab extensions and other derivatives I release are my intellectual property and are not included.
+This commercial freedom applies only to the Core Model described here. Other KellerLab extensions, add-ons, or derivative models that I publish are separate releases and may be offered under different licenses or terms.
 
 ## 🏘️ Community Driven
 
-Anyone can create and share extensions for HomeRacker without licensing restrictions!
+Anyone can create and share HomeRacker extensions under the open spec and CC BY-SA 4.0 terms!
 
 - 🧑‍💻 **Designers** — Go ahead and build! I'd love to link your creations in the catalog.
 - 💭 **Idea-Generators** — Pitch your idea to me with as much detail as possible!
