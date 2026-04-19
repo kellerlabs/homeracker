@@ -31,6 +31,7 @@ This model contains the **core parts** of HomeRacker:
 - **Supports** — from x2 to x17 in the print profile, customizable up to x100
 - **Connectors** — all permutations, sane defaults in the print profile
 - **Lock Pins** — standard, extended grip, and neck extension variants
+- **Foot Inserts** — snap into any connector arm for stability and grip (also available as a [standalone model](https://makerworld.com/en/models/2655123-foot-insert-for-homeracker))
 - **Diagonal Supports** — stabilizers for load bearing or large builds (separate 3mf folder)
 
 All parts are fully customizable in the Parametric Model Maker (v1.8.0+).
@@ -96,8 +97,8 @@ Or simply scan this QR-Code:
 
 ## 📜 Changelog
 
+- � v2.0.0 — Standalone foot insert added to Core (was previously part of the connector)
 - 🫳 v1.8.0 — Lock Pins now have extended grip versions and neck extension options
 - 🌐 v1.1.0 — All core parts now customizable in OpenSCAD (connectors, supports, lock pins)
-- 🤑 License changed from CC-BY-NC-SA to CC-BY-SA — commercial use now allowed
 
 Full changelog: [CHANGELOG.md](https://github.com/kellerlabs/homeracker/blob/main/CHANGELOG.md)
