@@ -44,6 +44,7 @@
       // If checks fail, Renovate will not automerge
       "matchPackageNames": [
         "BelfrySCAD/BOSL2",
+        "kellerlab-pre-commit-hooks",
         "markdown"
       ],
       "schedule": ["* * * * 6"],
