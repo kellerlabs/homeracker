@@ -13,6 +13,9 @@ models/.flatten-checksums
 # Generated MakerWorld HTML (from md-to-mw.py)
 DESCRIPTION.html
 
+# Self-test render logs
+_test*.log
+
 # Images — hosted in kellerlabs/assets repo
 *.png
 *.jpg
