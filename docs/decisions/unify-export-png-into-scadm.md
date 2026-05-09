@@ -30,9 +30,9 @@ Implement `scadm export-png` as a Python module in `cmd/scadm/scadm/export_png.p
 ### Key Design Choices
 
 - **Moved `find_openscad_exe()`** from `render.py` to `installer.py` for shared use
-- **Preserved all defaults** from the shell scripts (camera, colorscheme, image size)
+- **Standardized defaults** (camera, image size, `renders/` output subfolder from homeracker; colorscheme `BeforeDawn` from exclusive — chosen as the unified default)
 - **Linux CI**: auto-wraps with `xvfb-run` for headless rendering
-- **21 unit tests** + **4 integration tests** (including a slow happy-path that installs OpenSCAD and renders a cube)
+- **22 unit tests** + **4 integration tests** (including a slow happy-path that installs OpenSCAD and renders a cube)
 
 ## 📊 Consequences
 

@@ -37,14 +37,15 @@ class ExportPngTests(unittest.TestCase):
         return scad
 
     @patch("scadm.export_png.subprocess.run")
-    def test_default_output_next_to_input(self, mock_run):
-        """Default output is <input_basename>.png next to input file."""
+    def test_default_output_in_renders_subfolder(self, mock_run):
+        """Default output is renders/<input_basename>.png."""
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root, "models/test.scad")
-            expected_output = scad.with_suffix(".png")
+            expected_output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            expected_output.parent.mkdir(parents=True, exist_ok=True)
             expected_output.write_text("fake png", encoding="utf-8")
 
             result = export_png(scad, workspace_root=root)
@@ -77,9 +78,10 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, workspace_root=root)
@@ -95,9 +97,10 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, camera="1,2,3,4,5,6,7", imgsize="1200,900", colorscheme="Cornfield", workspace_root=root)
@@ -113,9 +116,10 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, projection="o", workspace_root=root)
@@ -129,9 +133,10 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, workspace_root=root)
@@ -145,9 +150,10 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, defines=["variant=2", "split=true"], workspace_root=root)
@@ -164,11 +170,12 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
             preset = root / "presets.json"
             preset.write_text("{}", encoding="utf-8")
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, param_file=preset, param_set="both_sides", workspace_root=root)
@@ -185,9 +192,10 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, workspace_root=root)
@@ -203,9 +211,10 @@ class ExportPngTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, workspace_root=root)
@@ -248,14 +257,30 @@ class ExportPngTests(unittest.TestCase):
             self.assertFalse(result)
 
     @patch("scadm.export_png.subprocess.run")
+    def test_zero_byte_output_returns_false(self, mock_run):
+        """Returns False when OpenSCAD produces a zero-byte file."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root, _ = self._make_workspace(tmp)
+            scad = self._make_scad(root)
+            output = scad.parent / "renders" / "test.png"
+
+            mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(b"")
+
+            result = export_png(scad, workspace_root=root)
+            self.assertFalse(result)
+
+    @patch("scadm.export_png.subprocess.run")
     def test_input_file_is_last_arg(self, mock_run):
         """Input .scad file is the last argument to OpenSCAD."""
         with tempfile.TemporaryDirectory() as tmp:
             root, _ = self._make_workspace(tmp)
             scad = self._make_scad(root)
-            output = scad.with_suffix(".png")
+            output = scad.parent / "renders" / "test.png"
 
             mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+            output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text("fake png", encoding="utf-8")
 
             export_png(scad, workspace_root=root)

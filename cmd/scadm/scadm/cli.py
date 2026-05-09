@@ -6,7 +6,7 @@ import sys
 from importlib.metadata import version, PackageNotFoundError
 from pathlib import Path
 
-from scadm.export_png import export_png
+from scadm.export_png import DEFAULT_CAMERA, DEFAULT_COLORSCHEME, DEFAULT_IMGSIZE, export_png
 from scadm.flatten import compute_checksum, flatten_all, flatten_file
 from scadm.installer import install_libraries, install_openscad
 from scadm.render import discover_flatten_files, render_files
@@ -117,6 +117,10 @@ def _handle_export_png(args):
         logger.error("Input .scad file is required")
         sys.exit(1)
 
+    if args.param_set and not args.param_file:
+        logger.error("-P/--param_set requires -p/--param_file")
+        sys.exit(1)
+
     input_file = Path(args.file).resolve()
     output = Path(args.output).resolve() if args.output else None
     param_file = Path(args.param_file) if args.param_file else None
@@ -197,15 +201,17 @@ def main():
     export_png_parser.add_argument("file", help="Input .scad file")
     export_png_parser.add_argument(
         "--camera",
-        default="0,0,0,55,0,35,80",
-        help="Camera params: translate_x,y,z,rot_x,y,z,dist (default: 0,0,0,55,0,35,80)",
+        default=DEFAULT_CAMERA,
+        help=f"Camera params: translate_x,y,z,rot_x,y,z,dist (default: {DEFAULT_CAMERA})",
     )
-    export_png_parser.add_argument("--imgsize", default="800,600", help="Image size: width,height (default: 800,600)")
     export_png_parser.add_argument(
-        "--colorscheme", default="BeforeDawn", help="OpenSCAD color scheme (default: BeforeDawn)"
+        "--imgsize", default=DEFAULT_IMGSIZE, help=f"Image size: width,height (default: {DEFAULT_IMGSIZE})"
     )
-    export_png_parser.add_argument("--output", help="Output file path (default: <input_basename>.png)")
-    export_png_parser.add_argument("--projection", help="Projection: (o)rtho or (p)erspective")
+    export_png_parser.add_argument(
+        "--colorscheme", default=DEFAULT_COLORSCHEME, help=f"OpenSCAD color scheme (default: {DEFAULT_COLORSCHEME})"
+    )
+    export_png_parser.add_argument("--output", help="Output file path (default: renders/<input_basename>.png)")
+    export_png_parser.add_argument("--projection", choices=["o", "p"], help="Projection: (o)rtho or (p)erspective")
     export_png_parser.add_argument(
         "-D", dest="defines", action="append", metavar="key=value", help="OpenSCAD variable override (repeatable)"
     )

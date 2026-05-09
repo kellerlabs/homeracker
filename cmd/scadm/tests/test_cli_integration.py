@@ -261,12 +261,14 @@ def test_export_png_renders_cube(tmp_path):
     install = _run_scadm("install", "--openscad-only", cwd=tmp_path)
     assert install.returncode == 0, f"Install failed:\n{install.stderr}"
 
+    (tmp_path / "bin" / "openscad" / "libraries").mkdir(parents=True, exist_ok=True)
+
     scad = tmp_path / "test.scad"
     scad.write_text("cube(10);", encoding="utf-8")
 
     result = _run_scadm("export-png", str(scad), cwd=tmp_path)
     assert result.returncode == 0, f"export-png failed:\n{result.stderr}"
 
-    png = tmp_path / "test.png"
-    assert png.exists(), "PNG output not created"
+    png = tmp_path / "renders" / "test.png"
+    assert png.exists(), "PNG output not created in renders/ subfolder"
     assert png.stat().st_size > 0, "PNG output is empty"

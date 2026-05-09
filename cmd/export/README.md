@@ -150,7 +150,7 @@ Exports an isometric preview PNG from any OpenSCAD model. Now part of `scadm`:
 scadm export-png <input.scad> [--camera CAM] [--imgsize WxH] [--colorscheme NAME] [--output PATH]
 ```
 
-Output is written next to the input file as `<basename>.png` (or custom path via `--output`).
+Output is written to a `renders/` subfolder as `renders/<basename>.png` (or custom path via `--output`).
 
 ### Examples
 

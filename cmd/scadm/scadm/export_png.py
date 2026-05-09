@@ -37,7 +37,7 @@ def export_png(
         camera: Camera params (translate_x,y,z,rot_x,y,z,dist).
         imgsize: Image size (width,height).
         colorscheme: OpenSCAD color scheme name.
-        output: Output file path (default: <input_basename>.png next to input).
+        output: Output file path (default: renders/<input_basename>.png).
         projection: Projection type ('o' for ortho, 'p' for perspective).
         defines: List of OpenSCAD variable overrides (key=value strings).
         param_file: Customizer parameter file (JSON).
@@ -68,7 +68,7 @@ def export_png(
         return False
 
     if output is None:
-        output = input_file.with_suffix(".png")
+        output = input_file.parent / "renders" / input_file.with_suffix(".png").name
     else:
         output = output.resolve()
 
@@ -109,6 +109,9 @@ def export_png(
 
     if result.returncode == 0 and output.exists():
         size = output.stat().st_size
+        if size == 0:
+            logger.error("Export produced empty file: %s", output)
+            return False
         logger.info("Exported: %s (%d bytes)", output, size)
         return True
 
