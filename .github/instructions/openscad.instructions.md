@@ -55,7 +55,7 @@ For quick geometry verification during development:
 
    # Fallback (direct openscad.com):
    bin/openscad/openscad.com models/<type>/parts/<file>.scad \
-     -o models/<type>/parts/_test_output.png \
+     -o models/<type>/parts/_test_output.png --render \
      --imgsize=1200,900 --colorscheme BeforeDawn --viewall --autocenter \
      -p models/<type>/parts/_test_preset.json -P my_test
    ```
