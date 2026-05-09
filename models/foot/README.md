@@ -54,7 +54,7 @@ foot(disable_chamfer=true);
 To generate or refresh previews:
 
 ```sh
-./cmd/export/export-png.sh models/foot/parts/foot.scad
+scadm export-png models/foot/parts/foot.scad
 ```
 
 ## 📚 References

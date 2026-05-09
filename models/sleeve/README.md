@@ -37,7 +37,7 @@ Implemented as a [BOSL2 attachable](https://github.com/BelfrySCAD/BOSL2/wiki/Tut
 To generate or refresh previews:
 
 ```sh
-./cmd/export/export-png.sh models/sleeve/parts/sleeve.scad
+scadm export-png models/sleeve/parts/sleeve.scad
 ```
 
 ## 📚 References

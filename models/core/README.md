@@ -90,7 +90,7 @@ Junction pieces that join supports in multiple directions.
 To generate or refresh previews:
 
 ```bash
-./cmd/export/export-png.sh models/core/parts/<part>.scad
+scadm export-png models/core/parts/<part>.scad
 ```
 
 ## 📝 License

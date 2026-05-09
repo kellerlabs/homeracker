@@ -36,6 +36,6 @@ applyTo: "**/*.scad"
 
 ## Preview PNGs
 
-- When adding or modifying a parts file, **generate a preview PNG** with `cmd/export/export-png.sh`.
+- When adding or modifying a parts file, **generate a preview PNG** with `scadm export-png`.
 - PNGs are stored in a `renders/` subfolder next to their source (e.g., `parts/foo.scad` → `parts/renders/foo.png`).
 - Update the model's README 📸 Catalog table and the `models/README.md` index accordingly.

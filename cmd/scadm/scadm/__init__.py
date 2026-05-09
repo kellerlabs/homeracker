@@ -5,6 +5,7 @@ __version__ = "0.7.0"
 from scadm.installer import (
     install_openscad,
     install_libraries,
+    find_openscad_exe,
     get_installed_openscad_version,
     get_installed_lib_version,
 )

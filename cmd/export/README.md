@@ -144,23 +144,23 @@ Output: `filename.webp: 4032x2268`
 
 ## PNG Export
 
-Exports an isometric preview PNG from any OpenSCAD model.
+Exports an isometric preview PNG from any OpenSCAD model. Now part of `scadm`:
 
 ```bash
-./cmd/export/export-png.sh <input.scad> [--camera CAM] [--imgsize WxH] [--colorscheme NAME]
+scadm export-png <input.scad> [--camera CAM] [--imgsize WxH] [--colorscheme NAME] [--output PATH]
 ```
 
-Output is written to a `renders/` subfolder next to the input file as `renders/<basename>.png`.
+Output is written to a `renders/` subfolder as `renders/<basename>.png` (or custom path via `--output`).
 
 ### Examples
 
 ```bash
 # Default diagonal view
-./cmd/export/export-png.sh models/pinpusher/pinpusher.scad
+scadm export-png models/pinpusher/pinpusher.scad
 
 # Custom camera and size
-./cmd/export/export-png.sh models/core/parts/connector.scad --imgsize 1200,900
+scadm export-png models/core/parts/connector.scad --imgsize 1200,900
 
 # Custom camera angle
-./cmd/export/export-png.sh models/core/parts/lockpin.scad --camera 0,0,0,45,0,25,100
+scadm export-png models/core/parts/lockpin.scad --camera 0,0,0,45,0,25,100
 ```

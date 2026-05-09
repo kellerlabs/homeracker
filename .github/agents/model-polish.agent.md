@@ -46,7 +46,7 @@ Review **every** `.scad` file in `lib/` and `parts/`:
 
 1. For each `.scad` file in `parts/`, generate a preview PNG:
    ```bash
-   ./cmd/export/export-png.sh models/<name>/parts/<part>.scad
+   scadm export-png models/<name>/parts/<part>.scad
    ```
 2. Verify the PNG was created in the `renders/` subfolder (e.g., `parts/renders/<part>.png`).
 3. Update the model README 📸 Catalog table to reference each PNG from `parts/renders/`.

@@ -6,6 +6,7 @@ import sys
 from importlib.metadata import version, PackageNotFoundError
 from pathlib import Path
 
+from scadm.export_png import DEFAULT_CAMERA, DEFAULT_COLORSCHEME, DEFAULT_IMGSIZE, export_png
 from scadm.flatten import compute_checksum, flatten_all, flatten_file
 from scadm.installer import install_libraries, install_openscad
 from scadm.render import discover_flatten_files, render_files
@@ -110,6 +111,38 @@ def _handle_render(args, render_parser):
         sys.exit(1)
 
 
+def _handle_export_png(args):
+    """Handle the export-png subcommand."""
+    if not args.file:
+        logger.error("Input .scad file is required")
+        sys.exit(1)
+
+    if args.param_set and not args.param_file:
+        logger.error("-P/--param_set requires -p/--param_file")
+        sys.exit(1)
+
+    input_file = Path(args.file).resolve()
+    output = Path(args.output).resolve() if args.output else None
+    param_file = Path(args.param_file) if args.param_file else None
+
+    try:
+        success = export_png(
+            input_file,
+            camera=args.camera,
+            imgsize=args.imgsize,
+            colorscheme=args.colorscheme,
+            output=output,
+            projection=args.projection,
+            defines=args.defines,
+            param_file=param_file,
+            param_set=args.param_set,
+        )
+        sys.exit(0 if success else 1)
+    except (FileNotFoundError, ValueError) as e:
+        logger.error("%s", e)
+        sys.exit(1)
+
+
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -161,6 +194,30 @@ def main():
         "--flattened", action="store_true", help="Render flattened output files from scadm.json flatten dest dirs"
     )
 
+    # Export-PNG command
+    export_png_parser = subparsers.add_parser(
+        "export-png", help="Export isometric preview PNG from an OpenSCAD model file"
+    )
+    export_png_parser.add_argument("file", help="Input .scad file")
+    export_png_parser.add_argument(
+        "--camera",
+        default=DEFAULT_CAMERA,
+        help=f"Camera params: translate_x,y,z,rot_x,y,z,dist (default: {DEFAULT_CAMERA})",
+    )
+    export_png_parser.add_argument(
+        "--imgsize", default=DEFAULT_IMGSIZE, help=f"Image size: width,height (default: {DEFAULT_IMGSIZE})"
+    )
+    export_png_parser.add_argument(
+        "--colorscheme", default=DEFAULT_COLORSCHEME, help=f"OpenSCAD color scheme (default: {DEFAULT_COLORSCHEME})"
+    )
+    export_png_parser.add_argument("--output", help="Output file path (default: renders/<input_basename>.png)")
+    export_png_parser.add_argument("--projection", choices=["o", "p"], help="Projection: (o)rtho or (p)erspective")
+    export_png_parser.add_argument(
+        "-D", dest="defines", action="append", metavar="key=value", help="OpenSCAD variable override (repeatable)"
+    )
+    export_png_parser.add_argument("-p", dest="param_file", metavar="file.json", help="Customizer parameter file")
+    export_png_parser.add_argument("-P", dest="param_set", metavar="set_name", help="Parameter set name")
+
     args = parser.parse_args()
 
     # Show help if no command provided
@@ -173,6 +230,7 @@ def main():
         "install": lambda: _handle_install(args),
         "flatten": lambda: _handle_flatten(args, flatten_parser),
         "render": lambda: _handle_render(args, render_parser),
+        "export-png": lambda: _handle_export_png(args),
     }
 
     handlers[args.command]()
