@@ -23,7 +23,7 @@ Open `parts/pinpusher.scad` in OpenSCAD and export as STL. Print flat — optimi
 To generate or refresh previews:
 
 ```bash
-./cmd/export/export-png.sh models/pinpusher/parts/pinpusher.scad
+scadm export-png models/pinpusher/parts/pinpusher.scad
 ```
 
 ## 📚 References

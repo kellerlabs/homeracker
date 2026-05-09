@@ -28,7 +28,7 @@ The model auto-calculates gap fillers and offsets to snap to the HomeRacker 15mm
 To generate or refresh previews:
 
 ```bash
-./cmd/export/export-png.sh models/flexmount/flexmount.scad
+scadm export-png models/flexmount/flexmount.scad
 ```
 
 ## 📚 References

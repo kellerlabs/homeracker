@@ -34,7 +34,7 @@ Open `parts/racklink.scad` in OpenSCAD and use the **Customizer** panel.
 To generate or refresh previews:
 
 ```sh
-./cmd/export/export-png.sh models/racklink/parts/racklink.scad
+scadm export-png models/racklink/parts/racklink.scad
 ```
 
 ## 📚 References

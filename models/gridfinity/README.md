@@ -78,7 +78,7 @@ All dimensions follow [grizzie17's Gridfinity specification](https://www.printab
 To generate or refresh previews:
 
 ```bash
-./cmd/export/export-png.sh models/gridfinity/parts/<part>.scad
+scadm export-png models/gridfinity/parts/<part>.scad
 ```
 
 ## 📝 License

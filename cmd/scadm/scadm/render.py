@@ -13,39 +13,9 @@ from pathlib import Path
 from typing import Optional
 
 from scadm.flatten import discover_scad_files, load_flatten_config
-from scadm.installer import get_install_paths, get_system_platform, get_workspace_root
+from scadm.installer import find_openscad_exe, get_install_paths, get_system_platform, get_workspace_root
 
 logger = logging.getLogger(__name__)
-
-
-def _find_openscad_exe(install_dir: Path) -> Optional[Path]:
-    """Find the OpenSCAD executable in the install directory.
-
-    Args:
-        install_dir: The bin/openscad directory.
-
-    Returns:
-        Path to the executable, or None if not found.
-    """
-    system = get_system_platform()
-    if system == "windows":
-        exe = install_dir / "openscad.com"
-        if exe.exists():
-            return exe
-        exe = install_dir / "openscad.exe"
-        if exe.exists():
-            return exe
-    else:
-        exe = install_dir / "openscad"
-        if exe.exists():
-            return exe
-        exe = install_dir / "OpenSCAD.AppImage"
-        if exe.exists():
-            return exe
-        # Versioned AppImage, e.g. OpenSCAD-2025.03.17.ai22092-x86_64.AppImage
-        for candidate in sorted(install_dir.glob("OpenSCAD-*.AppImage")):
-            return candidate
-    return None
 
 
 def render_file(scad_file: Path, workspace_root: Optional[Path] = None) -> bool:
@@ -63,7 +33,7 @@ def render_file(scad_file: Path, workspace_root: Optional[Path] = None) -> bool:
 
     install_dir, libraries_dir = get_install_paths(workspace_root)
 
-    openscad_exe = _find_openscad_exe(install_dir)
+    openscad_exe = find_openscad_exe(install_dir)
     if openscad_exe is None:
         logger.error("OpenSCAD executable not found in %s. Run `scadm install` first.", install_dir)
         return False

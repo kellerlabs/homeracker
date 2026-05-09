@@ -27,7 +27,7 @@ Mount with appropriate wall anchors. The connector slot accepts a standard HomeR
 To generate or refresh previews:
 
 ```bash
-./cmd/export/export-png.sh models/wallmount/parts/wallmount.scad
+scadm export-png models/wallmount/parts/wallmount.scad
 ```
 
 ## 📚 References

@@ -219,3 +219,54 @@ def test_vscode_creates_settings(tmp_path):
 
     settings = json.loads(settings_file.read_text(encoding="utf-8"))
     assert "scad-lsp.launchPath" in settings
+
+
+# --- scadm export-png ---
+
+
+@pytest.mark.integration
+def test_export_png_help():
+    result = subprocess.run([SCADM, "export-png", "--help"], capture_output=True, text=True, timeout=10, check=False)
+    assert result.returncode == 0
+    assert "--camera" in result.stdout
+    assert "--imgsize" in result.stdout
+    assert "--colorscheme" in result.stdout
+    assert "--output" in result.stdout
+    assert "--projection" in result.stdout
+
+
+@pytest.mark.integration
+def test_export_png_missing_file(tmp_path):
+    _write_config(tmp_path)
+    result = _run_scadm("export-png", "nonexistent.scad", cwd=tmp_path)
+    assert result.returncode != 0
+
+
+@pytest.mark.integration
+def test_export_png_no_openscad(tmp_path):
+    _write_config(tmp_path)
+    scad = tmp_path / "test.scad"
+    scad.write_text("cube(1);", encoding="utf-8")
+
+    result = _run_scadm("export-png", str(scad), cwd=tmp_path)
+    assert result.returncode != 0
+    assert "scadm install" in result.stderr
+
+
+@pytest.mark.integration
+@pytest.mark.slow
+def test_export_png_renders_cube(tmp_path):
+    _write_config(tmp_path, openscad={"type": "nightly", "version": "latest"})
+
+    install = _run_scadm("install", "--openscad-only", cwd=tmp_path)
+    assert install.returncode == 0, f"Install failed:\n{install.stderr}"
+
+    scad = tmp_path / "test.scad"
+    scad.write_text("cube(10);", encoding="utf-8")
+
+    result = _run_scadm("export-png", str(scad), cwd=tmp_path)
+    assert result.returncode == 0, f"export-png failed:\n{result.stderr}"
+
+    png = tmp_path / "test.png"
+    assert png.exists(), "PNG output not created"
+    assert png.stat().st_size > 0, "PNG output is empty"

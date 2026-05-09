@@ -34,7 +34,7 @@ Example configurations:
 To generate or refresh previews:
 
 ```bash
-./cmd/export/export-png.sh models/rackmount_ears/parts/rackmount_ears.scad
+scadm export-png models/rackmount_ears/parts/rackmount_ears.scad
 ```
 
 ## 📚 References

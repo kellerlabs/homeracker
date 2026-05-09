@@ -1,4 +1,4 @@
-# 📋 ADR-001: Image Hosting in Separate Assets Repository
+# 📋 Host Images in Separate Assets Repository
 
 ## 📌 Status
 
@@ -44,7 +44,7 @@ assets/
 | Image Type | Location | Tracking |
 |---|---|---|
 | Manual images (photos, diagrams, logos) | `kellerlabs/assets` repo | Tracked in assets |
-| Auto-generated render PNGs (`export-png.sh`) | Source repo `*/renders/*.png` | Tracked in source |
+| Auto-generated render PNGs (`scadm export-png`) | Source repo `*/<basename>.png` | Tracked in source |
 | MakerWorld render previews (`render-mw-modules.sh`) | Source repo `*/renders/*.png` | Tracked in source |
 
 ### URL Pattern
@@ -83,5 +83,5 @@ Source repos block all image extensions and whitelist only auto-generated render
 ## 📚 References
 
 - [kellerlabs/assets](https://github.com/kellerlabs/assets) — the assets repository
-- `cmd/export/export-png.sh` — auto-generates render PNGs to `*/renders/`
+- `scadm export-png` — auto-generates render PNGs next to source `.scad` files
 - `cmd/export/md-to-mw.py` — converts DESCRIPTION.md to MakerWorld HTML

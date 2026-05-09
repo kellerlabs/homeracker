@@ -58,7 +58,7 @@ A frame-mounted pocket grid that clips directly into a HomeRacker rack opening v
 To generate or refresh previews:
 
 ```sh
-./cmd/export/export-png.sh models/inception/parts/<part>.scad
+scadm export-png models/inception/parts/<part>.scad
 ```
 
 ## 📚 References
