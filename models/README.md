@@ -51,6 +51,14 @@ Connects independent rack columns together via double U-shaped sleeves for bette
 
 See [racklink/README.md](racklink/README.md) for details.
 
+### 🖼️ Panel
+
+Plain mounting panel that fits into the HomeRacker scaffold. Use as-is for blank panels or as a base for custom cutouts (keystone jacks, switches, etc.). Supports Inter-Fit (inset) and Full Cover (overlap) integration types.
+
+![Panel](./panel/parts/renders/panel.png)
+
+See [panel/README.md](panel/README.md) for details.
+
 ### 🦶 Foot
 
 Modular foot insert that plugs into any connector arm used as contact surface at the bottom of a rack. Decoupled from the connector for maximum flexibility — print in TPU for better grip and load distribution.

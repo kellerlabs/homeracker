@@ -39,3 +39,30 @@ applyTo: "**/*.scad"
 - When adding or modifying a parts file, **generate a preview PNG** with `scadm export-png`.
 - PNGs are stored in a `renders/` subfolder next to their source (e.g., `parts/foo.scad` → `parts/renders/foo.png`).
 - Update the model's README 📸 Catalog table and the `models/README.md` index accordingly.
+
+## Self-Test Renders
+
+For quick geometry verification during development:
+
+1. Create a temporary preset JSON in `parts/` with `_test_` prefix:
+   ```json
+   { "parameterSets": { "my_test": { "param": "value" } } }
+   ```
+2. Prefer `scadm export-png` when available, fall back to direct OpenSCAD:
+   ```bash
+   # Preferred (when scadm export-png is available):
+   scadm export-png models/<type>/parts/<file>.scad -p _test_preset.json -P my_test
+
+   # Fallback (direct OpenSCAD — use openscad.com on Windows, openscad on Linux/macOS):
+   bin/openscad/openscad.com models/<type>/parts/<file>.scad \
+     -o models/<type>/parts/_test_output.png --render \
+     --imgsize=1200,900 --colorscheme BeforeDawn --viewall --autocenter \
+     -p models/<type>/parts/_test_preset.json -P my_test
+   ```
+3. **Render multiple angles** — a single view can miss geometry issues:
+   - Default (`--viewall --autocenter`): overall shape
+   - Front: `--camera=0,0,0,90,0,0,0`
+   - Side: `--camera=0,0,0,90,0,90,0`
+   - Close-up of changed area: `--camera=x,y,z,rx,ry,rz,dist`
+4. Use `debug_colors=true` and low `$fn` (32) for fast iteration.
+5. **Clean up** all `_test_*` files after verification.
