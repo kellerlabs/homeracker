@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.4.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.3.2...homeracker-v3.4.0) (2026-05-10)
+
+
+### ✨ Features
+
+* **panel:** add parametric panel library ([#368](https://github.com/kellerlabs/homeracker/issues/368)) ([64f3595](https://github.com/kellerlabs/homeracker/commit/64f35958db8446c46a7fafed87f56631a5db61f7))
+* **scadm:** add export-png command and decision-records skill ([#366](https://github.com/kellerlabs/homeracker/issues/366)) ([4fac176](https://github.com/kellerlabs/homeracker/commit/4fac17681d01b9cb58f98809fbb37494db55445e))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.739 ([#365](https://github.com/kellerlabs/homeracker/issues/365)) ([3505872](https://github.com/kellerlabs/homeracker/commit/35058727417964aa8c7d5badb81fb9c1f036679f))
+
 ## [3.3.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.3.1...homeracker-v3.3.2) (2026-05-04)
 
 
