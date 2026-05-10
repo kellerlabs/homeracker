@@ -19,9 +19,12 @@ Open `parts/panel.scad` in OpenSCAD and use the **Customizer** panel.
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
 | `panel_type` | 1 (Inter-Fit) | 1–2 | Panel integration type |
-| `units_x` | 4 | 2–10 | Panel width in HR units |
-| `units_y` | 2 | 2–10 | Panel height in HR units |
+| `units_x` | 4 | 2–16 | Panel width in HR units |
+| `units_y` | 2 | 2–16 | Panel height in HR units |
 | `panel_clearance` | 0.0 | 0–0.4 | Full Cover only — gap between adjacent panels (mm) |
+| `support_contact_x` | false | — | Add protrusions on horizontal supports (only when units_x > 2) |
+| `support_contact_y` | false | — | Add protrusions on vertical supports (only when units_y > 2) |
+| `debug_colors` | false | — | Show distinct colors per section for debugging |
 | `chamfer_enabled` | true | — | Apply chamfers to edges |
 
 ## 📸 Catalog

@@ -211,24 +211,25 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
     color_this(debug_colors ? HR_BLUE : HR_PANEL_PRIMARY_COLOR)
     cuboid([panel_width, panel_depth, BASE_STRENGTH],chamfer=chamfer_enabled ? BASE_CHAMFER : 0, except=TOP){
       // Corner Mounts
-      wall_chamfer = panel_type == HR_PANEL_TYPE_FULLCOVER && units_x > 2;
-      align(TOP,LEFT+BACK) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, inner_chamfer_primary=wall_chamfer);
-      align(TOP,LEFT+FRONT) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=90, inner_chamfer_secondary=wall_chamfer);
-      align(TOP,RIGHT+FRONT) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=180, inner_chamfer_primary=wall_chamfer);
-      align(TOP,RIGHT+BACK) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=270, inner_chamfer_secondary=wall_chamfer);
+      wall_chamfer_x = panel_type == HR_PANEL_TYPE_FULLCOVER && units_x > 2 && !support_contact_x;
+      wall_chamfer_y = panel_type == HR_PANEL_TYPE_FULLCOVER && units_y > 2 && !support_contact_y;
+      align(TOP,LEFT+BACK) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, inner_chamfer_primary=wall_chamfer_x, inner_chamfer_secondary=wall_chamfer_y);
+      align(TOP,LEFT+FRONT) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=90, inner_chamfer_primary=wall_chamfer_y, inner_chamfer_secondary=wall_chamfer_x);
+      align(TOP,RIGHT+FRONT) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=180, inner_chamfer_primary=wall_chamfer_x, inner_chamfer_secondary=wall_chamfer_y);
+      align(TOP,RIGHT+BACK) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=270, inner_chamfer_primary=wall_chamfer_y, inner_chamfer_secondary=wall_chamfer_x);
       // Horizontal walls / support contact (in case of >2 units in x direction)
+      wall_color = debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR;
+      wall_chamfer_size = chamfer_enabled ? BASE_CHAMFER : 0;
+      wall_height = panel_type == HR_PANEL_TYPE_INTERFIT ? get_panel_mount_height(panel_type) : BASE_STRENGTH;
+      fullcover_wall_ext = panel_type == HR_PANEL_TYPE_FULLCOVER ? 2 * BASE_CHAMFER : 0;
       if(units_x > 2) {
         if(support_contact_x) {
           align(BACK,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_x, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=-90);
           align(FRONT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_x, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=90);
         } else {
-          horizonal_wall_length = (units_x - 2) * BASE_UNIT + (panel_type == HR_PANEL_TYPE_FULLCOVER ? 2 * BASE_CHAMFER : 0);
-          horizontal_wall_dimensions = [horizonal_wall_length, BASE_STRENGTH, panel_type == HR_PANEL_TYPE_INTERFIT ? get_panel_mount_height(panel_type) : BASE_STRENGTH];
-          wall_color = debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR;
-          color_this(wall_color)
-          align(TOP,BACK) cuboid(horizontal_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[BACK+TOP]);
-          color_this(wall_color)
-          align(TOP,FRONT) cuboid(horizontal_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[TOP+FRONT]);
+          h_wall = [(units_x - 2) * BASE_UNIT + fullcover_wall_ext, BASE_STRENGTH, wall_height];
+          color_this(wall_color) align(TOP,BACK) cuboid(h_wall, chamfer=wall_chamfer_size, edges=[BACK+TOP]);
+          color_this(wall_color) align(TOP,FRONT) cuboid(h_wall, chamfer=wall_chamfer_size, edges=[TOP+FRONT]);
         }
       }
       // Vertical walls / support contact (in case of >2 units in y direction)
@@ -237,13 +238,9 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
           align(LEFT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
           align(RIGHT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, mirror=true);
         } else {
-          vertical_wall_length = (units_y - 2) * BASE_UNIT;
-          vertical_wall_dimensions = [BASE_STRENGTH, vertical_wall_length, panel_type == HR_PANEL_TYPE_INTERFIT ? get_panel_mount_height(panel_type) : BASE_STRENGTH];
-          wall_color = debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR;
-          color_this(wall_color)
-          align(TOP,LEFT) cuboid(vertical_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[LEFT+TOP]);
-          color_this(wall_color)
-          align(TOP,RIGHT) cuboid(vertical_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[TOP+RIGHT]);
+          v_wall = [BASE_STRENGTH, (units_y - 2) * BASE_UNIT + fullcover_wall_ext, wall_height];
+          color_this(wall_color) align(TOP,LEFT) cuboid(v_wall, chamfer=wall_chamfer_size, edges=[LEFT+TOP]);
+          color_this(wall_color) align(TOP,RIGHT) cuboid(v_wall, chamfer=wall_chamfer_size, edges=[TOP+RIGHT]);
         }
       }
       // Add full cover overlaps if needed

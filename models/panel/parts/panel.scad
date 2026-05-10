@@ -8,9 +8,9 @@ include <../lib/panel.scad>
 // Panel type
 panel_type = 1; // [1:Interfit, 2:Full Cover]
 // Panel width in HomeRacker units
-units_x = 4; // [2:1:10]
+units_x = 4; // [2:1:16]
 // Panel height in HomeRacker units
-units_y = 2; // [2:1:10]
+units_y = 2; // [2:1:16]
 
 /* [Full Cover Parameters] */
 // Clearance between each panel (defaults to 0.0mm). Panel area will be reduced by this amount.
