@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.7.0...scadm-v0.8.0) (2026-05-10)
+
+
+### ✨ Features
+
+* **scadm:** add export-png command and decision-records skill ([#366](https://github.com/kellerlabs/homeracker/issues/366)) ([4fac176](https://github.com/kellerlabs/homeracker/commit/4fac17681d01b9cb58f98809fbb37494db55445e))
+
 ## [0.7.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.6.3...scadm-v0.7.0) (2026-04-18)
 
 
