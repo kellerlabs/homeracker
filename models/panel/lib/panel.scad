@@ -98,14 +98,16 @@ module connector_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, anchor=CENTER, s
   }
 }
 
-/** Support Mount Plate for vertical mounting of panels
-Only applicable if units_y > 2, otherwise the corner mounts already provide enough lockpin holes for mounting the panel to the vertical supports.
-Oriented per default for mounting on the left side
+/** Support Mount Plate for direct support bar contact
+Provides a protrusion (bottom plate + wall + bridges) that rests directly on a support bar.
+Only applicable if units > 2, otherwise the corner mounts already provide enough lockpin holes.
+Oriented per default for mounting on the left side (Y-span, X-protrusion).
+Use spin=90/-90 for horizontal placement (X-span, Y-protrusion).
 */
-module vertical_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units_y, anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=false,mirror=false) {
-  assert(units_y > 2, "Vertical mount plate is only needed for panels taller than 2 units");
+module support_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units, anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=false,mirror=false) {
+  assert(units > 2, "Support mount plate is only needed for panels larger than 2 units");
 
-  net_units = units_y - 2;
+  net_units = units - 2;
 
   bottom_plate_width = BASE_STRENGTH*2 + TOLERANCE/2;
   bottom_plate_depth = BASE_UNIT * net_units - TOLERANCE;
@@ -178,6 +180,8 @@ module mount_corner(panel_type=HR_PANEL_TYPE_INTERFIT, anchor=CENTER, spin=0, or
  *   units_y (int): Panel height in HomeRacker units (min 2).
  *   panel_type (int, default=HR_PANEL_TYPE_INTERFIT): Panel type — 1=Inter-Fit, 2=Full Cover.
  *   panel_clearance (float, default=0.0): Full Cover only — clearance between adjacent panels (mm).
+ *   support_contact_x (bool, default=false): Add protrusions on horizontal supports for direct bar contact.
+ *   support_contact_y (bool, default=false): Add protrusions on vertical supports for direct bar contact.
  *   debug_colors (bool, default=false): Use distinct HR_ colors per section for visualization.
  *   chamfer_enabled (bool, default=false): Apply chamfers to edges.
  *   anchor (vector, default=CENTER): BOSL2 anchor point.
@@ -185,6 +189,7 @@ module mount_corner(panel_type=HR_PANEL_TYPE_INTERFIT, anchor=CENTER, spin=0, or
  *   orient (vector, default=UP): BOSL2 orientation vector.
  */
 module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_clearance = 0.0,
+  support_contact_x=false, support_contact_y=false,
   anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=false
   ) {
   assert(panel_type == HR_PANEL_TYPE_INTERFIT || panel_type == HR_PANEL_TYPE_FULLCOVER, "Invalid panel type");
@@ -196,9 +201,10 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
   panel_depth = units_y * BASE_UNIT - interfit_deduction;
   attachable_height = BASE_STRENGTH + get_panel_mount_height(panel_type);
 
-  attachable_width = panel_width + (units_y > 2 ? BASE_STRENGTH*2 : 0);
+  attachable_width = panel_width + (support_contact_y && units_y > 2 ? BASE_STRENGTH*2 : 0);
+  attachable_depth = panel_depth + (support_contact_x && units_x > 2 ? BASE_STRENGTH*2 : 0);
 
-  attachable_dimensions = [attachable_width, panel_depth, attachable_height];
+  attachable_dimensions = [attachable_width, attachable_depth, attachable_height];
 
   attachable(anchor, spin, orient,size=attachable_dimensions) {
     down(attachable_height/2-BASE_STRENGTH/2)
@@ -210,20 +216,35 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
       align(TOP,LEFT+FRONT) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=90, inner_chamfer_secondary=wall_chamfer);
       align(TOP,RIGHT+FRONT) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=180, inner_chamfer_primary=wall_chamfer);
       align(TOP,RIGHT+BACK) mount_corner(panel_type=panel_type, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=270, inner_chamfer_secondary=wall_chamfer);
-      // Horizontal walls (in case of >2 units in x direction)
+      // Horizontal walls / support contact (in case of >2 units in x direction)
       if(units_x > 2) {
-        horizonal_wall_length = (units_x - 2) * BASE_UNIT + (panel_type == HR_PANEL_TYPE_FULLCOVER ? 2 * BASE_CHAMFER : 0);
-        horizontal_wall_dimensions = [horizonal_wall_length, BASE_STRENGTH, panel_type == HR_PANEL_TYPE_INTERFIT ? get_panel_mount_height(panel_type) : BASE_STRENGTH];
-        wall_color = debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR;
-        color_this(wall_color)
-        align(TOP,BACK) cuboid(horizontal_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[BACK+TOP]);
-        color_this(wall_color)
-        align(TOP,FRONT) cuboid(horizontal_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[TOP+FRONT]);
+        if(support_contact_x) {
+          align(BACK,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_x, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=-90);
+          align(FRONT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_x, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=90);
+        } else {
+          horizonal_wall_length = (units_x - 2) * BASE_UNIT + (panel_type == HR_PANEL_TYPE_FULLCOVER ? 2 * BASE_CHAMFER : 0);
+          horizontal_wall_dimensions = [horizonal_wall_length, BASE_STRENGTH, panel_type == HR_PANEL_TYPE_INTERFIT ? get_panel_mount_height(panel_type) : BASE_STRENGTH];
+          wall_color = debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR;
+          color_this(wall_color)
+          align(TOP,BACK) cuboid(horizontal_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[BACK+TOP]);
+          color_this(wall_color)
+          align(TOP,FRONT) cuboid(horizontal_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[TOP+FRONT]);
+        }
       }
-      // Vertical walls (in case of >2 units in y direction)
+      // Vertical walls / support contact (in case of >2 units in y direction)
       if(units_y > 2) {
-        align(LEFT,BOTTOM,overlap=BASE_STRENGTH) vertical_mount_plate(panel_type=panel_type, units_y=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
-        align(RIGHT,BOTTOM,overlap=BASE_STRENGTH) vertical_mount_plate(panel_type=panel_type, units_y=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, mirror=true);
+        if(support_contact_y) {
+          align(LEFT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+          align(RIGHT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, mirror=true);
+        } else {
+          vertical_wall_length = (units_y - 2) * BASE_UNIT;
+          vertical_wall_dimensions = [BASE_STRENGTH, vertical_wall_length, panel_type == HR_PANEL_TYPE_INTERFIT ? get_panel_mount_height(panel_type) : BASE_STRENGTH];
+          wall_color = debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR;
+          color_this(wall_color)
+          align(TOP,LEFT) cuboid(vertical_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[LEFT+TOP]);
+          color_this(wall_color)
+          align(TOP,RIGHT) cuboid(vertical_wall_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=[TOP+RIGHT]);
+        }
       }
       // Add full cover overlaps if needed
       if(panel_type == HR_PANEL_TYPE_FULLCOVER) {
