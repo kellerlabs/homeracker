@@ -48,12 +48,12 @@ For quick geometry verification during development:
    ```json
    { "parameterSets": { "my_test": { "param": "value" } } }
    ```
-2. Prefer `scadm export-png` when available, fall back to `bin/openscad/openscad.com`:
+2. Prefer `scadm export-png` when available, fall back to direct OpenSCAD:
    ```bash
    # Preferred (when scadm export-png is available):
    scadm export-png models/<type>/parts/<file>.scad -p _test_preset.json -P my_test
 
-   # Fallback (direct openscad.com):
+   # Fallback (direct OpenSCAD — use openscad.com on Windows, openscad on Linux/macOS):
    bin/openscad/openscad.com models/<type>/parts/<file>.scad \
      -o models/<type>/parts/_test_output.png --render \
      --imgsize=1200,900 --colorscheme BeforeDawn --viewall --autocenter \

@@ -6,7 +6,7 @@ include <../lib/panel.scad>
 
 /* [General Parameters] */
 // Panel type
-panel_type = 1; // [1:Interfit, 2:Full Cover]
+panel_type = 1; // [1:Inter-Fit, 2:Full Cover]
 // Panel width in HomeRacker units
 units_x = 4; // [2:1:16]
 // Panel height in HomeRacker units

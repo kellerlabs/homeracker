@@ -71,8 +71,6 @@ Chamfers are already oriented that way
 module connector_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=false,inner_chamfer=false) {
 
   attachable_dimensions = [HR_PANEL_CORNER_MOUNT_SIDE_LENGTH, BASE_STRENGTH, get_panel_mount_height(panel_type)];
-  lockpin_hole_dimensions = [LOCKPIN_HOLE_SIDE_LENGTH, BASE_STRENGTH, LOCKPIN_HOLE_SIDE_LENGTH];
-  lockpin_chamfer_dimensions = [LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2, LOCKPIN_HOLE_CHAMFER, LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2];
   lockpin_hole_offset_horizontal = (BASE_STRENGTH+TOLERANCE)/2;
   lockpin_hole_offset_vertical = get_lockpin_hole_offset_vertical(panel_type);
 
@@ -104,7 +102,7 @@ Only applicable if units > 2, otherwise the corner mounts already provide enough
 Oriented per default for mounting on the left side (Y-span, X-protrusion).
 Use spin=90/-90 for horizontal placement (X-span, Y-protrusion).
 */
-module support_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units, anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=false,mirror=false) {
+module support_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units, anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=false,mirrored=false) {
   assert(units > 2, "Support mount plate is only needed for panels larger than 2 units");
 
   net_units = units - 2;
@@ -128,7 +126,7 @@ module support_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units, anchor=CENT
   lockpin_hole_offset_vertical = get_lockpin_hole_offset_vertical(panel_type);
 
   attachable(anchor, spin, orient,size=attachable_dimensions) {
-    mirror([mirror ? 1 : 0,0,0])
+    mirror([mirrored ? 1 : 0, 0, 0])
     down((bottom_plate_height+wall_height)/2 - BASE_STRENGTH/2)
     color_this(debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR)
     cuboid([bottom_plate_width, bottom_plate_depth, bottom_plate_height],chamfer=chamfer_enabled ? BASE_CHAMFER : 0,edges=[BOTTOM,LEFT],except=TOP){
@@ -141,13 +139,13 @@ module support_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units, anchor=CENT
       align(TOP,RIGHT+BACK) diff() cuboid(bridge_dimensions) {
         if(chamfer_enabled) tag("remove") corner_mask([TOP+BACK+LEFT]) chamfer_corner_mask(chamfer=BASE_CHAMFER/2);
         align(BACK,TOP+RIGHT) cuboid(gap_filler_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=TOP+LEFT);
-        attach(LEFT,BACK) color_this(HR_WHITE) cuboid(gap_filler_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=TOP+LEFT);
+        attach(LEFT,BACK) color_this(debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR) cuboid(gap_filler_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=TOP+LEFT);
       }
       color(debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR)
       align(TOP,RIGHT+FRONT) diff() cuboid(bridge_dimensions) {
         if(chamfer_enabled) tag("remove") corner_mask([TOP+FWD+LEFT]) chamfer_corner_mask(chamfer=BASE_CHAMFER/2);
         align(FRONT,TOP+RIGHT) cuboid(gap_filler_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=TOP+LEFT);
-        attach(LEFT,FRONT) color_this(HR_WHITE) cuboid(gap_filler_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=TOP+LEFT);
+        attach(LEFT,FRONT) color_this(debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR) cuboid(gap_filler_dimensions, chamfer=chamfer_enabled ? BASE_CHAMFER : 0, edges=TOP+LEFT);
       }
     }
     children();
@@ -236,7 +234,7 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
       if(units_y > 2) {
         if(support_contact_y) {
           align(LEFT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
-          align(RIGHT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, mirror=true);
+          align(RIGHT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, mirrored=true);
         } else {
           v_wall = [BASE_STRENGTH, (units_y - 2) * BASE_UNIT + fullcover_wall_ext, wall_height];
           color_this(wall_color) align(TOP,LEFT) cuboid(v_wall, chamfer=wall_chamfer_size, edges=[LEFT+TOP]);
