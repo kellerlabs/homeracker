@@ -24,6 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// Epsilon
+EPSILON = 0.01; // Small value to enhance preview rendering because of overlapping faces.
+
 // Fitting tolerance between mating parts
 TOLERANCE = 0.2; // in mm
 
