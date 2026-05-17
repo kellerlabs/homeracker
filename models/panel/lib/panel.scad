@@ -245,33 +245,52 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
       wall_chamfer_size = chamfer_enabled ? BASE_CHAMFER : 0;
       wall_height = panel_type == HR_PANEL_TYPE_INTERFIT ? get_panel_mount_height(panel_type) : BASE_STRENGTH;
       fullcover_wall_ext = panel_type == HR_PANEL_TYPE_FULLCOVER ? 2 * BASE_CHAMFER : 0;
+      lockpin_hole_offset_vertical = get_lockpin_hole_offset_vertical(panel_type);
       if(units_x > 2) {
+        net_units_x = units_x - 2;
         if(mount_north) {
           align(BACK,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_x, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=-90);
         } else {
           h_wall = [(units_x - 2) * BASE_UNIT + fullcover_wall_ext, BASE_STRENGTH, wall_height];
-          color_this(wall_color) align(TOP,BACK) cuboid(h_wall, chamfer=wall_chamfer_size, edges=[BACK+TOP]);
+          color_this(wall_color) align(TOP,BACK) diff() cuboid(h_wall, chamfer=wall_chamfer_size, edges=[BACK+TOP]){
+            if(panel_type == HR_PANEL_TYPE_INTERFIT)
+              tag("remove") down(lockpin_hole_offset_vertical) attach(BACK,BACK,inside=true)
+                xcopies(spacing=BASE_UNIT, n=net_units_x) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+          }
         }
         if(mount_south) {
           align(FRONT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_x, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, spin=90);
         } else {
           h_wall = [(units_x - 2) * BASE_UNIT + fullcover_wall_ext, BASE_STRENGTH, wall_height];
-          color_this(wall_color) align(TOP,FRONT) cuboid(h_wall, chamfer=wall_chamfer_size, edges=[TOP+FRONT]);
+          color_this(wall_color) align(TOP,FRONT) diff() cuboid(h_wall, chamfer=wall_chamfer_size, edges=[TOP+FRONT]){
+            if(panel_type == HR_PANEL_TYPE_INTERFIT)
+              tag("remove") down(lockpin_hole_offset_vertical) attach(FRONT,BACK,inside=true)
+                xcopies(spacing=BASE_UNIT, n=net_units_x) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+          }
         }
       }
       // East/West mount surfaces (vertical edges, only when units_y > 2)
       if(units_y > 2) {
+        net_units_y = units_y - 2;
         if(mount_west) {
           align(LEFT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
         } else {
           v_wall = [BASE_STRENGTH, (units_y - 2) * BASE_UNIT + fullcover_wall_ext, wall_height];
-          color_this(wall_color) align(TOP,LEFT) cuboid(v_wall, chamfer=wall_chamfer_size, edges=[LEFT+TOP]);
+          color_this(wall_color) align(TOP,LEFT) diff() cuboid(v_wall, chamfer=wall_chamfer_size, edges=[LEFT+TOP]){
+            if(panel_type == HR_PANEL_TYPE_INTERFIT)
+              tag("remove") down(lockpin_hole_offset_vertical) attach(LEFT,BACK,inside=true)
+                xcopies(spacing=BASE_UNIT, n=net_units_y) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+          }
         }
         if(mount_east) {
           align(RIGHT,BOTTOM,overlap=BASE_STRENGTH) support_mount_plate(panel_type=panel_type, units=units_y, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled, mirrored=true);
         } else {
           v_wall = [BASE_STRENGTH, (units_y - 2) * BASE_UNIT + fullcover_wall_ext, wall_height];
-          color_this(wall_color) align(TOP,RIGHT) cuboid(v_wall, chamfer=wall_chamfer_size, edges=[TOP+RIGHT]);
+          color_this(wall_color) align(TOP,RIGHT) diff() cuboid(v_wall, chamfer=wall_chamfer_size, edges=[TOP+RIGHT]){
+            if(panel_type == HR_PANEL_TYPE_INTERFIT)
+              tag("remove") down(lockpin_hole_offset_vertical) attach(RIGHT,BACK,inside=true)
+                xcopies(spacing=BASE_UNIT, n=net_units_y) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+          }
         }
       }
       // Add full cover overlaps if needed
