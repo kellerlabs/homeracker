@@ -52,9 +52,10 @@ The `presets/` folder contains modules for batch-exporting all logical variants:
 
 ### 1. **Supports** (Beams)
 Structural elements with standardized connection points.
-- 15mm × 15mm cross-section
+- 15mm × 15mm cross-section (standard) or 14mm × 15mm (truss-ready)
 - Configurable length (multiples of 15mm)
 - Optional X-axis holes for cable management
+- **Truss width** (14mm): Narrow variant with lockpin holes offset +1mm in X for truss assemblies. Combined with a ring wrapper to form 15mm-grid-aligned trusses.
 
 ### 2. **Connectors**
 Junction pieces that join supports in multiple directions.
@@ -85,6 +86,7 @@ Junction pieces that join supports in multiple directions.
 |------|---------|
 | Connector | ![Connector](parts/renders/connector.png) |
 | Support | ![Support](parts/renders/support.png) |
+| Support (Truss) | ![Support Truss](parts/renders/support_truss.png) |
 | Lock Pin | ![Lock Pin](parts/renders/lockpin.png) |
 
 To generate or refresh previews:

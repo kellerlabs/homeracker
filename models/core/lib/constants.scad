@@ -36,6 +36,10 @@ BASE_UNIT = 15; // Base unit for all core measurements in mm
 BASE_STRENGTH = 2; // Wall thickness in mm
 BASE_CHAMFER = 1; // Chamfer size in mm
 
+// Support width variants
+HR_SUPPORT_WIDTH_STD = BASE_UNIT; // Standard support width (15mm)
+HR_SUPPORT_WIDTH_TRUSS = 14; // Narrow support for truss assemblies (14mm)
+
 // Lock pin hole dimensions
 LOCKPIN_HOLE_CHAMFER = 0.8; // Chamfer size in mm
 LOCKPIN_HOLE_SIDE_LENGTH = 4; // Square hole side length in mm

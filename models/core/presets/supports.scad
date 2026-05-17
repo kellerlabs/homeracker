@@ -23,6 +23,13 @@ module basic(amount=17, x_holes=false) {
     }
 }
 
+module truss(amount=17) {
+    for (i = [1:amount-1]) {
+        linear_position(i) support(i + 1, x_holes=false, width=HR_SUPPORT_WIDTH_TRUSS);
+    }
+}
+
 // Example calls
 // basic(17, false);  // Standard holes
 // basic(17, true);   // Double holes
+// truss(17);         // Truss-width (14mm)

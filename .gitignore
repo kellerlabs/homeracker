@@ -16,6 +16,9 @@ DESCRIPTION.html
 # Self-test render logs
 _test*.log
 
+# Visual test working directory
+_visual_test/*.log
+
 # Images — hosted in kellerlabs/assets repo
 *.png
 *.jpg
