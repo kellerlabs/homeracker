@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.4.0...homeracker-v3.4.1) (2026-05-16)
+
+
+### 📦 Dependencies
+
+* update dependency kellerlab-pre-commit-hooks to v0.3.2 ([#370](https://github.com/kellerlabs/homeracker/issues/370)) ([59a8689](https://github.com/kellerlabs/homeracker/commit/59a868981cca14b0294d8debb0aa4e797293c6ce))
+
 ## [3.4.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.3.2...homeracker-v3.4.0) (2026-05-10)
 
 
