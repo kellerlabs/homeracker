@@ -78,7 +78,14 @@ module truss_collar(units=4,
         cuboid(outer_dims, chamfer=disable_chamfer ? 0 : BASE_CHAMFER, except=[TOP,BOTTOM]) {
             // Inner cavity (open tube)
             tag("remove") color_this(debug_colors ? HR_GREEN : HR_TRUSS_COLLAR_PRIMARY_COLOR)
-            cuboid(inner_dims, chamfer=disable_chamfer ? 0 : -BASE_CHAMFER, edges=[TOP,BOTTOM]);
+            cuboid(inner_dims) {
+                if (!disable_chamfer) {
+                    align(TOP, inside=true)
+                    cuboid([TRUSS_COLLAR_INNER_X + BASE_CHAMFER*2, TRUSS_COLLAR_INNER_Y + BASE_CHAMFER*2, BASE_CHAMFER], chamfer=BASE_CHAMFER, edges=BOTTOM);
+                    align(BOTTOM, inside=true)
+                    cuboid([TRUSS_COLLAR_INNER_X + BASE_CHAMFER*2, TRUSS_COLLAR_INNER_Y + BASE_CHAMFER*2, BASE_CHAMFER], chamfer=BASE_CHAMFER, edges=TOP);
+                }
+            }
 
             // Lockpin through-holes at ±BASE_UNIT/2 from center (grid-aligned)
             zcopies(spacing=BASE_UNIT, n=units) {
