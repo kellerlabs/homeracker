@@ -38,7 +38,7 @@ BASE_CHAMFER = 1; // Chamfer size in mm
 
 // Support width variants
 HR_SUPPORT_WIDTH_STD = BASE_UNIT; // Standard support width (15mm)
-HR_SUPPORT_WIDTH_TRUSS = 14; // Narrow support for truss assemblies (14mm)
+HR_SUPPORT_WIDTH_TRUSS = 13; // Narrow support for truss assemblies (13mm)
 
 // Lock pin hole dimensions
 LOCKPIN_HOLE_CHAMFER = 0.8; // Chamfer size in mm

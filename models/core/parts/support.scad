@@ -13,8 +13,8 @@ units = 3; // [1:1:50]
 // Add x holes
 x_holes = false;
 
-// Support width (15 = standard, 14 = truss-ready narrow)
-width = 15; // [14, 15]
+// Support width (15 = standard, 13 = truss-ready narrow)
+width = 15; // [13, 15]
 
 /* [Debug Parameters] */
 debug_colors = false; // If true, uses bright colors to visualize different features (e.g. holes, main body) for testing purposes.

@@ -31,6 +31,7 @@
 
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
+include <../../core/lib/lockpin.scad>
 
 // Hidden constants for sleeve library (no Customizer section marker)
 EPSILON = 0.01;
@@ -43,17 +44,15 @@ module sleeve(length, color=HR_SLEEVE_PRIMARY_COLOR, debug_colors=false, disable
   attachable_width = SLEEVE_WIDTH;
   attachable_depth = BASE_UNIT + BASE_STRENGTH + TOLERANCE/2;
   attachable_height = length * BASE_UNIT - TOLERANCE;
-  lockpin_chamfer = LOCKPIN_HOLE_CHAMFER;
   tag_scope("sleeve")
   attachable(anchor=anchor, orient=orient, spin=spin, size=[attachable_width, attachable_depth, attachable_height]){
     color_this(debug_colors ? HR_GREEN : color)
     diff()
     cuboid([attachable_width, attachable_depth, attachable_height], chamfer=disable_chamfer ? 0 : BASE_CHAMFER){
       align(BACK, inside=true) tag("remove") color_this(debug_colors ? HR_WHITE : color) cuboid([BASE_UNIT+TOLERANCE, BASE_UNIT+TOLERANCE/2, attachable_height+EPSILON]);
-      zcopies(BASE_UNIT,n=length) tag("remove") back((BASE_STRENGTH+TOLERANCE/2)/2) color(debug_colors ? HR_RED : color) cuboid([attachable_width+EPSILON, LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH]){
-        align(RIGHT, inside=true) cuboid([lockpin_chamfer, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2], chamfer=lockpin_chamfer, edges=LEFT);
-        align(LEFT, inside=true) cuboid([lockpin_chamfer, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2, LOCKPIN_HOLE_SIDE_LENGTH+lockpin_chamfer*2], chamfer=lockpin_chamfer, edges=RIGHT);
-      }
+      zcopies(BASE_UNIT,n=length) tag("remove") back((BASE_STRENGTH+TOLERANCE/2)/2)
+      color(debug_colors ? HR_RED : color) rotate([0,90,0])
+      lockpin_hole(depth=attachable_width+EPSILON, chamfer_top=!disable_chamfer, chamfer_bottom=!disable_chamfer);
     }
     children();
   }

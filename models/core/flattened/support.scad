@@ -8,8 +8,8 @@ units = 3; // [1:1:50]
 // Add x holes
 x_holes = false;
 
-// Support width (15 = standard, 14 = truss-ready narrow)
-width = 15; // [14, 15]
+// Support width (15 = standard, 13 = truss-ready narrow)
+width = 15; // [13, 15]
 
 /* [Debug Parameters] */
 debug_colors = false; // If true, uses bright colors to visualize different features (e.g. holes, main body) for testing purposes.
@@ -21,7 +21,7 @@ PRINTING_LAYER_WIDTH = 0.4;
 BASE_UNIT = 15;
 BASE_CHAMFER = 1;
 HR_SUPPORT_WIDTH_STD = BASE_UNIT;
-HR_SUPPORT_WIDTH_TRUSS = 14;
+HR_SUPPORT_WIDTH_TRUSS = 13;
 LOCKPIN_HOLE_CHAMFER = 0.8;
 LOCKPIN_HOLE_SIDE_LENGTH = 4;
 LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION = [LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH];
@@ -53,7 +53,7 @@ module support(units=3, x_holes=false, width=HR_SUPPORT_WIDTH_STD,
     assert(!(width == HR_SUPPORT_WIDTH_TRUSS && x_holes),
         "x_holes not supported with truss width");
 
-    hole_x_offset = (width == HR_SUPPORT_WIDTH_TRUSS) ? 1 : 0;
+    hole_x_offset = (width == HR_SUPPORT_WIDTH_TRUSS) ? BASE_UNIT/2 - width/2 : 0;
     support_dimensions = [width, BASE_UNIT*units, BASE_UNIT];
     attachable(anchor=anchor, spin=spin, orient=orient, size=support_dimensions) {
         difference() {

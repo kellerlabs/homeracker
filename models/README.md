@@ -83,6 +83,14 @@ A utility tool for removing lock pins from connectors.
 
 See [pinpusher/README.md](pinpusher/README.md) for details.
 
+### 🔩 Truss
+
+Reinforced support system using two narrow (13mm) supports held together by collars. The simplest truss doubles structural strength while maintaining grid alignment.
+
+![Truss Collar](./truss/parts/renders/truss_collar.png)
+
+See [truss/README.md](truss/README.md) for details.
+
 ### Flexmount (⚠️ Deprecated)
 
 Universal device mount — deprecated in favor of the [Customizable Rackmount](https://makerworld.com/en/models/2128492-customizable-rackmount-any-racksize#profileId-2304669) on MakerWorld.

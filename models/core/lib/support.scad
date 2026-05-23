@@ -62,7 +62,7 @@ module support(units=3, x_holes=false, width=HR_SUPPORT_WIDTH_STD,
     assert(!(width == HR_SUPPORT_WIDTH_TRUSS && x_holes),
         "x_holes not supported with truss width");
 
-    hole_x_offset = (width == HR_SUPPORT_WIDTH_TRUSS) ? 1 : 0;
+    hole_x_offset = (width == HR_SUPPORT_WIDTH_TRUSS) ? BASE_UNIT/2 - width/2 : 0;
     support_dimensions = [width, BASE_UNIT*units, BASE_UNIT];
     attachable(anchor=anchor, spin=spin, orient=orient, size=support_dimensions) {
         difference() {
