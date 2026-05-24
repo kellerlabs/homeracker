@@ -53,10 +53,10 @@ module sleeve(length, color=HR_SLEEVE_PRIMARY_COLOR, debug_colors=false, disable
     color_this(debug_colors ? HR_GREEN : color)
     diff()
     cuboid([attachable_width, attachable_depth, attachable_height], chamfer=disable_chamfer ? 0 : BASE_CHAMFER){
-      align(BACK, inside=true) tag("remove") color_this(debug_colors ? HR_WHITE : color) cuboid([BASE_UNIT+TOLERANCE, BASE_UNIT+TOLERANCE/2, attachable_height+EPSILON]);
+      align(BACK, inside=true) tag("remove") color_this(debug_colors ? HR_WHITE : color) cuboid([BASE_UNIT+TOLERANCE, BASE_UNIT+TOLERANCE/2, attachable_height+HR_EPSILON]);
       zcopies(BASE_UNIT,n=length) tag("remove") back((BASE_STRENGTH+TOLERANCE/2)/2)
       color(debug_colors ? HR_RED : color) rotate([0,90,0])
-      lockpin_hole(depth=attachable_width+EPSILON, chamfer_top=!disable_chamfer, chamfer_bottom=!disable_chamfer);
+      lockpin_hole(depth=attachable_width+HR_EPSILON, chamfer_top=!disable_chamfer, chamfer_bottom=!disable_chamfer);
     }
     children();
   }

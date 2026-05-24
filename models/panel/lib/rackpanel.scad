@@ -44,7 +44,7 @@ RP_RACKMOUNT_BORE_HEIGHT = 6.5;
  * Rounded rectangular slot sized for M6 screws (10mm × 6.5mm).
  */
 module rack_bore(debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
-  bore_dimensions = [RP_RACKMOUNT_BORE_WIDTH, BASE_STRENGTH+EPSILON, RP_RACKMOUNT_BORE_HEIGHT];
+  bore_dimensions = [RP_RACKMOUNT_BORE_WIDTH, BASE_STRENGTH+HR_EPSILON, RP_RACKMOUNT_BORE_HEIGHT];
   attachable(anchor, spin, orient, size=bore_dimensions) {
     color(debug_colors ? HR_RED : RP_PRIMARY_COLOR)
     cuboid(bore_dimensions,rounding=RP_RACKMOUNT_BORE_HEIGHT/2,except=[FRONT,BACK]);
@@ -61,7 +61,7 @@ module rack_bore(debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
 module bores_1u(bore_count = 3,
   debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
 
-  assert(bore_count > 0, "Bore count must be greater than 0");
+  assert(is_int(bore_count) && bore_count >= 1 && bore_count <= 3, "Bore count must be an integer between 1 and 3");
 
   width = RP_RACKMOUNT_BORE_WIDTH;
   depth = BASE_STRENGTH;
@@ -138,6 +138,7 @@ module rackpanel_stack(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_
 module bores_minimal(panel_height_units,
   debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
 
+  assert(is_int(panel_height_units) && panel_height_units >= 1, "panel_height_units must be a positive integer");
   bore_spacing = (panel_height_units - 1) * STD_UNIT_HEIGHT;
   n = panel_height_units == 1 ? 1 : 2;
   width = RP_RACKMOUNT_BORE_WIDTH;
@@ -162,6 +163,8 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   debug_colors=false, chamfer_enabled=true,
   anchor=CENTER, spin=0, orient=UP) {
 
+  assert(is_int(panel_height_units) && panel_height_units >= 1, "panel_height_units must be a positive integer");
+  assert(bore_mode >= RP_BORE_MODE_DEFAULT && bore_mode <= RP_BORE_MODE_MINIMAL, "bore_mode must be RP_BORE_MODE_DEFAULT (0), RP_BORE_MODE_FULL (1), or RP_BORE_MODE_MINIMAL (2)");
   panel_dimensions = [panel_width, BASE_STRENGTH, panel_height_units * STD_UNIT_HEIGHT];
   bore_count = get_bore_count_per_unit(bore_mode, panel_height_units);
 

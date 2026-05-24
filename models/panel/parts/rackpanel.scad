@@ -8,7 +8,7 @@ include <../lib/rackpanel.scad>
 // Panel width standard
 panel_width_type = 1; // [1:10 Inch (254mm), 2:19 Inch (482.6mm)]
 // Panel height in rack units
-height_Units = 1; // [1:1:8]
+height_units = 1; // [1:1:8]
 // Bore hole pattern
 bore_mode = 0; // [0:Default, 1:All, 2:Minimal]
 
@@ -23,4 +23,4 @@ $fn = 100;
 
 panel_width = panel_width_type == 1 ? STD_WIDTH_10INCH : STD_WIDTH_19INCH;
 
-rackpanel(panel_width=panel_width, panel_height_units=height_Units, bore_mode=bore_mode, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+rackpanel(panel_width=panel_width, panel_height_units=height_units, bore_mode=bore_mode, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
