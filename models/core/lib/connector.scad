@@ -28,6 +28,7 @@
 
 include <BOSL2/std.scad>
 include <constants.scad>
+include <lockpin.scad>
 
 connector_outer_side_length = BASE_UNIT + BASE_STRENGTH*2 + TOLERANCE;
 arm_side_length_inner = connector_outer_side_length - BASE_STRENGTH*2;
@@ -181,8 +182,8 @@ module connectorArmOuter() {
   // outer cuboid
   difference() {
     color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer=BASE_CHAMFER,except=BOTTOM);
-    color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-    color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
+    color(HR_RED) rotate([90, 0, 0]) lockpin_hole(depth=connector_outer_side_length);
+    color(HR_RED) rotate([90, 0, 90]) lockpin_hole(depth=connector_outer_side_length);
   }
 }
 

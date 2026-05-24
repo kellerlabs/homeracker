@@ -39,6 +39,7 @@ applyTo: "**/*.scad"
 - When adding or modifying a parts file, **generate a preview PNG** with `scadm export-png`.
 - PNGs are stored in a `renders/` subfolder next to their source (e.g., `parts/foo.scad` → `parts/renders/foo.png`).
 - Update the model's README 📸 Catalog table and the `models/README.md` index accordingly.
+- **Dark models** (e.g., `HR_CHARCOAL` primary color): use `--colorscheme Metallic` for better contrast. The default `BeforeDawn` has a dark background that makes charcoal/black models invisible.
 
 ## Self-Test Renders
 

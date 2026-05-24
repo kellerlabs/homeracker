@@ -57,6 +57,22 @@ $fn = 100;
 // Color based on configuration:
 // HR_GREEN - standard (no pull through)
 // HR_YELLOW - pull-through (x/y/z pull through)
+module lockpin_hole(depth, chamfer_top=true, chamfer_bottom=true,
+    anchor=CENTER, spin=0, orient=UP) {
+    hole_dims = [LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, depth];
+    chamfer_face_dims = [LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2, LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2, LOCKPIN_HOLE_CHAMFER];
+    attachable(anchor=anchor, spin=spin, orient=orient, size=hole_dims) {
+        cuboid(hole_dims) {
+            if (chamfer_top)
+                align(TOP, inside=true)
+                cuboid(chamfer_face_dims, chamfer=LOCKPIN_HOLE_CHAMFER, edges=BOTTOM);
+            if (chamfer_bottom)
+                align(BOTTOM, inside=true)
+                cuboid(chamfer_face_dims, chamfer=LOCKPIN_HOLE_CHAMFER, edges=TOP);
+        }
+        children();
+    }
+}
 module connector(dimensions=3, directions=6, pull_through_axis="none", optimal_orientation=false) {
 
   valid_dimensions = max(1, min(3, dimensions));
@@ -137,8 +153,8 @@ module connectorArmOuter() {
 
   difference() {
     color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer=BASE_CHAMFER,except=BOTTOM);
-    color(HR_RED) rotate([90, 0, 0]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
-    color(HR_RED) rotate([90, 0, 90]) cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, connector_outer_side_length], chamfer=-LOCKPIN_HOLE_CHAMFER);
+    color(HR_RED) rotate([90, 0, 0]) lockpin_hole(depth=connector_outer_side_length);
+    color(HR_RED) rotate([90, 0, 90]) lockpin_hole(depth=connector_outer_side_length);
   }
 }
 module connectorArmInner() {

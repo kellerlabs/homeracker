@@ -245,3 +245,34 @@ module tension_hole_half(){
   lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height]; // planar
   prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
 }
+
+/**
+ * 📐 lockpin_hole module
+ *
+ * Reusable lockpin through-hole for any HomeRacker component.
+ * Uses 2-cuboid chamfer approach (main hole + chamfer pyramids at entry faces).
+ * Hole extends along Z-axis. Rotate for other orientations.
+ *
+ * @param depth Hole depth along Z-axis (required)
+ * @param chamfer_top Chamfer the +Z (top) face entry (default: true)
+ * @param chamfer_bottom Chamfer the -Z (bottom) face entry (default: true)
+ * @param anchor BOSL2 anchor point
+ * @param spin BOSL2 spin rotation
+ * @param orient BOSL2 orientation vector
+ */
+module lockpin_hole(depth, chamfer_top=true, chamfer_bottom=true,
+    anchor=CENTER, spin=0, orient=UP) {
+    hole_dims = [LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, depth];
+    chamfer_face_dims = [LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2, LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2, LOCKPIN_HOLE_CHAMFER];
+    attachable(anchor=anchor, spin=spin, orient=orient, size=hole_dims) {
+        cuboid(hole_dims) {
+            if (chamfer_top)
+                align(TOP, inside=true)
+                cuboid(chamfer_face_dims, chamfer=LOCKPIN_HOLE_CHAMFER, edges=BOTTOM);
+            if (chamfer_bottom)
+                align(BOTTOM, inside=true)
+                cuboid(chamfer_face_dims, chamfer=LOCKPIN_HOLE_CHAMFER, edges=TOP);
+        }
+        children();
+    }
+}

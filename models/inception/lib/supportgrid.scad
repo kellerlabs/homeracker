@@ -28,6 +28,7 @@
 include <BOSL2/std.scad>
 include <supportbin.scad>
 include <../../core/lib/constants.scad>
+include <../../core/lib/lockpin.scad>
 
 HR_SG_PRIMARY_COLOR = HR_YELLOW;
 
@@ -56,7 +57,7 @@ module mount_ear(grid_depth, debug_colors=false, anchor=CENTER, spin=0, orient=U
       attach(TOP, BOTTOM) cuboid([attachable_width, attachable_depth, BASE_UNIT],chamfer=BASE_UNIT,edges=TOP+LEFT){
         align(CENTER) tag("remove") cuboid([attachable_width, attachable_depth - 2*BASE_STRENGTH, BASE_UNIT]);
       }
-      align(CENTER) tag("remove") cuboid([LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH, BASE_STRENGTH], chamfer=-LOCKPIN_HOLE_CHAMFER, edges=TOP);
+      align(CENTER) tag("remove") lockpin_hole(depth=BASE_STRENGTH, chamfer_top=!disable_chamfer, chamfer_bottom=false);
     }
     children();
   }
