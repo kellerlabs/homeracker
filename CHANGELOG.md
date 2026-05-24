@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.5.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.4.1...homeracker-v3.5.0) (2026-05-24)
+
+
+### ✨ Features
+
+* **panel:** add rack panel with configurable bore patterns ([#369](https://github.com/kellerlabs/homeracker/issues/369)) ([ede2d1b](https://github.com/kellerlabs/homeracker/commit/ede2d1bded90d198ddba068b5d778aec020c76d6))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.741 ([#373](https://github.com/kellerlabs/homeracker/issues/373)) ([244e188](https://github.com/kellerlabs/homeracker/commit/244e188d653c43a158b5a22923862d1bd39f7958))
+* update dependency kellerlab-pre-commit-hooks to v0.3.3 ([#374](https://github.com/kellerlabs/homeracker/issues/374)) ([19d2131](https://github.com/kellerlabs/homeracker/commit/19d21311dfbd4aca735f9ac87a38b794ec56c3f1))
+
+
+### ♻️ Code Refactoring
+
+* **core:** extract reusable lockpin_hole() module ([4495128](https://github.com/kellerlabs/homeracker/commit/44951289a568ca6f16fdcdeaff097bb27f5e646d))
+
 ## [3.4.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.4.0...homeracker-v3.4.1) (2026-05-16)
 
 
