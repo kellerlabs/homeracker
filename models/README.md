@@ -59,6 +59,14 @@ Plain mounting panel that fits into the HomeRacker scaffold. Use as-is for blank
 
 See [panel/README.md](panel/README.md) for details.
 
+### 🔌 Keystone
+
+Parametric keystone jack socket module for integrating standard keystone connectors into virtually any panels (using BOSL2 `diff("keystone")`). Supports 4 rotation angles and includes snap-fit label plate slots for port identification.
+
+![Keystone Sample](./keystone/parts/renders/keystone_sample.png)
+
+See [keystone/README.md](keystone/README.md) for details.
+
 ### 🦶 Foot
 
 Modular foot insert that plugs into any connector arm used as contact surface at the bottom of a rack. Decoupled from the connector for maximum flexibility — print in TPU for better grip and load distribution.
