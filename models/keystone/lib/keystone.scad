@@ -134,7 +134,7 @@ module _label_hook_left(slot_width, slot_depth, slot_height, label_slot_spacing,
   _hook_width = TOLERANCE;
   _chamfer = inner ? KS_LABEL_CHAMFER : 0;
 
-  attachable(anchor=CENTER, spin=0, orient=UP, size=[slot_width + _hook_width, slot_depth, slot_height]) {
+  attachable(anchor=anchor, spin=spin, orient=orient, size=[slot_width + _hook_width, slot_depth, slot_height]) {
     color_this(debug_colors ? HR_RED : _color)
     left((label_slot_spacing - slot_width - _spacing_sub) / 2)
     cuboid([slot_width, slot_depth, slot_height], chamfer=_chamfer, edges=[BACK, LEFT], except=FRONT) {
@@ -203,8 +203,10 @@ module label_plate(yrot=0, anchor=CENTER, spin=0, orient=UP, debug_colors=false)
 ///   yrot                 - rotation angle (0, 90, 180, 270)
 ///   panel_depth          - total depth of the panel being cut into (mm).
 ///                          When greater than keystone depth, the pocket extends deeper.
-module keystone_pocket(additional_tolerance=0.0, yrot=0, panel_depth, spin=0, debug_colors=false) {
+module keystone_pocket(additional_tolerance=0.0, yrot=0, panel_depth, debug_colors=false) {
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
+  assert(_panel_depth >= get_ks_depth_outer(),
+    str("panel_depth (", _panel_depth, "mm) must be >= keystone depth (", get_ks_depth_outer(), "mm)"));
   _width_outer = get_ks_width_outer(additional_tolerance);
   _height_outer = get_ks_height_outer(additional_tolerance);
   _depth_outer = get_ks_depth_outer();
@@ -259,6 +261,8 @@ module keystone_full(add_label_slots=true, show_label=false, additional_toleranc
     "show_label requires add_label_slots=true");
 
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
+  assert(_panel_depth >= get_ks_depth_outer(),
+    str("panel_depth (", _panel_depth, "mm) must be >= keystone depth (", get_ks_depth_outer(), "mm)"));
   _label_height = add_label_slots ? get_label_attachable_height(yrot, additional_tolerance) : 0;
   _width = get_effective_keystone_width(additional_tolerance=additional_tolerance, yrot=yrot);
   _depth = get_ks_depth_outer();
