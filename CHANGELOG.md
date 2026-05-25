@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.5.0...homeracker-v3.6.0) (2026-05-25)
+
+
+### ✨ Features
+
+* **keystone:** add parametric keystone jack socket module ([#377](https://github.com/kellerlabs/homeracker/issues/377)) ([7cb2168](https://github.com/kellerlabs/homeracker/commit/7cb2168c5ee94ec7e84bc05c3444b195554b654f))
+
 ## [3.5.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.4.1...homeracker-v3.5.0) (2026-05-24)
 
 
