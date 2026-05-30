@@ -41,7 +41,7 @@ HR_PANEL_TYPE_FULLCOVER = 2;
 HR_PANEL_PRIMARY_COLOR = HR_YELLOW;
 HR_PANEL_SECONDARY_COLOR = HR_CHARCOAL;
 
-HR_PANEL_CORNER_MOUNT_SIDE_LENGTH = BASE_UNIT - BASE_STRENGTH - TOLERANCE;
+HR_PANEL_CORNER_MOUNT_SIDE_LENGTH = BASE_UNIT - BASE_STRENGTH;
 
 function get_panel_mount_height(panel_type = HR_PANEL_TYPE_INTERFIT) =
   BASE_UNIT + BASE_STRENGTH * (panel_type == HR_PANEL_TYPE_INTERFIT ? 0 : 1) + TOLERANCE;
@@ -114,7 +114,7 @@ module support_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units, anchor=CENT
   net_units = units - 2;
 
   bottom_plate_width = BASE_STRENGTH*2 + TOLERANCE/2;
-  bottom_plate_depth = BASE_UNIT * net_units - TOLERANCE;
+  bottom_plate_depth = BASE_UNIT * net_units;
   bottom_plate_height = BASE_STRENGTH;
 
   wall_width = BASE_STRENGTH;
@@ -202,7 +202,7 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
   assert(panel_type == HR_PANEL_TYPE_INTERFIT || panel_type == HR_PANEL_TYPE_FULLCOVER, "Invalid panel type");
   assert(units_x >= 2 && units_y >= 2, "Units must be at least 2 in both dimensions");
 
-  interfit_deduction = (2 * BASE_STRENGTH + 2 * TOLERANCE);
+  interfit_deduction = (2 * BASE_STRENGTH + TOLERANCE);
 
   panel_width = units_x * BASE_UNIT - interfit_deduction;
   panel_depth = units_y * BASE_UNIT - interfit_deduction;
