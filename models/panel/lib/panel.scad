@@ -214,16 +214,11 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
 
   attachable_dimensions = [attachable_width, attachable_depth, attachable_height];
 
-
-  // Override BOTTOM anchors for Full Cover to account for base plate XY dimensions
   fullcover_addition = BASE_UNIT - panel_clearance;
   full_cover_width = units_x * BASE_UNIT + fullcover_addition;
   full_cover_depth = units_y * BASE_UNIT + fullcover_addition;
-  override = panel_type != HR_PANEL_TYPE_FULLCOVER ? undef : function (anchor)
-      anchor.z != -1 ? undef
-      : [[anchor.x * attachable_width/2, anchor.y * attachable_depth/2, -attachable_height/2]];
 
-  attachable(anchor, spin, orient, size=attachable_dimensions, override=override) {
+  attachable(anchor, spin, orient, size=attachable_dimensions) {
     down(attachable_height/2-BASE_STRENGTH/2)
     color_this(debug_colors ? HR_BLUE : HR_PANEL_PRIMARY_COLOR)
     cuboid([panel_width, panel_depth, BASE_STRENGTH],chamfer=chamfer_enabled ? BASE_CHAMFER : 0, except=TOP){
