@@ -141,6 +141,29 @@ rackpanel          → orchestrator: bore mode logic, chamfering (edge_mask)
 
 See [lib/rackpanel.scad](lib/rackpanel.scad) for implementation.
 
+## 🧭 Anchoring Behavior
+
+The `panel()` module is fully BOSL2-attachable. Its bounding box encompasses all mount surfaces — **not** the Full Cover base plate. This means anchors align with the functional mounting geometry, making it straightforward to position child components (e.g. keystone jacks, switches) relative to the actual panel area.
+
+### Inter-Fit Panels
+
+Anchors align directly with the panel's base plate + mount surfaces. The bounding box extends `BASE_STRENGTH + TOLERANCE/2` beyond the base plate on each side that has a support mount plate enabled.
+
+### Full Cover Panels
+
+On Full Cover panels, the overlap base plate is larger than the mount surface bounding box. **Anchors intentionally do not align with the Full Cover plate edges** — they align with the mount plate boundaries instead. This is the correct behavior because:
+
+- Child components (cutouts, jacks) should align with the structural panel area, not the cosmetic overlap.
+- Using `align(BACK+BOTTOM)` on a Full Cover panel positions the child at the mount plate's back edge — exactly where the support bar sits — maximizing usable space.
+
+![Full Cover Panel Anchors](parts/renders/panel_fullcover_anchors.png)
+
+> 💡 **Example**: A keystone jack attached with `align(BACK,BOTTOM,inside=true)` perfectly aligns with the support plate edge, making optimal use of the panel's vertical space without intersecting the scaffold structure.
+
+### Asymmetric Mounts
+
+When mount surfaces are enabled on only some sides (e.g., `mount_west=true, mount_east=false`), the bounding box center shifts to stay centered on the actual geometry. Anchors account for this offset automatically.
+
 ## 📚 References
 
 - [HomeRacker core](../core/README.md)

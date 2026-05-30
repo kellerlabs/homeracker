@@ -197,7 +197,7 @@ Parameters:
 */
 module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_clearance = 0.0,
   corner_mounts=true, mount_north=true, mount_south=true, mount_east=true, mount_west=true,
-  anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=false
+  anchor=CENTER, spin=0, orient=UP, debug_colors=false,chamfer_enabled=true
   ) {
   assert(panel_type == HR_PANEL_TYPE_INTERFIT || panel_type == HR_PANEL_TYPE_FULLCOVER, "Invalid panel type");
   assert(units_x >= 2 && units_y >= 2, "Units must be at least 2 in both dimensions");
@@ -208,14 +208,18 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
   panel_depth = units_y * BASE_UNIT - interfit_deduction;
   attachable_height = BASE_STRENGTH + get_panel_mount_height(panel_type);
 
-  attachable_width = panel_width + (units_y > 2 ? (mount_west ? BASE_STRENGTH : 0) + (mount_east ? BASE_STRENGTH : 0) : 0);
-  attachable_depth = panel_depth + (units_x > 2 ? (mount_north ? BASE_STRENGTH : 0) + (mount_south ? BASE_STRENGTH : 0) : 0);
+  // Support mount plates extend BASE_STRENGTH + TOLERANCE/2 beyond the base plate
+  // (bottom_plate_width = BASE_STRENGTH*2 + TOLERANCE/2, overlap = BASE_STRENGTH)
+  mount_extension = BASE_STRENGTH + TOLERANCE/2;
+
+  attachable_width = panel_width + (units_y > 2 ? (mount_west ? mount_extension : 0) + (mount_east ? mount_extension : 0) : 0);
+  attachable_depth = panel_depth + (units_x > 2 ? (mount_north ? mount_extension : 0) + (mount_south ? mount_extension : 0) : 0);
 
   attachable_dimensions = [attachable_width, attachable_depth, attachable_height];
 
   // Align attachable anchors depending on mount surfaces
-  move_right = (mount_west ? BASE_STRENGTH/2 : 0) + (mount_east ? -BASE_STRENGTH/2 : 0);
-  move_fwd = (mount_north ? BASE_STRENGTH/2 : 0) + (mount_south ? -BASE_STRENGTH/2 : 0);
+  move_right = (mount_west ? mount_extension/2 : 0) + (mount_east ? -mount_extension/2 : 0);
+  move_fwd = (mount_north ? mount_extension/2 : 0) + (mount_south ? -mount_extension/2 : 0);
 
   // Override BOTTOM anchors for Full Cover to account for base plate XY dimensions
   fullcover_addition = BASE_UNIT - panel_clearance;
@@ -223,7 +227,7 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
   full_cover_depth = units_y * BASE_UNIT + fullcover_addition;
   override = panel_type != HR_PANEL_TYPE_FULLCOVER ? undef : function (anchor)
       anchor.z != -1 ? undef
-      : [[anchor.x * full_cover_width/2 + move_right, anchor.y * full_cover_depth/2 - move_fwd, -attachable_height/2]];
+      : [[anchor.x * attachable_width/2 + move_right, anchor.y * attachable_depth/2 - move_fwd, -attachable_height/2]];
 
   attachable(anchor, spin, orient, size=attachable_dimensions, override=override) {
     right(move_right)
