@@ -208,30 +208,17 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
   panel_depth = units_y * BASE_UNIT - interfit_deduction;
   attachable_height = BASE_STRENGTH + get_panel_mount_height(panel_type);
 
-  // Support mount plates extend BASE_STRENGTH + TOLERANCE/2 beyond the base plate
-  // (bottom_plate_width = BASE_STRENGTH*2 + TOLERANCE/2, overlap = BASE_STRENGTH)
-  mount_extension = BASE_STRENGTH + TOLERANCE/2;
 
-  attachable_width = panel_width + (units_y > 2 ? (mount_west ? mount_extension : 0) + (mount_east ? mount_extension : 0) : 0);
-  attachable_depth = panel_depth + (units_x > 2 ? (mount_north ? mount_extension : 0) + (mount_south ? mount_extension : 0) : 0);
+  attachable_width = panel_width + (units_y > 2 ? BASE_STRENGTH * 2 : 0);
+  attachable_depth = panel_depth + (units_x > 2 ? BASE_STRENGTH * 2 : 0);
 
   attachable_dimensions = [attachable_width, attachable_depth, attachable_height];
 
-  // Align attachable anchors depending on mount surfaces
-  move_right = (mount_west ? mount_extension/2 : 0) + (mount_east ? -mount_extension/2 : 0);
-  move_fwd = (mount_north ? mount_extension/2 : 0) + (mount_south ? -mount_extension/2 : 0);
-
-  // Override BOTTOM anchors for Full Cover to account for base plate XY dimensions
   fullcover_addition = BASE_UNIT - panel_clearance;
   full_cover_width = units_x * BASE_UNIT + fullcover_addition;
   full_cover_depth = units_y * BASE_UNIT + fullcover_addition;
-  override = panel_type != HR_PANEL_TYPE_FULLCOVER ? undef : function (anchor)
-      anchor.z != -1 ? undef
-      : [[anchor.x * attachable_width/2 + move_right, anchor.y * attachable_depth/2 - move_fwd, -attachable_height/2]];
 
-  attachable(anchor, spin, orient, size=attachable_dimensions, override=override) {
-    right(move_right)
-    fwd(move_fwd)
+  attachable(anchor, spin, orient, size=attachable_dimensions) {
     down(attachable_height/2-BASE_STRENGTH/2)
     color_this(debug_colors ? HR_BLUE : HR_PANEL_PRIMARY_COLOR)
     cuboid([panel_width, panel_depth, BASE_STRENGTH],chamfer=chamfer_enabled ? BASE_CHAMFER : 0, except=TOP){

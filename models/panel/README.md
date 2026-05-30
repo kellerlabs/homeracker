@@ -147,7 +147,7 @@ The `panel()` module is fully BOSL2-attachable. Its bounding box encompasses all
 
 ### Inter-Fit Panels
 
-Anchors align directly with the panel's base plate + mount surfaces. The bounding box extends `BASE_STRENGTH + TOLERANCE/2` beyond the base plate on each side that has a support mount plate enabled.
+Anchors align directly with the panel's base plate + mount surfaces. The bounding box extends `BASE_STRENGTH` beyond the base plate on each side that has support mount plates (i.e. when units > 2 on that axis). The extension is always symmetric — disabling individual mount surfaces does not shrink or shift the bounding box.
 
 ### Full Cover Panels
 
@@ -160,9 +160,9 @@ On Full Cover panels, the overlap base plate is larger than the mount surface bo
 
 > 💡 **Example**: A keystone jack attached with `align(BACK,BOTTOM,inside=true)` perfectly aligns with the support plate edge, making optimal use of the panel's vertical space without intersecting the scaffold structure.
 
-### Asymmetric Mounts
+### Stable Anchors
 
-When mount surfaces are enabled on only some sides (e.g., `mount_west=true, mount_east=false`), the bounding box center shifts to stay centered on the actual geometry. Anchors account for this offset automatically.
+Anchors remain fixed regardless of which mount surfaces are enabled or disabled. Disabling a mount plate (e.g. `mount_west=false`) removes the plate geometry but does **not** shift the bounding box or anchor positions. This ensures children attached via `align()` stay in a predictable position — aligned with the support bar boundary — even when mount plates are selectively disabled.
 
 ## 📚 References
 
