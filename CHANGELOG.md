@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.6.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.6.0...homeracker-v3.6.1) (2026-05-30)
+
+
+### 🐛 Bug Fixes
+
+* **panel:** correct attachable bounding box to include tolerance ([#382](https://github.com/kellerlabs/homeracker/issues/382)) ([a32a248](https://github.com/kellerlabs/homeracker/commit/a32a24897bf324a13da96f4c3fd8b25f7840e541))
+* **panel:** remove extra TOLERANCE from panel dimensions ([#381](https://github.com/kellerlabs/homeracker/issues/381)) ([b906ae0](https://github.com/kellerlabs/homeracker/commit/b906ae024114f488722275261eb6ea2ffc33ea21))
+
+
+### 📦 Dependencies
+
+* update dependency kellerlab-pre-commit-hooks to v0.3.4 ([#379](https://github.com/kellerlabs/homeracker/issues/379)) ([84ac7b1](https://github.com/kellerlabs/homeracker/commit/84ac7b1bec5f34cb91c2038d3760fb73aad1c22a))
+
 ## [3.6.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.5.0...homeracker-v3.6.0) (2026-05-25)
 
 
