@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.6.1...homeracker-v3.6.2) (2026-05-30)
+
+
+### 🐛 Bug Fixes
+
+* **panel:** stabilize anchor positions and correct mount_extension ([#383](https://github.com/kellerlabs/homeracker/issues/383)) ([9145cc5](https://github.com/kellerlabs/homeracker/commit/9145cc5c9f8a0e9586a6c8db66774ac1de555fa5))
+
 ## [3.6.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.6.0...homeracker-v3.6.1) (2026-05-30)
 
 
