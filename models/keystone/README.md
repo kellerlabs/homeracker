@@ -61,6 +61,8 @@ cuboid([50, 2, 50]) {
 | `label_recess()` | Front-face recess for label hook snap-fit |
 | `keystone_demo_panel()` | Demo panel strip with one keystone mounted |
 
+`keystone_full()` and `keystone_demo_panel()` accept `label_plate_mode` (`"assembly"` or `"plate"`) and `label_plate_gap` (mm) to control label plate placement for build-plate layouts.
+
 ### Key Functions
 
 | Function | Returns |
@@ -70,6 +72,7 @@ cuboid([50, 2, 50]) {
 | `get_ks_depth_outer()` | Total depth (front lip + body + rear hook) |
 | `get_effective_keystone_width(tol, yrot)` | Width accounting for rotation |
 | `get_effective_keystone_height(tol, yrot)` | Height accounting for rotation |
+| `get_keystone_dimensions(yrot, tol)` | Pocket dimensions `[w, d, h]` accounting for rotation (excludes label recess) |
 
 ## 📸 Catalog
 
