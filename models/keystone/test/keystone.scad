@@ -31,3 +31,11 @@ label_plate(yrot=0);
 // Demo panel
 right(185)
 keystone_demo_panel(yrot=90, panel_depth=15);
+
+// Plate mode: label above panel
+right(220)
+keystone_full(show_label=true, label_plate_mode="plate", label_plate_gap=15);
+
+// Demo panel in plate mode
+right(255)
+keystone_demo_panel(label_plate_mode="plate", add_label=true);

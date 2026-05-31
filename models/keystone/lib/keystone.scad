@@ -79,7 +79,8 @@ function get_effective_keystone_height(additional_tolerance=0.0, yrot=0) =
 function get_label_slot_vertical_offset(yrot=0, additional_tolerance=0.0) =
   yrot == 90 || yrot == 270 ? get_ks_height_outer(additional_tolerance) - get_ks_width_outer(additional_tolerance) : 0;
 
-/// Returns the dimensions [width, depth, height] of a keystone accounting for rotation.
+/// Returns the pocket dimensions [width, depth, height] of a keystone accounting for rotation.
+/// Excludes the label recess — use get_label_attachable_height() for label slot height.
 function get_keystone_dimensions(yrot=0, additional_tolerance=0.0) = [
   get_effective_keystone_width(additional_tolerance, yrot),
   get_ks_depth_outer(),
@@ -268,6 +269,8 @@ module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="a
   label_plate_gap=0, additional_tolerance=0.0, yrot=0,
   panel_depth, anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
 
+  assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
+    str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
   assert(!show_label || add_label_slots,
     "show_label requires add_label_slots=true");
 
@@ -303,6 +306,8 @@ module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="a
 /// Useful for visualization and testing. Used by the parts/keystone_sample.scad file.
 module keystone_demo_panel(additional_tolerance=0.0, yrot=0, panel_depth, add_label=true,
   label_plate_mode="assembly", label_plate_gap=0, debug_colors=false) {
+  assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
+    str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
   _ks_depth = get_ks_depth_outer();
   _width = get_effective_keystone_width(additional_tolerance=additional_tolerance, yrot=yrot);
