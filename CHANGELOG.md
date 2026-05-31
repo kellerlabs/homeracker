@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.6.2...homeracker-v3.7.0) (2026-05-31)
+
+
+### ✨ Features
+
+* **keystone:** add dimensions helper, label plate modes, and shorten inner hooks ([#385](https://github.com/kellerlabs/homeracker/issues/385)) ([ce7106c](https://github.com/kellerlabs/homeracker/commit/ce7106c7b9cc4b5bb2dd9f0bf478d2c0e26ca7ff))
+
 ## [3.6.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.6.1...homeracker-v3.6.2) (2026-05-30)
 
 
