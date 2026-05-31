@@ -79,6 +79,13 @@ function get_effective_keystone_height(additional_tolerance=0.0, yrot=0) =
 function get_label_slot_vertical_offset(yrot=0, additional_tolerance=0.0) =
   yrot == 90 || yrot == 270 ? get_ks_height_outer(additional_tolerance) - get_ks_width_outer(additional_tolerance) : 0;
 
+/// Returns the dimensions [width, depth, height] of a keystone accounting for rotation.
+function get_keystone_dimensions(yrot=0, additional_tolerance=0.0) = [
+  get_effective_keystone_width(additional_tolerance, yrot),
+  get_ks_depth_outer(),
+  get_effective_keystone_height(additional_tolerance, yrot)
+];
+
 /// Returns the total attachable height of the label recess block.
 function get_label_attachable_height(yrot=0, additional_tolerance=0.0) =
   KS_LABEL_HEIGHT + TOLERANCE + get_label_slot_vertical_offset(yrot, additional_tolerance) + BASE_STRENGTH;
@@ -139,8 +146,9 @@ module _label_hook_left(slot_width, slot_depth, slot_height, label_slot_spacing,
     left((label_slot_spacing - slot_width - _spacing_sub) / 2)
     cuboid([slot_width, slot_depth, slot_height], chamfer=_chamfer, edges=[BACK, LEFT], except=FRONT) {
       // Hook tab
+      _hook_height = inner ? slot_height / 2 : slot_height;
       color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
-      align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, slot_height],
+      align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, _hook_height],
         chamfer=_hook_width, edges=RIGHT);
       // Insertion funnel (panel side only)
       if (!inner) {
@@ -251,10 +259,13 @@ module label_recess(additional_tolerance=0.0, yrot=0,
 /// Parameters:
 ///   add_label_slots      - include snap-fit label plate recesses (default: true)
 ///   show_label           - render a label plate in place for preview (default: false)
+///   label_plate_mode     - "assembly": label in front (default); "plate": label above on same plane
+///   label_plate_gap      - extra upward offset for plate mode (mm, default: 0)
 ///   additional_tolerance - extra clearance around the keystone (mm)
 ///   yrot                 - rotation angle: 0, 90, 180, 270 (degrees)
 ///   panel_depth          - depth of the panel being cut into (mm, default: keystone depth)
-module keystone_full(add_label_slots=true, show_label=false, additional_tolerance=0.0, yrot=0,
+module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="assembly",
+  label_plate_gap=0, additional_tolerance=0.0, yrot=0,
   panel_depth, anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
 
   assert(!show_label || add_label_slots,
@@ -273,9 +284,13 @@ module keystone_full(add_label_slots=true, show_label=false, additional_toleranc
     keystone_pocket(additional_tolerance=additional_tolerance, yrot=yrot, panel_depth=_panel_depth, debug_colors=debug_colors) {
       if (add_label_slots) {
         align(TOP, FRONT) label_recess(additional_tolerance=additional_tolerance, yrot=yrot, debug_colors=debug_colors) {
-          if (show_label) {
+          if (show_label && label_plate_mode == "assembly") {
             fwd(BASE_STRENGTH) down(BASE_STRENGTH)
               align(FRONT, TOP) label_plate(yrot=yrot, debug_colors=debug_colors);
+          }
+          if (show_label && label_plate_mode == "plate") {
+            up(KS_LABEL_HEIGHT/2 + TOLERANCE + label_plate_gap)
+              align(TOP) label_plate(yrot=yrot, orient=UP, debug_colors=debug_colors);
           }
         }
       }
@@ -286,19 +301,22 @@ module keystone_full(add_label_slots=true, show_label=false, additional_toleranc
 
 /// Demo panel showing a single keystone mounted in a 1U-height panel strip.
 /// Useful for visualization and testing. Used by the parts/keystone_sample.scad file.
-module keystone_demo_panel(additional_tolerance=0.0, yrot=0, panel_depth, add_label=true, debug_colors=false) {
+module keystone_demo_panel(additional_tolerance=0.0, yrot=0, panel_depth, add_label=true,
+  label_plate_mode="assembly", label_plate_gap=0, debug_colors=false) {
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
   _ks_depth = get_ks_depth_outer();
   _width = get_effective_keystone_width(additional_tolerance=additional_tolerance, yrot=yrot);
   _height = STD_UNIT_HEIGHT;
+  _orient = label_plate_mode == "plate" ? FRONT : UP;
 
-  attachable(expose_tags=true, anchor=CENTER, spin=0, axis=UP, orient=UP, size=[_width, _ks_depth, _height]) {
+  attachable(expose_tags=true, anchor=CENTER, spin=0, axis=UP, orient=_orient, size=[_width, _ks_depth, _height]) {
     fwd(_ks_depth / 2 - BASE_STRENGTH / 2)
     diff("keystone")
     color_this(debug_colors ? HR_WHITE : KS_COLOR_PRIMARY)
     cuboid([_width, BASE_STRENGTH, STD_UNIT_HEIGHT]) {
       align(FRONT, BOTTOM, inside=true) {
         keystone_full(add_label_slots=add_label, show_label=add_label,
+          label_plate_mode=label_plate_mode, label_plate_gap=label_plate_gap,
           additional_tolerance=additional_tolerance, yrot=yrot,
           panel_depth=_panel_depth, debug_colors=debug_colors);
       }
