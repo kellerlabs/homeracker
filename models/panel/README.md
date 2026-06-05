@@ -39,6 +39,7 @@ Open `parts/panel.scad` in OpenSCAD and use the **Customizer** panel.
 | Panel (Full Cover) | ![Panel Full Cover](parts/renders/panel_fullcover_default.png) |
 | Rack Panel (10") | ![Rack Panel 10"](parts/renders/rackpanel_default_1u_10inch.png) |
 | Rack Panel (19") | ![Rack Panel 19"](parts/renders/rackpanel_default_1u_19inch.png) |
+| Split Connector | ![Split Connector](parts/renders/split_connector.png) |
 | Split Lock Pin | ![Split Lock Pin](parts/renders/split_lockpin.png) |
 
 To generate or refresh previews:
@@ -46,6 +47,7 @@ To generate or refresh previews:
 ```sh
 scadm export-png models/panel/parts/panel.scad
 scadm export-png models/panel/parts/rackpanel.scad
+scadm export-png models/panel/parts/split_connector.scad
 scadm export-png models/panel/parts/split_lockpin.scad
 ```
 
@@ -152,18 +154,30 @@ A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divid
 
 ### How it works
 
-- **Split connector** — a hinge-like column of interlocking knuckles is grown onto the facing edge of each half (via `split_connector`). The two halves interleave like the leaves of a door hinge. Every height unit has one central **lock knuckle** (a full HomeRacker base unit with a tension lock-pin socket) flanked by two plain **regular knuckles** (4mm square holes).
-- **Split lock pin** — the `split_lockpin` part threads vertically down the aligned knuckle bores like a hinge rod and locks the joint. It reuses the standard lock pin's tension grip as a central lock element for each height unit. The grip is a full base unit (the tension wedge plus a short extension each side) that seats in the lock knuckle, while shaft segments butt against the grip ends and fill the regular knuckles. One tension grip per height unit, so the pin scales with the panel.
+- **Split connector** — a hinge-like column of interlocking knuckles is grown onto the facing edge of each half (via `split_connector`). The two halves interleave like the leaves of a door hinge. Each height unit has **four knuckles**: a **lock knuckle** (a full HomeRacker base unit with a tension lock-pin socket) at each end, and two shorter **middle knuckles** (plain 4mm square holes) sharing the space between them. The layout is point-symmetric — both halves always own exactly two knuckles and the connector is identical whichever way you rotate it, so multi-unit panels simply stack identical units straight up.
+- **Split lock pin** — the `split_lockpin` part threads vertically down the aligned knuckle bores like a hinge rod and locks the joint. It reuses the standard lock pin's tension grip as its single lock element, seated in the lock knuckle at **one extreme end** of the pin; a plain shaft (with a finished chamfered end) runs from the grip up through every remaining knuckle. Multi-unit pins keep the single grip and just extend the shaft.
 
 ### Print & assembly
 
-1. Set `split_mode = 1` (Half) and print each half — use `view_mode = 1` (Left) and `view_mode = 2` (Right), or print both at once with `view_mode = 0` (Assembly).
+1. Set `split_mode = 1` (Half) and print each half — use `view_mode = 1` (Left) and `view_mode = 2` (Right), or print both at once with `view_mode = 0` (Assembly). The hinge knuckles are generated automatically as part of each half; `parts/split_connector.scad` exposes the bare connector standalone for preview and inspection.
 2. Print the matching **Split Lock Pin** (`parts/split_lockpin.scad`) at the same `height_units`.
 3. Interleave the two halves' hinge knuckles and slide the lock pin down through the aligned bores until it seats.
 
 > 💡 If you print panels front-face down, use `split_connector_strength = strong` to widen each knuckle to a full base unit: the larger contact area improves layer adhesion at the split seam and reduces the risk of layer-line breakage.
 
 ### Parameters
+
+**Split Connector** (`parts/split_connector.scad`)
+
+| Parameter | Default | Range | Description |
+|-----------|---------|-------|-------------|
+| `height_units` | 1 | 1–8 | Connector height in rack units (match the split panel) |
+| `knuckle_side` | all | all, left, right | Which knuckles to keep: both halves, or a single panel half's two knuckles |
+| `connector_strength` | slim | slim, strong | Knuckle width — `strong` uses a full base unit for better layer adhesion |
+| `debug_colors` | false | — | Show distinct colors per section for debugging |
+| `chamfer_enabled` | true | — | Chamfer the knuckle edges |
+
+**Split Lock Pin** (`parts/split_lockpin.scad`)
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
@@ -173,13 +187,14 @@ A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divid
 
 ### Variants
 
-| Split Panel (2U, 19") | Lock Pin (1U) | Lock Pin (2U) |
-|-----------------------|---------------|---------------|
-| ![Split Panel 2U](parts/renders/rackpanel_split_2u_19inch.png) | ![Split Lock Pin 1U](parts/renders/split_lockpin.png) | ![Split Lock Pin 2U](parts/renders/split_lockpin_2u.png) |
+| Split Panel (2U, 19") | Split Connector (1U) | Lock Pin (1U) | Lock Pin (2U) |
+|-----------------------|----------------------|---------------|---------------|
+| ![Split Panel 2U](parts/renders/rackpanel_split_2u_19inch.png) | ![Split Connector](parts/renders/split_connector.png) | ![Split Lock Pin 1U](parts/renders/split_lockpin.png) | ![Split Lock Pin 2U](parts/renders/split_lockpin_2u.png) |
 
 To generate or refresh previews:
 
 ```sh
+scadm export-png models/panel/parts/split_connector.scad
 scadm export-png models/panel/parts/split_lockpin.scad
 scadm export-png models/panel/parts/rackpanel.scad -D panel_width_type=2 -D height_units=2 -D split_mode=1 --output models/panel/parts/renders/rackpanel_split_2u_19inch.png
 ```
@@ -187,9 +202,11 @@ scadm export-png models/panel/parts/rackpanel.scad -D panel_width_type=2 -D heig
 ### Module Architecture
 
 ```text
-split_connector   → per-unit hinge column (regular + lock + regular knuckles), mirrored per unit
-└─ knuckle        → single knuckle: lock (tension socket) or regular (4mm square bore)
-split_lockpin     → hinge-rod pin: tension grip per unit (base-unit lock element) + shaft segments, with flex slits
+split_connector   → 4-knuckle hinge column per unit (lock + 2 middle + lock), stacked straight up
+└─ knuckle        → single knuckle: lock (tension socket) or middle (4mm square bore)
+split_lockpin     → hinge-rod pin: single tension grip at one end + plain shaft through the rest
+├─ split_lockpin_grip  → tension element (flex-slit grip) that seats in the bottom lock knuckle
+└─ split_lockpin_shaft → plain shaft with a filleted + chamfered outer end
 ```
 
 See [lib/split.scad](lib/split.scad) for implementation.

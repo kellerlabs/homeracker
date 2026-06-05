@@ -201,18 +201,21 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   split_connector_cutout = split_connector_width/2;
   attachable_width_half_naked = panel_width/2 - split_connector_cutout;
   attachable_width_half = attachable_width_half_naked + split_connector_width/2;
+  // left_half/right_half size their masking cube on ALL axes, so it must clear the panel's
+  // full bounding box (otherwise a tall, narrow panel like the demo width clips to the width).
+  split_clip_size = 2 * max(panel_width, attachable_height);
 
   module _naked_panel_left() {
     attachable(size=[attachable_width_half_naked, BASE_STRENGTH, attachable_height]){
       right(attachable_width_half_naked/2+split_connector_cutout)
-      left_half(s=panel_width,x=-split_connector_cutout) _naked_panel();
+      left_half(s=split_clip_size,x=-split_connector_cutout) _naked_panel();
       children();
     }
   }
   module _naked_panel_right() {
     attachable(size=[attachable_width_half_naked, BASE_STRENGTH, attachable_height]){
       left(attachable_width_half_naked/2+split_connector_cutout)
-      right_half(s=panel_width,x=split_connector_cutout) _naked_panel();
+      right_half(s=split_clip_size,x=split_connector_cutout) _naked_panel();
       children();
     }
   }

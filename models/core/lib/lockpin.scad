@@ -40,6 +40,8 @@ grip_distance = BASE_STRENGTH / 2;
 // we add lockpin_chamfer to cover the existing chamfer on the end part
 grip_base_length = grip_thickness_inner + grip_thickness_outer + grip_distance + lockpin_chamfer + TOLERANCE/2;
 
+HR_CORE_LOCKPIN_PRIMARY_COLOR = HR_YELLOW;
+
 /**
  * 📐 lockpin module
  *
@@ -61,26 +63,30 @@ grip_base_length = grip_thickness_inner + grip_thickness_outer + grip_distance +
  *   lockpin(grip_type=LP_GRIP_NO_GRIP);
  *   lockpin(neck_extension=LP_NECK_EXT_NECK);
  */
-module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
+module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE,
+  strength = HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR,
+  debug_colors = false, chamfer_enabled = true
+) {
   rotate([90,0,0])
   difference() {
     // Create the lockpin shape
     union() {
       // Mid part (outer shape)
-      color(HR_YELLOW)
-      tension_shape();
+      color_this(debug_colors ? HR_BLUE : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+      tension_shape(chamfer_enabled);
       // End part
-      end_parts(grip_type, neck_extension);
+      color_this(debug_colors ? HR_GREEN : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+      end_parts(grip_type, neck_extension, chamfer_enabled);
       // Neck extension
-      color(HR_BLUE)
+      color_this(debug_colors ? HR_BLUE : HR_CORE_LOCKPIN_PRIMARY_COLOR)
       neck(neck_extension, grip_type);
       // Grip part
-      color(HR_GREEN)
+      color_this(debug_colors ? HR_YELLOW : HR_CORE_LOCKPIN_PRIMARY_COLOR)
       grip(grip_type, neck_extension);
     }
     // Subtract the tension hole
-    color(HR_RED)
-    tension_hole();
+    color_this(debug_colors ? HR_RED : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+    tension_hole(strength);
   }
 }
 
@@ -167,11 +173,11 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
  * The front half has filleted top edges for better grip, while the back half has chamfered edges.
  * Fillets are suppressed on ends that connect to a neck extension.
  */
-module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
+module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE, chamfer_enabled=true) {
   has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
   has_tail_neck = neck_extension == LP_NECK_EXT_TAIL || neck_extension == LP_NECK_EXT_BOTH;
-  end_part_half(true, has_tail_neck);
-  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_neck_ext);
+  end_part_half(true, has_tail_neck, chamfer_enabled);
+  mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_neck_ext, chamfer_enabled);
 }
 
 /**
@@ -181,18 +187,17 @@ module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE
  * The front half has filleted top edges for better grip, while the back half has chamfered edges.
  * When has_neck is true, the TOP edge is not chamfered/filleted for a flush neck connection.
  */
-module end_part_half(front = false, has_neck = false) {
+module end_part_half(front = false, has_neck = false, chamfer_enabled=true) {
 
   lockpin_fillet_front = lockpin_width_outer / 3;
   lockpin_endpart_dimension = [lockpin_width_outer, lockpin_height, lockpin_endpart_length]; // cubic
 
   translate([0, 0, lockpin_prismoid_length + lockpin_endpart_length / 2 - TOLERANCE/2])
-  color(HR_BLUE)
   // Since it's not possible to have both chamfer and fillet on the same edges,
   // we use an intersection of two shapes to achieve the desired effect.
   intersection() {
     cuboid(lockpin_endpart_dimension, rounding=front && !has_neck ? lockpin_fillet_front : 0, edges=[TOP + LEFT, TOP + RIGHT]);
-    cuboid(lockpin_endpart_dimension, chamfer=lockpin_chamfer, edges=[FRONT,BACK], except=has_neck ? [BOTTOM, TOP] : BOTTOM);
+    cuboid(lockpin_endpart_dimension, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=[FRONT,BACK], except=has_neck ? [BOTTOM, TOP] : BOTTOM);
   }
 }
 
@@ -204,9 +209,9 @@ module end_part_half(front = false, has_neck = false) {
  * I haven't found a clean way to do this using BOSL2 yet (only ways that bloat the code significantly).
  * I think it'll work without fillets here for now.
  */
-module tension_shape() {
-    tension_shape_half();
-    mirror([0, 0, 1]) tension_shape_half();
+module tension_shape(chamfer_enabled=true) {
+    tension_shape_half(chamfer_enabled);
+    mirror([0, 0, 1]) tension_shape_half(chamfer_enabled);
 }
 
 /**
@@ -214,12 +219,12 @@ module tension_shape() {
  *
  * Creates one half of the main body of the lock pin with chamfered prismoid shape.
  */
-module tension_shape_half() {
+module tension_shape_half(chamfer_enabled=true) {
   lockpin_inner_dimension = [lockpin_width_inner, lockpin_height]; // planar
   lockpin_outer_dimension = [lockpin_width_outer, lockpin_height]; // planar
   lockpin_fillet_sides = BASE_UNIT;
 
-  prismoid(lockpin_inner_dimension, lockpin_outer_dimension, height=lockpin_prismoid_length, chamfer=lockpin_chamfer);
+  prismoid(lockpin_inner_dimension, lockpin_outer_dimension, height=lockpin_prismoid_length, chamfer=(chamfer_enabled ? lockpin_chamfer : 0));
 }
 
 
@@ -228,9 +233,9 @@ module tension_shape_half() {
  *
  * Creates the bidirectional chamfered tension hole for lock pins.
  */
-module tension_hole(){
-  tension_hole_half();
-  mirror([0,0,1]) tension_hole_half();
+module tension_hole(tension_hole_strength_multiplier=HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR){
+  tension_hole_half(tension_hole_strength_multiplier);
+  mirror([0,0,1]) tension_hole_half(tension_hole_strength_multiplier);
 }
 
 /**
@@ -238,11 +243,13 @@ module tension_hole(){
  *
  * Creates one half of the bidirectional chamfered tension hole for lock pins.
  */
-module tension_hole_half(){
+HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR = 4;
+HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_SLIM = 6;
+module tension_hole_half(tension_hole_strength_multiplier=HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR) {
   lockpin_tension_angle = 86.5; // in degrees
-  lockpin_tension_hole_width_inner = PRINTING_LAYER_WIDTH * 4; // widest/middle point of the tension hole
+  lockpin_tension_hole_width_inner = PRINTING_LAYER_WIDTH * tension_hole_strength_multiplier; // widest/middle point of the tension hole
   lockpin_tension_hole_height = BASE_UNIT / 2;
-  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height]; // planar
+  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height+HR_EPSILON]; // planar
   prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
 }
 
