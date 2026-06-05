@@ -22,9 +22,11 @@ LOCKPIN_HOLE_SIDE_LENGTH = 4;
 LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION = [LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH];
 HR_YELLOW = "#f7b600";
 HR_RED = "#c41e3a";
+HR_GREEN = "#2d7a2e";
 HR_CHARCOAL = "#333333";
 // --- from support.scad ---
 HR_CORE_SUPPORT_PRIMARY_COLOR = HR_CHARCOAL;
+HR_CORE_SUPPORT_SECONDARY_COLOR = HR_YELLOW;
 $fn = 100;
 
 // --- Examples ---
@@ -61,30 +63,39 @@ module support(units=3, x_holes=false,
         children();
     }
 }
-module lockpin_hole_support() {
-    lock_pin_center_side = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
-    lock_pin_center_dimension = [lock_pin_center_side, lock_pin_center_side];
+module lockpin_hole_support(
+  disable_chamfer=false, debug_colors=false) {
+  lock_pin_center_side = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
+  lock_pin_center_dimension = [lock_pin_center_side, lock_pin_center_side];
 
-    lock_pin_outer_side = LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2;
-    lock_pin_outer_dimension = [lock_pin_outer_side, lock_pin_outer_side];
+  lock_pin_outer_side = LOCKPIN_HOLE_SIDE_LENGTH + (disable_chamfer ? 0 : LOCKPIN_HOLE_CHAMFER*2);
+  lock_pin_outer_dimension = [lock_pin_outer_side, lock_pin_outer_side];
 
-    lock_pin_prismoid_inner_length = BASE_UNIT/2 - LOCKPIN_HOLE_CHAMFER;
-    lock_pin_prismoid_outer_length = LOCKPIN_HOLE_CHAMFER;
+  lock_pin_prismoid_inner_length = BASE_UNIT/2 - LOCKPIN_HOLE_CHAMFER;
+  lock_pin_prismoid_outer_length = LOCKPIN_HOLE_CHAMFER;
 
-    module hole_half() {
-        union() {
-            prismoid(size1=lock_pin_center_dimension, size2=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, h=lock_pin_prismoid_inner_length);
-            translate([0, 0, lock_pin_prismoid_inner_length]) {
-                prismoid(size1=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, size2=lock_pin_outer_dimension, h=lock_pin_prismoid_outer_length);
-            }
-        }
+  attachable_side_length = disable_chamfer ? lock_pin_center_side : lock_pin_outer_side;
+  attachable_height_half = lock_pin_prismoid_inner_length + lock_pin_prismoid_outer_length;
+
+  module hole_half(anchor=CENTER, spin=0, orient=UP) {
+    attachable(anchor=anchor, spin=spin, orient=orient, size=[attachable_side_length, attachable_side_length, attachable_height_half]) {
+      down(attachable_height_half/2)
+      color_this(debug_colors ? HR_GREEN : HR_CORE_SUPPORT_SECONDARY_COLOR)
+      prismoid(size1=lock_pin_center_dimension, size2=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, h=lock_pin_prismoid_inner_length){
+        attach(TOP,BOTTOM) color_this(debug_colors ? HR_RED : HR_CORE_SUPPORT_SECONDARY_COLOR)
+        prismoid(size1=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, size2=lock_pin_outer_dimension, h=lock_pin_prismoid_outer_length);
+      }
+      children();
     }
+  }
 
-    hole_half();
-
-    mirror([0, 0, 1]) {
-        hole_half();
+  attachable(anchor=CENTER, spin=0, orient=UP, size=[attachable_side_length, attachable_side_length, attachable_height_half*2]) {
+    up(attachable_height_half/2)
+    hole_half() {
+      attach(BOTTOM,BOTTOM) hole_half();
     }
+    children();
+  }
 }
 
 support(units=units, x_holes=x_holes, debug_colors=debug_colors, disable_chamfer=disable_chamfer);

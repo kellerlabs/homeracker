@@ -30,6 +30,10 @@ support(units=3);
 
 // Create a lock pin with standard grip
 lockpin(grip_type="standard");
+
+// Advanced: use the lock-pin hole primitive directly (e.g. in a split connector)
+// disable_chamfer=true produces a flat-ended hole for stacking
+lockpin_hole_support(disable_chamfer=false);
 ```
 
 ### Customizing Parts
