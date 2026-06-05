@@ -152,6 +152,13 @@ module bores_minimal(panel_height_units,
   }
 }
 
+HR_RP_SPLIT_FULL = 0;
+HR_RP_SPLIT_HALF = 1;
+
+HR_RP_VIEW_ASSEMBLY = 0;
+HR_RP_VIEW_HALF_LEFT = 1;
+HR_RP_VIEW_HALF_RIGHT = 2;
+
 /** Rack panel (top-level module)
  * Assembles a complete rack panel with configurable height, bore mode, and chamfering.
  * Orchestrates:
@@ -160,27 +167,92 @@ module bores_minimal(panel_height_units,
  *   - edge_mask + chamfer_edge_mask for outer chamfers
  */
 module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=RP_BORE_MODE_DEFAULT,
+  split_mode=HR_RP_SPLIT_FULL, view_mode=HR_RP_VIEW_ASSEMBLY, split_connector_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
   debug_colors=false, chamfer_enabled=true,
   anchor=CENTER, spin=0, orient=UP) {
 
   assert(is_int(panel_height_units) && panel_height_units >= 1, "panel_height_units must be a positive integer");
   assert(bore_mode >= RP_BORE_MODE_DEFAULT && bore_mode <= RP_BORE_MODE_MINIMAL, "bore_mode must be RP_BORE_MODE_DEFAULT (0), RP_BORE_MODE_FULL (1), or RP_BORE_MODE_MINIMAL (2)");
-  panel_dimensions = [panel_width, BASE_STRENGTH, panel_height_units * STD_UNIT_HEIGHT];
+  attachable_height = panel_height_units * STD_UNIT_HEIGHT;
+  panel_dimensions = [panel_width, BASE_STRENGTH, attachable_height];
   bore_count = get_bore_count_per_unit(bore_mode, panel_height_units);
 
-  tag_scope("rackpanel")
-  attachable(anchor, spin, orient, size=panel_dimensions) {
-    diff()
-    rackpanel_stack(panel_width=panel_width, panel_height_units=panel_height_units,
-      bore_count=bore_count, debug_colors=debug_colors) {
-      if (bore_mode == RP_BORE_MODE_MINIMAL)
-        tag("remove") align(CENTER, [LEFT,RIGHT], inside=true, inset=(STD_MOUNT_SURFACE_WIDTH-RP_RACKMOUNT_BORE_WIDTH)/2)
-          bores_minimal(panel_height_units=panel_height_units, debug_colors=debug_colors);
-      if (chamfer_enabled)
-        color_this(debug_colors ? HR_GREEN : RP_PRIMARY_COLOR)
-        edge_mask(FRONT)
-          chamfer_edge_mask(chamfer=BASE_CHAMFER);
+  module _naked_panel() {
+    tag_scope("rackpanel")
+    attachable(anchor, spin, orient, size=panel_dimensions) {
+      diff()
+      rackpanel_stack(panel_width=panel_width, panel_height_units=panel_height_units,
+        bore_count=bore_count, debug_colors=debug_colors) {
+        if (bore_mode == RP_BORE_MODE_MINIMAL)
+          tag("remove") align(CENTER, [LEFT,RIGHT], inside=true, inset=(STD_MOUNT_SURFACE_WIDTH-RP_RACKMOUNT_BORE_WIDTH)/2)
+            bores_minimal(panel_height_units=panel_height_units, debug_colors=debug_colors);
+        if (chamfer_enabled)
+          color_this(debug_colors ? HR_GREEN : RP_PRIMARY_COLOR)
+          edge_mask(FRONT)
+            chamfer_edge_mask(chamfer=BASE_CHAMFER);
+      }
+      children();
     }
-    children();
   }
+
+  split_connector_width = get_split_connector_width(split_connector_strength);
+  split_connector_cutout = split_connector_width/2;
+  attachable_width_half_naked = panel_width/2 - split_connector_cutout;
+  attachable_width_half = attachable_width_half_naked + split_connector_width/2;
+
+  module _naked_panel_left() {
+    attachable(size=[attachable_width_half_naked, BASE_STRENGTH, attachable_height]){
+      right(attachable_width_half_naked/2+split_connector_cutout)
+      left_half(s=panel_width,x=-split_connector_cutout) _naked_panel();
+      children();
+    }
+  }
+  module _naked_panel_right() {
+    attachable(size=[attachable_width_half_naked, BASE_STRENGTH, attachable_height]){
+      left(attachable_width_half_naked/2+split_connector_cutout)
+      right_half(s=panel_width,x=split_connector_cutout) _naked_panel();
+      children();
+    }
+  }
+
+  module _panel_left() {
+    attachable(size=[attachable_width_half, BASE_STRENGTH, attachable_height]){
+      left(split_connector_width/4)
+      _naked_panel_left() align(RIGHT,FRONT)
+        diff()
+        split_connector(units=panel_height_units,
+          knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_LEFT,
+          debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
+            edge_mask([TOP+FRONT,BOTTOM+FRONT])
+              chamfer_edge_mask(chamfer=BASE_CHAMFER);
+          }
+      children();
+    }
+  }
+
+  module _panel_right() {
+    attachable(size=[attachable_width_half, BASE_STRENGTH, attachable_height]){
+      right(split_connector_width/4)
+      _naked_panel_right() align(LEFT,FRONT)
+        diff()
+        split_connector(units=panel_height_units,
+          knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_RIGHT,
+          debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
+            edge_mask([TOP+FRONT,BOTTOM+FRONT])
+              chamfer_edge_mask(chamfer=BASE_CHAMFER);
+          }
+      children();
+    }
+  }
+
+  if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_LEFT)
+    _panel_left();
+  if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_RIGHT)
+    _panel_right();
+  if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_ASSEMBLY)
+    _panel_left() attach(RIGHT,LEFT) _panel_right();
+  if (split_mode == HR_RP_SPLIT_FULL)
+    _naked_panel();
+
+
 }
