@@ -39,12 +39,14 @@ Open `parts/panel.scad` in OpenSCAD and use the **Customizer** panel.
 | Panel (Full Cover) | ![Panel Full Cover](parts/renders/panel_fullcover_default.png) |
 | Rack Panel (10") | ![Rack Panel 10"](parts/renders/rackpanel_default_1u_10inch.png) |
 | Rack Panel (19") | ![Rack Panel 19"](parts/renders/rackpanel_default_1u_19inch.png) |
+| Split Lock Pin | ![Split Lock Pin](parts/renders/split_lockpin.png) |
 
 To generate or refresh previews:
 
 ```sh
 scadm export-png models/panel/parts/panel.scad
 scadm export-png models/panel/parts/rackpanel.scad
+scadm export-png models/panel/parts/split_lockpin.scad
 ```
 
 ### Panel Variants
@@ -95,9 +97,12 @@ A standard 10"/19" rack-compatible panel with configurable bore patterns. Open `
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
-| `panel_width_type` | 1 (10") | 1–2 | Panel width standard (10" or 19") |
-| `height_Units` | 1 | 1–8 | Panel height in rack units |
+| `panel_width_type` | 1 (10") | 1–3 | Panel width: 1 = 10", 2 = 19", 3 = Demo split (100mm, narrow demo to spare material) |
+| `height_units` | 1 | 1–8 | Panel height in rack units |
 | `bore_mode` | 0 (Default) | 0–2 | Bore hole pattern |
+| `split_mode` | 0 (Full) | 0–1 | Print whole (Full) or split into halves (Half) — see [Split Panels](#-split-panels) |
+| `view_mode` | 0 (Assembly) | 0–2 | When split: show both halves assembled, left half only, or right half only |
+| `split_connector_strength` | slim | slim, strong | Hinge connector knuckle width — `strong` uses a full base unit for extra rigidity |
 | `debug_colors` | false | — | Show distinct colors per section for debugging |
 | `chamfer_enabled` | true | — | Apply chamfers to edges |
 
@@ -140,6 +145,54 @@ rackpanel          → orchestrator: bore mode logic, chamfering (edge_mask)
 ```
 
 See [lib/rackpanel.scad](lib/rackpanel.scad) for implementation.
+
+## ✂️ Split Panels
+
+A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divides the panel along its vertical centerline into two halves that print separately and join into a rigid panel — no glue, no fasteners beyond a single lock pin.
+
+### How it works
+
+- **Split connector** — a hinge-like column of interlocking knuckles is grown onto the facing edge of each half (via `split_connector`). The two halves interleave like the leaves of a door hinge. Every height unit has one central **lock knuckle** (a full HomeRacker base unit with a tension lock-pin socket) flanked by two plain **regular knuckles** (4mm square holes).
+- **Split lock pin** — the `split_lockpin` part threads vertically down the aligned knuckle bores like a hinge rod and locks the joint. It reuses the standard lock pin's tension grip as a central lock element for each height unit. The grip is a full base unit (the tension wedge plus a short extension each side) that seats in the lock knuckle, while shaft segments butt against the grip ends and fill the regular knuckles. One tension grip per height unit, so the pin scales with the panel.
+
+### Print & assembly
+
+1. Set `split_mode = 1` (Half) and print each half — use `view_mode = 1` (Left) and `view_mode = 2` (Right), or print both at once with `view_mode = 0` (Assembly).
+2. Print the matching **Split Lock Pin** (`parts/split_lockpin.scad`) at the same `height_units`.
+3. Interleave the two halves' hinge knuckles and slide the lock pin down through the aligned bores until it seats.
+
+> 💡 If you print panels front-face down, use `split_connector_strength = strong` to widen each knuckle to a full base unit: the larger contact area improves layer adhesion at the split seam and reduces the risk of layer-line breakage.
+
+### Parameters
+
+| Parameter | Default | Range | Description |
+|-----------|---------|-------|-------------|
+| `height_units` | 1 | 1–8 | Match the split panel this pin locks |
+| `debug_colors` | false | — | Show distinct colors per section for debugging |
+| `chamfer_enabled` | true | — | Chamfer the insertion ends |
+
+### Variants
+
+| Split Panel (2U, 19") | Lock Pin (1U) | Lock Pin (2U) |
+|-----------------------|---------------|---------------|
+| ![Split Panel 2U](parts/renders/rackpanel_split_2u_19inch.png) | ![Split Lock Pin 1U](parts/renders/split_lockpin.png) | ![Split Lock Pin 2U](parts/renders/split_lockpin_2u.png) |
+
+To generate or refresh previews:
+
+```sh
+scadm export-png models/panel/parts/split_lockpin.scad
+scadm export-png models/panel/parts/rackpanel.scad -D panel_width_type=2 -D height_units=2 -D split_mode=1 --output models/panel/parts/renders/rackpanel_split_2u_19inch.png
+```
+
+### Module Architecture
+
+```text
+split_connector   → per-unit hinge column (regular + lock + regular knuckles), mirrored per unit
+└─ knuckle        → single knuckle: lock (tension socket) or regular (4mm square bore)
+split_lockpin     → hinge-rod pin: tension grip per unit (base-unit lock element) + shaft segments, with flex slits
+```
+
+See [lib/split.scad](lib/split.scad) for implementation.
 
 ## 🧭 Anchoring Behavior
 

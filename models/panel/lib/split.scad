@@ -43,6 +43,7 @@
 
 include <BOSL2/std.scad>
 include <../../core/lib/support.scad>
+include <../../core/lib/lockpin.scad>
 
 //tmp
 include <../../panel/lib/rackpanel.scad>
@@ -162,6 +163,86 @@ module split_connector(
           split_connector_1HU(invert = ($idx % 2 != 0));
       }
     }
+    children();
+  }
+}
+
+
+// the split lock pin threads vertically through the split_connector knuckle stack and
+// locks two split panel halves together (it replaces the standard lock pin for split panels).
+// it reuses the core lock pin's central tension grip (tension_shape + tension_hole) as the
+// lock element of every height unit — aligned with each lock knuckle — joined by plain shaft
+// segments that fill the regular knuckles above and below each grip. one tension grip is
+// placed per height unit, so the pin scales with the panel height.
+//
+// per height unit the lock element is a full BASE_UNIT (the lock knuckle): the central tension
+// grip plus one extension on each side. following the lock pin, the extension length is
+//   (BASE_UNIT - tension_grip) / 2
+// the shafts butt against the grip's narrow ends (they never overlap the flaring grip face),
+// so every grip presents as a clean 2D wedge just like a standard lock pin.
+HR_SPLIT_LOCKPIN_TENSION_HEIGHT = lockpin_prismoid_length * 2; // = BASE_UNIT - BASE_STRENGTH
+// shaft from a grip end out to the pin end (extension + one regular knuckle)
+HR_SPLIT_LOCKPIN_END_SHAFT = (STD_UNIT_HEIGHT - HR_SPLIT_LOCKPIN_TENSION_HEIGHT) / 2;
+// shaft bridging two neighbouring grips (two extensions + two regular knuckles)
+HR_SPLIT_LOCKPIN_MID_SHAFT = STD_UNIT_HEIGHT - HR_SPLIT_LOCKPIN_TENSION_HEIGHT;
+
+// one tension grip (lock element core), with the flex slit removed. BASE_UNIT - BASE_STRENGTH tall.
+module split_lockpin_grip(debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
+  attachable(anchor=anchor, spin=spin, orient=orient,
+    size=[lockpin_width_inner, lockpin_height, HR_SPLIT_LOCKPIN_TENSION_HEIGHT]) {
+    diff() {
+      color(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_SECONDARY_COLOR) tension_shape();
+      tag("remove") tension_hole();
+    }
+    children();
+  }
+}
+
+// shaft end cap: the pin's outer end. TOP end is filleted + chamfered like a lock pin neck,
+// the BOTTOM end stays flush so it butts against the grip.
+module split_lockpin_end_cap(debug_colors=false, chamfer_enabled=true, anchor=CENTER, spin=0, orient=UP) {
+  cap_fillet = lockpin_width_outer / 3;
+  cap_size = [lockpin_width_outer, lockpin_height, HR_SPLIT_LOCKPIN_END_SHAFT];
+  attachable(anchor=anchor, spin=spin, orient=orient, size=cap_size) {
+    color(debug_colors ? HR_BLUE : HR_CORE_SUPPORT_SECONDARY_COLOR)
+    if (chamfer_enabled)
+      // fillet + chamfer can't share an edge, so intersect a rounded and a chamfered cuboid
+      intersection() {
+        cuboid(cap_size, rounding=cap_fillet, edges=[TOP + LEFT, TOP + RIGHT]);
+        cuboid(cap_size, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=BOTTOM);
+      }
+    else
+      cuboid(cap_size);
+    children();
+  }
+}
+
+module split_lockpin(units=1,
+  anchor=CENTER, spin=0, orient=UP,
+  debug_colors=false, chamfer_enabled=true) {
+
+  assert(is_int(units) && units >= 1, "units must be a positive integer");
+
+  total_height = units * STD_UNIT_HEIGHT;
+
+  attachable(anchor=anchor, spin=spin, orient=orient,
+    size=[lockpin_width_inner, lockpin_height, total_height]) {
+    // one grip per height unit; shafts and end caps grow off each grip via attach
+    zcopies(spacing=STD_UNIT_HEIGHT, n=units)
+      split_lockpin_grip(debug_colors=debug_colors) {
+        // outer end cap below the bottom-most grip (treated TOP end points outward/down)
+        if ($idx == 0)
+          attach(BOTTOM, BOTTOM)
+            split_lockpin_end_cap(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        // above each grip: outer end cap on the top-most grip, else a bridge to the next grip
+        if ($idx == units - 1)
+          attach(TOP, BOTTOM)
+            split_lockpin_end_cap(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        else
+          attach(TOP, BOTTOM)
+            color(debug_colors ? HR_BLUE : HR_CORE_SUPPORT_SECONDARY_COLOR)
+            cuboid([lockpin_width_outer, lockpin_height, HR_SPLIT_LOCKPIN_MID_SHAFT]);
+      }
     children();
   }
 }

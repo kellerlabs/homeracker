@@ -39,6 +39,8 @@ RP_PRIMARY_COLOR = HR_YELLOW;
 RP_SECONDARY_COLOR = HR_CHARCOAL;
 RP_RACKMOUNT_BORE_WIDTH = 10;
 RP_RACKMOUNT_BORE_HEIGHT = 6.5;
+// narrow non-standard width purely for demoing the split feature with minimal material
+RP_DEMO_WIDTH = 60;
 
 /** Single rackmount bore
  * Rounded rectangular slot sized for M6 screws (10mm × 6.5mm).
@@ -245,14 +247,23 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
     }
   }
 
+  module _panel_assembly() {
+    attachable(size=[panel_width, HR_SPLIT_KNUCKLE_STRENGTH_SLIM, attachable_height]) {
+      fwd(HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2-BASE_STRENGTH/2)
+      left(attachable_width_half/2)
+      _panel_left() attach(RIGHT,LEFT) _panel_right();
+      children();
+    }
+  }
+
   if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_LEFT)
     _panel_left();
   if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_RIGHT)
     _panel_right();
   if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_ASSEMBLY)
-    _panel_left() attach(RIGHT,LEFT) _panel_right();
+    _panel_assembly()
+      attach(TOP,BOTTOM,overlap=-BASE_STRENGTH) split_lockpin(units=panel_height_units, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
   if (split_mode == HR_RP_SPLIT_FULL)
     _naked_panel();
-
 
 }

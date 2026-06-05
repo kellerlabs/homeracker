@@ -7,7 +7,7 @@ include <../lib/split.scad>
 
 /* [General Parameters] */
 // Panel width standard
-panel_width_type = 1; // [1:10 Inch (254mm), 2:19 Inch (482.6mm)]
+panel_width_type = 1; // [1:10 Inch (254mm), 2:19 Inch (482.6mm), 3:Demo split (60mm)]
 // Panel height in rack units
 height_units = 1; // [1:1:8]
 // Bore hole pattern
@@ -30,7 +30,9 @@ chamfer_enabled = true; // [false,true]
 /* [Hidden] */
 $fn = 100;
 
-panel_width = panel_width_type == 1 ? STD_WIDTH_10INCH : STD_WIDTH_19INCH;
+panel_width = panel_width_type == 1 ? STD_WIDTH_10INCH :
+  panel_width_type == 2 ? STD_WIDTH_19INCH :
+  RP_DEMO_WIDTH;
 
 _split_connector_strength = split_connector_strength == "slim" ? HR_SPLIT_KNUCKLE_STRENGTH_SLIM :
   split_connector_strength == "strong" ? HR_SPLIT_KNUCKLE_STRENGTH_BASE :

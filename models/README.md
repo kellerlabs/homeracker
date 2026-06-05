@@ -53,7 +53,7 @@ See [racklink/README.md](racklink/README.md) for details.
 
 ### 🖼️ Panel
 
-Plain mounting panel that fits into the HomeRacker scaffold. Use as-is for blank panels or as a base for custom cutouts (keystone jacks, switches, etc.). Supports Inter-Fit (inset) and Full Cover (overlap) integration types. Includes a standard 10"/19" rack panel variant with configurable bore patterns.
+Plain mounting panel that fits into the HomeRacker scaffold. Use as-is for blank panels or as a base for custom cutouts (keystone jacks, switches, etc.). Supports Inter-Fit (inset) and Full Cover (overlap) integration types. Includes a standard 10"/19" rack panel variant with configurable bore patterns and an optional split mode (hinge connector + lock pin) for printing wide panels in halves.
 
 ![Panel](./panel/parts/renders/panel.png)
 
