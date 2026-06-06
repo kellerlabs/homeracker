@@ -42,7 +42,7 @@ Open `parts/panel.scad` in OpenSCAD and use the **Customizer** panel.
 | Split Connector | ![Split Connector](parts/renders/split_connector.png) |
 | Split Lock Pin | ![Split Lock Pin](parts/renders/split_lockpin.png) |
 
-To generate or refresh previews:
+To generate or refresh the renders (full F6 renders via `scadm export-png`):
 
 ```sh
 scadm export-png models/panel/parts/panel.scad
@@ -191,11 +191,12 @@ A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divid
 |-----------------------|----------------------|---------------|---------------|
 | ![Split Panel 2U](parts/renders/rackpanel_split_2u_19inch.png) | ![Split Connector](parts/renders/split_connector.png) | ![Split Lock Pin 1U](parts/renders/split_lockpin.png) | ![Split Lock Pin 2U](parts/renders/split_lockpin_2u.png) |
 
-To generate or refresh previews:
+To generate or refresh the renders (full F6 renders via `scadm export-png`):
 
 ```sh
 scadm export-png models/panel/parts/split_connector.scad
 scadm export-png models/panel/parts/split_lockpin.scad
+scadm export-png models/panel/parts/split_lockpin.scad -D height_units=2 --output models/panel/parts/renders/split_lockpin_2u.png
 scadm export-png models/panel/parts/rackpanel.scad -D panel_width_type=2 -D height_units=2 -D split_mode=1 --output models/panel/parts/renders/rackpanel_split_2u_19inch.png
 ```
 

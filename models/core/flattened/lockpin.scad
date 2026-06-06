@@ -86,17 +86,17 @@ module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE,
       end_parts(grip_type, neck_extension, chamfer_enabled);
 
       color_this(debug_colors ? HR_BLUE : HR_CORE_LOCKPIN_PRIMARY_COLOR)
-      neck(neck_extension, grip_type);
+      neck(neck_extension, grip_type, chamfer_enabled);
 
       color_this(debug_colors ? HR_YELLOW : HR_CORE_LOCKPIN_PRIMARY_COLOR)
-      grip(grip_type, neck_extension);
+      grip(grip_type, neck_extension, chamfer_enabled);
     }
 
     color_this(debug_colors ? HR_RED : HR_CORE_LOCKPIN_PRIMARY_COLOR)
     tension_hole(strength);
   }
 }
-module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
+module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE, chamfer_enabled=true) {
   if (grip_type != LP_GRIP_NO_GRIP) {
     has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
     grip_side_extension = has_neck_ext ? LP_NECK_EXTENSION_UNIT : 0;
@@ -109,19 +109,19 @@ module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE) {
     union() {
 
       translate([0, 0, -base_translation - grip_base_length / 2])
-        cuboid(grip_base_dimensions, chamfer=lockpin_chamfer, except=TOP);
+        cuboid(grip_base_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, except=TOP);
 
       if(grip_type == LP_GRIP_STANDARD || grip_type == LP_GRIP_EXTENDED) {
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer / 2])
-          cuboid(grip_outer_dimensions, chamfer=lockpin_chamfer, edges=BOTTOM);
+          cuboid(grip_outer_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=BOTTOM);
 
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer + grip_thickness_inner / 2 + grip_distance])
-          cuboid(grip_inner_dimensions, chamfer=lockpin_chamfer, edges=BOTTOM);
+          cuboid(grip_inner_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=BOTTOM);
       }
     }
   }
 }
-module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
+module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD, chamfer_enabled=true) {
   lockpin_fillet = lockpin_width_outer / 3;
   neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
   neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE/2 + LP_NECK_EXTENSION_UNIT / 2;
@@ -132,12 +132,12 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
     translate([0, 0, -neck_z])
     if (grip_type != LP_GRIP_NO_GRIP) {
 
-      cuboid(neck_dimensions, chamfer=lockpin_chamfer, except=[TOP, BOTTOM]);
+      cuboid(neck_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, except=[TOP, BOTTOM]);
     } else {
 
       intersection() {
         cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[BOTTOM + LEFT, BOTTOM + RIGHT]);
-        cuboid(neck_dimensions, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=TOP);
+        cuboid(neck_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=[FRONT, BACK], except=TOP);
       }
     }
   }
@@ -147,7 +147,7 @@ module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD) {
 
     intersection() {
       cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[TOP + LEFT, TOP + RIGHT]);
-      cuboid(neck_dimensions, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=BOTTOM);
+      cuboid(neck_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=[FRONT, BACK], except=BOTTOM);
     }
   }
 }

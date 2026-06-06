@@ -34,12 +34,19 @@ applyTo: "**/*.scad"
 - Use `include <homeracker/...>` for cross-model library includes (resolved by scadm).
 - Use relative paths (`include <../lib/foo.scad>`) for same-model includes.
 
-## Preview PNGs
+## Catalog Render PNGs
 
-- When adding or modifying a parts file, **generate a preview PNG** with `scadm export-png`.
+- When adding or modifying a parts file, **regenerate its render PNG** with `scadm export-png`.
+- `scadm export-png` always passes `--render`, so catalog images are **full F6 renders**, not OpenCSG previews. Always recreate them this way — preview screenshots show triangulation seams on coplanar/coincident faces that full renders avoid.
+- If a full render still shows a diagonal seam on a flat face, the geometry has two coplanar coincident faces. Fix it in the model (e.g. overlap unioned boxes by `HR_EPSILON`) rather than re-rendering.
 - PNGs are stored in a `renders/` subfolder next to their source (e.g., `parts/foo.scad` → `parts/renders/foo.png`).
 - Update the model's README 📸 Catalog table and the `models/README.md` index accordingly.
 - **Dark models** (e.g., `HR_CHARCOAL` primary color): use `--colorscheme Metallic` for better contrast. The default `BeforeDawn` has a dark background that makes charcoal/black models invisible.
+- **Repo-wide regeneration** — recreate every default catalog PNG (one per non-`_` `parts/*.scad`):
+  ```bash
+  find models -path '*/parts/*.scad' -not -name '_*' -exec scadm export-png {} \;
+  ```
+  Variant PNGs (those built with `-D`/`--output`) are listed per model in that model's `README.md` — re-run those commands too.
 
 ## Self-Test Renders
 

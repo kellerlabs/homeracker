@@ -101,6 +101,16 @@ module knuckle(knuckle_type, bridge_side=LEFT, knuckle_strength=HR_SPLIT_KNUCKLE
     // main knuckle body
     diff()
     cuboid([knuckle_strength, HR_SPLIT_KNUCKLE_STRENGTH_SLIM, attachable_height], chamfer=chamfer_enabled ? BASE_CHAMFER : 0, except=FRONT){
+      // refill the front panel_depth slab so the vertical-corner chamfers only run
+      // knuckle_depth - panel_depth deep: keeps a clean square front face while the rear
+      // chamfers (which help neighbouring knuckles nest) stay full length. the slab pokes
+      // HR_EPSILON proud of the front so its face is not coplanar/coincident with the body
+      // front face (which would leave a triangulation seam even in a full render).
+      if (chamfer_enabled)
+        fwd(attachable_depth/2 - (panel_depth + HR_EPSILON)/2)
+          color_this(debug_colors ? HR_BLUE : HR_CORE_SUPPORT_SECONDARY_COLOR)
+          cuboid([knuckle_strength, panel_depth + HR_EPSILON, attachable_height]);
+
       // minimal bridge to connect the knuckle to its panel half's leaf
       _bridge_width = TOLERANCE/2 + BASE_CHAMFER;
       color_this(debug_colors ? HR_GREEN : HR_CORE_SUPPORT_SECONDARY_COLOR)
