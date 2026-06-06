@@ -163,13 +163,13 @@ module split_connector(
     diff()
     tag_scope("split_connector")
     tag(_tag0)
-    knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, bridge_side=LEFT, knuckle_strength=knuckle_strength, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled){
+    knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, bridge_side=LEFT, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled){
       attach(TOP,BOTTOM,overlap=-_g) tag(_tag1)
-        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, bridge_side=RIGHT, knuckle_strength=knuckle_strength, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, bridge_side=RIGHT, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
       attach(TOP,BOTTOM,overlap=-(2*_g+_m)) tag(_tag2)
-        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, bridge_side=LEFT, knuckle_strength=knuckle_strength, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, bridge_side=LEFT, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
       attach(TOP,BOTTOM,overlap=-(3*_g+2*_m)) tag(_tag3)
-        knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, bridge_side=RIGHT, knuckle_strength=knuckle_strength, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, bridge_side=RIGHT, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
     }
   }
 

@@ -46,3 +46,10 @@ up(640)
 rackpanel(panel_width=STD_WIDTH_19INCH, panel_height_units=2,
   split_mode=HR_RP_SPLIT_HALF, view_mode=HR_RP_VIEW_ASSEMBLY, debug_colors=true)
   align(FRONT) split_lockpin(units=2);
+
+// === strong (4mm) split rack panel — deeper panel mating with connector ===
+
+up(640) right(300)
+rackpanel(panel_width=STD_WIDTH_19INCH, panel_height_units=2,
+  split_mode=HR_RP_SPLIT_HALF, view_mode=HR_RP_VIEW_ASSEMBLY, panel_depth=4, debug_colors=true)
+  align(FRONT) split_lockpin(units=2);

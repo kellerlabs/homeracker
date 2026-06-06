@@ -12,6 +12,8 @@ panel_width_type = 1; // [1:10 Inch (254mm), 2:19 Inch (482.6mm), 3:Demo split (
 height_units = 1; // [1:1:8]
 // Bore hole pattern
 bore_mode = 0; // [0:Default, 1:All, 2:Minimal]
+// Panel depth (wall thickness)
+panel_depth_type = 1; // [1:Regular (2mm), 2:Strong (4mm)]
 
 /* [Advanced Parameters] */
 // Split mode for rack panel — controls how the panel is split for assembly and viewing
@@ -38,6 +40,9 @@ _split_connector_strength = split_connector_strength == "slim" ? HR_SPLIT_KNUCKL
   split_connector_strength == "strong" ? HR_SPLIT_KNUCKLE_STRENGTH_BASE :
   die(str("Invalid split_connector_strength: ", split_connector_strength));
 
+_panel_depth = panel_depth_type == 2 ? 4 : 2;
+
 rackpanel(panel_width=panel_width, panel_height_units=height_units, bore_mode=bore_mode,
   split_mode=split_mode, view_mode=view_mode, split_connector_strength=_split_connector_strength,
+  panel_depth=_panel_depth,
   debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);

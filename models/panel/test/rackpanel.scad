@@ -65,3 +65,14 @@ up(540) right(900) rackpanel(panel_height_units=4, bore_mode=RP_BORE_MODE_MINIMA
 up(840) rackpanel(panel_height_units=3, bore_mode=RP_BORE_MODE_DEFAULT, debug_colors=true);
 
 up(840) right(300) rackpanel(panel_height_units=3, bore_mode=RP_BORE_MODE_MINIMAL, debug_colors=true);
+
+// === Panel depth (strong 4mm) ===
+
+// 1U strong panel
+up(1080) rackpanel(panel_height_units=1, panel_depth=4);
+
+// 1U standalone strong panel
+up(1080) right(300) rackpanel_1u(panel_depth=4);
+
+// 3U strong minimal panel
+up(1080) right(600) rackpanel(panel_height_units=3, bore_mode=RP_BORE_MODE_MINIMAL, panel_depth=4);

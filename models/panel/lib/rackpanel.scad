@@ -45,8 +45,8 @@ RP_DEMO_WIDTH = 60;
 /** Single rackmount bore
  * Rounded rectangular slot sized for M6 screws (10mm × 6.5mm).
  */
-module rack_bore(debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
-  bore_dimensions = [RP_RACKMOUNT_BORE_WIDTH, BASE_STRENGTH+HR_EPSILON, RP_RACKMOUNT_BORE_HEIGHT];
+module rack_bore(panel_depth=BASE_STRENGTH, debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
+  bore_dimensions = [RP_RACKMOUNT_BORE_WIDTH, panel_depth+HR_EPSILON, RP_RACKMOUNT_BORE_HEIGHT];
   attachable(anchor, spin, orient, size=bore_dimensions) {
     color(debug_colors ? HR_RED : RP_PRIMARY_COLOR)
     cuboid(bore_dimensions,rounding=RP_RACKMOUNT_BORE_HEIGHT/2,except=[FRONT,BACK]);
@@ -60,18 +60,18 @@ module rack_bore(debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
  *   bore_count=2: outer bores only (top, bottom)
  *   bore_count=1: middle bore only
  */
-module bores_1u(bore_count = 3,
+module bores_1u(bore_count = 3, panel_depth=BASE_STRENGTH,
   debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
 
   assert(is_int(bore_count) && bore_count >= 1 && bore_count <= 3, "Bore count must be an integer between 1 and 3");
 
   width = RP_RACKMOUNT_BORE_WIDTH;
-  depth = BASE_STRENGTH;
+  depth = panel_depth;
   height = RP_RACKMOUNT_BORE_HEIGHT + (bore_count-1)*STD_RACK_BORE_DISTANCE_Z;
   attachable_dimensions = [width, depth, height];
   attachable(anchor, spin, orient, size=attachable_dimensions) {
     zcopies(spacing=STD_RACK_BORE_DISTANCE_Z*(4-bore_count), n=bore_count)
-    rack_bore(debug_colors=debug_colors);
+    rack_bore(panel_depth=panel_depth, debug_colors=debug_colors);
     children();
   }
 }
@@ -81,12 +81,11 @@ module bores_1u(bore_count = 3,
  * Does NOT apply chamfers — chamfering is handled at the rackpanel level.
  * Used as the building block for rackpanel_stack.
  */
-module rackpanel_1u(panel_width=STD_WIDTH_10INCH, bore_count=3,
+module rackpanel_1u(panel_width=STD_WIDTH_10INCH, bore_count=3, panel_depth=BASE_STRENGTH,
   debug_colors=false,
   anchor=CENTER, spin=0, orient=UP) {
 
   panel_height = STD_UNIT_HEIGHT;
-  panel_depth = BASE_STRENGTH;
   panel_dimensions = [panel_width, panel_depth, panel_height];
 
   tag_scope("rackpanel_1u")
@@ -96,7 +95,7 @@ module rackpanel_1u(panel_width=STD_WIDTH_10INCH, bore_count=3,
     cuboid(panel_dimensions){
       if (bore_count > 0)
         tag("remove") align(CENTER,[LEFT,RIGHT], inside=true, inset=(STD_MOUNT_SURFACE_WIDTH-RP_RACKMOUNT_BORE_WIDTH)/2)
-          bores_1u(bore_count=bore_count, debug_colors=debug_colors);
+          bores_1u(bore_count=bore_count, panel_depth=panel_depth, debug_colors=debug_colors);
     }
     children();
   }
@@ -119,14 +118,14 @@ function get_bore_count_per_unit(bore_mode, panel_height_units) =
  * Pure stacker — no bore mode logic, no chamfering.
  * Attachable — exposes $parent_size so children (e.g. edge_mask) work as expected.
  */
-module rackpanel_stack(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_count=3,
+module rackpanel_stack(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_count=3, panel_depth=BASE_STRENGTH,
   debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
 
-  panel_dimensions = [panel_width, BASE_STRENGTH, panel_height_units * STD_UNIT_HEIGHT];
+  panel_dimensions = [panel_width, panel_depth, panel_height_units * STD_UNIT_HEIGHT];
 
   attachable(anchor, spin, orient, size=panel_dimensions) {
     zcopies(spacing=STD_UNIT_HEIGHT, n=panel_height_units)
-      rackpanel_1u(panel_width=panel_width, bore_count=bore_count, debug_colors=debug_colors);
+      rackpanel_1u(panel_width=panel_width, bore_count=bore_count, panel_depth=panel_depth, debug_colors=debug_colors);
     children();
   }
 }
@@ -137,7 +136,7 @@ module rackpanel_stack(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_
  *   2U+: 2 bores (top + bottom unit centers)
  * Sibling module to bores_1u — same interface, different spacing strategy.
  */
-module bores_minimal(panel_height_units,
+module bores_minimal(panel_height_units, panel_depth=BASE_STRENGTH,
   debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
 
   assert(is_int(panel_height_units) && panel_height_units >= 1, "panel_height_units must be a positive integer");
@@ -145,11 +144,11 @@ module bores_minimal(panel_height_units,
   n = panel_height_units == 1 ? 1 : 2;
   width = RP_RACKMOUNT_BORE_WIDTH;
   height = RP_RACKMOUNT_BORE_HEIGHT + bore_spacing;
-  attachable_dimensions = [width, BASE_STRENGTH, height];
+  attachable_dimensions = [width, panel_depth, height];
 
   attachable(anchor, spin, orient, size=attachable_dimensions) {
     zcopies(spacing=bore_spacing, n=n)
-      rack_bore(debug_colors=debug_colors);
+      rack_bore(panel_depth=panel_depth, debug_colors=debug_colors);
     children();
   }
 }
@@ -170,13 +169,15 @@ HR_RP_VIEW_HALF_RIGHT = 2;
  */
 module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=RP_BORE_MODE_DEFAULT,
   split_mode=HR_RP_SPLIT_FULL, view_mode=HR_RP_VIEW_ASSEMBLY, split_connector_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
+  panel_depth=BASE_STRENGTH,
   debug_colors=false, chamfer_enabled=true,
   anchor=CENTER, spin=0, orient=UP) {
 
   assert(is_int(panel_height_units) && panel_height_units >= 1, "panel_height_units must be a positive integer");
   assert(bore_mode >= RP_BORE_MODE_DEFAULT && bore_mode <= RP_BORE_MODE_MINIMAL, "bore_mode must be RP_BORE_MODE_DEFAULT (0), RP_BORE_MODE_FULL (1), or RP_BORE_MODE_MINIMAL (2)");
+  assert(is_num(panel_depth) && panel_depth >= BASE_STRENGTH, str("panel_depth must be a number >= ", BASE_STRENGTH, "mm"));
   attachable_height = panel_height_units * STD_UNIT_HEIGHT;
-  panel_dimensions = [panel_width, BASE_STRENGTH, attachable_height];
+  panel_dimensions = [panel_width, panel_depth, attachable_height];
   bore_count = get_bore_count_per_unit(bore_mode, panel_height_units);
 
   module _naked_panel() {
@@ -184,10 +185,10 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
     attachable(anchor, spin, orient, size=panel_dimensions) {
       diff()
       rackpanel_stack(panel_width=panel_width, panel_height_units=panel_height_units,
-        bore_count=bore_count, debug_colors=debug_colors) {
+        bore_count=bore_count, panel_depth=panel_depth, debug_colors=debug_colors) {
         if (bore_mode == RP_BORE_MODE_MINIMAL)
           tag("remove") align(CENTER, [LEFT,RIGHT], inside=true, inset=(STD_MOUNT_SURFACE_WIDTH-RP_RACKMOUNT_BORE_WIDTH)/2)
-            bores_minimal(panel_height_units=panel_height_units, debug_colors=debug_colors);
+            bores_minimal(panel_height_units=panel_height_units, panel_depth=panel_depth, debug_colors=debug_colors);
         if (chamfer_enabled)
           color_this(debug_colors ? HR_GREEN : RP_PRIMARY_COLOR)
           edge_mask(FRONT)
@@ -206,14 +207,14 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   split_clip_size = 2 * max(panel_width, attachable_height);
 
   module _naked_panel_left() {
-    attachable(size=[attachable_width_half_naked, BASE_STRENGTH, attachable_height]){
+    attachable(size=[attachable_width_half_naked, panel_depth, attachable_height]){
       right(attachable_width_half_naked/2+split_connector_cutout)
       left_half(s=split_clip_size,x=-split_connector_cutout) _naked_panel();
       children();
     }
   }
   module _naked_panel_right() {
-    attachable(size=[attachable_width_half_naked, BASE_STRENGTH, attachable_height]){
+    attachable(size=[attachable_width_half_naked, panel_depth, attachable_height]){
       left(attachable_width_half_naked/2+split_connector_cutout)
       right_half(s=split_clip_size,x=split_connector_cutout) _naked_panel();
       children();
@@ -221,11 +222,11 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   }
 
   module _panel_left() {
-    attachable(size=[attachable_width_half, BASE_STRENGTH, attachable_height]){
+    attachable(size=[attachable_width_half, panel_depth, attachable_height]){
       left(split_connector_width/4)
       _naked_panel_left() align(RIGHT,FRONT)
         diff()
-        split_connector(units=panel_height_units,
+        split_connector(units=panel_height_units, panel_depth=panel_depth,
           knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_LEFT,
           debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
@@ -236,11 +237,11 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   }
 
   module _panel_right() {
-    attachable(size=[attachable_width_half, BASE_STRENGTH, attachable_height]){
+    attachable(size=[attachable_width_half, panel_depth, attachable_height]){
       right(split_connector_width/4)
       _naked_panel_right() align(LEFT,FRONT)
         diff()
-        split_connector(units=panel_height_units,
+        split_connector(units=panel_height_units, panel_depth=panel_depth,
           knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_RIGHT,
           debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
@@ -252,7 +253,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
 
   module _panel_assembly() {
     attachable(size=[panel_width, HR_SPLIT_KNUCKLE_STRENGTH_SLIM, attachable_height]) {
-      fwd(HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2-BASE_STRENGTH/2)
+      fwd(HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2-panel_depth/2)
       left(attachable_width_half/2)
       _panel_left() attach(RIGHT,LEFT) _panel_right();
       children();
