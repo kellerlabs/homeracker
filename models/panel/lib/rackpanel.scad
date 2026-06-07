@@ -169,6 +169,7 @@ HR_RP_SPLIT_HALF = 1;
 HR_RP_VIEW_ASSEMBLY = 0;
 HR_RP_VIEW_HALF_LEFT = 1;
 HR_RP_VIEW_HALF_RIGHT = 2;
+HR_RP_VIEW_EXPLOSION = 3;
 
 /** Rack panel (top-level module)
  * Assembles a complete rack panel with configurable height, bore mode, and chamfering.
@@ -190,6 +191,8 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   assert(is_num(panel_depth) && panel_depth >= BASE_STRENGTH, str("panel_depth must be a number >= ", BASE_STRENGTH, "mm"));
   attachable_height = panel_height_units * STD_UNIT_HEIGHT;
   panel_dimensions = [panel_width, panel_depth, attachable_height];
+  // sink depth that seats the lock pin flush with the panel top (matches split_lockpin total height)
+  lockpin_seat = attachable_height - TOLERANCE/2;
   bore_count = get_bore_count_per_unit(bore_mode, panel_height_units);
   // The brace sits behind the panel back face and protrudes to the knuckle plane; it only
   // earns its place when at least a rib's worth of depth is available there.
@@ -263,10 +266,11 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);
           }
-        // own half-brace, attached to the panel back: outer (mount) margin, flush to the cut
+        // own half-brace: outer (mount) margin on the bore side; the inner edge overlaps the
+        // knuckle by HR_EPSILON (field widened + shifted toward the seam) so the join is manifold
         if (brace_active)
           attach(BACK, FRONT)
-            _back_brace(attachable_width_half_naked - RP_BRACE_SIDE_MARGIN, x_offset=-RP_BRACE_SIDE_MARGIN/2);
+            _back_brace(attachable_width_half_naked - RP_BRACE_SIDE_MARGIN + HR_EPSILON, x_offset=-RP_BRACE_SIDE_MARGIN/2 + HR_EPSILON/2);
       }
       children();
     }
@@ -284,20 +288,28 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);
           }
-        // mirror of the left half: outer margin on the right, flush to the cut, lattice mirrored
+        // mirror of the left half: outer margin on the right, inner edge overlaps the knuckle by
+        // HR_EPSILON toward the seam, lattice mirrored
         if (brace_active)
           attach(BACK, FRONT)
-            _back_brace(attachable_width_half_naked - RP_BRACE_SIDE_MARGIN, x_offset=RP_BRACE_SIDE_MARGIN/2, mirror_lattice=true);
+            _back_brace(attachable_width_half_naked - RP_BRACE_SIDE_MARGIN + HR_EPSILON, x_offset=RP_BRACE_SIDE_MARGIN/2 - HR_EPSILON/2, mirror_lattice=true);
       }
       children();
     }
   }
 
-  module _panel_assembly() {
+  // Both halves joined. explode=false butts them flush (the real assembled panel); explode=true
+  // pushes them apart so the interleaving knuckles read as a clear exploded diagram.
+  module _panel_assembly(explode=false) {
+    // shift left so the seam stays centred under the lock pin; in explode mode the extra gap pushes
+    // the halves apart and the seam moves by half that gap, so shift an extra knuckle-depth to match
+    half_shift = attachable_width_half/2 + (explode ? HR_SPLIT_KNUCKLE_STRENGTH_SLIM : 0);
+    seam_gap = explode ? -2*HR_SPLIT_KNUCKLE_STRENGTH_SLIM : 0;
     attachable(size=[panel_width, HR_SPLIT_KNUCKLE_STRENGTH_SLIM, attachable_height]) {
       fwd(HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2-panel_depth/2)
-      left(attachable_width_half/2)
-      _panel_left() attach(RIGHT,LEFT) _panel_right();
+      left(half_shift)
+      _panel_left()
+        attach(RIGHT,LEFT,overlap=seam_gap) _panel_right();
       children();
     }
   }
@@ -307,7 +319,13 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_RIGHT)
     _panel_right();
   if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_ASSEMBLY)
+    // the real assembled panel: halves butted flush with the lock pin seated in the knuckle bores
     _panel_assembly()
+      attach(TOP,TOP,overlap=lockpin_seat)
+        split_lockpin(units=panel_height_units, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+  if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_EXPLOSION)
+    // exploded diagram: halves pushed apart with the lock pin floating above its bores
+    _panel_assembly(explode=true)
       attach(TOP,TOP,overlap=-BASE_STRENGTH) split_lockpin(units=panel_height_units, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
   if (split_mode == HR_RP_SPLIT_FULL)
     _naked_panel()

@@ -27,7 +27,7 @@ split_connector_strength = "slim"; // [slim, strong]
 // Split mode for rack panel — controls how the panel is split for assembly and viewing
 split_mode = 0; // [0:Full, 1:Half]
 // view mode controls which sections of the panel are visible in case of a split mode selection other than full
-view_mode = 0; // [0:Assembly (all), 1:Half Left, 2:Half Right]
+view_mode = 0; // [0:Assembled, 1:Half Left, 2:Half Right, 3:Exploded]
 
 /* [Debug Parameters] */
 // Show distinct colors per section for easier debugging and measurement

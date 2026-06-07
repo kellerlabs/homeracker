@@ -106,7 +106,7 @@ A standard 10"/19" rack-compatible panel with configurable bore patterns. Open `
 | `back_brace` | false | — | Add a triangulated truss stiffener on the panel back, flush with the split-knuckle plane — see [Stiffening](#-stiffening-depth-vs-back-brace) |
 | `back_brace_density` | regular | regular, dense | Truss band density when `back_brace` is on — `regular` = 1 band per unit, `dense` = 2 bands per unit (finer triangles, but noticeably more material) |
 | `split_mode` | 0 (Full) | 0–1 | Print whole (Full) or split into halves (Half) — see [Split Panels](#-split-panels) |
-| `view_mode` | 0 (Assembly) | 0–2 | When split: show both halves assembled, left half only, or right half only |
+| `view_mode` | 0 (Assembled) | 0–3 | When split: assembled panel (pin seated), left half only, right half only, or exploded preview (halves apart + pin floating above) |
 | `split_connector_strength` | slim | slim, strong | Hinge connector knuckle width — `strong` uses a full base unit for extra rigidity |
 | `debug_colors` | false | — | Show distinct colors per section for debugging |
 | `chamfer_enabled` | true | — | Apply chamfers to edges |
@@ -182,7 +182,7 @@ A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divid
 
 ### Print & assembly
 
-1. Set `split_mode = 1` (Half) and print each half — use `view_mode = 1` (Left) and `view_mode = 2` (Right), or print both at once with `view_mode = 0` (Assembly). The hinge knuckles are generated automatically as part of each half; `parts/split_connector.scad` exposes the bare connector standalone for preview and inspection.
+1. Set `split_mode = 1` (Half) and print each half — use `view_mode = 1` (Left) and `view_mode = 2` (Right). `view_mode = 0` (Assembled) previews the finished panel with the lock pin seated, and `view_mode = 3` (Exploded) shows how the two halves and the pin fit together — neither is a print layout. The hinge knuckles are generated automatically as part of each half; `parts/split_connector.scad` exposes the bare connector standalone for preview and inspection.
 2. Print the matching **Split Lock Pin** (`parts/split_lockpin.scad`) at the same `height_units`.
 3. Interleave the two halves' hinge knuckles and slide the lock pin down through the aligned bores until it seats.
 
@@ -222,7 +222,7 @@ To generate or refresh the renders (full F6 renders via `scadm export-png`):
 scadm export-png models/panel/parts/split_connector.scad
 scadm export-png models/panel/parts/split_lockpin.scad
 scadm export-png models/panel/parts/split_lockpin.scad -D height_units=2 --output models/panel/parts/renders/split_lockpin_2u.png
-scadm export-png models/panel/parts/rackpanel.scad -D panel_width_type=2 -D height_units=2 -D split_mode=1 --output models/panel/parts/renders/rackpanel_split_2u_19inch.png
+scadm export-png models/panel/parts/rackpanel.scad -D panel_width_type=2 -D height_units=2 -D split_mode=1 -D view_mode=3 --output models/panel/parts/renders/rackpanel_split_2u_19inch.png
 ```
 
 ### Module Architecture
