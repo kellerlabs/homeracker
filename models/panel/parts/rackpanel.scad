@@ -20,8 +20,6 @@ panel_depth_type = 1; // [1:Regular (2mm), 2:Strong (4mm)]
 back_brace = false; // [false,true]
 // Truss grid density for the back brace (only relevant if back_brace is on)
 back_brace_density = "regular"; // [regular, dense]
-// Split connector knuckle width — wider = more rigid joint (only relevant if split_mode is Half)
-split_connector_strength = "slim"; // [slim, strong]
 
 /* [Advanced Parameters] */
 // Split mode for rack panel — controls how the panel is split for assembly and viewing
@@ -42,10 +40,6 @@ panel_width = panel_width_type == 1 ? STD_WIDTH_10INCH :
   panel_width_type == 2 ? STD_WIDTH_19INCH :
   RP_DEMO_WIDTH;
 
-_split_connector_strength = split_connector_strength == "slim" ? HR_SPLIT_KNUCKLE_STRENGTH_SLIM :
-  split_connector_strength == "strong" ? HR_SPLIT_KNUCKLE_STRENGTH_BASE :
-  die(str("Invalid split_connector_strength: ", split_connector_strength));
-
 _panel_depth = panel_depth_type == 2 ? 4 : 2;
 
 // Density scales with height so triangles keep a consistent size across panel heights:
@@ -55,7 +49,7 @@ _brace_rows = back_brace_density == "regular" ? max(1, height_units) :
   die(str("Invalid back_brace_density: ", back_brace_density));
 
 rackpanel(panel_width=panel_width, panel_height_units=height_units, bore_mode=bore_mode,
-  split_mode=split_mode, view_mode=view_mode, split_connector_strength=_split_connector_strength,
+  split_mode=split_mode, view_mode=view_mode,
   panel_depth=_panel_depth,
   brace_enabled=back_brace, brace_rows=_brace_rows,
   debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);

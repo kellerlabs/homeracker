@@ -60,7 +60,6 @@ enable_chamfer = true; // [false,true]
 
 _LOCKPIN_HOLE_CENTER_SIDE = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
 HR_SPLIT_KNUCKLE_STRENGTH_SLIM = _LOCKPIN_HOLE_CENTER_SIDE + BASE_STRENGTH*2;
-HR_SPLIT_KNUCKLE_STRENGTH_BASE = BASE_UNIT;
 
 HR_SPLIT_KNUCKLE_TYPE_LOCK = 0;
 HR_SPLIT_KNUCKLE_TYPE_MIDDLE = 1;
@@ -77,13 +76,11 @@ function get_knuckle_height(knuckle_type) =
   die(str("Invalid knuckle type: ", knuckle_type));
 
 
-function get_split_connector_width(knuckle_strength) =
-  knuckle_strength; // leaves meet the centered knuckle body flush — no bridge gap
-
-// the knuckle body spans the full connector width, so each panel-half leaf butts flush against it:
-// the owning half's leaf welds to the near face, the opposite half's leaf kisses the far face on
-// assembly. point-symmetric, so the body is identical for either half (ownership is tag-driven).
-module knuckle(knuckle_type, knuckle_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
+// the knuckle body is a square HR_SPLIT_KNUCKLE_STRENGTH_SLIM column. each panel-half leaf butts
+// flush against it: the owning half's leaf welds to the near face, the opposite half's leaf kisses
+// the far face on assembly. point-symmetric, so the body is identical for either half (ownership
+// is tag-driven).
+module knuckle(knuckle_type,
   panel_depth=BASE_STRENGTH,
   anchor=CENTER, spin=0, orient=UP,
   debug_colors=false, chamfer_enabled=true) {
@@ -91,7 +88,7 @@ module knuckle(knuckle_type, knuckle_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
   assert(knuckle_type == HR_SPLIT_KNUCKLE_TYPE_LOCK || knuckle_type == HR_SPLIT_KNUCKLE_TYPE_MIDDLE,
     "Invalid knuckle type");
 
-  attachable_width = get_split_connector_width(knuckle_strength);
+  attachable_width = HR_SPLIT_KNUCKLE_STRENGTH_SLIM;
   attachable_depth = HR_SPLIT_KNUCKLE_STRENGTH_SLIM;
   attachable_height = get_knuckle_height(knuckle_type);
 
@@ -100,7 +97,7 @@ module knuckle(knuckle_type, knuckle_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
     color_this(debug_colors ? HR_BLUE : HR_CORE_SUPPORT_SECONDARY_COLOR)
     // main knuckle body
     diff()
-    cuboid([knuckle_strength, HR_SPLIT_KNUCKLE_STRENGTH_SLIM, attachable_height], chamfer=chamfer_enabled ? BASE_CHAMFER : 0, except=FRONT){
+    cuboid([HR_SPLIT_KNUCKLE_STRENGTH_SLIM, HR_SPLIT_KNUCKLE_STRENGTH_SLIM, attachable_height], chamfer=chamfer_enabled ? BASE_CHAMFER : 0, except=FRONT){
       // refill the front panel_depth slab so the vertical-corner chamfers only run
       // knuckle_depth - panel_depth deep: keeps a clean square front face while the rear
       // chamfers (which help neighbouring knuckles nest) stay full length. the slab pokes
@@ -109,7 +106,7 @@ module knuckle(knuckle_type, knuckle_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
       if (chamfer_enabled)
         fwd(attachable_depth/2 - (panel_depth + HR_EPSILON)/2)
           color_this(debug_colors ? HR_BLUE : HR_CORE_SUPPORT_SECONDARY_COLOR)
-          cuboid([knuckle_strength, panel_depth + HR_EPSILON, attachable_height]);
+          cuboid([HR_SPLIT_KNUCKLE_STRENGTH_SLIM, panel_depth + HR_EPSILON, attachable_height]);
 
       // lock pin hole: LOCK knuckles get the tension socket, MIDDLE knuckles a plain 4x4mm hole
       color_this(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_SECONDARY_COLOR)
@@ -140,7 +137,7 @@ function knuckle_visibility_tag(owner, knuckle_side) =
 
 module split_connector(
   units=1, panel_depth=BASE_STRENGTH,
-  knuckle_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_ALL,
+  knuckle_side=HR_SPLIT_KNUCKLE_SIDE_ALL,
   anchor=CENTER, spin=0, orient=UP,
   debug_colors=false, chamfer_enabled=true) {
 
@@ -158,17 +155,17 @@ module split_connector(
     diff()
     tag_scope("split_connector")
     tag(_tag0)
-    knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled){
+    knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled){
       attach(TOP,BOTTOM,overlap=-_g) tag(_tag1)
-        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
       attach(TOP,BOTTOM,overlap=-(2*_g+_m)) tag(_tag2)
-        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        knuckle(HR_SPLIT_KNUCKLE_TYPE_MIDDLE, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
       attach(TOP,BOTTOM,overlap=-(3*_g+2*_m)) tag(_tag3)
-        knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, knuckle_strength=knuckle_strength, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        knuckle(HR_SPLIT_KNUCKLE_TYPE_LOCK, panel_depth=panel_depth, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
     }
   }
 
-  attachable_width = get_split_connector_width(knuckle_strength);
+  attachable_width = HR_SPLIT_KNUCKLE_STRENGTH_SLIM;
   attachable_depth = HR_SPLIT_KNUCKLE_STRENGTH_SLIM;
   attachable_height = units * STD_UNIT_HEIGHT - TOLERANCE/2;
 

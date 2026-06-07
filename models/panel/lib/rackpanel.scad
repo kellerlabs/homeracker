@@ -180,7 +180,7 @@ HR_RP_VIEW_EXPLOSION = 3;
  *   - optional back-side truss stiffener (brace_enabled), flush with the split-knuckle plane
  */
 module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=RP_BORE_MODE_DEFAULT,
-  split_mode=HR_RP_SPLIT_FULL, view_mode=HR_RP_VIEW_ASSEMBLY, split_connector_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
+  split_mode=HR_RP_SPLIT_FULL, view_mode=HR_RP_VIEW_ASSEMBLY,
   panel_depth=BASE_STRENGTH,
   brace_enabled=false, brace_rows=2,
   debug_colors=false, chamfer_enabled=true,
@@ -217,7 +217,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
     }
   }
 
-  split_connector_width = get_split_connector_width(split_connector_strength);
+  split_connector_width = HR_SPLIT_KNUCKLE_STRENGTH_SLIM;
   split_connector_cutout = split_connector_width/2;
   attachable_width_half_naked = panel_width/2 - split_connector_cutout;
   attachable_width_half = attachable_width_half_naked + split_connector_width/2;
@@ -261,7 +261,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
         align(RIGHT,FRONT)
         diff()
         split_connector(units=panel_height_units, panel_depth=panel_depth,
-          knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_LEFT,
+          knuckle_side=HR_SPLIT_KNUCKLE_SIDE_LEFT,
           debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);
@@ -283,7 +283,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
         align(LEFT,FRONT)
         diff()
         split_connector(units=panel_height_units, panel_depth=panel_depth,
-          knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_RIGHT,
+          knuckle_side=HR_SPLIT_KNUCKLE_SIDE_RIGHT,
           debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);

@@ -13,8 +13,6 @@ include <../lib/split.scad>
 height_units = 1; // [1:1:8]
 // Which knuckles to keep: all (both halves), or just one panel half's knuckles
 knuckle_side = "all"; // [all:Both halves, left:Left half, right:Right half]
-// Knuckle width: strong widens each knuckle to a full base unit for better layer adhesion
-connector_strength = "slim"; // [slim, strong]
 
 /* [Debug Parameters] */
 // Show distinct colors per section for easier debugging
@@ -25,9 +23,5 @@ chamfer_enabled = true; // [false,true]
 /* [Hidden] */
 $fn = 100;
 
-_knuckle_strength = connector_strength == "slim" ? HR_SPLIT_KNUCKLE_STRENGTH_SLIM :
-  connector_strength == "strong" ? HR_SPLIT_KNUCKLE_STRENGTH_BASE :
-  die(str("Invalid connector_strength: ", connector_strength));
-
-split_connector(units=height_units, knuckle_strength=_knuckle_strength, knuckle_side=knuckle_side,
+split_connector(units=height_units, knuckle_side=knuckle_side,
   debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);

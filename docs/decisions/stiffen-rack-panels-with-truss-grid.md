@@ -53,6 +53,14 @@ Alternatives considered:
 
 - **Solid/deeper panel only** — rejected as the *sole* mechanism: infill-dependent and weak
   in torsion. Kept as a complementary option (`panel_depth`); the two combine.
+- **A wider (`strong`, full `BASE_UNIT`) split connector for seam stiffness** — added as an option
+  first, then **removed**. A four-panel print test (19" 1U, Bambu X1C, HomeRacker defaults:
+  3 walls, Arachne, 15 % gyroid, Bambu PLA Matte Charcoal) hand-loaded in shear and bending showed
+  the wider knuckle flexed *more* along the seam and cost extra filament for no gain — stiffness
+  came from `panel_depth` and `back_brace`, not connector width. So `split_connector_strength` /
+  `connector_strength` and the `HR_SPLIT_KNUCKLE_STRENGTH_BASE` / `knuckle_strength` plumbing were
+  dropped; the slim knuckle is the only connector. See the README's
+  [real-world print test](../../models/panel/README.md#-stiffening-depth-vs-back-brace).
 - **All diagonals one direction** (initial draft) — rejected: asymmetric racking stiffness and
   it left clipped partial cells along one edge from the 45° clip. The row-based alternating
   pattern fixes both.
@@ -70,6 +78,8 @@ Alternatives considered:
 - ✅ `truss_grid` is reusable by other models.
 - ✅ Composable: `panel_depth` (broad bending) + `back_brace` (torsion) stack;
   `back_brace` + Minimal bores is the lightest stiff combo.
+- ✅ One split-connector width to reason about: dropping `strong` removed a trap option that
+  hurt seam bending, plus its dead `knuckle_strength` plumbing.
 - ⚠️ The full-panel attachable bounding box still reports `panel_depth` and does not include
   the brace protrusion (consistent with how split knuckles already exceed it). Back-face
   child anchoring is therefore approximate on braced full panels.

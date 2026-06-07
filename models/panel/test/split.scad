@@ -15,9 +15,6 @@ right(80) split_connector(units=3);
 // debug colors
 right(120) split_connector(units=2, debug_colors=true);
 
-// strong (BASE_UNIT) knuckle strength
-right(160) split_connector(units=2, knuckle_strength=HR_SPLIT_KNUCKLE_STRENGTH_BASE);
-
 // === split_connector — single sides (printed with each panel half) ===
 
 up(160) split_connector(units=2, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_LEFT, debug_colors=true);
