@@ -6,5 +6,6 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [stiffen-rack-panels-with-truss-grid](stiffen-rack-panels-with-truss-grid.md) | 2026-06-19 | Optional back-side truss stiffener via generic `truss_grid` |
 | [unify-export-png-into-scadm](unify-export-png-into-scadm.md) | 2026-06-18 | Replace duplicate shell scripts with `scadm export-png` |
 | [image-hosting-assets-repo](image-hosting-assets-repo.md) | 2026-04-13 | Host manually-created images in `kellerlabs/assets` repo |

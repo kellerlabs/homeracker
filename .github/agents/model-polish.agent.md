@@ -42,9 +42,9 @@ Review **every** `.scad` file in `lib/` and `parts/`:
 2. If missing, create it following the model README template from `.github/instructions/markdown.instructions.md`
 3. If it exists, verify all sections are present and accurate. Update as needed.
 
-### Phase 4 — Preview PNGs
+### Phase 4 — Render PNGs
 
-1. For each `.scad` file in `parts/`, generate a preview PNG:
+1. For each `.scad` file in `parts/`, generate a full F6 render PNG (`scadm export-png` always passes `--render`):
    ```bash
    scadm export-png models/<name>/parts/<part>.scad
    ```

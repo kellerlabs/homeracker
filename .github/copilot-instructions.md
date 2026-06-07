@@ -28,7 +28,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components use p
   - Every code change that adds, modifies, or removes functionality **must** include a documentation update.
   - Follow the What / Why / How / References structure defined in the markdown instructions.
   - When renaming or restructuring code, update or rename the associated docs to keep everything tidy.
-  - When adding or modifying model parts (`parts/*.scad`), **generate preview PNGs** with `scadm export-png` and update both the model's README 📸 Catalog and the parent `models/README.md` index.
+  - When adding or modifying model parts (`parts/*.scad`), **regenerate the render PNGs** with `scadm export-png` (full F6 renders, not previews) and update both the model's README 📸 Catalog and the parent `models/README.md` index.
 - **Assets Policy**: All manually-created images (photos, diagrams, logos, MakerWorld description images) are hosted in [`kellerlabs/assets`](https://github.com/kellerlabs/assets). Push directly to its `main` branch. Reference via `https://raw.githubusercontent.com/kellerlabs/assets/main/<repo>/<path>`. Only auto-generated render PNGs (`**/renders/*.png`) are tracked in source repos. See [image-hosting-assets-repo](docs/decisions/image-hosting-assets-repo.md).
 - **Architecture Decision Records (ADRs)**:
   - When the user makes an architectural or design decision during a session, create a decision record in `docs/decisions/`. Load the `decision-records` skill for the full workflow.

@@ -9,6 +9,15 @@ applyTo: "**/*.scad"
 - Use [BOSL2](https://github.com/BelfrySCAD/BOSL2/wiki) for complex geometry operations (prefer attach/align over OpenSCAD's translate/rotate).
 - Consult the BOSL2 wiki for available modules before writing custom geometry.
 
+## Composing Geometry (attach/align vs union/diff)
+
+- **Position with anchors, not offsets.** Prefer `attach`/`align`/`position` + `left`/`right`/`fwd`/`back` over raw `translate`/`rotate` with hand-computed centre math. `union()` is for merging separate solids, never for positioning.
+- **`diff()` is tag-based.** Kept (untagged) geometry and `remove`-tagged cutters coexist in one `diff()`; cutters only subtract where they overlap. A part welded on after the bores belongs *inside* the same `diff()` as an untagged child — do **not** wrap it in `union()` to "shield" it.
+- **Isolate a child's own `diff()`/`edge_mask` with `tag_scope()`.** A nested chamfer (edge_mask applies a `remove` tag) leaks into an enclosing `diff()` and gets cancelled. Wrap the inner part in `tag_scope()` at the call site to contain its tags.
+- **Edge breaks in one pass.** Chamfer/fillet an assembly's outer edge with `edge_mask` on the bounding-box edges, not per-member — per-piece chamfers leave nubs at junctions.
+- **Keep sub-parts ignorant of the parent.** A reusable part (e.g. a back brace) should take its own size and attach to a face; splitting/clipping belongs in the parent, not duplicated inside the part.
+
+
 ## Quality Settings
 
 - Set `$fn=100` for production renders.
@@ -34,12 +43,19 @@ applyTo: "**/*.scad"
 - Use `include <homeracker/...>` for cross-model library includes (resolved by scadm).
 - Use relative paths (`include <../lib/foo.scad>`) for same-model includes.
 
-## Preview PNGs
+## Catalog Render PNGs
 
-- When adding or modifying a parts file, **generate a preview PNG** with `scadm export-png`.
+- When adding or modifying a parts file, **regenerate its render PNG** with `scadm export-png`.
+- `scadm export-png` always passes `--render`, so catalog images are **full F6 renders**, not OpenCSG previews. Always recreate them this way — preview screenshots show triangulation seams on coplanar/coincident faces that full renders avoid.
+- If a full render still shows a diagonal seam on a flat face, the geometry has two coplanar coincident faces. Fix it in the model (e.g. overlap unioned boxes by `HR_EPSILON`) rather than re-rendering.
 - PNGs are stored in a `renders/` subfolder next to their source (e.g., `parts/foo.scad` → `parts/renders/foo.png`).
 - Update the model's README 📸 Catalog table and the `models/README.md` index accordingly.
 - **Dark models** (e.g., `HR_CHARCOAL` primary color): use `--colorscheme Metallic` for better contrast. The default `BeforeDawn` has a dark background that makes charcoal/black models invisible.
+- **Repo-wide regeneration** — recreate every default catalog PNG (one per non-`_` `parts/*.scad`):
+  ```bash
+  find models -path '*/parts/*.scad' -not -name '_*' -exec scadm export-png {} \;
+  ```
+  Variant PNGs (those built with `-D`/`--output`) are listed per model in that model's `README.md` — re-run those commands too.
 
 ## Self-Test Renders
 
