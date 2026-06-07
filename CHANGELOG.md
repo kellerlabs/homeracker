@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.8.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.7.0...homeracker-v3.8.0) (2026-06-07)
+
+
+### ✨ Features
+
+* **panel:** split panels, back-brace stiffener & panel depth ([#393](https://github.com/kellerlabs/homeracker/issues/393)) ([3d2ae7d](https://github.com/kellerlabs/homeracker/commit/3d2ae7de7260b11c13058cd02d4b7354ae7fab1f))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.743 ([#390](https://github.com/kellerlabs/homeracker/issues/390)) ([124202e](https://github.com/kellerlabs/homeracker/commit/124202ed21d1df0dabdc3bce85621a0f942d4db9))
+* update dependency kellerlab-pre-commit-hooks to v0.3.5 ([#391](https://github.com/kellerlabs/homeracker/issues/391)) ([65186c0](https://github.com/kellerlabs/homeracker/commit/65186c0997be0c970057c43e3cfb1a13fffde2fb))
+* update openscad nightly to v2026.06.06 ([#392](https://github.com/kellerlabs/homeracker/issues/392)) ([a02ed6d](https://github.com/kellerlabs/homeracker/commit/a02ed6de9b25f1319fcb8abc0efdc56d47644fbe))
+* update pre-commit hooks ([#387](https://github.com/kellerlabs/homeracker/issues/387)) ([a654907](https://github.com/kellerlabs/homeracker/commit/a6549077d5dc21bd5f6a4fe0038f8ba00c39ab22))
+
 ## [3.7.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.6.2...homeracker-v3.7.0) (2026-05-31)
 
 
