@@ -99,7 +99,7 @@ A standard 10"/19" rack-compatible panel with configurable bore patterns. Open `
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
-| `panel_width_type` | 1 (10") | 1–3 | Panel width: 1 = 10", 2 = 19", 3 = Demo split (100mm, narrow demo to spare material) |
+| `panel_width_type` | 1 (10") | 1–3 | Panel width: 1 = 10", 2 = 19", 3 = Demo split (60mm, narrow demo to spare material) |
 | `height_units` | 1 | 1–8 | Panel height in rack units |
 | `bore_mode` | 0 (Default) | 0–2 | Bore hole pattern |
 | `panel_depth_type` | 1 (Regular) | 1–2 | Panel depth (wall thickness): 1 = Regular (2mm), 2 = Strong (4mm) |

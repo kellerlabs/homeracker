@@ -50,14 +50,6 @@ include <BOSL2/std.scad>
 include <../../core/lib/support.scad>
 include <../../core/lib/lockpin.scad>
 
-//tmp
-include <../../panel/lib/rackpanel.scad>
-
-knuckle_side = "all"; // [all:Complete, left:left, right:right]
-units = 2; // [1:1:8]
-debug_colors = true; // [false,true]
-enable_chamfer = true; // [false,true]
-
 _LOCKPIN_HOLE_CENTER_SIDE = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
 HR_SPLIT_KNUCKLE_STRENGTH_SLIM = _LOCKPIN_HOLE_CENTER_SIDE + BASE_STRENGTH*2;
 

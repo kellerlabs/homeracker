@@ -32,15 +32,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// Disclaimer (even though I take ownership)
+// Authorship note
 //
-// DISCLAIMER: This entire truss.scad file is AI-generated (Claude Opus 4.8) from my
-// requirements for a rack-panel stiffener. The idea — triangulated ribs like a truss — is mine;
-// I tasked the AI with the research and the implementation. The geometry math is not the easiest
-// read, and I deliberately did not review the calculations in detail: the module is a
-// self-contained, black-box geometry that I only call from the outside, and its behavior meets
-// all of my requirements (verified by rendering). For this kind of contained, well-specified
-// geometry task I'm comfortable trusting the result without owning every line of the math.
+// This truss.scad file is AI-generated (Claude Opus 4.8) from my requirements for a rack-panel
+// stiffener — the idea (triangulated ribs like a truss) is mine; I tasked the AI with the
+// research and implementation. It is a self-contained, dimension-driven geometry module called
+// only from the outside. Validate changes by rendering the test file (`models/panel/test/truss.scad`)
+// and the braced panel catalog renders, and confirm a manifold result before relying on it.
 
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
