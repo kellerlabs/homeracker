@@ -103,6 +103,8 @@ A standard 10"/19" rack-compatible panel with configurable bore patterns. Open `
 | `height_units` | 1 | 1–8 | Panel height in rack units |
 | `bore_mode` | 0 (Default) | 0–2 | Bore hole pattern |
 | `panel_depth_type` | 1 (Regular) | 1–2 | Panel depth (wall thickness): 1 = Regular (2mm), 2 = Strong (4mm) |
+| `back_brace` | false | — | Add a triangulated truss stiffener on the panel back, flush with the split-knuckle plane — see [Stiffening](#-stiffening-depth-vs-back-brace) |
+| `back_brace_density` | regular | regular, dense | Truss band density when `back_brace` is on — `regular` = 1 band per unit, `dense` = 2 bands per unit (finer triangles, but noticeably more material) |
 | `split_mode` | 0 (Full) | 0–1 | Print whole (Full) or split into halves (Half) — see [Split Panels](#-split-panels) |
 | `view_mode` | 0 (Assembly) | 0–2 | When split: show both halves assembled, left half only, or right half only |
 | `split_connector_strength` | slim | slim, strong | Hinge connector knuckle width — `strong` uses a full base unit for extra rigidity |
@@ -116,6 +118,17 @@ A standard 10"/19" rack-compatible panel with configurable bore patterns. Open `
 | Default | 0 | 2 bores/unit | 1 bore/unit | 1 bore/unit |
 | All | 1 | 3 bores/unit | 3 bores/unit | 3 bores/unit |
 | Minimal | 2 | 1 bore/unit | 1 bore top + bottom | 1 bore top + bottom, 0 inner |
+
+### 💪 Stiffening: depth vs back brace
+
+Two independent ways to make a panel stiffer — combine them for the most rigid result:
+
+- **`panel_depth` (Strong, 4mm)** — thickens the whole skin. Because panels print face-down, depth is the vertical (Z) print direction, so the slicer fills the added volume with sparse gyroid infill: a deep panel becomes a cheap sandwich/I-beam that resists broad bending well. Stiffness scales with *your slicer's* infill settings, not the model.
+- **`back_brace`** — a triangulated truss grown onto the **back**, protruding to the split-knuckle plane (so it stays flush with split connectors) while never touching the front face or its chamfer. Each cell carries a diagonal whose direction **alternates** in a checkerboard (a Warren/zigzag lattice), so it resists racking/torsion equally both ways instead of favouring one handedness — the kind of load gyroid infill handles poorly. On split panels each half gets its own framed sub-brace, mirrored about the centerline, with a clear gap for the connector. Bands scale with panel height so triangles stay a consistent size; columns auto-size for roughly square cells.
+
+Rules of thumb: small panels rarely need either; wide (19") or tall multi-U panels benefit most from the brace; **`back_brace` + Minimal bore mode** is the lightest stiff combo. The brace's solid ribs are not free — `dense` density on a large panel can use more plastic than simply going to Strong `panel_depth` (which is mostly sparse infill), so prefer `regular` unless you need the extra rigidity. A panel already as deep as the knuckle plane gets no brace (it would not protrude).
+
+> See [stiffen-rack-panels-with-truss-grid](../../docs/decisions/stiffen-rack-panels-with-truss-grid.md) for the rationale, and [lib/truss.scad](lib/truss.scad) for the generic lattice module.
 
 ### Variants
 
@@ -136,6 +149,15 @@ A standard 10"/19" rack-compatible panel with configurable bore patterns. Open `
 | 1U | 2U | 3U |
 |----|----|----|
 | ![Minimal 1U](parts/renders/rackpanel_minimal_1u_10inch.png) | ![Minimal 2U](parts/renders/rackpanel_minimal_2u_10inch.png) | ![Minimal 3U](parts/renders/rackpanel_minimal_3u_10inch.png) |
+
+#### Back Brace (viewed from behind)
+
+The triangulated stiffener grows on the panel **back**, flush with the split-knuckle plane — see [Stiffening](#-stiffening-depth-vs-back-brace). Each panel/half carries its own framed field; on a split panel the two halves mirror about the centerline with a clear gap for the connector and lock pin.
+
+| 10" (regular) | 10" (dense) | 19" split |
+|---------------|-------------|-----------|
+| ![Brace 10" regular](parts/renders/rackpanel_brace_2u_10inch.png) | ![Brace 10" dense](parts/renders/rackpanel_brace_dense_2u_10inch.png) | ![Brace 19" split](parts/renders/rackpanel_brace_split_2u_19inch.png) |
+
 
 ### Module Architecture
 
@@ -165,6 +187,8 @@ A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divid
 3. Interleave the two halves' hinge knuckles and slide the lock pin down through the aligned bores until it seats.
 
 > 💡 If you print panels front-face down, use `split_connector_strength = strong` to widen each knuckle to a full base unit: the larger contact area improves layer adhesion at the split seam and reduces the risk of layer-line breakage.
+
+> ⚠️ **Warping & thick parts**: Thicker, taller features printed on their edge (e.g. Strong `panel_depth` combined with a `strong` split connector) warp more easily — the effect is worse on textured PEI plates and toward the bed edges, where heating is less even. A warped split connector can stop the lock pin from inserting. Anecdote: on a Bambu Lab X1C (256 mm bed) with Bambu PLA Matte (Charcoal) and typical HomeRacker settings (3 walls, 15 % gyroid, Arachne wall generation), 4 mm `panel_depth` + `strong` connector knuckles warped near the bed edge and the pin would not seat. Fix: print one part at a time, laid diagonally for extra edge clearance. Larger printers are less likely to hit this.
 
 ### Parameters
 

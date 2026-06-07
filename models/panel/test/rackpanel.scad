@@ -76,3 +76,26 @@ up(1080) right(300) rackpanel_1u(panel_depth=4);
 
 // 3U strong minimal panel
 up(1080) right(600) rackpanel(panel_height_units=3, bore_mode=RP_BORE_MODE_MINIMAL, panel_depth=4);
+
+// === Back-brace stiffener (full panels) ===
+
+// 1U braced (slim spacing)
+up(1320) rackpanel(panel_height_units=1, brace_enabled=true);
+
+// 3U braced (slim: 1 band per unit)
+up(1320) right(300) rackpanel(panel_height_units=3, brace_enabled=true, brace_rows=3);
+
+// 3U braced (strong: 2 bands per unit)
+up(1320) right(600) rackpanel(panel_height_units=3, brace_enabled=true, brace_rows=6);
+
+// 3U braced + minimal bores (lightest stiff combo)
+up(1320) right(900) rackpanel(panel_height_units=3, bore_mode=RP_BORE_MODE_MINIMAL, brace_enabled=true);
+
+// 3U braced + strong panel depth (brace shrinks toward knuckle plane)
+up(1320) right(1200) rackpanel(panel_height_units=3, panel_depth=4, brace_enabled=true);
+
+// 3U braced debug colors
+up(1620) rackpanel(panel_height_units=3, brace_enabled=true, debug_colors=true);
+
+// 19" 2U braced
+up(1620) right(300) rackpanel(panel_width=STD_WIDTH_19INCH, panel_height_units=2, brace_enabled=true);

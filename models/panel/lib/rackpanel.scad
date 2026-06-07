@@ -34,6 +34,7 @@
 
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
+include <truss.scad>
 
 RP_PRIMARY_COLOR = HR_YELLOW;
 RP_SECONDARY_COLOR = HR_CHARCOAL;
@@ -41,6 +42,15 @@ RP_RACKMOUNT_BORE_WIDTH = 10;
 RP_RACKMOUNT_BORE_HEIGHT = 6.5;
 // narrow non-standard width purely for demoing the split feature with minimal material
 RP_DEMO_WIDTH = 60;
+
+// Back-brace stiffener (truss_grid) — see truss.scad
+// Unusable strip on each side (clears the mount surfaces + bore columns). Rounded up from
+// STD_MOUNT_SURFACE_WIDTH + TOLERANCE/2 (= 15.975) for a clean number.
+RP_BRACE_SIDE_MARGIN = 16;
+// Total knuckle depth measured from the panel front face. The brace's BACK face lands on this
+// plane so it sits flush with split connectors. Mirrors split.scad's HR_SPLIT_KNUCKLE_STRENGTH_SLIM
+// derivation, kept local to avoid a circular include between rackpanel.scad and split.scad.
+RP_BRACE_DEPTH = (LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2) + BASE_STRENGTH*2; // = 8.8mm
 
 /** Single rackmount bore
  * Rounded rectangular slot sized for M6 screws (10mm × 6.5mm).
@@ -166,10 +176,12 @@ HR_RP_VIEW_HALF_RIGHT = 2;
  *   - rackpanel_stack for unit stacking
  *   - bores_minimal subtracted as children (MINIMAL mode)
  *   - edge_mask + chamfer_edge_mask for outer chamfers
+ *   - optional back-side truss stiffener (brace_enabled), flush with the split-knuckle plane
  */
 module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=RP_BORE_MODE_DEFAULT,
   split_mode=HR_RP_SPLIT_FULL, view_mode=HR_RP_VIEW_ASSEMBLY, split_connector_strength=HR_SPLIT_KNUCKLE_STRENGTH_SLIM,
   panel_depth=BASE_STRENGTH,
+  brace_enabled=false, brace_rows=2,
   debug_colors=false, chamfer_enabled=true,
   anchor=CENTER, spin=0, orient=UP) {
 
@@ -179,6 +191,10 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   attachable_height = panel_height_units * STD_UNIT_HEIGHT;
   panel_dimensions = [panel_width, panel_depth, attachable_height];
   bore_count = get_bore_count_per_unit(bore_mode, panel_height_units);
+  // The brace sits behind the panel back face and protrudes to the knuckle plane; it only
+  // earns its place when at least a rib's worth of depth is available there.
+  brace_active = brace_enabled && (RP_BRACE_DEPTH - panel_depth) >= BASE_STRENGTH;
+  brace_depth = RP_BRACE_DEPTH - panel_depth; // protrusion from the panel back to the knuckle plane
 
   module _naked_panel() {
     tag_scope("rackpanel")
@@ -206,6 +222,20 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   // full bounding box (otherwise a tall, narrow panel like the demo width clips to the width).
   split_clip_size = 2 * max(panel_width, attachable_height);
 
+  // Back-side truss stiffener. Emits one framed truss field, offset by `x_offset` and with the
+  // diagonals flipped by `mirror_lattice` (so split halves read as a mirrored pair). The caller
+  // attaches it to the panel back, so it also works standalone. tag_scope("brace") keeps the
+  // truss's own chamfer tags from leaking into an enclosing panel diff().
+  module _back_brace(field_width, x_offset=0, mirror_lattice=false) {
+    if (field_width > 2 * BASE_STRENGTH)
+      tag_scope("brace")
+      right(x_offset)
+      scale([mirror_lattice ? -1 : 1, 1, 1])
+      color_this(debug_colors ? HR_GREEN : RP_PRIMARY_COLOR)
+      truss_grid(size=[field_width, brace_depth, attachable_height], rows=brace_rows,
+        chamfer_enabled=chamfer_enabled, anchor=FRONT);
+  }
+
   module _naked_panel_left() {
     attachable(size=[attachable_width_half_naked, panel_depth, attachable_height]){
       right(attachable_width_half_naked/2+split_connector_cutout)
@@ -224,7 +254,8 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   module _panel_left() {
     attachable(size=[attachable_width_half, panel_depth, attachable_height]){
       left(split_connector_width/4)
-      _naked_panel_left() align(RIGHT,FRONT)
+      _naked_panel_left() {
+        align(RIGHT,FRONT)
         diff()
         split_connector(units=panel_height_units, panel_depth=panel_depth,
           knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_LEFT,
@@ -232,6 +263,11 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);
           }
+        // own half-brace, attached to the panel back: outer (mount) margin, flush to the cut
+        if (brace_active)
+          attach(BACK, FRONT)
+            _back_brace(attachable_width_half_naked - RP_BRACE_SIDE_MARGIN, x_offset=-RP_BRACE_SIDE_MARGIN/2);
+      }
       children();
     }
   }
@@ -239,7 +275,8 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   module _panel_right() {
     attachable(size=[attachable_width_half, panel_depth, attachable_height]){
       right(split_connector_width/4)
-      _naked_panel_right() align(LEFT,FRONT)
+      _naked_panel_right() {
+        align(LEFT,FRONT)
         diff()
         split_connector(units=panel_height_units, panel_depth=panel_depth,
           knuckle_strength=split_connector_strength, knuckle_side=HR_SPLIT_KNUCKLE_SIDE_RIGHT,
@@ -247,6 +284,11 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);
           }
+        // mirror of the left half: outer margin on the right, flush to the cut, lattice mirrored
+        if (brace_active)
+          attach(BACK, FRONT)
+            _back_brace(attachable_width_half_naked - RP_BRACE_SIDE_MARGIN, x_offset=RP_BRACE_SIDE_MARGIN/2, mirror_lattice=true);
+      }
       children();
     }
   }
@@ -266,8 +308,11 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
     _panel_right();
   if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_ASSEMBLY)
     _panel_assembly()
-      attach(TOP,BOTTOM,overlap=-BASE_STRENGTH) split_lockpin(units=panel_height_units, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+      attach(TOP,TOP,overlap=-BASE_STRENGTH) split_lockpin(units=panel_height_units, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
   if (split_mode == HR_RP_SPLIT_FULL)
-    _naked_panel();
+    _naked_panel()
+      if (brace_active)
+        attach(BACK, FRONT)
+          _back_brace(panel_width - 2 * RP_BRACE_SIDE_MARGIN);
 
 }

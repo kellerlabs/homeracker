@@ -9,6 +9,15 @@ applyTo: "**/*.scad"
 - Use [BOSL2](https://github.com/BelfrySCAD/BOSL2/wiki) for complex geometry operations (prefer attach/align over OpenSCAD's translate/rotate).
 - Consult the BOSL2 wiki for available modules before writing custom geometry.
 
+## Composing Geometry (attach/align vs union/diff)
+
+- **Position with anchors, not offsets.** Prefer `attach`/`align`/`position` + `left`/`right`/`fwd`/`back` over raw `translate`/`rotate` with hand-computed centre math. `union()` is for merging separate solids, never for positioning.
+- **`diff()` is tag-based.** Kept (untagged) geometry and `remove`-tagged cutters coexist in one `diff()`; cutters only subtract where they overlap. A part welded on after the bores belongs *inside* the same `diff()` as an untagged child — do **not** wrap it in `union()` to "shield" it.
+- **Isolate a child's own `diff()`/`edge_mask` with `tag_scope()`.** A nested chamfer (edge_mask applies a `remove` tag) leaks into an enclosing `diff()` and gets cancelled. Wrap the inner part in `tag_scope()` at the call site to contain its tags.
+- **Edge breaks in one pass.** Chamfer/fillet an assembly's outer edge with `edge_mask` on the bounding-box edges, not per-member — per-piece chamfers leave nubs at junctions.
+- **Keep sub-parts ignorant of the parent.** A reusable part (e.g. a back brace) should take its own size and attach to a face; splitting/clipping belongs in the parent, not duplicated inside the part.
+
+
 ## Quality Settings
 
 - Set `$fn=100` for production renders.
