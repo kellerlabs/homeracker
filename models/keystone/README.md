@@ -12,6 +12,7 @@ Keystone jacks are the universal standard for structured cabling (Ethernet, HDMI
 
 - **Rotation support** (0°, 90°, 180°, 270°) — mount keystones vertically or horizontally depending on panel layout and density needs.
 - **Label system** — snap-fit label plates identify ports without adhesive labels that peel off or "hard"-printed labels.
+- **Label above or below** — place the label slot on either side of the jack (`label_position`), so stacked rows can carry labels between them without overlapping the jack opening above.
 - **Tolerance-aware** — `additional_tolerance` parameter adjusts fit for different printers/materials. (untested. I haven't had the need to diverge yet. So use with caution)
 
 ## 🔧 How
@@ -35,6 +36,7 @@ Open `parts/keystone_sample.scad` in OpenSCAD and use the **Customizer** panel.
 | `yrotation` | `0` | Y-axis rotation in single mode (0, 90, 180, 270) |
 | `panel_depth` | `9.75` | Depth of the panel being cut into (mm). Increase for thicker panels. |
 | `show_labels` | `true` | Show label plates on keystones |
+| `label_position` | `above` | Which side of the jack the label sits on: `above` or `below` |
 | `debug_colors` | `false` | Distinct colors per section for debugging |
 
 ### Library Usage
@@ -61,7 +63,7 @@ cuboid([50, 2, 50]) {
 | `label_recess()` | Front-face recess for label hook snap-fit |
 | `keystone_demo_panel()` | Demo panel strip with one keystone mounted |
 
-`keystone_full()` and `keystone_demo_panel()` accept `label_plate_mode` (`"assembly"` or `"plate"`) and `label_plate_gap` (mm) to control label plate placement for build-plate layouts.
+`keystone_full()` and `keystone_demo_panel()` accept `label_plate_mode` (`"assembly"` or `"plate"`) and `label_plate_gap` (mm) to control label plate placement for build-plate layouts. They also accept `label_position` (`"above"` or `"below"`) to mirror the label slot to either side of the jack.
 
 ### Key Functions
 
@@ -79,11 +81,13 @@ cuboid([50, 2, 50]) {
 | Part | Preview |
 |------|---------|
 | Keystone Sample | ![Keystone Sample](parts/renders/keystone_sample.png) |
+| Label Below | ![Label Below](parts/renders/keystone_sample_below.png) |
 
 To generate or refresh previews:
 
 ```sh
 scadm export-png models/keystone/parts/keystone_sample.scad
+scadm export-png models/keystone/parts/keystone_sample.scad -p models/keystone/parts/keystone_sample_below.json -P label_below --output models/keystone/parts/renders/keystone_sample_below.png
 ```
 
 ## 📚 References
