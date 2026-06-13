@@ -239,9 +239,11 @@ module keystone_pocket(additional_tolerance=0.0, yrot=0, panel_depth, debug_colo
 /// Must be used within a diff("keystone") context.
 /// Parameters:
 ///   label_position - "above" (default) or "below": which side of the jack the recess sits on
-module label_recess(additional_tolerance=0.0, yrot=0, label_position="above",
-  anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
+module label_recess(additional_tolerance=0.0, yrot=0,
+  anchor=CENTER, spin=0, orient=UP, debug_colors=false, label_position="above") {
 
+  assert(label_position == "above" || label_position == "below",
+    str("label_position must be 'above' or 'below', got: '", label_position, "'"));
   _width = get_effective_keystone_width(additional_tolerance, yrot);
   _depth = BASE_STRENGTH * 3;
   _height = get_label_attachable_height(yrot, additional_tolerance);
@@ -265,13 +267,13 @@ module label_recess(additional_tolerance=0.0, yrot=0, label_position="above",
 ///   show_label           - render a label plate in place for preview (default: false)
 ///   label_plate_mode     - "assembly": label in front (default); "plate": label above on same plane
 ///   label_plate_gap      - extra upward offset for plate mode (mm, default: 0)
-///   label_position       - "above" (default) or "below": which side of the jack the label sits on
 ///   additional_tolerance - extra clearance around the keystone (mm)
 ///   yrot                 - rotation angle: 0, 90, 180, 270 (degrees)
 ///   panel_depth          - depth of the panel being cut into (mm, default: keystone depth)
+///   label_position       - "above" (default) or "below": which side of the jack the label sits on
 module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="assembly",
-  label_plate_gap=0, label_position="above", additional_tolerance=0.0, yrot=0,
-  panel_depth, anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
+  label_plate_gap=0, additional_tolerance=0.0, yrot=0,
+  panel_depth, anchor=CENTER, spin=0, orient=UP, debug_colors=false, label_position="above") {
 
   assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
     str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
@@ -313,7 +315,7 @@ module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="a
 /// Demo panel showing a single keystone mounted in a 1U-height panel strip.
 /// Useful for visualization and testing. Used by the parts/keystone_sample.scad file.
 module keystone_demo_panel(additional_tolerance=0.0, yrot=0, panel_depth, add_label=true,
-  label_plate_mode="assembly", label_plate_gap=0, label_position="above", debug_colors=false) {
+  label_plate_mode="assembly", label_plate_gap=0, debug_colors=false, label_position="above") {
   assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
     str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
