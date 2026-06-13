@@ -1,0 +1,12 @@
+{
+  "parameterSets": {
+    "label_below": {
+      "mode": "single",
+      "yrotation": "0",
+      "panel_depth": "9.75",
+      "show_labels": "true",
+      "label_position": "below",
+      "debug_colors": "false"
+    }
+  }
+}

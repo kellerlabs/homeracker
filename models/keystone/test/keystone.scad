@@ -39,3 +39,15 @@ keystone_full(show_label=true, label_plate_mode="plate", label_plate_gap=15);
 // Demo panel in plate mode
 right(255)
 keystone_demo_panel(label_plate_mode="plate", add_label=true);
+
+// Label below the jack (0° rotation)
+right(290)
+keystone_full(label_position="below", show_label=true);
+
+// Label below the jack, rotated 90° (exercises mirrored slot offset)
+right(320)
+keystone_full(yrot=90, label_position="below", show_label=true);
+
+// Demo panel with label below
+right(355)
+keystone_demo_panel(label_position="below", add_label=true);

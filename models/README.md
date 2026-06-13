@@ -61,7 +61,7 @@ See [panel/README.md](panel/README.md) for details.
 
 ### 🔌 Keystone
 
-Parametric keystone jack socket module for integrating standard keystone connectors into virtually any panels (using BOSL2 `diff("keystone")`). Supports 4 rotation angles and includes snap-fit label plate slots for port identification.
+Parametric keystone jack socket module for integrating standard keystone connectors into virtually any panels (using BOSL2 `diff("keystone")`). Supports 4 rotation angles and includes snap-fit label plate slots for port identification, mountable above or below the jack.
 
 ![Keystone Sample](./keystone/parts/renders/keystone_sample.png)
 

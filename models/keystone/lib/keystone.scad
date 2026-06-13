@@ -237,18 +237,23 @@ module keystone_pocket(additional_tolerance=0.0, yrot=0, panel_depth, debug_colo
 
 /// Creates the recess for snap-fit label hooks on the panel front face.
 /// Must be used within a diff("keystone") context.
+/// Parameters:
+///   label_position - "above" (default) or "below": which side of the jack the recess sits on
 module label_recess(additional_tolerance=0.0, yrot=0,
-  anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
+  anchor=CENTER, spin=0, orient=UP, debug_colors=false, label_position="above") {
 
+  assert(label_position == "above" || label_position == "below",
+    str("label_position must be 'above' or 'below', got: '", label_position, "'"));
   _width = get_effective_keystone_width(additional_tolerance, yrot);
   _depth = BASE_STRENGTH * 3;
   _height = get_label_attachable_height(yrot, additional_tolerance);
+  _below = label_position == "below";
 
   attachable(expose_tags=true, anchor=anchor, spin=spin, orient=orient, size=[_width, _depth, _height]) {
     color_this(debug_colors ? HR_BLUE : KS_COLOR_PRIMARY)
     cuboid([_width, _depth, _height]) {
-      tag("keystone") align(FRONT, BOTTOM, inside=true)
-        up(get_label_slot_vertical_offset(yrot, additional_tolerance))
+      tag("keystone") align(FRONT, _below ? TOP : BOTTOM, inside=true)
+        up((_below ? -1 : 1) * get_label_slot_vertical_offset(yrot, additional_tolerance))
         label_hooks(yrot=yrot, debug_colors=debug_colors);
     }
     children();
@@ -265,35 +270,40 @@ module label_recess(additional_tolerance=0.0, yrot=0,
 ///   additional_tolerance - extra clearance around the keystone (mm)
 ///   yrot                 - rotation angle: 0, 90, 180, 270 (degrees)
 ///   panel_depth          - depth of the panel being cut into (mm, default: keystone depth)
+///   label_position       - "above" (default) or "below": which side of the jack the label sits on
 module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="assembly",
   label_plate_gap=0, additional_tolerance=0.0, yrot=0,
-  panel_depth, anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
+  panel_depth, anchor=CENTER, spin=0, orient=UP, debug_colors=false, label_position="above") {
 
   assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
     str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
+  assert(label_position == "above" || label_position == "below",
+    str("label_position must be 'above' or 'below', got: '", label_position, "'"));
   assert(!show_label || add_label_slots,
     "show_label requires add_label_slots=true");
 
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
   assert(_panel_depth >= get_ks_depth_outer(),
     str("panel_depth (", _panel_depth, "mm) must be >= keystone depth (", get_ks_depth_outer(), "mm)"));
+  _below = label_position == "below";
+  _label_anchor = _below ? BOTTOM : TOP;
   _label_height = add_label_slots ? get_label_attachable_height(yrot, additional_tolerance) : 0;
   _width = get_effective_keystone_width(additional_tolerance=additional_tolerance, yrot=yrot);
   _depth = get_ks_depth_outer();
   _height = get_effective_keystone_height(additional_tolerance=additional_tolerance, yrot=yrot) + _label_height;
 
   attachable(expose_tags=true, anchor=anchor, spin=spin, orient=orient, size=[_width, _depth, _height]) {
-    down(_label_height / 2)
+    up((_below ? 1 : -1) * _label_height / 2)
     keystone_pocket(additional_tolerance=additional_tolerance, yrot=yrot, panel_depth=_panel_depth, debug_colors=debug_colors) {
       if (add_label_slots) {
-        align(TOP, FRONT) label_recess(additional_tolerance=additional_tolerance, yrot=yrot, debug_colors=debug_colors) {
+        align(_label_anchor, FRONT) label_recess(additional_tolerance=additional_tolerance, yrot=yrot, label_position=label_position, debug_colors=debug_colors) {
           if (show_label && label_plate_mode == "assembly") {
-            fwd(BASE_STRENGTH) down(BASE_STRENGTH)
-              align(FRONT, TOP) label_plate(yrot=yrot, debug_colors=debug_colors);
+            fwd(BASE_STRENGTH) up((_below ? 1 : -1) * BASE_STRENGTH)
+              align(FRONT, _label_anchor) label_plate(yrot=yrot, debug_colors=debug_colors);
           }
           if (show_label && label_plate_mode == "plate") {
-            up(KS_LABEL_HEIGHT/2 + TOLERANCE + label_plate_gap)
-              align(TOP) label_plate(yrot=yrot, orient=UP, debug_colors=debug_colors);
+            up((_below ? -1 : 1) * (KS_LABEL_HEIGHT/2 + TOLERANCE + label_plate_gap))
+              align(_label_anchor) label_plate(yrot=yrot, orient=UP, debug_colors=debug_colors);
           }
         }
       }
@@ -305,7 +315,7 @@ module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="a
 /// Demo panel showing a single keystone mounted in a 1U-height panel strip.
 /// Useful for visualization and testing. Used by the parts/keystone_sample.scad file.
 module keystone_demo_panel(additional_tolerance=0.0, yrot=0, panel_depth, add_label=true,
-  label_plate_mode="assembly", label_plate_gap=0, debug_colors=false) {
+  label_plate_mode="assembly", label_plate_gap=0, debug_colors=false, label_position="above") {
   assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
     str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
@@ -322,6 +332,7 @@ module keystone_demo_panel(additional_tolerance=0.0, yrot=0, panel_depth, add_la
       align(FRONT, BOTTOM, inside=true) {
         keystone_full(add_label_slots=add_label, show_label=add_label,
           label_plate_mode=label_plate_mode, label_plate_gap=label_plate_gap,
+          label_position=label_position,
           additional_tolerance=additional_tolerance, yrot=yrot,
           panel_depth=_panel_depth, debug_colors=debug_colors);
       }
