@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.9.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.8.0...homeracker-v3.9.0) (2026-06-13)
+
+
+### ✨ Features
+
+* **keystone:** add label_position above/below for label slots ([#396](https://github.com/kellerlabs/homeracker/issues/396)) ([5377742](https://github.com/kellerlabs/homeracker/commit/53777422ca29416b715b39eb2c9c5ee7f275766a))
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.06.11 ([#394](https://github.com/kellerlabs/homeracker/issues/394)) ([29a20b8](https://github.com/kellerlabs/homeracker/commit/29a20b8561320c9c8185bd2a4a6e977699d50083))
+
 ## [3.8.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.7.0...homeracker-v3.8.0) (2026-06-07)
 
 
