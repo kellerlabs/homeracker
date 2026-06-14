@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.10.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.9.0...homeracker-v3.10.0) (2026-06-14)
+
+
+### ✨ Features
+
+* **panel:** expose rackpanel usable-frame helpers + child passthrough ([#399](https://github.com/kellerlabs/homeracker/issues/399)) ([044e3ae](https://github.com/kellerlabs/homeracker/commit/044e3ae4daffa2825ade17f21348de3065ff2137))
+
+
+### 📦 Dependencies
+
+* update openscad nightly to v2026.06.12 ([#397](https://github.com/kellerlabs/homeracker/issues/397)) ([e8a2f3f](https://github.com/kellerlabs/homeracker/commit/e8a2f3fd61209e9a5886579c30cc7a862ebee687))
+
 ## [3.9.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.8.0...homeracker-v3.9.0) (2026-06-13)
 
 
