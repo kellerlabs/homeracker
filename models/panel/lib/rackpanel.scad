@@ -171,6 +171,45 @@ HR_RP_VIEW_HALF_LEFT = 1;
 HR_RP_VIEW_HALF_RIGHT = 2;
 HR_RP_VIEW_EXPLOSION = 3;
 
+/** Usable keystone-band width for a rack panel face (mm).
+ * Excludes the rackmount mount-surface column on each outer edge plus a half-tolerance
+ * slide-in clearance per outer edge. On a split half the seam (inner) edge has no mount
+ * column, but the split-connector knuckle occupies the centre, so the band stops at the
+ * naked-panel edge (its half of the knuckle, HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2). The two
+ * halves' bands therefore leave the knuckle uncovered in the middle; a cutout pass should
+ * overlap that edge by HR_EPSILON to stay manifold. Pair with get_rackpanel_usable_x() to
+ * centre cutouts (e.g. keystone pockets) in the band.
+ *   full:  panel_width - 2*STD_MOUNT_SURFACE_WIDTH - TOLERANCE                              (centred)
+ *   half:  panel_width/2 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2 - STD_MOUNT_SURFACE_WIDTH - TOLERANCE/2
+ * split_mode=Half is only meaningful per half (view_mode Half-Left/Half-Right). The
+ * assembled/exploded views have no single usable band, so they warn and fall back to the
+ * full-panel band (which will NOT fit a half) — distribute content per half instead.
+ */
+function get_rackpanel_usable_width(panel_width, split_mode=HR_RP_SPLIT_FULL, view_mode=HR_RP_VIEW_ASSEMBLY) =
+  let(_full_band = panel_width - 2*STD_MOUNT_SURFACE_WIDTH - TOLERANCE)
+  (split_mode == HR_RP_SPLIT_HALF && (view_mode == HR_RP_VIEW_HALF_LEFT || view_mode == HR_RP_VIEW_HALF_RIGHT))
+    ? panel_width/2 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2 - STD_MOUNT_SURFACE_WIDTH - TOLERANCE/2
+  : split_mode == HR_RP_SPLIT_HALF
+    ? echo("⚠️ get_rackpanel_usable_width: split_mode=Half needs view_mode=Half-Left/Half-Right; the assembled/exploded views have no single usable band. Falling back to the full-panel band, which will NOT fit a half.") _full_band
+  : _full_band;
+
+/** X offset of the usable band centre from the (half-)panel attachable centre (mm).
+ * Full panels are symmetric (0). A split half pins the band's seam edge on its naked-panel
+ * edge (the split-connector knuckle boundary), so the band centre shifts toward the seam by
+ * half the deducted outer column + clearance, less half the knuckle cutout. Left half shifts
+ * +X (seam on its right); right half shifts -X. panel_width is accepted for API symmetry with
+ * get_rackpanel_usable_width() (the offset is width-independent). As with usable_width,
+ * split_mode=Half with a non-half view is undefined: it warns and returns 0 (panel centre).
+ */
+function get_rackpanel_usable_x(panel_width, split_mode=HR_RP_SPLIT_FULL, view_mode=HR_RP_VIEW_ASSEMBLY) =
+  (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_LEFT)
+    ? STD_MOUNT_SURFACE_WIDTH/2 + TOLERANCE/4 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM/4
+  : (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_RIGHT)
+    ? -(STD_MOUNT_SURFACE_WIDTH/2 + TOLERANCE/4 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM/4)
+  : split_mode == HR_RP_SPLIT_HALF
+    ? echo("⚠️ get_rackpanel_usable_x: split_mode=Half needs view_mode=Half-Left/Half-Right; returning 0 (panel centre).") 0
+  : 0;
+
 /** Rack panel (top-level module)
  * Assembles a complete rack panel with configurable height, bore mode, and chamfering.
  * Orchestrates:
@@ -201,7 +240,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
 
   module _naked_panel() {
     tag_scope("rackpanel")
-    attachable(anchor, spin, orient, size=panel_dimensions) {
+    attachable(CENTER, 0, UP, size=panel_dimensions) {
       diff()
       rackpanel_stack(panel_width=panel_width, panel_height_units=panel_height_units,
         bore_count=bore_count, panel_depth=panel_depth, debug_colors=debug_colors) {
@@ -314,10 +353,29 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
     }
   }
 
-  if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_LEFT)
-    _panel_left();
-  if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_RIGHT)
-    _panel_right();
+  // Views that accept external children (e.g. a diff("keystone") cutout pass) share one outer
+  // attachable so children attach OUTSIDE _naked_panel's tag_scope (otherwise their remove tags
+  // get scoped away and never cut) and so anchor/spin/orient apply uniformly. Width is the only
+  // view-dependent dimension; the union() merges the single active branch into one shape node.
+  accepts_children = split_mode == HR_RP_SPLIT_FULL ||
+    (split_mode == HR_RP_SPLIT_HALF && (view_mode == HR_RP_VIEW_HALF_LEFT || view_mode == HR_RP_VIEW_HALF_RIGHT));
+  view_width = split_mode == HR_RP_SPLIT_HALF ? attachable_width_half : panel_width;
+
+  if (accepts_children)
+    attachable(anchor, spin, orient, size=[view_width, panel_depth, attachable_height]) {
+      union() {
+        if (split_mode == HR_RP_SPLIT_FULL)
+          _naked_panel()
+            if (brace_active)
+              attach(BACK, FRONT)
+                _back_brace(panel_width - 2 * RP_BRACE_SIDE_MARGIN);
+        if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_LEFT)
+          _panel_left();
+        if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_HALF_RIGHT)
+          _panel_right();
+      }
+      children();
+    }
   if (split_mode == HR_RP_SPLIT_HALF && view_mode == HR_RP_VIEW_ASSEMBLY)
     // the real assembled panel: halves butted flush with the lock pin seated in the knuckle bores
     _panel_assembly()
@@ -327,10 +385,5 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
     // exploded diagram: halves pushed apart with the lock pin floating above its bores
     _panel_assembly(explode=true)
       attach(TOP,TOP,overlap=-BASE_STRENGTH) split_lockpin(units=panel_height_units, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
-  if (split_mode == HR_RP_SPLIT_FULL)
-    _naked_panel()
-      if (brace_active)
-        attach(BACK, FRONT)
-          _back_brace(panel_width - 2 * RP_BRACE_SIDE_MARGIN);
 
 }

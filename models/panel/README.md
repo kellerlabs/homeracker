@@ -191,6 +191,46 @@ rackpanel          → orchestrator: bore mode logic, chamfering (edge_mask)
 
 See [lib/rackpanel.scad](lib/rackpanel.scad) for implementation.
 
+### 🧩 Building on rack panels (children + usable frame)
+
+`rackpanel` is BOSL2-attachable and **passes children through** on the Full, Left-half, and Right-half views, so a downstream model can add or subtract geometry against the panel face — e.g. drop in keystone jacks (each cuts its own pocket and leaves the jack body) with a `diff()` pass:
+
+```scad
+include <models/panel/lib/rackpanel.scad>
+include <models/panel/lib/split.scad>
+include <models/keystone/lib/keystone.scad>
+
+diff("keystone")
+rackpanel(split_mode=HR_RP_SPLIT_HALF, view_mode=HR_RP_VIEW_HALF_LEFT)
+  align(FRONT, inside=true)
+    right(get_rackpanel_usable_x(STD_WIDTH_10INCH, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_LEFT))
+      keystone_full(panel_depth=get_ks_depth_outer());
+```
+
+Children are emitted **outside** the internal `tag_scope`, so a `tag("keystone")` cutter survives to the enclosing `diff()`. `keystone_full()` already tags its own pocket as `"keystone"`, so call it **bare** — wrapping it in another `tag("keystone")` would turn the whole jack into a cutter (a hole, no body). A plain cuboid cutter, by contrast, does need the explicit `tag("keystone")`. The assembled/exploded views are preview-only and do not take children.
+
+**Usable band** — a magenta marker the exact size of the cutout-safe band, attached to the panel **back** face so any overlap with a mount column is obvious. The split halves leave the central split-connector knuckle uncovered.
+
+| Full panel | Split panel (assembled) |
+|------------|-------------------------|
+| ![Usable band full](demo/renders/usable_band_full.png) | ![Usable band split](demo/renders/usable_band_split.png) |
+
+**Keystone jacks** — a real `keystone_full` jack (shown in white via `debug_colors`) cut into a strong (4&nbsp;mm) braced panel. Front shows the installed socket; back shows the jack body protruding alongside the truss brace.
+
+| | Front | Back |
+|--|-------|------|
+| **Full panel** | ![Keystone on full, front](demo/renders/keystones_on_full_front.png) | ![Keystone on full, back](demo/renders/keystones_on_full_back.png) |
+| **Split half** | ![Keystone on split, front](demo/renders/keystones_on_split_front.png) | ![Keystone on split, back](demo/renders/keystones_on_split_back.png) |
+
+Two helper functions describe the cutout-safe band (the panel face minus the rackmount mount-surface columns and slide-in clearance):
+
+| Function | Returns |
+|----------|---------|
+| `get_rackpanel_usable_width(panel_width, split_mode, view_mode)` | Usable band width (mm). Full: `panel_width − 2·STD_MOUNT_SURFACE_WIDTH − TOLERANCE`. Split half: `panel_width/2 − HR_SPLIT_KNUCKLE_STRENGTH_SLIM/2 − STD_MOUNT_SURFACE_WIDTH − TOLERANCE/2` (one outer column; the band stops at the central split-connector knuckle, which stays uncovered, so `2·half + knuckle = full`). |
+| `get_rackpanel_usable_x(panel_width, split_mode, view_mode)` | X offset of the band centre from the (half-)panel centre (mm). Full: `0`. Left half: `+(STD_MOUNT_SURFACE_WIDTH/2 + TOLERANCE/4 − HR_SPLIT_KNUCKLE_STRENGTH_SLIM/4)`; right half: the negative — each half pins its band's seam edge on the knuckle boundary so cutouts stay aligned across the joint (overlap by `HR_EPSILON` to stay manifold). |
+
+A split-aware consumer distributes its content left/right itself and calls `rackpanel` once per half; the library does **not** split content for you. See [rackpanel-usable-frame-helpers](../../docs/decisions/rackpanel-usable-frame-helpers.md).
+
 ## ✂️ Split Panels
 
 A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divides the panel along its vertical centerline into two halves that print separately and join into a rigid panel — no glue, no fasteners beyond a single lock pin.
