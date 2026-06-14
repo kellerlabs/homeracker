@@ -196,6 +196,10 @@ See [lib/rackpanel.scad](lib/rackpanel.scad) for implementation.
 `rackpanel` is BOSL2-attachable and **passes children through** on the Full, Left-half, and Right-half views, so a downstream model can add or subtract geometry against the panel face — e.g. drop in keystone jacks (each cuts its own pocket and leaves the jack body) with a `diff()` pass:
 
 ```scad
+include <models/panel/lib/rackpanel.scad>
+include <models/panel/lib/split.scad>
+include <models/keystone/lib/keystone.scad>
+
 diff("keystone")
 rackpanel(split_mode=HR_RP_SPLIT_HALF, view_mode=HR_RP_VIEW_HALF_LEFT)
   align(FRONT, inside=true)

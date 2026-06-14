@@ -102,33 +102,39 @@ up(1620) rackpanel(panel_height_units=3, brace_enabled=true, debug_colors=true);
 up(1620) right(300) rackpanel(panel_width=STD_WIDTH_19INCH, panel_height_units=2, brace_enabled=true);
 
 // === Usable-frame helper functions ===
+// Asserts mirror the helper formulas using the same standard constants (no magic numbers),
+// so they verify the math, not a frozen snapshot of today's constant values.
 
 function _approx(a, b, eps=0.001) = abs(a - b) < eps;
 
-// Full 10": panel_width - 2*mount_surface - tolerance, centred
-assert(_approx(get_rackpanel_usable_width(STD_WIDTH_10INCH), 254 - 2 * 15.875 - 0.2),
-  "10\" full usable width");
+// Full: panel_width - 2*mount_surface - tolerance, centred
+assert(_approx(get_rackpanel_usable_width(STD_WIDTH_10INCH),
+  STD_WIDTH_10INCH - 2 * STD_MOUNT_SURFACE_WIDTH - TOLERANCE), "10\" full usable width");
 assert(_approx(get_rackpanel_usable_x(STD_WIDTH_10INCH), 0), "10\" full usable x is centred");
 
 // Half 10": panel_width/2 - knuckle/2 - mount_surface - tolerance/2; the central split-connector
 // knuckle stays uncovered, so 2*half + knuckle == full
 assert(_approx(get_rackpanel_usable_width(STD_WIDTH_10INCH, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_LEFT),
-  127 - 8.8 / 2 - 15.875 - 0.1), "10\" half usable width");
+  STD_WIDTH_10INCH / 2 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM / 2 - STD_MOUNT_SURFACE_WIDTH - TOLERANCE / 2),
+  "10\" half usable width");
 assert(_approx(2 * get_rackpanel_usable_width(STD_WIDTH_10INCH, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_LEFT)
   + HR_SPLIT_KNUCKLE_STRENGTH_SLIM, get_rackpanel_usable_width(STD_WIDTH_10INCH)),
   "split halves + knuckle sum to full usable width");
 
 // Half x offset: seam-pinned to the knuckle edge, symmetric, left = +, right = -
 assert(_approx(get_rackpanel_usable_x(STD_WIDTH_10INCH, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_LEFT),
-  15.875 / 2 + 0.05 - 8.8 / 4), "10\" half-left usable x toward seam");
+  STD_MOUNT_SURFACE_WIDTH / 2 + TOLERANCE / 4 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM / 4),
+  "10\" half-left usable x toward seam");
 assert(_approx(get_rackpanel_usable_x(STD_WIDTH_10INCH, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_RIGHT),
-  -(15.875 / 2 + 0.05 - 8.8 / 4)), "10\" half-right usable x mirrored");
+  -(STD_MOUNT_SURFACE_WIDTH / 2 + TOLERANCE / 4 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM / 4)),
+  "10\" half-right usable x mirrored");
 
 // 19" full + half
-assert(_approx(get_rackpanel_usable_width(STD_WIDTH_19INCH), 482.6 - 2 * 15.875 - 0.2),
-  "19\" full usable width");
+assert(_approx(get_rackpanel_usable_width(STD_WIDTH_19INCH),
+  STD_WIDTH_19INCH - 2 * STD_MOUNT_SURFACE_WIDTH - TOLERANCE), "19\" full usable width");
 assert(_approx(get_rackpanel_usable_width(STD_WIDTH_19INCH, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_RIGHT),
-  482.6 / 2 - 8.8 / 2 - 15.875 - 0.1), "19\" half usable width");
+  STD_WIDTH_19INCH / 2 - HR_SPLIT_KNUCKLE_STRENGTH_SLIM / 2 - STD_MOUNT_SURFACE_WIDTH - TOLERANCE / 2),
+  "19\" half usable width");
 
 // Visual demonstration of the usable band + child passthrough lives in models/panel/demo/
 // (committed, one scene per file, rendered to demo/renders/ for the README).
