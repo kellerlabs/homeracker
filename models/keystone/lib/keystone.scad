@@ -19,11 +19,30 @@
 
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
+// Native (BOSL2-free) socket geometry, pulled in via `use` so identical jacks share
+// one cached mesh. See keystone_native.scad for the caching rationale.
+use <keystone_native.scad>
 
 // --- Colors ---
 
 KS_COLOR_PRIMARY = HR_YELLOW;
 KS_COLOR_SECONDARY = HR_CHARCOAL;
+
+// --- Geometry Backend ---
+//
+// The socket, panel-side label recess, and label plate each ship two interchangeable
+// geometry backends that produce the identical printable shape (verified by zero-volume
+// boolean parity):
+//   - native (default): BOSL2-free primitives from keystone_native.scad. Identical jacks /
+//     plates collapse to a single cached mesh, so a fully-populated panel renders many times
+//     faster. Trade-off: per-section debug colors are not available.
+//   - bosl2: the original attachable/diff construction. More readable and supports
+//     debug_colors, but BOSL2 re-instantiates every copy (defeating OpenSCAD's geometry
+//     cache), so large panels render slowly.
+//
+// Select globally with the special variable $ks_native (true = native, false = BOSL2); like
+// $fn it propagates to all children, so set it once at the top of your file. Defaults to native.
+function ks_use_native() = is_undef($ks_native) ? true : $ks_native;
 
 // --- Keystone Dimensions ---
 // All dimensions assume the keystone module is oriented with the clip on top.
@@ -113,19 +132,38 @@ module keystone_socket(additional_tolerance=0.0, anchor=CENTER, spin=0, orient=U
   _height = KS_BODY_HEIGHT + additional_tolerance;
 
   attachable(anchor=anchor, spin=spin, orient=orient, size=[_width, _height, _depth]) {
-    // Oriented lying on front face — negative chamfers only work on top/bottom faces
-    color_this(debug_colors ? HR_YELLOW : KS_COLOR_PRIMARY)
-    cuboid([_width, _height, _ks_body_depth]) {
-      // Front opening (lip section)
-      fwd(_ks_body_offset_y) align(BOTTOM, BACK)
-        color(debug_colors ? HR_GREEN : KS_COLOR_PRIMARY)
-        cuboid([_width, get_ks_height_inner_front(additional_tolerance), _ks_front_depth],
-          chamfer=-_ks_front_chamfer, edges=[TOP+FRONT]);
-      // Rear hooks (retention section)
-      fwd(_ks_body_offset_y) align(TOP, BACK)
-        color(debug_colors ? HR_RED : KS_COLOR_PRIMARY)
-        cuboid([_width, _ks_hook_height + additional_tolerance, _ks_hook_depth],
-          chamfer=-_ks_hook_chamfer, edges=[TOP+FRONT, TOP+BACK]);
+    if (ks_use_native()) {
+      // Native (BOSL2-free) primitives so identical jacks reuse one cached mesh. Shape is
+      // identical to the BOSL2 path below (verified by zero-volume boolean parity). Native
+      // geometry is one fused mesh, so it carries a single solid identity color via color()
+      // (color_this is a no-op on non-attachable primitives); debug_colors is bosl2-only.
+      color(KS_COLOR_PRIMARY)
+      ks_socket_native(
+        width=_width,
+        height=_height,
+        body_depth=_ks_body_depth,
+        front_depth=_ks_front_depth,
+        front_height=get_ks_height_inner_front(additional_tolerance),
+        front_chamfer=_ks_front_chamfer,
+        body_offset_y=_ks_body_offset_y,
+        hook_depth=_ks_hook_depth,
+        hook_height=_ks_hook_height + additional_tolerance,
+        hook_chamfer=_ks_hook_chamfer);
+    } else {
+      // Oriented lying on front face — negative chamfers only work on top/bottom faces
+      color_this(debug_colors ? HR_YELLOW : KS_COLOR_PRIMARY)
+      cuboid([_width, _height, _ks_body_depth]) {
+        // Front opening (lip section)
+        fwd(_ks_body_offset_y) align(BOTTOM, BACK)
+          color(debug_colors ? HR_GREEN : KS_COLOR_PRIMARY)
+          cuboid([_width, get_ks_height_inner_front(additional_tolerance), _ks_front_depth],
+            chamfer=-_ks_front_chamfer, edges=[TOP+FRONT]);
+        // Rear hooks (retention section)
+        fwd(_ks_body_offset_y) align(TOP, BACK)
+          color(debug_colors ? HR_RED : KS_COLOR_PRIMARY)
+          cuboid([_width, _ks_hook_height + additional_tolerance, _ks_hook_depth],
+            chamfer=-_ks_hook_chamfer, edges=[TOP+FRONT, TOP+BACK]);
+      }
     }
     children();
   }
@@ -143,16 +181,32 @@ module _label_hook_left(slot_width, slot_depth, slot_height, label_slot_spacing,
   _chamfer = inner ? KS_LABEL_CHAMFER : 0;
 
   attachable(anchor=anchor, spin=spin, orient=orient, size=[slot_width + _hook_width, slot_depth, slot_height]) {
-    color_this(debug_colors ? HR_RED : _color)
-    left((label_slot_spacing - slot_width - _spacing_sub) / 2)
-    cuboid([slot_width, slot_depth, slot_height], chamfer=_chamfer, edges=[BACK, LEFT], except=FRONT) {
-      // Hook tab
-      _hook_height = inner ? slot_height / 2 : slot_height;
-      color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
-      align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, _hook_height],
-        chamfer=_hook_width, edges=RIGHT);
-      // Insertion funnel (panel side only)
-      if (!inner) {
+    if (inner) {
+      // Label-plate side: chamfered slot with a half-height retention lip (BOSL2).
+      color_this(debug_colors ? HR_RED : _color)
+      left((label_slot_spacing - slot_width - _spacing_sub) / 2)
+      cuboid([slot_width, slot_depth, slot_height], chamfer=_chamfer, edges=[BACK, LEFT], except=FRONT) {
+        color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
+        align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, slot_height / 2],
+          chamfer=_hook_width, edges=RIGHT);
+      }
+    } else if (ks_use_native()) {
+      // Panel-side recess from native (BOSL2-free) geometry so identical jacks reuse one
+      // cached mesh. Shape matches the BOSL2 slot+tab+funnel construction below (verified by
+      // boolean parity); see keystone_native.scad. One fused mesh carries a single solid color
+      // via color(); per-section debug colors are not available.
+      color(_color)
+      _ks_label_hook_single(slot_width, slot_depth, slot_height,
+        label_slot_spacing=label_slot_spacing, hook_width=_hook_width,
+        base_chamfer=BASE_CHAMFER, strength=BASE_STRENGTH);
+    } else {
+      // Panel-side recess (BOSL2): chamfered slot, full-height retention tab, insertion funnel.
+      color_this(debug_colors ? HR_RED : _color)
+      left((label_slot_spacing - slot_width - _spacing_sub) / 2)
+      cuboid([slot_width, slot_depth, slot_height], chamfer=_chamfer, edges=[BACK, LEFT], except=FRONT) {
+        color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
+        align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, slot_height],
+          chamfer=_hook_width, edges=RIGHT);
         align(FRONT, inside=true)
           color_this(debug_colors ? HR_CHARCOAL : _color)
           cuboid([slot_width + BASE_CHAMFER, BASE_CHAMFER, slot_height + BASE_CHAMFER],
@@ -191,14 +245,37 @@ module label_plate(yrot=0, anchor=CENTER, spin=0, orient=UP, debug_colors=false)
   _height = KS_LABEL_HEIGHT;
 
   attachable(anchor=anchor, spin=spin, orient=orient, size=[_width, _depth, _height]) {
-    fwd(BASE_STRENGTH)
-    color_this(debug_colors ? HR_YELLOW : KS_COLOR_SECONDARY)
-    diff("label_plate_remove")
-    cuboid([_width, BASE_STRENGTH, _height], chamfer=KS_LABEL_CHAMFER, except=[BACK, FRONT]) {
-      tag("label_plate_remove") edge_mask(BACK, except=[LEFT, RIGHT])
-        color_this(debug_colors ? HR_BLUE : KS_COLOR_SECONDARY)
-        chamfer_edge_mask(l=_width - BASE_STRENGTH * 2 - TOLERANCE / 2, chamfer=BASE_STRENGTH - PRINTING_LAYER_HEIGHT);
-      attach(BACK, FRONT) label_hooks(yrot=yrot, inner=true, debug_colors=debug_colors);
+    if (ks_use_native()) {
+      // Native (BOSL2-free) primitives so identical label plates reuse one cached mesh across a
+      // populated panel — the BOSL2 attachable construction defeats that cache and dominates
+      // render time. Shape matches the BOSL2 path below (verified by zero-volume boolean
+      // parity). One fused mesh carries a single solid identity color via color() (here the
+      // charcoal KS_COLOR_SECONDARY); debug_colors is bosl2-only.
+      color(KS_COLOR_SECONDARY)
+      ks_label_plate_native(
+        plate_width=_width,
+        body_depth=BASE_STRENGTH,
+        plate_height=_height,
+        body_chamfer=KS_LABEL_CHAMFER,
+        grip_len=_width - BASE_STRENGTH * 2 - TOLERANCE / 2,
+        grip_chamfer=BASE_STRENGTH - PRINTING_LAYER_HEIGHT,
+        hook_spacing=_spacing,
+        hook_slot_width=KS_LABEL_STRENGTH,
+        hook_depth=BASE_STRENGTH * 2,
+        hook_chamfer=KS_LABEL_CHAMFER,
+        spacing_sub=TOLERANCE,
+        tab_width=TOLERANCE,
+        tab_depth=BASE_STRENGTH - TOLERANCE - KS_LABEL_CHAMFER);
+    } else {
+      fwd(BASE_STRENGTH)
+      color_this(debug_colors ? HR_YELLOW : KS_COLOR_SECONDARY)
+      diff("label_plate_remove")
+      cuboid([_width, BASE_STRENGTH, _height], chamfer=KS_LABEL_CHAMFER, except=[BACK, FRONT]) {
+        tag("label_plate_remove") edge_mask(BACK, except=[LEFT, RIGHT])
+          color_this(debug_colors ? HR_BLUE : KS_COLOR_SECONDARY)
+          chamfer_edge_mask(l=_width - BASE_STRENGTH * 2 - TOLERANCE / 2, chamfer=BASE_STRENGTH - PRINTING_LAYER_HEIGHT);
+        attach(BACK, FRONT) label_hooks(yrot=yrot, inner=true, debug_colors=debug_colors);
+      }
     }
     children();
   }
