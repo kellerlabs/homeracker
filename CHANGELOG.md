@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.10.0...homeracker-v3.11.0) (2026-06-18)
+
+
+### ✨ Features
+
+* **keystone:** native geometry backend toggle + grill-my-model skill ([#400](https://github.com/kellerlabs/homeracker/issues/400)) ([546f37d](https://github.com/kellerlabs/homeracker/commit/546f37d167a2b7689d27fc495944464fd4ba2ca4))
+
 ## [3.10.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.9.0...homeracker-v3.10.0) (2026-06-14)
 
 
