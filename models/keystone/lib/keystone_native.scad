@@ -87,7 +87,6 @@ module _ks_label_hook_single(slot_width, slot_depth, slot_height, label_slot_spa
   _left = (label_slot_spacing - slot_width) / 2;  // slot center sits at X = -_left
   _sw2 = slot_width / 2;
   _sd2 = slot_depth / 2;
-  _sh2 = slot_height / 2;
   _right = -_left + _sw2;  // slot right (+X) face
 
   union() {
@@ -135,7 +134,7 @@ module _ks_wedge_z(len, c) {
 /// centered; body at the front, inner hooks extending back). Mirror-symmetric about X.
 module ks_label_plate_native(plate_width, body_depth, plate_height, body_chamfer,
   grip_len, grip_chamfer, hook_spacing, hook_slot_width, hook_depth, hook_chamfer,
-  spacing_sub, tab_width, tab_depth, strength) {
+  spacing_sub, tab_width, tab_depth) {
 
   _hw = plate_width / 2;
   _hh = plate_height / 2;
@@ -169,7 +168,7 @@ module ks_label_plate_native(plate_width, body_depth, plate_height, body_chamfer
     }
 
     // --- Finger grip: 45° chamfers on the body back top & bottom edges, central length. ---
-    // grip_len + 2*HR_EPSILON matches BOSL2 chamfer_edge_mask's `excess` bleed past each end.
+    // grip_len + 0.1 bleeds the wedge past each end, matching BOSL2 chamfer_edge_mask's `excess`.
     for (z = [1, -1])
       translate([0, _body_back, z * _hh])
         _ks_wedge_x(grip_len + 0.1, grip_chamfer);

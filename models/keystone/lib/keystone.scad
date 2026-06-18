@@ -265,8 +265,7 @@ module label_plate(yrot=0, anchor=CENTER, spin=0, orient=UP, debug_colors=false)
         hook_chamfer=KS_LABEL_CHAMFER,
         spacing_sub=TOLERANCE,
         tab_width=TOLERANCE,
-        tab_depth=BASE_STRENGTH - TOLERANCE - KS_LABEL_CHAMFER,
-        strength=BASE_STRENGTH);
+        tab_depth=BASE_STRENGTH - TOLERANCE - KS_LABEL_CHAMFER);
     } else {
       fwd(BASE_STRENGTH)
       color_this(debug_colors ? HR_YELLOW : KS_COLOR_SECONDARY)
