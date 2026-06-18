@@ -38,6 +38,34 @@ Open `parts/keystone_sample.scad` in OpenSCAD and use the **Customizer** panel.
 | `show_labels` | `true` | Show label plates on keystones |
 | `label_position` | `above` | Which side of the jack the label sits on: `above` or `below` |
 | `debug_colors` | `false` | Distinct colors per section for debugging |
+| `geometry` | `native` | Geometry backend: `native` (fast) or `bosl2` (per-section debug colors). See below. |
+
+### Geometry Backend (native vs BOSL2)
+
+The socket, panel-side label recess, and label plate each ship two interchangeable
+geometry backends that produce the **identical** printable shape (verified by zero-volume
+boolean parity). Pick one via the `geometry` Customizer dropdown, or globally in code with the
+`$ks_native` special variable (`true` = native, `false` = BOSL2) — like `$fn` it propagates to
+all children, so set it once at the top of your file.
+
+Both backends render the model's solid identity colors (yellow socket, charcoal label plate).
+The only coloring difference is `debug_colors`: native geometry is a single fused mesh, so it
+cannot tint individual sections — use the `bosl2` backend when you need per-section debug colors.
+
+> ⚠ **Disclaimer:** the `native` geometry was fully AI-transpiled from the original BOSL2 code.
+> It was print-tested with no noticeable difference from the BOSL2 version, but the `bosl2`
+> backend remains the authored source of truth — prefer it if in doubt.
+> I personally only use the native geometry for really packed panels.
+
+| Backend | Speed | `debug_colors` | Use when |
+|---------|-------|----------------|----------|
+| `native` (default) | Fast — identical jacks/plates collapse to one cached mesh, so a fully-populated panel renders many times faster | ❌ per-section coloring not available (solid identity colors still apply) | Rendering or exporting real panels, especially with many keystones |
+| `bosl2` | Slow — BOSL2 re-instantiates every copy, defeating OpenSCAD's geometry cache | ✅ full per-section coloring | Editing/inspecting a single part, or when you want per-section debug colors |
+
+Why the speed gap: native geometry definitions are cached by OpenSCAD across identical copies,
+but a BOSL2 `attachable`/`diff` construction inside the geometry defeats that cache, and `diff()`
+re-evaluates its subtree multiple times per copy. On a populated panel this dominated render
+time, so `native` is the default.
 
 ### Library Usage
 

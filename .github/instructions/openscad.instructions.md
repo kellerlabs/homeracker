@@ -17,6 +17,11 @@ applyTo: "**/*.scad"
 - **Edge breaks in one pass.** Chamfer/fillet an assembly's outer edge with `edge_mask` on the bounding-box edges, not per-member — per-piece chamfers leave nubs at junctions.
 - **Keep sub-parts ignorant of the parent.** A reusable part (e.g. a back brace) should take its own size and attach to a face; splitting/clipping belongs in the parent, not duplicated inside the part.
 
+## Naming
+
+- **Use descriptive variable names.** Spell out intent: `usable_width`, `seam_edge`, `row_center` — not `uw`, `se`, `rc`. The only exception is loop counters (`i`, `j`, `k`) and BOSL2/OpenSCAD idioms (`$fn`, `$idx`).
+- Local variables in functions/modules carry a leading underscore by convention (`_usable_width`); keep the descriptive name after it.
+
 
 ## Quality Settings
 
