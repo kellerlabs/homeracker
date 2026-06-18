@@ -135,9 +135,9 @@ module keystone_socket(additional_tolerance=0.0, anchor=CENTER, spin=0, orient=U
     if (ks_use_native()) {
       // Native (BOSL2-free) primitives so identical jacks reuse one cached mesh. Shape is
       // identical to the BOSL2 path below (verified by zero-volume boolean parity). Native
-      // geometry is one fused mesh, so it carries a single solid color via color() (color_this
-      // is a no-op on non-attachable primitives); per-section debug colors are not available.
-      color(debug_colors ? HR_BLUE : KS_COLOR_PRIMARY)
+      // geometry is one fused mesh, so it carries a single solid identity color via color()
+      // (color_this is a no-op on non-attachable primitives); debug_colors is bosl2-only.
+      color(KS_COLOR_PRIMARY)
       ks_socket_native(
         width=_width,
         height=_height,
@@ -249,9 +249,9 @@ module label_plate(yrot=0, anchor=CENTER, spin=0, orient=UP, debug_colors=false)
       // Native (BOSL2-free) primitives so identical label plates reuse one cached mesh across a
       // populated panel — the BOSL2 attachable construction defeats that cache and dominates
       // render time. Shape matches the BOSL2 path below (verified by zero-volume boolean
-      // parity). One fused mesh carries a single solid color via color() (here the charcoal
-      // KS_COLOR_SECONDARY); per-section debug colors are not available.
-      color(debug_colors ? HR_RED : KS_COLOR_SECONDARY)
+      // parity). One fused mesh carries a single solid identity color via color() (here the
+      // charcoal KS_COLOR_SECONDARY); debug_colors is bosl2-only.
+      color(KS_COLOR_SECONDARY)
       ks_label_plate_native(
         plate_width=_width,
         body_depth=BASE_STRENGTH,

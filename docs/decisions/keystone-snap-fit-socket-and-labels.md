@@ -36,7 +36,19 @@ Ship a parametric **cutter** module (`keystone_full()`) that panels subtract in 
 - **Dual geometry backend:** keep both a `native` (BOSL2-free, cache-friendly, fast) and a
   `bosl2` (authored source of truth, per-section debug colors) path behind a `$ks_native`
   toggle. `native` is the default; the native code was AI-transpiled from the BOSL2 source and
-  print-tested with no noticeable difference.
+  print-tested with no noticeable difference. The native geometry lives in a separate
+  `keystone_native.scad` pulled in via `use <>` (not `include`) and **without** an
+  `include <BOSL2/std.scad>`, so its `cube()`/`linear_extrude()`/`polygon()` calls resolve to
+  OpenSCAD's built-in primitives in that file's own scope — *not* BOSL2's attachable wrappers —
+  even though the consuming `keystone.scad` includes BOSL2. This is what lets OpenSCAD cache one
+  jack's mesh and re-stamp it across the panel.
+
+**Benchmark** (synthetic 6×5 = 30-jack panel with labels, rendered to STL, manifold backend,
+median of 3 runs, AMD Ryzen 9 7950X / 64 GB / Windows, OpenSCAD 2026.06.12, single-threaded
+geometry): `native` **0.17 s** vs `bosl2` **1.0 s** — ≈ **6×** faster, with a per-jack marginal
+cost of ~5.4 ms (native) vs ~32 ms (bosl2). The 6× win empirically confirms the `use <>`-scoping
+trick keeps the primitives native (a BOSL2-wrapped `cube()` would defeat the cache and erase the
+gap). Reproduce with `_visual_test/ks_bench.scad`.
 
 **Alternatives considered:**
 

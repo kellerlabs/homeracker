@@ -51,3 +51,19 @@ keystone_full(yrot=90, label_position="below", show_label=true);
 // Demo panel with label below
 right(355)
 keystone_demo_panel(label_position="below", add_label=true);
+
+// --- Geometry backend coverage: render the full part on both backends ---
+
+// Native backend (default) — explicit
+right(390)
+keystone_full(show_label=true, $ks_native=true);
+
+// BOSL2 backend — exercises the attachable/diff path and debug colors
+right(420)
+keystone_full(show_label=true, debug_colors=true, $ks_native=false);
+
+// Standalone label plate on both backends
+right(450)
+label_plate($ks_native=true);
+right(480)
+label_plate($ks_native=false);

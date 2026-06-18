@@ -39,7 +39,6 @@ geometry = "native"; // [native, bosl2]
 
 /* [Hidden] */
 $fn = 100;
-spacing = 5;
 // Propagates to all keystone modules like $fn (see ks_use_native() in keystone.scad).
 $ks_native = geometry == "native";
 

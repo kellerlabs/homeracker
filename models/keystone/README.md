@@ -56,7 +56,7 @@ Open `parts/keystone_sample.scad` in OpenSCAD and use the **Customizer** panel.
 | `show_labels` | `true` | Show label plates on keystones |
 | `label_position` | `above` | Which side of the jack the label sits on: `above` or `below` (aesthetic default; no functional difference) |
 | `label_plate_mode` | `assembly` | `assembly` previews the plate in front of its slots; `plate` lays it out print-ready (used by the Parametric Model Maker for MakerWorld build plates) |
-| `debug_colors` | `false` | Colors each section for debugging. Coarse per-module colors on `native`; richest per-section breakdown on the `bosl2` backend. |
+| `debug_colors` | `false` | Tints each section for debugging. **`bosl2` backend only** — native renders one fused mesh and keeps its solid identity colors. |
 | `geometry` | `native` | Geometry backend: `native` (fast) or `bosl2` (per-section debug colors). See below. |
 
 ### Geometry Backend (native vs BOSL2)
@@ -85,6 +85,25 @@ Why the speed gap: native geometry definitions are cached by OpenSCAD across ide
 but a BOSL2 `attachable`/`diff` construction inside the geometry defeats that cache, and `diff()`
 re-evaluates its subtree multiple times per copy. On a populated panel this dominated render
 time, so `native` is the default.
+
+#### Benchmark
+
+Synthetic panel of **30 jacks (6×5) with label slots**, rendered to STL (manifold backend,
+`--render`). Median of 3 runs:
+
+| Backend | 30-jack render | Marginal cost per added jack¹ |
+|---------|---------------:|------------------------------:|
+| `native` | **0.17 s** | ~5.4 ms |
+| `bosl2`  | 1.0 s | ~32 ms |
+
+**≈ 6× faster** on this panel, and the gap widens as you add more jacks. ¹Marginal cost is
+derived from the 1-jack vs 30-jack delta, isolating the per-copy geometry work the native cache
+eliminates.
+
+<sub>Hardware: AMD Ryzen 9 7950X (16C/32T), 64 GB RAM, Windows. OpenSCAD 2026.06.12, manifold
+backend. OpenSCAD's geometry render is effectively single-threaded, so wall-clock numbers are
+CPU-clock bound and reproduce closely across runs. Reproduce with `_visual_test/ks_bench.scad`
+(throwaway, not tracked) — see the [decision record](../../docs/decisions/keystone-snap-fit-socket-and-labels.md) for the method.</sub>
 
 ### Label system design
 
