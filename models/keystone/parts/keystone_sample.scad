@@ -23,6 +23,9 @@ panel_depth = 9.75; // [9.75:0.25:30]
 show_labels = true; // [false, true]
 // Which side of the jack the label sits on
 label_position = "above"; // [above, below]
+// Label plate placement: assembly previews the plate in front of its slots; plate lays it
+// out print-ready (used when exposing build plates via the Parametric Model Maker).
+label_plate_mode = "assembly"; // [assembly, plate]
 // Show distinct colors per section for easier debugging
 debug_colors = false; // [false, true]
 
@@ -41,12 +44,12 @@ spacing = 5;
 $ks_native = geometry == "native";
 
 if (mode == "single") {
-  keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=yrotation, panel_depth=panel_depth, add_label=show_labels, label_position=label_position, debug_colors=debug_colors);
+  keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=yrotation, panel_depth=panel_depth, add_label=show_labels, label_plate_mode=label_plate_mode, label_position=label_position, debug_colors=debug_colors);
 } else {
-  keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=0, panel_depth=panel_depth, add_label=false, label_position=label_position, debug_colors=debug_colors){
-    attach(RIGHT,LEFT) keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=90, panel_depth=panel_depth, add_label=true, label_position=label_position, debug_colors=debug_colors) {
-      attach(RIGHT,LEFT) keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=180, panel_depth=panel_depth, add_label=true, label_position=label_position, debug_colors=debug_colors) {
-        attach(RIGHT,LEFT) keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=270, panel_depth=panel_depth, add_label=false, label_position=label_position, debug_colors=debug_colors);
+  keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=0, panel_depth=panel_depth, add_label=false, label_plate_mode=label_plate_mode, label_position=label_position, debug_colors=debug_colors){
+    attach(RIGHT,LEFT) keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=90, panel_depth=panel_depth, add_label=true, label_plate_mode=label_plate_mode, label_position=label_position, debug_colors=debug_colors) {
+      attach(RIGHT,LEFT) keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=180, panel_depth=panel_depth, add_label=true, label_plate_mode=label_plate_mode, label_position=label_position, debug_colors=debug_colors) {
+        attach(RIGHT,LEFT) keystone_demo_panel(additional_tolerance=additional_tolerance, yrot=270, panel_depth=panel_depth, add_label=false, label_plate_mode=label_plate_mode, label_position=label_position, debug_colors=debug_colors);
       }
     }
   }
