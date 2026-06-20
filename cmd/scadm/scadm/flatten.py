@@ -409,7 +409,7 @@ def _extract_main_code(content: str) -> str:
         stripped = line.strip()
         if skipping_leading:
             if in_multiline_assignment:
-                if ";" in stripped:
+                if _has_terminator(stripped):
                     in_multiline_assignment = False
                 continue
             if not stripped:
@@ -418,7 +418,7 @@ def _extract_main_code(content: str) -> str:
             if re.match(r"^[\$\w]+\s*=.*;\s*(//.*)?$", stripped):
                 continue
             # e.g. pusher_length =\n    BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
-            if _VAR_ASSIGN_RE.match(stripped) and ";" not in stripped:
+            if _VAR_ASSIGN_RE.match(stripped) and not _has_terminator(stripped):
                 in_multiline_assignment = True
                 continue
             # e.g. // Debug, // Example usage
