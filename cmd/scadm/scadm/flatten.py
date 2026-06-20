@@ -190,7 +190,7 @@ def _extract_hidden_section(content: str) -> str:
 
         if in_multiline_assignment:
             kept.append(line)
-            if ";" in stripped:
+            if _has_terminator(stripped):
                 in_multiline_assignment = False
             continue
 
@@ -205,7 +205,7 @@ def _extract_hidden_section(content: str) -> str:
         # e.g. $fn = 100;, EPSILON = 0.01;, BASE_UNIT =\n    15;
         if _VAR_ASSIGN_RE.match(stripped):
             kept.append(line)
-            if ";" not in stripped:
+            if not _has_terminator(stripped):
                 in_multiline_assignment = True
             continue
 
@@ -260,8 +260,8 @@ def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
 
             # Function definitions: single-expression functions end with ;
             if kind == "function" and not seen_brace:
-                # Collect until ; for single-expression functions
-                while i + 1 < len(lines) and ";" not in lines[i]:
+                # Collect until the terminating ; (ignoring ; inside strings/comments).
+                while i + 1 < len(lines) and not _has_terminator(lines[i]):
                     i += 1
                     def_lines.append(lines[i])
                 defs.append(_Definition(kind, name, def_lines, origin))
@@ -298,8 +298,8 @@ def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
         if vm and stripped:
             name = vm.group(1)
             var_lines = [lines[i]]
-            if ";" not in stripped:
-                while i + 1 < len(lines) and ";" not in lines[i]:
+            if not _has_terminator(stripped):
+                while i + 1 < len(lines) and not _has_terminator(lines[i]):
                     i += 1
                     var_lines.append(lines[i])
             defs.append(_Definition("variable", name, var_lines, origin))
@@ -324,6 +324,16 @@ def _strip_comments_and_strings(text: str) -> str:
         re.DOTALL,
     )
     return pattern.sub(lambda m: " " * len(m.group(0)), text)
+
+
+def _has_terminator(line: str) -> bool:
+    """True if *line* contains a statement-terminating ';' outside strings/comments.
+
+    A naive ``";" in line`` check is fooled by semicolons inside string literals
+    (e.g. an ``echo("a; b")`` warning), which would truncate a multi-line function
+    or variable definition mid-body. Masking strings/comments first avoids that.
+    """
+    return ";" in _strip_comments_and_strings(line)
 
 
 def _find_used_names(text: str) -> Set[str]:

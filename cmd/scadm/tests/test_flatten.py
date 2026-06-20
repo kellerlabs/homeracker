@@ -57,6 +57,26 @@ class ParseDefinitionsTests(unittest.TestCase):
         self.assertEqual(defs[0].kind, "function")
         self.assertEqual(defs[0].name, "bar")
 
+    def test_parses_multiline_function_with_semicolon_in_string(self):
+        # Regression: a ';' inside an echo() warning string must NOT terminate the
+        # function early. It used to drop the trailing ': 20;' body line, producing
+        # a truncated (syntactically invalid) flattened function.
+        src = 'function f(x) =\n  x == 1\n    ? echo("need a; got b") 10\n  : 20;\n'
+        defs = _parse_definitions(src)
+        self.assertEqual(len(defs), 1)
+        self.assertEqual(defs[0].kind, "function")
+        self.assertEqual(defs[0].name, "f")
+        self.assertEqual(len(defs[0].lines), 4)
+        self.assertIn(": 20;", defs[0].lines[-1])
+
+    def test_parses_multiline_variable_with_semicolon_in_string(self):
+        # Same regression for multi-line variable assignments.
+        src = 'MSG =\n  str("a; b",\n  "c");\n'
+        defs = _parse_definitions(src)
+        self.assertEqual(len(defs), 1)
+        self.assertEqual(defs[0].name, "MSG")
+        self.assertEqual(len(defs[0].lines), 3)
+
     def test_parses_mixed_content(self):
         content = "A = 1;\nmodule m() { cube(A); }\nB = 2;"
         defs = _parse_definitions(content)
