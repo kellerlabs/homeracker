@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.11.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.11.0...homeracker-v3.11.1) (2026-06-20)
+
+
+### 🐛 Bug Fixes
+
+* **panel:** rename lockpin_hole to panel_lockpin_hole to avoid name collision ([#406](https://github.com/kellerlabs/homeracker/issues/406)) ([054c4e6](https://github.com/kellerlabs/homeracker/commit/054c4e6aee75f20416ef32621a4030ecfe793ce3))
+
+
+### 📦 Dependencies
+
+* update dependency kellerlab-pre-commit-hooks to v0.3.6 ([#402](https://github.com/kellerlabs/homeracker/issues/402)) ([0d07d38](https://github.com/kellerlabs/homeracker/commit/0d07d3874c412358dcfff3ebce2eca18b67b35bc))
+* update openscad nightly to v2026.06.19 ([#404](https://github.com/kellerlabs/homeracker/issues/404)) ([ea020a3](https://github.com/kellerlabs/homeracker/commit/ea020a3077d36a07ae0d971a0650404c41f6a435))
+
 ## [3.11.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.10.0...homeracker-v3.11.0) (2026-06-18)
 
 
