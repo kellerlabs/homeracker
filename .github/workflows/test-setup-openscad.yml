@@ -44,7 +44,7 @@ jobs:
     name: test (${{ matrix.name }})
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Create test requirements file
         if: matrix.name == 'scadm-requirements'
