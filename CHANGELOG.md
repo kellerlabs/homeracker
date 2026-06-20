@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.12.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.11.1...homeracker-v3.12.0) (2026-06-20)
+
+
+### ✨ Features
+
+* **skills:** add grill-my-plan skill + exclude tests from pylint ([#410](https://github.com/kellerlabs/homeracker/issues/410)) ([13cdb17](https://github.com/kellerlabs/homeracker/commit/13cdb17c8f9c7b64d08cb359409ad6fe828aac68))
+
 ## [3.11.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.11.0...homeracker-v3.11.1) (2026-06-20)
 
 

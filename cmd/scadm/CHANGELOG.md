@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.8.0...scadm-v0.9.0) (2026-06-20)
+
+
+### ✨ Features
+
+* **skills:** add grill-my-plan skill + exclude tests from pylint ([#410](https://github.com/kellerlabs/homeracker/issues/410)) ([13cdb17](https://github.com/kellerlabs/homeracker/commit/13cdb17c8f9c7b64d08cb359409ad6fe828aac68))
+
+
+### 🐛 Bug Fixes
+
+* **scadm:** ignore semicolons inside strings when flattening definitions ([#408](https://github.com/kellerlabs/homeracker/issues/408)) ([848f044](https://github.com/kellerlabs/homeracker/commit/848f0448b29bf444f25063e5cce67d001699e7b9))
+
 ## [0.8.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.7.0...scadm-v0.8.0) (2026-05-10)
 
 
