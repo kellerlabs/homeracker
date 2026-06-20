@@ -1,6 +1,6 @@
 """OpenSCAD Dependency Manager (scadm)."""
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 from scadm.installer import (
     install_openscad,
