@@ -122,7 +122,7 @@ Or simply scan this QR-Code:
 **For homeracker-exclusive models** (private repo): add a note linking to the Core changelog since the exclusive repo isn't public:
 
 ```markdown
-This model is part of the [HomeRacker Exclusive](https://makerworld.com/en/@kellerlab) collection. It builds on the open-source [HomeRacker - Core](https://makerworld.com/en/models/1317298-homeracker-modular-rack-building-system#profileId-1352703) system — the base building blocks changelog can be found in the [Core CHANGELOG](https://github.com/kellerlabs/homeracker/blob/main/CHANGELOG.md).
+This model is part of the [MakerWorld-exclusive HomeRacker collection](https://makerworld.com/en/collections/5970240-homeracker-official-catalog). It builds on the open-source [HomeRacker - Core](https://github.com/kellerlabs/homeracker/tree/main/models) system — the base building blocks changelog can be found in the [Core CHANGELOG](https://github.com/kellerlabs/homeracker/blob/main/CHANGELOG.md).
 ```
 
 **For homeracker models** (public repo): link directly to the full changelog:
