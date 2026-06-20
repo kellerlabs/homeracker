@@ -58,14 +58,26 @@ class ParseDefinitionsTests(unittest.TestCase):
         self.assertEqual(defs[0].kind, "function")
         self.assertEqual(defs[0].name, "bar")
 
-    def test_multiline_definition_with_semicolon_in_string(self):
-        # A ';' inside a string must not terminate a multi-line function or variable
-        # definition early (it used to drop trailing body lines like ': 20;').
-        fn = _parse_definitions('function f(x) =\n  x == 1\n    ? echo("a; b") 10\n  : 20;\n')
-        self.assertEqual(len(fn[0].lines), 4)
-        self.assertIn(": 20;", fn[0].lines[-1])
-        var = _parse_definitions('MSG =\n  str("a; b",\n  "c");\n')
-        self.assertEqual(len(var[0].lines), 3)
+    def test_parses_multiline_function_with_semicolon_in_string(self):
+        # A ';' inside an echo() warning string must not terminate the function
+        # early — it used to drop the trailing ': 20;' body line, producing a
+        # truncated (syntactically invalid) flattened function.
+        src = 'function f(x) =\n  x == 1\n    ? echo("need a; got b") 10\n  : 20;\n'
+        defs = _parse_definitions(src)
+        self.assertEqual(len(defs), 1)
+        self.assertEqual(defs[0].kind, "function")
+        self.assertEqual(defs[0].name, "f")
+        self.assertEqual(len(defs[0].lines), 4)
+        self.assertIn(": 20;", defs[0].lines[-1])
+
+    def test_parses_multiline_variable_with_semicolon_in_string(self):
+        # Same regression for multi-line variable assignments.
+        src = 'MSG =\n  str("a; b",\n  "c");\n'
+        defs = _parse_definitions(src)
+        self.assertEqual(len(defs), 1)
+        self.assertEqual(defs[0].kind, "variable")
+        self.assertEqual(defs[0].name, "MSG")
+        self.assertEqual(len(defs[0].lines), 3)
 
     def test_parses_mixed_content(self):
         content = "A = 1;\nmodule m() { cube(A); }\nB = 2;"
@@ -87,6 +99,8 @@ class ParseDefinitionsTests(unittest.TestCase):
 
 
 class ExtractMainCodeTests(unittest.TestCase):
+    """Unit tests for the _extract_main_code leading-assignment skipper."""
+
     def test_skips_multiline_assignment_with_semicolon_in_string(self):
         # A ';' in a string must not end the assignment early (leaking '"c");').
         content = 'MSG =\n  str("a; b",\n  "c");\ncube(1);\n'

@@ -195,6 +195,7 @@ The grill is done when:
 
 ## 📚 References
 
+- [`grill-my-plan` skill](../grill-my-plan/SKILL.md) — the plan-shaped sibling (use it to stress-test a plan before code exists)
 - [`decision-records` skill](../decision-records/SKILL.md) — ADR template, index, supersede flow
 - [`makerworld-description` skill](../makerworld-description/SKILL.md) — MakerWorld `DESCRIPTION.md` handling
 - [Markdown guidelines](../../instructions/markdown.instructions.md) — Model README template, Catalog rules

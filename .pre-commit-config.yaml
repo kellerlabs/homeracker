@@ -64,6 +64,10 @@ repos:
           [
             "--rcfile=.lint/pylint/.pylintrc"
           ]
+        # Tests legitimately run long, hold many methods, and repeat fixtures —
+        # idioms a general linter fights. They are covered by pytest + black, so
+        # pylint only runs on production code (keeping signal like too-many-lines).
+        exclude: '(^|/)tests/'
   - repo: local
     hooks:
       - id: scadm-tests
