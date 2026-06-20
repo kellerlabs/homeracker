@@ -9,6 +9,7 @@ from unittest.mock import patch
 import scadm.flatten as flatten_mod
 from scadm.flatten import (
     _Definition,
+    _extract_main_code,
     _find_used_names,
     _parse_definitions,
     _resolve_dependencies,
@@ -57,6 +58,15 @@ class ParseDefinitionsTests(unittest.TestCase):
         self.assertEqual(defs[0].kind, "function")
         self.assertEqual(defs[0].name, "bar")
 
+    def test_multiline_definition_with_semicolon_in_string(self):
+        # A ';' inside a string must not terminate a multi-line function or variable
+        # definition early (it used to drop trailing body lines like ': 20;').
+        fn = _parse_definitions('function f(x) =\n  x == 1\n    ? echo("a; b") 10\n  : 20;\n')
+        self.assertEqual(len(fn[0].lines), 4)
+        self.assertIn(": 20;", fn[0].lines[-1])
+        var = _parse_definitions('MSG =\n  str("a; b",\n  "c");\n')
+        self.assertEqual(len(var[0].lines), 3)
+
     def test_parses_mixed_content(self):
         content = "A = 1;\nmodule m() { cube(A); }\nB = 2;"
         defs = _parse_definitions(content)
@@ -74,6 +84,13 @@ class ParseDefinitionsTests(unittest.TestCase):
     def test_preserves_origin(self):
         defs = _parse_definitions("A = 1;", origin="constants.scad")
         self.assertEqual(defs[0].origin, "constants.scad")
+
+
+class ExtractMainCodeTests(unittest.TestCase):
+    def test_skips_multiline_assignment_with_semicolon_in_string(self):
+        # A ';' in a string must not end the assignment early (leaking '"c");').
+        content = 'MSG =\n  str("a; b",\n  "c");\ncube(1);\n'
+        self.assertEqual(_extract_main_code(content), "cube(1);")
 
 
 class ResolveDependenciesTests(unittest.TestCase):
