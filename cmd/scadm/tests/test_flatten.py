@@ -75,6 +75,7 @@ class ParseDefinitionsTests(unittest.TestCase):
         src = 'MSG =\n  str("a; b",\n  "c");\n'
         defs = _parse_definitions(src)
         self.assertEqual(len(defs), 1)
+        self.assertEqual(defs[0].kind, "variable")
         self.assertEqual(defs[0].name, "MSG")
         self.assertEqual(len(defs[0].lines), 3)
 
