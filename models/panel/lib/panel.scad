@@ -51,10 +51,11 @@ function get_lockpin_hole_offset_vertical(panel_type = HR_PANEL_TYPE_INTERFIT) =
   - BASE_STRENGTH/2
   - TOLERANCE/2;
 
-/** Lockpin Hole — subtracted from mount plates to create the square hole a lockpin slides into.
+/** Panel Lockpin Hole — subtracted from mount plates to create the square hole a lockpin slides into.
 Includes an optional chamfer on the insertion side for easier pin alignment.
+This is the shallow panel-side passthrough; distinct from the core lockpin_hole(depth=...) reusable cavity.
 */
-module lockpin_hole(anchor=CENTER, spin=0, orient=UP, debug_colors=false, chamfer_enabled=false) {
+module panel_lockpin_hole(anchor=CENTER, spin=0, orient=UP, debug_colors=false, chamfer_enabled=false) {
 
   lockpin_hole_dimensions = [LOCKPIN_HOLE_SIDE_LENGTH, BASE_STRENGTH, LOCKPIN_HOLE_SIDE_LENGTH];
   lockpin_chamfer_dimensions = [LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2, LOCKPIN_HOLE_CHAMFER, LOCKPIN_HOLE_SIDE_LENGTH + LOCKPIN_HOLE_CHAMFER*2];
@@ -88,7 +89,7 @@ module connector_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, anchor=CENTER, s
       if(full) {
         down(lockpin_hole_offset_vertical) left(lockpin_hole_offset_horizontal)
         attach(FRONT,FRONT, inside=true)
-        tag("remove") lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        tag("remove") panel_lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
       }
       if(inner_chamfer && full) {
         inner_chamfer_length = plate_height - BASE_CHAMFER;
@@ -139,7 +140,7 @@ module support_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, units, anchor=CENT
       align(TOP,LEFT) color_this(debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR) diff() cuboid([wall_width, wall_depth, wall_height],chamfer=chamfer_enabled ? BASE_CHAMFER : 0,edges=[LEFT,TOP],except=[BOTTOM,RIGHT]){
         down(lockpin_hole_offset_vertical)
         attach(LEFT,BACK,inside=true)
-        xcopies(spacing=BASE_UNIT, n=net_units) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        xcopies(spacing=BASE_UNIT, n=net_units) panel_lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
       }
       color(debug_colors ? HR_GREEN : HR_PANEL_PRIMARY_COLOR)
       align(TOP,RIGHT+BACK) diff() cuboid(bridge_dimensions) {
@@ -246,7 +247,7 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
           color_this(wall_color) align(TOP,BACK) diff() cuboid(h_wall, chamfer=wall_chamfer_size, edges=[BACK+TOP]){
             if(panel_type == HR_PANEL_TYPE_INTERFIT)
               tag("remove") down(lockpin_hole_offset_vertical) attach(BACK,BACK,inside=true)
-                xcopies(spacing=BASE_UNIT, n=net_units_x) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+                xcopies(spacing=BASE_UNIT, n=net_units_x) panel_lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
           }
         }
         if(mount_south) {
@@ -256,7 +257,7 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
           color_this(wall_color) align(TOP,FRONT) diff() cuboid(h_wall, chamfer=wall_chamfer_size, edges=[TOP+FRONT]){
             if(panel_type == HR_PANEL_TYPE_INTERFIT)
               tag("remove") down(lockpin_hole_offset_vertical) attach(FRONT,BACK,inside=true)
-                xcopies(spacing=BASE_UNIT, n=net_units_x) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+                xcopies(spacing=BASE_UNIT, n=net_units_x) panel_lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
           }
         }
       }
@@ -270,7 +271,7 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
           color_this(wall_color) align(TOP,LEFT) diff() cuboid(v_wall, chamfer=wall_chamfer_size, edges=[LEFT+TOP]){
             if(panel_type == HR_PANEL_TYPE_INTERFIT)
               tag("remove") down(lockpin_hole_offset_vertical) attach(LEFT,BACK,inside=true)
-                xcopies(spacing=BASE_UNIT, n=net_units_y) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+                xcopies(spacing=BASE_UNIT, n=net_units_y) panel_lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
           }
         }
         if(mount_east) {
@@ -280,7 +281,7 @@ module panel(units_x, units_y, panel_type = HR_PANEL_TYPE_INTERFIT, panel_cleara
           color_this(wall_color) align(TOP,RIGHT) diff() cuboid(v_wall, chamfer=wall_chamfer_size, edges=[TOP+RIGHT]){
             if(panel_type == HR_PANEL_TYPE_INTERFIT)
               tag("remove") down(lockpin_hole_offset_vertical) attach(RIGHT,BACK,inside=true)
-                xcopies(spacing=BASE_UNIT, n=net_units_y) lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+                xcopies(spacing=BASE_UNIT, n=net_units_y) panel_lockpin_hole(debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
           }
         }
       }
