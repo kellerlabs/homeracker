@@ -177,14 +177,22 @@ module split_connector(
 // the two split panel halves together (it replaces the standard lock pin for split panels).
 // it reuses the core lock pin's tension grip (tension_shape + tension_hole) as its single lock
 // element, seated in the bottom-most LOCK knuckle. a plain shaft then runs from the grip all the
-// way up through every remaining knuckle. both extreme ends get a matching rounded + chamfered
-// insertion tip. the grip sits at one extreme end of the pin only; multi-HU pins keep that single
-// grip and just extend the shaft.
+// way up through every remaining knuckle. both extreme ends get a rounded + chamfered insertion
+// tip; the leading (far) end gets a fuller rounded nose so it slides into the bores easily. the
+// grip sits at one extreme end of the pin only; multi-HU pins keep that single grip and just
+// extend the shaft.
 HR_SPLIT_LOCKPIN_TENSION_HEIGHT = lockpin_prismoid_length * 2; // = BASE_UNIT - BASE_STRENGTH
 // short nub below the grip so its catch waist lines up with the lock knuckle socket waist
 HR_SPLIT_LOCKPIN_END_EXTENSION = (BASE_UNIT - HR_SPLIT_LOCKPIN_TENSION_HEIGHT) / 2;
-// insertion-tip fillet, clamped so the short bottom nub can carry the same tip as the shaft
+// bottom-nub insertion-tip fillet, clamped so the short nub below the grip can carry it
 HR_SPLIT_LOCKPIN_CAP_FILLET = min(lockpin_width_outer / 3, HR_SPLIT_LOCKPIN_END_EXTENSION);
+// leading (far) shaft end gets a fuller rounded nose for an easy lead-in into the knuckle bores —
+// a tip that's too sharp catches hard on insertion (and can even snap the pin). the shaft is long,
+// so it isn't limited by the short bottom nub like HR_SPLIT_LOCKPIN_CAP_FILLET is.
+HR_SPLIT_LOCKPIN_LEAD_FILLET = lockpin_width_outer / 2;
+// ...plus a deeper chamfer on that same leading end's front/back edges, so the nose tapers in the
+// depth axis too. only the cap-end edges grow; the full-length side chamfers stay lockpin_chamfer.
+HR_SPLIT_LOCKPIN_LEAD_CHAMFER = lockpin_height / 3;
 
 // one tension grip (lock element core), with the flex slit removed. BASE_UNIT - BASE_STRENGTH tall.
 module split_lockpin_grip(debug_colors=false, chamfer_enabled=true, anchor=CENTER, spin=0, orient=UP) {
@@ -192,7 +200,7 @@ module split_lockpin_grip(debug_colors=false, chamfer_enabled=true, anchor=CENTE
     size=[lockpin_width_inner, lockpin_height, HR_SPLIT_LOCKPIN_TENSION_HEIGHT]) {
     diff() {
       color(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_SECONDARY_COLOR) tension_shape(chamfer_enabled);
-      tag("remove") tension_hole(tension_hole_strength_multiplier=HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_SLIM);
+      tag("remove") tension_hole(tension_hole_strength_multiplier=HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR);
     }
     children();
   }
@@ -201,15 +209,18 @@ module split_lockpin_grip(debug_colors=false, chamfer_enabled=true, anchor=CENTE
 // a plain pin segment whose `cap_dir` end is filleted + chamfered like a lock pin neck, while the
 // opposite end stays flush so it butts against the grip. used for both the shaft (cap on TOP) and
 // the short nub below the grip (cap on BOTTOM), so both extreme ends of the pin look identical.
-module split_lockpin_shaft(shaft_height, cap_dir=TOP, debug_colors=false, chamfer_enabled=true, anchor=CENTER, spin=0, orient=UP) {
+module split_lockpin_shaft(shaft_height, cap_dir=TOP, cap_fillet=HR_SPLIT_LOCKPIN_CAP_FILLET, cap_chamfer=lockpin_chamfer, debug_colors=false, chamfer_enabled=true, anchor=CENTER, spin=0, orient=UP) {
   shaft_size = [lockpin_width_outer, lockpin_height, shaft_height];
   attachable(anchor=anchor, spin=spin, orient=orient, size=shaft_size) {
     color(debug_colors ? HR_BLUE : HR_CORE_SUPPORT_SECONDARY_COLOR)
     if (chamfer_enabled)
-      // fillet + chamfer can't share an edge, so intersect a rounded and a chamfered cuboid
+      // fillet + chamfer can't share an edge, so intersect the rounded nose with the chamfers.
+      // the full-length side chamfers (Z edges) and the cap-end chamfer are separate cuboids so
+      // the leading end can taper harder in depth without changing the side chamfers.
       intersection() {
-        cuboid(shaft_size, rounding=HR_SPLIT_LOCKPIN_CAP_FILLET, edges=[cap_dir + LEFT, cap_dir + RIGHT]);
-        cuboid(shaft_size, chamfer=lockpin_chamfer, edges=[FRONT, BACK], except=-cap_dir);
+        cuboid(shaft_size, rounding=cap_fillet, edges=[cap_dir + LEFT, cap_dir + RIGHT]);
+        cuboid(shaft_size, chamfer=lockpin_chamfer, edges="Z");
+        cuboid(shaft_size, chamfer=cap_chamfer, edges=[cap_dir + FRONT, cap_dir + BACK]);
       }
     else
       cuboid(shaft_size);
@@ -237,9 +248,10 @@ module split_lockpin(units=1,
       // carries the same rounded + chamfered insertion tip as the shaft's top end
       attach(BOTTOM, TOP)
         split_lockpin_shaft(HR_SPLIT_LOCKPIN_END_EXTENSION, cap_dir=BOTTOM, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
-      // plain shaft up through the rest of the stack, capped at the far end
+      // plain shaft up through the rest of the stack; its far (leading) end carries the fuller
+      // rounded nose + deeper end chamfer so it slides into the knuckle bores easily
       attach(TOP, BOTTOM)
-        split_lockpin_shaft(shaft_height, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+        split_lockpin_shaft(shaft_height, cap_fillet=HR_SPLIT_LOCKPIN_LEAD_FILLET, cap_chamfer=HR_SPLIT_LOCKPIN_LEAD_CHAMFER, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
     }
     children();
   }
