@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.12.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.0...homeracker-v3.12.1) (2026-06-21)
+
+
+### 🐛 Bug Fixes
+
+* **split:** strengthen lock pin and ease split-panel pin insertion ([#413](https://github.com/kellerlabs/homeracker/issues/413)) ([2bca702](https://github.com/kellerlabs/homeracker/commit/2bca70255b2c828d0c6d0c63453811517e1fea51))
+
+
+### 📚 Documentation
+
+* **agent:** fix exclusive collection name and Core link in description template ([#411](https://github.com/kellerlabs/homeracker/issues/411)) ([8529445](https://github.com/kellerlabs/homeracker/commit/85294457aa204886086307bb5957ffef485872ab))
+
 ## [3.12.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.11.1...homeracker-v3.12.0) (2026-06-20)
 
 
