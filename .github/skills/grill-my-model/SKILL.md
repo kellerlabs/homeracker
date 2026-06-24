@@ -195,6 +195,7 @@ The grill is done when:
 
 ## 📚 References
 
+- [`humanizer` skill](../humanizer/SKILL.md) — run it over any README/description/ADR text this grill writes or edits, to strip AI tells
 - [`grill-my-plan` skill](../grill-my-plan/SKILL.md) — the plan-shaped sibling (use it to stress-test a plan before code exists)
 - [`decision-records` skill](../decision-records/SKILL.md) — ADR template, index, supersede flow
 - [`makerworld-description` skill](../makerworld-description/SKILL.md) — MakerWorld `DESCRIPTION.md` handling
