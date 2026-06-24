@@ -220,6 +220,7 @@ These elements are often dropped by `fetch_webpage` (logo as orphan linked image
 - **Alignment**: Use inline HTML blocks (`<h2 style="text-align: center">`, `<p style="text-align: center">`) to preserve centered headings, images, and text from MakerWorld. These render correctly on GitHub and pass through to `md-to-mw.py` HTML output.
 - **Image sizing**: Use `width="800"` as the standard for all description images whose native width is ≥ 800px; for smaller images use their native width (omit `height` so images scale proportionally). Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`).
 - MakerWorld CDN images (from `makerworld.bblmw.com`) should be downloaded to the assets repo during extraction. External reference images (memes, badges, etc.) can stay as external URLs.
+- **Humanize after writing**: once a `DESCRIPTION.md` is created or edited, run the [`humanizer`](../humanizer/SKILL.md) skill over it to strip AI tells before publishing.
 
 ## 🐛 Known Limitations
 
