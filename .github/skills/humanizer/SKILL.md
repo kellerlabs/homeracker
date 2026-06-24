@@ -76,7 +76,7 @@ gear, maybe even full-blown 19" devices down the road. And maybe also... just st
 
 These few ingredients give you the freedom to basically scale racks infinitely and
 create whatever it is you want to "rack"... at least to the point where a rack
-collapses under its own weight and might turn into a black hole. Physics, yeay.
+collapses under its own weight and might turn into a black hole. Physics, yay.
 
 TL;DR: the biggest strength is also its biggest challenge, versatility. If you're
 looking for a plug-and-play rack, this might feel overwhelming. But if you love
@@ -150,13 +150,16 @@ Scan for these. Each is a reliable AI tell; rewrite, never just delete.
     preserved automatically". Name the actor where active is clearer.
 
 ### Style
-14. **Em / en dashes — cut them all.** Hard constraint. Replace each `—`, `–`, `--`,
-    or spaced em dash with a period, comma, colon, parentheses, or a restructure.
-    Scan the final draft for `—` and `–`; any hit means it isn't done.
+14. **Em / en dashes — cut them all.** Hard constraint. Replace each `—`, `–`, or a
+    `--` double-hyphen *used as a dash in prose* (not Markdown `---` horizontal rules
+    or `---` YAML front-matter fences) with a period, comma, colon, parentheses, or a
+    restructure. Scan the final draft for `—` and `–`; any hit means it isn't done.
 15. **Boldface overuse** — don't bold phrases mechanically.
 16. **Inline-header vertical lists** — "**Performance:** Performance is improved…".
     Fold into prose or plain bullets.
-17. **Title Case In Headings** — use sentence case.
+17. **Title Case in headings** — prefer sentence case in body/marketing prose.
+    Exception: HomeRacker structural headings (README, ADR, skill, and MakerWorld
+    description section headings) use Title Case by convention — leave those as-is.
 18. **Decorative emojis** — fine as our intentional section markers (per markdown
     instructions and existing social posts); not as fake-structure bullet prefixes
     inside body copy.
@@ -227,4 +230,5 @@ short bullet list of what changed. Skip the bullets for tiny edits.
 - Text-creating skills that should run this pass:
   [`makerworld-description`](../makerworld-description/SKILL.md),
   [`grill-my-model`](../grill-my-model/SKILL.md),
-  [`grill-my-plan`](../grill-my-plan/SKILL.md)
+  [`grill-my-plan`](../grill-my-plan/SKILL.md),
+  [`decision-records`](../decision-records/SKILL.md)

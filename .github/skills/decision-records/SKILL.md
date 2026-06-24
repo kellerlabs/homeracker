@@ -123,4 +123,4 @@ See [docs/decisions/image-hosting-assets-repo.md](../../../docs/decisions/image-
 
 ## 7. Humanize the Prose
 
-After writing or editing a decision record, run the [`humanizer`](../humanizer/SKILL.md) skill over it to strip AI tells. ADRs are reference text, so use its neutral register (no first person or injected opinions) — just plain, concrete prose.
+After writing or editing a decision record, run the [`humanizer`](../humanizer/SKILL.md) skill over it to strip AI tells. ADRs are reference text, so use its neutral register (no first person or injected opinions), just plain, concrete prose.
