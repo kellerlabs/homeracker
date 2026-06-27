@@ -281,6 +281,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   module _naked_panel_left() {
     attachable(size=[attachable_width_half_naked, panel_depth, attachable_height]){
       right(attachable_width_half_naked/2+split_connector_cutout)
+      color(debug_colors ? HR_GREEN : RP_PRIMARY_COLOR)
       left_half(s=split_clip_size,x=-split_connector_cutout) _naked_panel();
       children();
     }
@@ -288,6 +289,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
   module _naked_panel_right() {
     attachable(size=[attachable_width_half_naked, panel_depth, attachable_height]){
       left(attachable_width_half_naked/2+split_connector_cutout)
+      color(debug_colors ? HR_RED : RP_PRIMARY_COLOR)
       right_half(s=split_clip_size,x=split_connector_cutout) _naked_panel();
       children();
     }
@@ -302,6 +304,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
         split_connector(units=panel_height_units, panel_depth=panel_depth,
           knuckle_side=HR_SPLIT_KNUCKLE_SIDE_LEFT,
           debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
+            color_this(debug_colors ? HR_BLUE : RP_PRIMARY_COLOR)
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);
           }
@@ -324,6 +327,7 @@ module rackpanel(panel_width=STD_WIDTH_10INCH, panel_height_units=1, bore_mode=R
         split_connector(units=panel_height_units, panel_depth=panel_depth,
           knuckle_side=HR_SPLIT_KNUCKLE_SIDE_RIGHT,
           debug_colors=debug_colors, chamfer_enabled=chamfer_enabled) {
+            color_this(debug_colors ? HR_BLUE : RP_PRIMARY_COLOR)
             edge_mask([TOP+FRONT,BOTTOM+FRONT])
               chamfer_edge_mask(chamfer=BASE_CHAMFER);
           }
