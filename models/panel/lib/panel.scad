@@ -94,6 +94,7 @@ module connector_mount_plate(panel_type=HR_PANEL_TYPE_INTERFIT, anchor=CENTER, s
       if(inner_chamfer && full) {
         inner_chamfer_length = plate_height - BASE_CHAMFER;
         tag("remove")
+        color_this(debug_colors ? HR_RED : HR_PANEL_PRIMARY_COLOR)
         edge_mask(RIGHT+BACK)
           up(BASE_CHAMFER/2)
           chamfer_edge_mask(l=inner_chamfer_length, chamfer=BASE_CHAMFER);
