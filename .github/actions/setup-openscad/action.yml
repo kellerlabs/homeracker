@@ -65,7 +65,7 @@ runs:
         fi
 
     - name: Cache OpenSCAD and libraries
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: bin/openscad
         key: openscad-${{ runner.os }}-${{ steps.resolve-scadm.outputs.version }}-${{ hashFiles('scadm.json') }}
