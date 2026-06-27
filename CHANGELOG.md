@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.12.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.1...homeracker-v3.12.2) (2026-06-27)
+
+
+### 🐛 Bug Fixes
+
+* **panel:** keep one uniform color when mount plates are removed ([#419](https://github.com/kellerlabs/homeracker/issues/419)) ([3fd37cc](https://github.com/kellerlabs/homeracker/commit/3fd37ccd29e9f72f2b3fa7f03a358e2638370d6f))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.745 ([#416](https://github.com/kellerlabs/homeracker/issues/416)) ([e7b62ca](https://github.com/kellerlabs/homeracker/commit/e7b62cafc43fbb4f25b1e3842f82db882affc2ee))
+* update dependency kellerlab-pre-commit-hooks to v0.3.7 ([#417](https://github.com/kellerlabs/homeracker/issues/417)) ([0193375](https://github.com/kellerlabs/homeracker/commit/01933759a918eba33ec7753d293f1032cab61f70))
+* update dependency openscad to v2026.06.21 ([#407](https://github.com/kellerlabs/homeracker/issues/407)) ([b5c40bf](https://github.com/kellerlabs/homeracker/commit/b5c40bf3180563025cf452fa3449a959508676e1))
+
+
+### 📚 Documentation
+
+* **skills:** add humanizer skill ([#414](https://github.com/kellerlabs/homeracker/issues/414)) ([bcc42ec](https://github.com/kellerlabs/homeracker/commit/bcc42ec7eb13b7afcebe868623cf5976f369f427))
+
 ## [3.12.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.0...homeracker-v3.12.1) (2026-06-21)
 
 
