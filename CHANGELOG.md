@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.12.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.2...homeracker-v3.12.3) (2026-06-27)
+
+
+### 🐛 Bug Fixes
+
+* **panel/split:** color uncolored cutters; fix lockpin cap manifold seam ([#420](https://github.com/kellerlabs/homeracker/issues/420)) ([7bb2fe5](https://github.com/kellerlabs/homeracker/commit/7bb2fe54a89b629d9aa0e29fc763abe74ff7bd55))
+
 ## [3.12.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.1...homeracker-v3.12.2) (2026-06-27)
 
 
