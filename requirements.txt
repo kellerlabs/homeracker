@@ -1,2 +1,2 @@
-kellerlab-pre-commit-hooks==0.3.6
+kellerlab-pre-commit-hooks==0.3.7
 markdown==3.10.2
