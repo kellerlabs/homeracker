@@ -99,6 +99,8 @@ def render_files(
 
     if max_workers is None:
         max_workers = os.cpu_count() or 1
+    elif max_workers < 1:
+        raise ValueError(f"--jobs must be at least 1, got {max_workers}")
 
     workers = min(max_workers, len(files))
     logger.info("Rendering %d file(s) with %d worker(s)", len(files), workers)

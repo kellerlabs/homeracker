@@ -4,8 +4,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from scadm.render import discover_flatten_files
+from scadm.render import discover_flatten_files, render_files
 
 
 class DiscoverFlattenFilesTests(unittest.TestCase):
@@ -165,6 +166,41 @@ class DiscoverFlattenFilesTests(unittest.TestCase):
             (root / "scadm.json").write_text("{invalid json", encoding="utf-8")
             with self.assertRaises(ValueError):
                 discover_flatten_files(root, source=True)
+
+
+class RenderFilesTests(unittest.TestCase):
+    @patch("scadm.render.render_file", return_value=True)
+    @patch("scadm.render.get_workspace_root", return_value=Path("/fake"))
+    def test_all_pass_returns_true(self, _mock_root, mock_render):
+        """Returns True when all renders succeed."""
+        files = [Path("a.scad"), Path("b.scad"), Path("c.scad")]
+        self.assertTrue(render_files(files, max_workers=2))
+        self.assertEqual(mock_render.call_count, 3)
+
+    @patch("scadm.render.render_file", side_effect=[True, False, True])
+    @patch("scadm.render.get_workspace_root", return_value=Path("/fake"))
+    def test_partial_failure_returns_false(self, _mock_root, _mock_render):
+        """Returns False when any render fails."""
+        files = [Path("a.scad"), Path("b.scad"), Path("c.scad")]
+        self.assertFalse(render_files(files, max_workers=1))
+
+    def test_zero_jobs_raises(self):
+        """Raises ValueError for max_workers=0."""
+        with self.assertRaises(ValueError, msg="--jobs must be at least 1"):
+            render_files([Path("a.scad")], workspace_root=Path("/fake"), max_workers=0)
+
+    def test_negative_jobs_raises(self):
+        """Raises ValueError for negative max_workers."""
+        with self.assertRaises(ValueError, msg="--jobs must be at least 1"):
+            render_files([Path("a.scad")], workspace_root=Path("/fake"), max_workers=-1)
+
+    @patch("scadm.render.render_file", return_value=True)
+    @patch("scadm.render.get_workspace_root", return_value=Path("/fake"))
+    def test_workers_capped_to_file_count(self, _mock_root, mock_render):
+        """Workers are capped to file count even if max_workers is higher."""
+        files = [Path("a.scad"), Path("b.scad")]
+        self.assertTrue(render_files(files, max_workers=100))
+        self.assertEqual(mock_render.call_count, 2)
 
 
 if __name__ == "__main__":
