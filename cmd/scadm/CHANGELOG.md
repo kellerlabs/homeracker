@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.9.0...scadm-v0.10.0) (2026-07-04)
+
+
+### ✨ Features
+
+* **scadm:** parallelize model rendering ([#428](https://github.com/kellerlabs/homeracker/issues/428)) ([dac9d50](https://github.com/kellerlabs/homeracker/commit/dac9d50fab3d5934904d8cae0714a890edd7d759))
+
 ## [0.9.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.8.0...scadm-v0.9.0) (2026-06-20)
 
 

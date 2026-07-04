@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.13.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.3...homeracker-v3.13.0) (2026-07-04)
+
+
+### ✨ Features
+
+* insta360 Link 2C Pro adapter for Elgato Prompter ([#427](https://github.com/kellerlabs/homeracker/issues/427)) ([adf7920](https://github.com/kellerlabs/homeracker/commit/adf7920f38f5658c589a5337603248711de26ead))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.746 ([#424](https://github.com/kellerlabs/homeracker/issues/424)) ([4fe34d9](https://github.com/kellerlabs/homeracker/commit/4fe34d969795744e4cbf9aef5c41a7fde729131a))
+* update dependency kellerlab-pre-commit-hooks to v0.3.8 ([#425](https://github.com/kellerlabs/homeracker/issues/425)) ([f94b356](https://github.com/kellerlabs/homeracker/commit/f94b356eb1f01f86f2a162089a303eb4dfafbaff))
+* update dependency openscad to v2026.07.01 ([#426](https://github.com/kellerlabs/homeracker/issues/426)) ([aef56e5](https://github.com/kellerlabs/homeracker/commit/aef56e5a9b83cfbb886637a47e81ed164156e9b3))
+* update pre-commit hooks ([#422](https://github.com/kellerlabs/homeracker/issues/422)) ([e7d025a](https://github.com/kellerlabs/homeracker/commit/e7d025a630485d59f0a42c09f4f4f651c2c9ba36))
+
 ## [3.12.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.2...homeracker-v3.12.3) (2026-06-27)
 
 
