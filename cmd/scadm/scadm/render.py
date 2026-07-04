@@ -4,6 +4,7 @@ Finds the bundled OpenSCAD binary, sets OPENSCADPATH to the installed libraries,
 and runs a render-to-STL to validate syntax and geometry.
 """
 
+import concurrent.futures
 import logging
 import os
 import shutil
@@ -78,12 +79,17 @@ def render_file(scad_file: Path, workspace_root: Optional[Path] = None) -> bool:
         output_file.unlink(missing_ok=True)
 
 
-def render_files(files: list[Path], workspace_root: Optional[Path] = None) -> bool:
-    """Render multiple .scad files.
+def render_files(
+    files: list[Path],
+    workspace_root: Optional[Path] = None,
+    max_workers: Optional[int] = None,
+) -> bool:
+    """Render multiple .scad files in parallel.
 
     Args:
         files: List of .scad file paths.
         workspace_root: Project root (auto-detected if None).
+        max_workers: Max parallel renders. Defaults to os.cpu_count().
 
     Returns:
         True if all renders succeeded.
@@ -91,10 +97,18 @@ def render_files(files: list[Path], workspace_root: Optional[Path] = None) -> bo
     if workspace_root is None:
         workspace_root = get_workspace_root()
 
+    if max_workers is None:
+        max_workers = os.cpu_count() or 1
+
+    workers = min(max_workers, len(files))
+    logger.info("Rendering %d file(s) with %d worker(s)", len(files), workers)
+
     failed = 0
-    for f in files:
-        if not render_file(f, workspace_root):
-            failed += 1
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {executor.submit(render_file, f, workspace_root): f for f in files}
+        for future in concurrent.futures.as_completed(futures):
+            if not future.result():
+                failed += 1
 
     if failed:
         logger.error("%d render(s) failed", failed)
