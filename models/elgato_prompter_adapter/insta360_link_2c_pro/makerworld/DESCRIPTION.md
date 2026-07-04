@@ -66,8 +66,8 @@ The camera is now perfectly aligned and ready for use.
 
 ## 📜 Changelog
 
-- **v1.0.0** - Initial release! 🎉
+- **04.07.2026** - Initial release! 🎉
 
 ## 👨‍💻 Source Code
 
-I am a strong believer in open source. You can find the raw OpenSCAD source files for this adapter on [GitHub in the HomeRacker repository](https://github.com/kellerlabs/homeracker/tree/main/models/elgato_prompter_adapter/insta360_link_2c_pro). Feel free to fork, remix, and contribute!
+I am a strong believer in open source. You can find the raw OpenSCAD source files for this adapter on [GitHub in the HomeRacker repository](https://github.com/kellerlabs/homeracker/tree/main/models/elgato_prompter_adapter/insta360_link_2c_pro). Feel free to fork, remix, and contribute! (MIT license)
