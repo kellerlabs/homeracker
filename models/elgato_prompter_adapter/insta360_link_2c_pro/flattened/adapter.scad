@@ -94,3 +94,4 @@ module mw_plate_1() {
 }
 
 mw_assembly_view();
+
