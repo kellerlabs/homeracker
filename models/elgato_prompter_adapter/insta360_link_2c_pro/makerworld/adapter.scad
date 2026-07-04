@@ -32,5 +32,12 @@ print_demo = false;
 
 $fn=100;
 
-color(HR_YELLOW)
-elgato_prompter_insta360_link_2c_pro_adapter(clearance=clearance, print_demo=print_demo);
+module mw_assembly_view() {
+  color(HR_YELLOW)
+  elgato_prompter_insta360_link_2c_pro_adapter(clearance=clearance, print_demo=print_demo);
+}
+
+module mw_plate_1() {
+  color(HR_YELLOW)
+  elgato_prompter_insta360_link_2c_pro_adapter(clearance=clearance, print_demo=print_demo);
+}
