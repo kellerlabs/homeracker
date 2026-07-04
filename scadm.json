@@ -16,6 +16,7 @@
     {"src": "models/gridfinity/parts", "dest": "models/gridfinity/flattened"},
     {"src": "models/pinpusher/parts", "dest": "models/pinpusher/flattened"},
     {"src": "models/rackmount_ears/parts", "dest": "models/rackmount_ears/flattened"},
-    {"src": "models/wallmount/parts", "dest": "models/wallmount/flattened"}
+    {"src": "models/wallmount/parts", "dest": "models/wallmount/flattened"},
+    {"src": "models/elgato_prompter_adapter/insta360_link_2c_pro/makerworld", "dest": "models/elgato_prompter_adapter/insta360_link_2c_pro/flattened"}
   ]
 }
