@@ -43,3 +43,4 @@ module mw_plate_1() {
   color(HR_YELLOW)
   elgato_prompter_insta360_link_2c_pro_adapter(clearance=clearance, print_demo=print_demo);
 }
+mw_assembly_view();
