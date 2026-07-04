@@ -17,8 +17,7 @@ created: 2026-07-04
 
 The assembly is straightforward and requires no extra hardware.
 
-> [!TIP]
-> **Material Recommendation**: While PLA works fine, I highly recommend using a hard TPU like **TPU68D** (such as Bambu Lab TPU for AMS in black). The fit is just as tight, but the rubber-like nature makes it much less "scratchy" when inserting the camera, and it provides noticeably better grip.
+> 💡 **Material Recommendation**: While PLA works fine, I highly recommend using a hard TPU like **TPU68D** (such as Bambu Lab TPU for AMS in black). The fit is just as tight, but the rubber-like nature makes it much less "scratchy" when inserting the camera, and it provides noticeably better grip.
 
 ### 1. Print the Demo Piece (Optional but Recommended)
 The provided print profile includes both the full adapter plate and the small demo piece on separate plates. I highly recommend printing just the demo piece first. This helps you verify that your printer's tolerances allow the camera to fit snugly without being too tight or too loose.
