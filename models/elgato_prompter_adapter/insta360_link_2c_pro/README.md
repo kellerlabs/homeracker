@@ -30,7 +30,13 @@ elgato_prompter_insta360_link_2c_pro_adapter(clearance=0.2, print_demo=false);
 
 | Part | Preview |
 |------|---------|
-| Adapter | <img src="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/models/elgato_prompter_adapter/insta360_link_2c_pro/adapter_iso.jpg" alt="Adapter ISO View" width="200"> |
+| Adapter | ![Adapter](makerworld/renders/adapter.png) |
+
+To generate or refresh previews:
+
+```bash
+scadm export-png models/elgato_prompter_adapter/insta360_link_2c_pro/makerworld/adapter.scad
+```
 
 ## 📝 License
 
