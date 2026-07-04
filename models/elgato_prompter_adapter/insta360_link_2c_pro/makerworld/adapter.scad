@@ -19,8 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-include <lib/adapter.scad>
-include <../../core/lib/constants.scad>
+include <../lib/adapter.scad>
+include <../../../core/lib/constants.scad>
 
 // tolerance to account for print inaccuracy
 clearance = 0.2;
