@@ -105,7 +105,7 @@ def _handle_render(args, render_parser):
         else:
             files = [f.resolve() for f in args.files]
 
-        sys.exit(0 if render_files(files) else 1)
+        sys.exit(0 if render_files(files, max_workers=args.jobs) else 1)
     except (FileNotFoundError, ValueError) as e:
         logger.error("%s", e)
         sys.exit(1)
@@ -192,6 +192,13 @@ def main():
     )
     render_parser.add_argument(
         "--flattened", action="store_true", help="Render flattened output files from scadm.json flatten dest dirs"
+    )
+    render_parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help="Number of parallel render workers (default: CPU count)",
     )
 
     # Export-PNG command

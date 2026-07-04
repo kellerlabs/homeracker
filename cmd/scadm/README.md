@@ -161,7 +161,12 @@ scadm render --source
 
 # Both at once
 scadm render --source --flattened
+
+# Control parallelism (default: number of CPU cores)
+scadm render --flattened -j 4
 ```
+
+Renders run in parallel by default, using one thread per CPU core. Use `-j`/`--jobs` to override the worker count (e.g. `-j 1` for sequential execution, `-j 4` to cap at 4 workers).
 
 The `--source` and `--flattened` flags discover files from `scadm.json` `"flatten"` entries automatically. They cannot be combined with explicit file arguments.
 
