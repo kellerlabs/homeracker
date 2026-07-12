@@ -93,8 +93,8 @@ module horizontal_rib_profile(
               color_this(debug_colors ? HR_WHITE : KL_CRATE_SECONDARY_COLOR)
               cuboid([width, depth, PRINTING_LAYER_WIDTH], rounding=_stacking_lip_radius, except=[TOP, BOTTOM]);
             } else if (rib_type == KL_CRATE_RIB_TYPE_BOTTOM) {
-              tag("remove") color(debug_colors ? HR_BLUE : KL_CRATE_SECONDARY_COLOR) edge_profile(BOTTOM) mask2d_chamfer(KL_CRATE_RIB_DEPTH / 2);
-              tag("remove") color(debug_colors ? HR_GREEN : KL_CRATE_SECONDARY_COLOR) corner_profile(BOTTOM, r=radius) mask2d_chamfer(KL_CRATE_RIB_DEPTH / 2);
+              tag("remove") color(debug_colors ? HR_BLUE : KL_CRATE_SECONDARY_COLOR) edge_profile(BOTTOM) mask2d_chamfer(KL_CRATE_RIB_DEPTH / 2  * sqrt(2));
+              tag("remove") color(debug_colors ? HR_GREEN : KL_CRATE_SECONDARY_COLOR) corner_profile(BOTTOM, r=radius) mask2d_chamfer(KL_CRATE_RIB_DEPTH / 2  * sqrt(2));
             }
           }
       children();
@@ -183,18 +183,16 @@ module crate(
           horizontal_rib_profile(_width_effective, _depth_effective, KL_CRATE_RIB_TYPE_BOTTOM, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
 
         // // Top rib
+        down(KL_CRATE_RIB_DEPTH/2)
         align(TOP, inside=true, overlap=KL_CRATE_RIB_DEPTH)
           horizontal_rib_profile(_width_effective, _depth_effective, KL_CRATE_RIB_TYPE_TOP, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
 
         // // Mid ribs
-
         for (i = [0:rib_count - 1]) {
           z = get_rib_mid_z_by_count(height_inner + KL_CRATE_BOTTOM_STRENGTH, rib_count, i);
-          echo("rib z-position: ", z, " for position ", i)
-            align(BOTTOM) {
-              up(z)
-                horizontal_rib_profile(_width_effective, _depth_effective, KL_CRATE_RIB_TYPE_MID, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
-            }
+          align(BOTTOM) {
+            up(z) horizontal_rib_profile(_width_effective, _depth_effective, KL_CRATE_RIB_TYPE_MID, debug_colors=debug_colors, chamfer_enabled=chamfer_enabled);
+          }
         }
       }
 }
