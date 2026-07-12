@@ -38,10 +38,18 @@ include <../lib/constants.scad>
 
 // all units in mm
 
-module binbase_cell() {
-  prismoid(GRIDFINITY_BB_BOTTOM_LIP_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_SIDE_LENGTH, rounding1 = GRIDFINITY_BB_BOTTOM_LIP_ROUNDING, rounding2 = GRIDFINITY_BB_MID_PART_ROUNDING, h = GRIDFINITY_BB_BOTTOM_LIP_HEIGHT)
-    attach(TOP, BOTTOM) cuboid([GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_HEIGHT], rounding = GRIDFINITY_BB_MID_PART_ROUNDING, except = [BOTTOM, TOP])
-      attach(TOP, BOTTOM) prismoid(GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_TOP_PART_SIDE_LENGTH, rounding1 = GRIDFINITY_BB_MID_PART_ROUNDING, rounding2 = GRIDFINITY_BB_TOP_PART_ROUNDING, h = GRIDFINITY_BB_TOP_PART_HEIGHT);
+module binbase_cell(anchor = CENTER, spin = 0, orient = UP) {
+  width = GRIDFINITY_BASE_UNIT;
+  depth = GRIDFINITY_BASE_UNIT;
+  height = GRIDFINITY_BB_HEIGHT;
+
+  attachable(anchor, spin, orient, size = [width, depth, height]) {
+    down(height / 2)
+      prismoid(GRIDFINITY_BB_BOTTOM_LIP_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_SIDE_LENGTH, rounding1 = GRIDFINITY_BB_BOTTOM_LIP_ROUNDING, rounding2 = GRIDFINITY_BB_MID_PART_ROUNDING, h = GRIDFINITY_BB_BOTTOM_LIP_HEIGHT)
+        attach(TOP, BOTTOM) cuboid([GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_HEIGHT], rounding = GRIDFINITY_BB_MID_PART_ROUNDING, except = [BOTTOM, TOP])
+          attach(TOP, BOTTOM) prismoid(GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_TOP_PART_SIDE_LENGTH, rounding1 = GRIDFINITY_BB_MID_PART_ROUNDING, rounding2 = GRIDFINITY_BB_TOP_PART_ROUNDING, h = GRIDFINITY_BB_TOP_PART_HEIGHT);
+    children();
+  }
 }
 
 /** Bin Base Grid
@@ -51,7 +59,9 @@ module binbase_cell() {
   @param units_x Number of grid units in X direction (1 unit = 42mm)
   @param units_y Number of grid units in Y direction (1 unit = 42mm)
 */
-module binbase(units_x = 1, units_y = 1, anchor = CENTER, spin = 0, orient = UP) {
+module binbase(units_x = 1, units_y = 1,
+  anchor = CENTER, spin = 0, orient = UP
+) {
   assert(is_int(units_x), "units_x must be an integer");
   assert(is_int(units_y), "units_y must be an integer");
   assert(units_x >= 1, "units_x must be at least 1");
@@ -74,11 +84,11 @@ module binbase_with_topplate(units_x = 1, units_y = 1, topplate_thickness = 2, a
   height_total = GRIDFINITY_BB_HEIGHT + topplate_thickness;
 
   attachable(anchor, spin, orient, size = [length_x, length_y, height_total]) {
-    down(height_total / 2)
-      binbase(units_x, units_y) attach(TOP, BOTTOM)
+    down(topplate_thickness / 2)
+      binbase(units_x, units_y) {
         attach(TOP, BOTTOM)
-          cuboid([length_x, length_y, topplate_thickness],
-            rounding = GRIDFINITY_BB_TOP_PART_ROUNDING, except = [BOTTOM, TOP]);
+          cuboid([length_x, length_y, topplate_thickness], rounding = GRIDFINITY_BB_TOP_PART_ROUNDING, except = [BOTTOM, TOP]);
+      }
     children();
   }
 }
