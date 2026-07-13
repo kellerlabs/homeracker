@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.13.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.0...homeracker-v3.13.1) (2026-07-11)
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.747 ([#429](https://github.com/kellerlabs/homeracker/issues/429)) ([dc68574](https://github.com/kellerlabs/homeracker/commit/dc685747f6ae1e57b5b3571ee7d9c2edb7c6309f))
+* update dependency openscad to v2026.07.09 ([#430](https://github.com/kellerlabs/homeracker/issues/430)) ([57e8c0c](https://github.com/kellerlabs/homeracker/commit/57e8c0c9dfd352331456ddb605fef2f108e60223))
+
 ## [3.13.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.12.3...homeracker-v3.13.0) (2026-07-04)
 
 
