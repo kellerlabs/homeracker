@@ -1,0 +1,33 @@
+---
+name: Mutation Tests
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'  # Weekly: Monday 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadm -r requirements.txt
+
+      - name: Run mutation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./cmd/test/test-mutmut.sh
