@@ -36,22 +36,11 @@ include <../../core/lib/constants.scad>
 include <../lib/constants.scad>
 
 // all units in mm
-BP_BOTTOM_LIP_SIDE_LENGTH = 36.3; // mid part side length - bottom lip height * 2
-BP_BOTTOM_LIP_ROUNDING = 1.15; // radius
-BP_BOTTOM_LIP_HEIGHT = 0.7;
-
-BP_MID_PART_SIDE_LENGTH = 37.7; // top side length - top height * 2
-BP_MID_PART_ROUNDING = 1.85; // radius
-BP_MID_PART_HEIGHT = 1.8;
-
-BP_TOP_PART_SIDE_LENGTH = GRIDFINITY_BASE_UNIT;
-BP_TOP_PART_ROUNDING = 4; // radius
-BP_TOP_PART_HEIGHT = 2.15;
 
 module baseplate_cutout() {
-  prismoid(BP_BOTTOM_LIP_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, rounding1=BP_BOTTOM_LIP_ROUNDING, rounding2=BP_MID_PART_ROUNDING, h=BP_BOTTOM_LIP_HEIGHT)
-    attach(TOP,BOTTOM) cuboid([BP_MID_PART_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, BP_MID_PART_HEIGHT], rounding=BP_MID_PART_ROUNDING, except=[BOTTOM,TOP])
-    attach(TOP,BOTTOM) prismoid(BP_MID_PART_SIDE_LENGTH, BP_TOP_PART_SIDE_LENGTH, rounding1=BP_MID_PART_ROUNDING, rounding2=BP_TOP_PART_ROUNDING, h=BP_TOP_PART_HEIGHT);
+  prismoid(GRIDFINITY_BP_BOTTOM_LIP_SIDE_LENGTH, GRIDFINITY_BP_MID_PART_SIDE_LENGTH, rounding1=GRIDFINITY_BP_BOTTOM_LIP_ROUNDING, rounding2=GRIDFINITY_BP_MID_PART_ROUNDING, h=GRIDFINITY_BP_BOTTOM_LIP_HEIGHT)
+    attach(TOP,BOTTOM) cuboid([GRIDFINITY_BP_MID_PART_SIDE_LENGTH, GRIDFINITY_BP_MID_PART_SIDE_LENGTH, GRIDFINITY_BP_MID_PART_HEIGHT], rounding=GRIDFINITY_BP_MID_PART_ROUNDING, except=[BOTTOM,TOP])
+    attach(TOP,BOTTOM) prismoid(GRIDFINITY_BP_MID_PART_SIDE_LENGTH, GRIDFINITY_BP_TOP_PART_SIDE_LENGTH, rounding1=GRIDFINITY_BP_MID_PART_ROUNDING, rounding2=GRIDFINITY_BP_TOP_PART_ROUNDING, h=GRIDFINITY_BP_TOP_PART_HEIGHT);
 }
 
 module baseplate(units_x=1, units_y=1) {
@@ -60,16 +49,16 @@ module baseplate(units_x=1, units_y=1) {
   assert(units_x >= 1, "units_x must be at least 1");
   assert(units_y >= 1, "units_y must be at least 1");
   // total height of the baseplate minus two layer heights for better printability. Avoids sharp top edges.
-  BASEPLATE_HEIGHT = BP_BOTTOM_LIP_HEIGHT+BP_MID_PART_HEIGHT+BP_TOP_PART_HEIGHT-PRINTING_LAYER_HEIGHT*3;
-  baseplate_dimensions = [BP_TOP_PART_SIDE_LENGTH*units_x, BP_TOP_PART_SIDE_LENGTH*units_y, BASEPLATE_HEIGHT];
+  BASEPLATE_HEIGHT = GRIDFINITY_BP_BOTTOM_LIP_HEIGHT+GRIDFINITY_BP_MID_PART_HEIGHT+GRIDFINITY_BP_TOP_PART_HEIGHT-PRINTING_LAYER_HEIGHT*3;
+  baseplate_dimensions = [GRIDFINITY_BP_TOP_PART_SIDE_LENGTH*units_x, GRIDFINITY_BP_TOP_PART_SIDE_LENGTH*units_y, BASEPLATE_HEIGHT];
 
   // went with difference() instead of diff() to increase performance
   difference() {
     // Single baseplate block, anchored to bottom
-    cuboid(baseplate_dimensions, rounding=BP_TOP_PART_ROUNDING, except=[TOP,BOTTOM], anchor=BOTTOM);
+    cuboid(baseplate_dimensions, rounding=GRIDFINITY_BP_TOP_PART_ROUNDING, except=[TOP,BOTTOM], anchor=BOTTOM);
 
     // Grid of cutouts, also anchored to bottom for alignment
-    grid_copies(n=[units_x, units_y], spacing=BP_TOP_PART_SIDE_LENGTH)
+    grid_copies(n=[units_x, units_y], spacing=GRIDFINITY_BP_TOP_PART_SIDE_LENGTH)
       baseplate_cutout();
   }
 }
