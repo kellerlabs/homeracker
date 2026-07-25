@@ -82,13 +82,15 @@ module horizontal_rib_profile(
         _stacking_lip_width = KL_CRATE_RIB_DEPTH / 2 - KL_CRATE_GF_TOLERANCE / 2;
         _stacking_lip_radius = radius;
         _stacking_lip_hypothenusis = _stacking_lip_width * sqrt(2);
+        // cutout to create a stacking lip
         tag("remove")
-          tag_scope("lip") align(TOP, inside=true, overlap=HR_EPSILON)
-          color_this(debug_colors ? HR_RED : KL_CRATE_SECONDARY_COLOR) diff()
-          cuboid([width, depth, _stacking_lip_width], rounding=_stacking_lip_radius, except=[TOP, BOTTOM]) {
-            tag("remove") color(debug_colors ? HR_GREEN : KL_CRATE_SECONDARY_COLOR) edge_profile(BOTTOM) mask2d_chamfer(_stacking_lip_hypothenusis);
-            tag("remove") color(debug_colors ? HR_BLUE : KL_CRATE_SECONDARY_COLOR) corner_profile(BOTTOM, r=_stacking_lip_radius) mask2d_chamfer(_stacking_lip_hypothenusis);
-          }
+        tag_scope("lip") align(TOP, inside=true, overlap=HR_EPSILON)
+        color_this(debug_colors ? HR_RED : KL_CRATE_SECONDARY_COLOR) diff()
+        cuboid([width, depth, _stacking_lip_width], rounding=_stacking_lip_radius, except=[TOP, BOTTOM]) {
+          tag("remove") color(debug_colors ? HR_GREEN : KL_CRATE_SECONDARY_COLOR) edge_profile(BOTTOM) mask2d_chamfer(_stacking_lip_hypothenusis);
+          tag("remove") color(debug_colors ? HR_BLUE : KL_CRATE_SECONDARY_COLOR) corner_profile(BOTTOM, r=_stacking_lip_radius) mask2d_chamfer(_stacking_lip_hypothenusis);
+        }
+        // remove top part of the lip
         tag("remove") align(TOP, inside=true)
         color_this(debug_colors ? HR_WHITE : KL_CRATE_SECONDARY_COLOR)
         cuboid([width, depth, PRINTING_LAYER_WIDTH], rounding=_stacking_lip_radius, except=[TOP, BOTTOM]);
@@ -114,9 +116,10 @@ module vertical_edge_rib(
   attachable(anchor=anchor, spin=spin, orient=orient, size=[radius, radius, height]){
     diff()
     cuboid([radius,radius,height], rounding=radius,edges=[FRONT+LEFT]){
+      right(HR_EPSILON) back(HR_EPSILON)
       align(BACK+RIGHT,inside=true)
       tag("remove")
-      cuboid([KL_CRATE_CORNER_INNER_RADIUS,KL_CRATE_CORNER_INNER_RADIUS,height+HR_EPSILON], rounding=KL_CRATE_CORNER_INNER_RADIUS,edges=[FRONT+LEFT]);
+      cuboid([KL_CRATE_CORNER_INNER_RADIUS+HR_EPSILON,KL_CRATE_CORNER_INNER_RADIUS+HR_EPSILON,height+HR_EPSILON], rounding=KL_CRATE_CORNER_INNER_RADIUS,edges=[FRONT+LEFT]);
     }
     children();
   }
@@ -244,11 +247,9 @@ module crate(
     bottom_strength=bottom_strength, horizontal_rib_divider=horizontal_rib_divider,
     debug_colors=debug_colors, chamfer_enabled=chamfer_enabled
   ) {
-
     up(bottom_strength) attach(FRONT+LEFT,FRONT+LEFT,inside=true) vertical_edge_rib(height = height_inner-KL_CRATE_RIB_STRENGTH);
     up(bottom_strength) attach(FRONT+RIGHT,FRONT+LEFT,inside=true) vertical_edge_rib(height = height_inner-KL_CRATE_RIB_STRENGTH);
     up(bottom_strength) attach(BACK+LEFT,FRONT+LEFT,inside=true) vertical_edge_rib(height = height_inner-KL_CRATE_RIB_STRENGTH);
     up(bottom_strength) attach(BACK+RIGHT,FRONT+LEFT,inside=true) vertical_edge_rib(height = height_inner-KL_CRATE_RIB_STRENGTH);
   }
-
 }
