@@ -32,8 +32,10 @@ include <../../core/lib/constants.scad>
 
 width=50;
 depth=50;
+height=2;
 side_length=5;
 wall_strength=2;
+vent_type=0; // [0:Hex,1:Cheesegrater]
 
 /** 3D Hexagon Geometry
  * Creates a single solid 3D hexagon pointing "up" (Z axis).
@@ -123,4 +125,40 @@ module hexgrid(width, depth, height, side_length=8, wall_strength=2,
 }
 
 
-hexgrid(width=width,depth=depth,height=2, side_length=side_length, wall_strength=wall_strength, ghost=true) show_anchors();
+HR_VENT_TYPE_HEXAGON=0;
+HR_VENT_TYPE_CHEESEGRATER=1;
+module vent(width,depth,height=2, side_length, wall_strength, vent_type=HR_VENT_TYPE_HEXAGON){
+
+  intersection(){
+    cuboid([width,depth,height]);
+    if(vent_type == HR_VENT_TYPE_HEXAGON) {
+      hexgrid(width = width, depth = depth, height = height+HR_EPSILON, side_length=side_length, wall_strength=wall_strength, ghost=false);
+    } else if(vent_type == HR_VENT_TYPE_CHEESEGRATER) {
+       r_flat = side_length * sqrt(3) / 2;
+       spacing = 2 * r_flat + wall_strength;
+       shift_x = (spacing * sqrt(3) / 2) / 3;
+       shift_y = spacing / 2;
+
+       down(height/4) {
+         hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, ghost=false);
+         up(height/2) right(shift_x) back(shift_y)
+           hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, ghost=false);
+       }
+    }
+  }
+
+
+
+}
+
+//color_this(HR_YELLOW)
+//cuboid([width+5,depth+5,height]);
+
+
+//hexgrid(width=width,depth=depth,height=height, side_length=side_length, wall_strength=wall_strength, ghost=true) show_anchors();
+
+diff()
+color_this(HR_YELLOW)
+cuboid([width+5,depth+5,height]){
+  tag("remove") vent(width=width,depth=depth,height=height+HR_EPSILON,side_length=side_length,wall_strength=wall_strength,vent_type=vent_type);
+}
