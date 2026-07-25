@@ -1,7 +1,7 @@
 {
   "openscad": {
     "type": "nightly",
-    "version": "2026.07.20"
+    "version": "2026.07.24"
   },
   "dependencies": [
     {
