@@ -29,6 +29,23 @@
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
 
+
+width=50;
+depth=50;
+side_length=5;
+wall_strength=2;
+
+/** 3D Hexagon Geometry
+ * Creates a single solid 3D hexagon pointing "up" (Z axis).
+ * The hexagon is inherently oriented with flat faces pointing Left/Right,
+ * and sharp corners pointing Front/Back (Y axis).
+ * Exposes custom named anchors ("face_back_right", "face_back", etc.)
+ * corresponding to its 6 flat sides for precise neighbor attachment.
+ *
+ * side_length      The length of a single hexagon edge
+ * height           The Z-axis height of the extruded hexagon
+ * chamfer_enabled  If true, applies a small edge break (chamfer) to the top/bottom faces
+ */
 module hexagon3d(side_length, height,
   anchor=CENTER, spin=0, orient=UP,
   debug_colors=false, chamfer_enabled=true) {
@@ -64,36 +81,46 @@ module hexagon3d(side_length, height,
   }
 }
 
-module hexgrid(width, depth, height, side_length=8, wall_strength=2) {
+
+/** Hexagon Grid Matrix
+ * Generates an interlocking 2D honeycomb grid of solid 3D hexagons that completely fills
+ * a given [width, depth] boundary box. Used to cut a vent pattern out of a solid panel.
+ * The bounding box math guarantees that all edge-cases are fully covered.
+ *
+ * width            The X-axis bounding dimension
+ * depth            The Y-axis bounding dimension
+ * height           The Z-axis height (thickness) of the grid
+ * side_length      The edge length of individual hexagons
+ * wall_strength    The distance between adjacent hexagon flat faces (the remaining solid wall when subtracted)
+ * ghost            If true, overlays a transparent bounding box (useful for debugging bounds logic)
+ */
+module hexgrid(width, depth, height, side_length=8, wall_strength=2,
+  anchor=CENTER, spin=0, orient=UP,
+  debug_colors=false,
+  ghost=false) {
+
   // Distance from center to flat face
   r_flat = side_length * sqrt(3) / 2;
   // Center-to-center distance between adjacent hexes sharing a wall
   spacing = 2 * r_flat + wall_strength;
 
-  // X distance between columns and Y distance between rows when stagger="alt"
-  dx = spacing * sqrt(3) / 2;
-  dy = spacing;
-
-  // Calculate required amount of hexes to fully cover width and depth
-  // Adding +2 ensures the grid safely overhangs the boundaries for reliable cutting
-  cols = ceil(width / dx) + 2;
-  rows = ceil(depth / dy) + 2;
-
-  // Center offsets to keep the grid centered at [0,0]
-  x_offset = (cols - 1) * dx / 2;
-  y_offset = ((rows - 1) * dy + dy / 2) / 2;
-
-  // Manually generate the staggered grid to ensure correct 30°/90° alignment
-  for (col = [0 : cols - 1]) {
-    for (row = [0 : rows - 1]) {
-      x = col * dx - x_offset;
-      y = row * dy + (col % 2 == 1 ? dy / 2 : 0) - y_offset;
-      translate([x, y, 0])
-        hexagon3d(side_length=side_length, height=height);
+  attachable(anchor=anchor, spin=spin, orient=orient, size=[width, depth, height]) {
+    union() {
+      // By supplying a size slightly larger than the bounds, grid_copies handles the matrix natively.
+      // We use 0.75 * spacing for both width and depth to tightly cover edge-cases
+      // without excessive overshoots, maintaining a clean declarative BOSL2 implementation.
+      zrot(90)
+        grid_copies(spacing=spacing, size=[depth + 0.75*spacing, width + 0.75*spacing], stagger=true) {
+          zrot(-90)
+            hexagon3d(side_length=side_length, height=height);
+        }
+      if (ghost) {
+        %cuboid([width, depth, height]);
+      }
     }
+    children();
   }
 }
 
-hexgrid(width=50,depth=40,height=2, side_length=5, wall_strength=2);
 
-//hexagon3d(side_length=20, height=5) show_anchors();
+hexgrid(width=width,depth=depth,height=2, side_length=side_length, wall_strength=wall_strength, ghost=true) show_anchors();
