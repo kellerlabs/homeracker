@@ -36,9 +36,14 @@ height=2;
 side_length=5;
 wall_strength=2;
 vent_type=0; // [0:Hex,1:Cheesegrater]
+cheesegrater_rounding=0;
+debug_colors=false;
 
 /* [Hidden] */
 $fn=100;
+
+HR_VENT_PRIMARY_COLOR=HR_CHARCOAL;
+HR_VENT_SECONDARY_COLOR=HR_YELLOW;
 
 /** 3D Hexagon Geometry
  * Creates a single solid 3D hexagon pointing "up" (Z axis).
@@ -141,26 +146,44 @@ HR_VENT_TYPE_CHEESEGRATER=1;
  * wall_strength    The solid wall thickness between hexes
  * vent_type        HR_VENT_TYPE_HEXAGON (0) or HR_VENT_TYPE_CHEESEGRATER (1)
  */
-module vent(width, depth, height=2, side_length, wall_strength, vent_type=HR_VENT_TYPE_HEXAGON) {
+module vent(width, depth, height=2, side_length, wall_strength, vent_type=HR_VENT_TYPE_HEXAGON,
+  cheesegrater_rounding=0,
+  anchor=CENTER, spin=0, orient=UP,
+  debug_colors=false
+  ) {
 
-  intersection(){
-    cuboid([width,depth,height]);
+  attachable(size=[width, depth, height], anchor=anchor, spin=spin, orient=orient) {
+    tag_scope("vent")
     if(vent_type == HR_VENT_TYPE_HEXAGON) {
-      hexgrid(width = width, depth = depth, height = height+HR_EPSILON, side_length=side_length, wall_strength=wall_strength, ghost=false);
+      diff()
+      cuboid([width,depth,height]){
+        if(vent_type == HR_VENT_TYPE_HEXAGON) {
+          color(debug_colors ? HR_GREEN : HR_VENT_PRIMARY_COLOR)
+          tag("remove") hexgrid(width = width, depth = depth, height = height+HR_EPSILON, side_length=side_length, wall_strength=wall_strength, ghost=false);
+        }
+      }
     } else if(vent_type == HR_VENT_TYPE_CHEESEGRATER) {
-       r_flat = side_length * sqrt(3) / 2;
-       spacing = 2 * r_flat + wall_strength;
-       shift_x = (spacing * sqrt(3) / 2) / 3;
-       shift_y = spacing / 2;
-       rounding = 5;
+      r_flat = side_length * sqrt(3) / 2;
+      spacing = 2 * r_flat + wall_strength;
+      shift_x = (spacing * sqrt(3) / 2) / 3;
+      shift_y = spacing / 2;
 
-       down(height/4) {
-         hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, rounding=rounding, ghost=false);
-         up(height/2) right(shift_x) back(shift_y)
-           hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, rounding=rounding, ghost=false);
-       }
+      diff()
+      color(debug_colors ? HR_GREEN : HR_VENT_PRIMARY_COLOR)
+      cuboid([width,depth,height]){
+        tag("remove") hexgrid(width = width + spacing, depth = depth + spacing, height = height + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, rounding=cheesegrater_rounding, ghost=false);
+      }
+
+      diff() down(height/4)
+      color(debug_colors ? HR_RED : HR_VENT_SECONDARY_COLOR)
+      cuboid([width,depth,height/2]){
+        tag("remove") right(shift_x) back(shift_y)
+        hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, rounding=cheesegrater_rounding, ghost=false);
+      }
     }
+    children();
   }
+
 }
 
 //color_this(HR_YELLOW)
@@ -170,7 +193,12 @@ module vent(width, depth, height=2, side_length, wall_strength, vent_type=HR_VEN
 //hexgrid(width=width,depth=depth,height=height, side_length=side_length, wall_strength=wall_strength, ghost=true) show_anchors();
 
 diff()
-color_this(HR_YELLOW)
+color_this(debug_colors ? HR_BLUE : HR_VENT_PRIMARY_COLOR)
 cuboid([width+5,depth+5,height]){
-  tag("remove") vent(width=width,depth=depth,height=height+HR_EPSILON,side_length=side_length,wall_strength=wall_strength,vent_type=vent_type);
+  tag("remove") color_this(HR_YELLOW) cuboid([width,depth,height+HR_EPSILON]);
+  tag("keep") vent(width=width,depth=depth,height=height+HR_EPSILON,side_length=side_length,wall_strength=wall_strength,vent_type=vent_type, cheesegrater_rounding=cheesegrater_rounding, debug_colors=debug_colors);
 }
+
+
+// vent(width=width,depth=depth,height=height+HR_EPSILON,side_length=side_length,wall_strength=wall_strength,vent_type=vent_type,
+//   debug_colors=debug_colors) show_anchors();
