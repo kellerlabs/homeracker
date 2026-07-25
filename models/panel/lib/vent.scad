@@ -37,6 +37,9 @@ side_length=5;
 wall_strength=2;
 vent_type=0; // [0:Hex,1:Cheesegrater]
 
+/* [Hidden] */
+$fn=100;
+
 /** 3D Hexagon Geometry
  * Creates a single solid 3D hexagon pointing "up" (Z axis).
  * The hexagon is inherently oriented with flat faces pointing Left/Right,
@@ -46,9 +49,10 @@ vent_type=0; // [0:Hex,1:Cheesegrater]
  *
  * side_length      The length of a single hexagon edge
  * height           The Z-axis height of the extruded hexagon
+ * rounding         Radius for rounding the 2D corners of the hexagon (default 0)
  * chamfer_enabled  If true, applies a small edge break (chamfer) to the top/bottom faces
  */
-module hexagon3d(side_length, height,
+module hexagon3d(side_length, height, rounding=0,
   anchor=CENTER, spin=0, orient=UP,
   debug_colors=false, chamfer_enabled=true) {
 
@@ -77,7 +81,7 @@ module hexagon3d(side_length, height,
 
   attachable(anchor=anchor, spin=spin, orient=orient, size=size, anchors=face_anchors) {
     linear_extrude(h=height, center=true) {
-      hexagon(side=side_length);
+      hexagon(side=side_length, rounding=rounding);
     }
     children();
   }
@@ -94,9 +98,10 @@ module hexagon3d(side_length, height,
  * height           The Z-axis height (thickness) of the grid
  * side_length      The edge length of individual hexagons
  * wall_strength    The distance between adjacent hexagon flat faces (the remaining solid wall when subtracted)
+ * rounding         Radius for rounding the 2D corners of the hexagon (default 0)
  * ghost            If true, overlays a transparent bounding box (useful for debugging bounds logic)
  */
-module hexgrid(width, depth, height, side_length=8, wall_strength=2,
+module hexgrid(width, depth, height, side_length=8, wall_strength=2, rounding=0,
   anchor=CENTER, spin=0, orient=UP,
   debug_colors=false,
   ghost=false) {
@@ -114,7 +119,7 @@ module hexgrid(width, depth, height, side_length=8, wall_strength=2,
       zrot(90)
         grid_copies(spacing=spacing, size=[depth + 0.75*spacing, width + 0.75*spacing], stagger=true) {
           zrot(-90)
-            hexagon3d(side_length=side_length, height=height);
+            hexagon3d(side_length=side_length, height=height, rounding=rounding);
         }
       if (ghost) {
         %cuboid([width, depth, height]);
@@ -127,7 +132,16 @@ module hexgrid(width, depth, height, side_length=8, wall_strength=2,
 
 HR_VENT_TYPE_HEXAGON=0;
 HR_VENT_TYPE_CHEESEGRATER=1;
-module vent(width,depth,height=2, side_length, wall_strength, vent_type=HR_VENT_TYPE_HEXAGON){
+
+/** Vent Module
+ * width            The X-axis bounding dimension
+ * depth            The Y-axis bounding dimension
+ * height           The Z-axis height (thickness) of the vent
+ * side_length      The edge length of individual hexagons
+ * wall_strength    The solid wall thickness between hexes
+ * vent_type        HR_VENT_TYPE_HEXAGON (0) or HR_VENT_TYPE_CHEESEGRATER (1)
+ */
+module vent(width, depth, height=2, side_length, wall_strength, vent_type=HR_VENT_TYPE_HEXAGON) {
 
   intersection(){
     cuboid([width,depth,height]);
@@ -138,17 +152,15 @@ module vent(width,depth,height=2, side_length, wall_strength, vent_type=HR_VENT_
        spacing = 2 * r_flat + wall_strength;
        shift_x = (spacing * sqrt(3) / 2) / 3;
        shift_y = spacing / 2;
+       rounding = 5;
 
        down(height/4) {
-         hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, ghost=false);
+         hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, rounding=rounding, ghost=false);
          up(height/2) right(shift_x) back(shift_y)
-           hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, ghost=false);
+           hexgrid(width = width + spacing, depth = depth + spacing, height = height/2 + HR_EPSILON, side_length=side_length, wall_strength=wall_strength, rounding=rounding, ghost=false);
        }
     }
   }
-
-
-
 }
 
 //color_this(HR_YELLOW)
