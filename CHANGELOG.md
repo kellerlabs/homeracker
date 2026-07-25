@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.13.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.2...homeracker-v3.13.3) (2026-07-25)
+
+
+### 📦 Dependencies
+
+* update dependency openscad to v2026.07.20 ([#435](https://github.com/kellerlabs/homeracker/issues/435)) ([58676af](https://github.com/kellerlabs/homeracker/commit/58676af34e886960d041f92402cc71ad2678e4ab))
+* update dependency openscad to v2026.07.24 ([#438](https://github.com/kellerlabs/homeracker/issues/438)) ([2bc930c](https://github.com/kellerlabs/homeracker/commit/2bc930cf2b221e337f321f698aeed4c5b29f7a3a))
+
 ## [3.13.2](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.1...homeracker-v3.13.2) (2026-07-18)
 
 

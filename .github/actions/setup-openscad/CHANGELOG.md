@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.1.1...setup-openscad-v2.1.2) (2026-07-25)
+
+
+### 📦 Dependencies
+
+* update actions/setup-python action to v7 ([#436](https://github.com/kellerlabs/homeracker/issues/436)) ([6a818af](https://github.com/kellerlabs/homeracker/commit/6a818afca77ba8678523bf30a4c3cbb71bea729b))
+
 ## [2.1.1](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.1.0...setup-openscad-v2.1.1) (2026-06-27)
 
 
