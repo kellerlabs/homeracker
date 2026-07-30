@@ -61,3 +61,18 @@ python -m pytest tests/ -m "integration and not slow" -v
 - Adding or modifying a CLI subcommand → add/update integration test.
 - Changing `scadm.json` config schema → update config-dependent tests.
 - Changing installer/resolver behavior → update relevant slow tests.
+
+## Code Coverage
+
+- Enforced via `pytest-cov` with a ratcheting threshold in `cmd/scadm/.coverage-threshold`.
+- Run locally: `./cmd/test/test-coverage.sh` (fails below threshold).
+- Generate HTML report: `./cmd/test/test-coverage.sh --report` (opens `htmlcov/`).
+- CI: `.github/workflows/coverage.yml` runs on PRs and main pushes.
+- Threshold only increases — never lower it manually.
+
+## Mutation Testing
+
+- Uses `mutmut` to validate test quality by introducing code mutations.
+- Run locally: `./cmd/test/test-mutmut.sh`.
+- CI: `.github/workflows/mutation-tests.yml` runs weekly.
+- See [ADR-002](../../docs/decisions/ADR-002-code-coverage-mutation-testing.md) for rationale.
