@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.13.4](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.3...homeracker-v3.13.4) (2026-08-02)
+
+
+### 📦 Dependencies
+
+* update dependency kellerlab-pre-commit-hooks to v0.3.9 ([#439](https://github.com/kellerlabs/homeracker/issues/439)) ([b0501bf](https://github.com/kellerlabs/homeracker/commit/b0501bf4d1d80b8a4c4e2e93b0b83a08a7c0d753))
+* update dependency markdown to v3.10.3 ([#440](https://github.com/kellerlabs/homeracker/issues/440)) ([7661fc4](https://github.com/kellerlabs/homeracker/commit/7661fc461be1830fe1d3127b7aa1f6058aa03084))
+* update dependency openscad to v2026.07.26 ([#441](https://github.com/kellerlabs/homeracker/issues/441)) ([70411b5](https://github.com/kellerlabs/homeracker/commit/70411b53418b7d37a4f03054af5e7333a57ac370))
+* update pre-commit hook renovatebot/pre-commit-hooks to v44 ([#442](https://github.com/kellerlabs/homeracker/issues/442)) ([865aeb7](https://github.com/kellerlabs/homeracker/commit/865aeb764670797f72b1681bf02206ea674b45ba))
+
 ## [3.13.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.2...homeracker-v3.13.3) (2026-07-25)
 
 
