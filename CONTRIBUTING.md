@@ -215,6 +215,21 @@ Releases are automated using Camunda's GitHub actions from [infra-global-github-
 5. Push: `git push origin feature/my-feature`
 6. Create PR with description and screenshots
 
+### 🔭 Preview Deployments
+
+A PR touching `site/` or `configurator/` is published at `https://homeracker.org/preview/pr-<number>/` and a bot comments the link. It rebuilds on every push and disappears when the PR closes.
+
+To preview a PR that touches neither path, add the `deploy-preview` label (e.g. if you want to see your new model in the catalog).
+
+Previews come from branches in this repository only. A PR from a fork never gets one, because a preview serves its author's HTML and JavaScript from the live domain.
+
+Since previews are served from a subpath, never write a root-absolute internal link. Use `import.meta.env.BASE_URL` in components and client scripts, and pass the base explicitly into anything that runs at build time in Node, such as the rehype plugins in `site/src/lib/`. To check a subpath build locally:
+
+```sh
+cd site
+SITE_BASE=/preview/pr-999/ npm run build
+```
+
 ## 📂 Project Structure
 
 ```

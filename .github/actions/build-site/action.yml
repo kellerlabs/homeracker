@@ -1,0 +1,58 @@
+---
+name: Build Site
+description: >
+  Export the OpenSCAD part meshes (cached on the model sources) and build the Astro site
+  into site/dist. Requires the repository to be checked out already.
+
+inputs:
+  base:
+    description: >
+      Mount point for the build, with leading and trailing slash (e.g. /preview/pr-42/).
+      Defaults to the site root.
+    required: false
+    default: /
+
+runs:
+  using: composite
+  steps:
+    - name: Setup OpenSCAD
+      uses: ./.github/actions/setup-openscad
+      with:
+        scadm-source: cmd/scadm
+
+    - name: Setup Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24
+        cache: npm
+        cache-dependency-path: site/package-lock.json
+
+    - name: Restore part meshes
+      id: parts
+      uses: actions/cache@v6
+      with:
+        path: site/public/parts
+        key: parts-${{ hashFiles('models/**/*.scad', 'site/scripts/scad/*.scad', 'site/scripts/export-parts.mjs') }}
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: site
+      run: npm ci
+
+    # Several minutes of OpenSCAD on a miss, skipped entirely on a hit. PARTS_REQUIRED makes a
+    # missing OpenSCAD fatal rather than silently dropping the site to schematic boxes.
+    - name: Export part meshes
+      if: steps.parts.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: site
+      env:
+        PARTS_REQUIRED: "1"
+      run: npm run parts
+
+    - name: Build site
+      shell: bash
+      working-directory: site
+      env:
+        SITE_BASE: ${{ inputs.base }}
+      run: npm run build:site
+...
