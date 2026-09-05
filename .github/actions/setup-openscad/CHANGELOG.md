@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.1.2...setup-openscad-v2.2.0) (2026-09-05)
+
+
+### ✨ Features
+
+* **ci:** pin every action to a commit SHA and enforce it with zizmor ([#475](https://github.com/kellerlabs/homeracker/issues/475)) ([569b564](https://github.com/kellerlabs/homeracker/commit/569b564762600cf9321bf3b33f32d614d3d1b03b))
+
 ## [2.1.2](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.1.1...setup-openscad-v2.1.2) (2026-07-25)
 
 
