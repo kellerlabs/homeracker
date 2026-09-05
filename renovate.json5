@@ -11,6 +11,15 @@
   "platformAutomerge": false,
   // Disable hourly PR limit (default from config:recommended is 2)
   "prHourlyLimit": 0,
+  // A release must be public for five days before Renovate proposes it, so a compromised
+  // publish has time to be caught and yanked before it reaches a branch here.
+  "minimumReleaseAge": "5 days",
+  // The openscad HTML datasource and the BOSL2 git-refs digest carry no release timestamp.
+  // The default of timestamp-required would suppress those updates outright rather than
+  // just exempt them from the wait, so they are let through and npm keeps the five days.
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  // Without this, an update that has not served its five days still gets a branch and a PR.
+  "internalChecksFilter": "strict",
   "schedule": ["* * * * 0,6"],
   // Use "deps" as commit type instead of "chore(deps)"
   "semanticCommits": "enabled",
@@ -62,6 +71,42 @@
       "groupSlug": "pre-commit-hooks",
       "separateMajorMinor": false,
       "schedule": ["before 5am on the first day of the month"],
+      "automerge": true
+    },
+    {
+      // The runtime and its types have separate version lines and must land together.
+      "matchPackageNames": ["three", "@types/three"],
+      "groupName": "three.js",
+      "groupSlug": "three-js"
+    },
+    // Automerge allow-lists. A package earns its place here once CI is known to catch its
+    // breakage; anything absent is reviewed by hand. The sibling globs are there because
+    // Renovate groups these into monorepo PRs, and a group only automerges when every
+    // package in it is listed.
+    {
+      "matchPackageNames": [
+        "astro",
+        "@astrojs/**",
+        "eslint",
+        "@eslint/**",
+        "typescript-eslint",
+        "typescript",
+        "vitest",
+        "@vitest/**"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "matchPackageNames": [
+        "astro",
+        "@astrojs/**",
+        "eslint",
+        "@eslint/**",
+        "typescript-eslint",
+        "typescript",
+        "vitest",
+        "@vitest/**"],
+      "matchUpdateTypes": ["minor"],
       "automerge": true
     }
   ]
