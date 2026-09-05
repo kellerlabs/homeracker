@@ -10,6 +10,7 @@
     "dev": "astro dev",
     "parts": "node scripts/export-parts.mjs",
     "build": "node scripts/export-parts.mjs && astro build",
+    "build:site": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
     "lint": "astro check",

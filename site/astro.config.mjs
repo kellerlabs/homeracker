@@ -4,6 +4,9 @@ import { rehypeRepoLinks, rehypeSections } from "./src/lib/rehype.ts";
 
 export default defineConfig({
   site: "https://homeracker.org",
+  // Preview deployments are served from a subpath, so every internal link and public asset
+  // reference has to go through import.meta.env.BASE_URL rather than a leading slash.
+  base: process.env.SITE_BASE ?? "/",
   outDir: "dist",
   trailingSlash: "always",
   image: {

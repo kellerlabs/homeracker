@@ -131,7 +131,7 @@ async function loadParts(manifest: Manifest): Promise<Record<Kind, BufferGeometr
     (Object.keys(FILES) as Kind[]).map(async (kind) => {
       const entry = manifest.parts[FILES[kind]];
       if (!entry) throw new Error(`part ${FILES[kind]} missing from manifest`);
-      const geometry = await loader.loadAsync(`/parts/${entry.file}`);
+      const geometry = await loader.loadAsync(`${import.meta.env.BASE_URL}parts/${entry.file}`);
       geometry.computeVertexNormals();
       return [kind, geometry] as const;
     }),
@@ -208,7 +208,7 @@ function mountExplodedCube(canvas: HTMLCanvasElement, parts: Part[]): void {
 /** Exploded 3D3W cube from the real part meshes; falls back to the schematic rack when they are missing. */
 export async function mountHero(canvas: HTMLCanvasElement): Promise<void> {
   try {
-    const response = await fetch("/parts/manifest.json", { cache: "no-cache" });
+    const response = await fetch(`${import.meta.env.BASE_URL}parts/manifest.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`no parts manifest (${response.status})`);
     const manifest = (await response.json()) as Manifest;
     const geometries = await loadParts(manifest);

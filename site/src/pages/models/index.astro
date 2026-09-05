@@ -31,7 +31,7 @@ const renderFor = (image: string | null) => (image ? renders[`../../../../models
           const render = renderFor(card.image);
           return (
             <li class:list={["card", { deprecated: card.deprecated }]}>
-              <a href={`/models/${card.slug}/`}>
+              <a href={`${import.meta.env.BASE_URL}models/${card.slug}/`}>
                 <div class="thumb">
                   {render ? <Image src={render} alt={`${card.title} render`} width={480} /> : <span class="none">no render</span>}
                 </div>
