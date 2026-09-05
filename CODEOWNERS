@@ -1,6 +1,10 @@
 # Default owner for everything
 * @kellervater
 
+# Web configurator and site
+/configurator/ @kellervater @Dirnei
+/site/ @kellervater @Dirnei
+
 # Release files can be approved by release bot
 CHANGELOG.md
 .release-please-manifest.json
