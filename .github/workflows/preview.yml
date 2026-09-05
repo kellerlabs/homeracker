@@ -77,10 +77,14 @@ jobs:
 
   # Closing a PR or dropping its label leaves its preview published until something redeploys.
   # pages.yml re-evaluates every artifact on each run, so a deployment is all the pruning takes.
+  #
+  # A merge is excluded: it pushes to main, which deploys anyway. Dispatching here as well would
+  # land seconds later and cancel that push run under the shared `pages` concurrency group,
+  # marking the merge commit as failed even though the site deployed fine.
   prune:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository
-      && (github.event.action == 'closed'
+      && ((github.event.action == 'closed' && !github.event.pull_request.merged)
       || (github.event.action == 'unlabeled' && github.event.label.name == 'deploy-preview'))
     runs-on: ubuntu-latest
     permissions:
