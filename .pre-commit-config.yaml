@@ -76,4 +76,18 @@ repos:
         language: system
         pass_filenames: false
         files: '^cmd/scadm/'
+  - repo: local
+    hooks:
+      - id: configurator-check
+        name: Configurator lint + tests
+        entry: bash -c 'cd configurator && (test -d node_modules || npm ci --no-audit --no-fund) && npm run check'
+        language: system
+        pass_filenames: false
+        files: '^configurator/'
+      - id: site-check
+        name: Site type-check + tests
+        entry: bash -c 'cd site && (test -d node_modules || npm ci --no-audit --no-fund) && npm run check'
+        language: system
+        pass_filenames: false
+        files: '^(site/|README\.md|models/.*README\.md)'
 ...

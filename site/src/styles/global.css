@@ -1,0 +1,344 @@
+@import "@fontsource/orbitron/900.css";
+@import "@fontsource/source-code-pro/400.css";
+@import "@fontsource/source-code-pro/400-italic.css";
+@import "@fontsource/source-code-pro/500.css";
+@import "@fontsource/source-code-pro/600.css";
+
+:root {
+  --bg: #0b0c10;
+  --panel: #15171c;
+  --panel-2: #1c1f26;
+  --line: #2a2e38;
+  --text: #e8e6df;
+  --muted: #a3a49f;
+  --accent: #f7b600;
+  --accent-ink: #1a1300;
+  --accent-dim: rgba(247, 182, 0, 0.14);
+  --link: #4d95ff;
+  --danger: #ff4d6a;
+  --core: #0056b3;
+  --unit: 15px;
+  /* Style guide (docs/styleguide.md): Orbitron Black for headings, Source Code Pro for everything else. */
+  --font-display: "Orbitron", "Segoe UI", sans-serif;
+  --font-label: "Source Code Pro", ui-monospace, Consolas, monospace;
+  --font-body: "Source Code Pro", ui-monospace, Consolas, monospace;
+  --font-mono: "Source Code Pro", ui-monospace, Consolas, monospace;
+  --measure: 72ch;
+  --pins: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Crect x='5.5' y='5.5' width='4' height='4' fill='%23f7b600' fill-opacity='0.09'/%3E%3C/svg%3E");
+  --pins-strong: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Crect x='5.5' y='5.5' width='4' height='4' fill='%230b0c10'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-image: var(--pins);
+  background-attachment: fixed;
+}
+
+/* App pages (configurator): nav + app fill the viewport, panes scroll internally. */
+body.app-shell {
+  height: 100vh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.app-shell main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 1000px) {
+  body.app-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+}
+
+a {
+  color: var(--link);
+  text-decoration-color: rgba(77, 149, 255, 0.4);
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 3.8vw, 3rem);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+code {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.05em 0.35em;
+  color: var(--accent);
+}
+
+pre {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text);
+}
+
+blockquote {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.2rem;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+blockquote p {
+  margin: 0.25rem 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+}
+
+th {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--panel);
+}
+
+td img {
+  max-width: 260px;
+}
+
+hr {
+  border: none;
+  height: var(--unit);
+  margin: 3rem 0;
+  background: var(--accent) var(--pins-strong);
+}
+
+.eyebrow {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.wrap {
+  width: min(100% - 2.5rem, 1180px);
+  margin-inline: auto;
+  min-width: 0;
+}
+
+.button {
+  touch-action: manipulation;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.75rem 1.4rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.button.primary:hover,
+.button.primary:focus-visible {
+  background: #ffcd3a;
+}
+
+/* Rendered markdown */
+
+.doc {
+  max-width: var(--measure);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.doc-lead,
+.doc-section {
+  position: relative;
+  padding: 3rem 0;
+}
+
+.doc-section + .doc-section {
+  border-top: 1px solid var(--line);
+}
+
+.doc-section > h1,
+.doc-section > h2 {
+  margin-bottom: 1.25rem;
+}
+
+.doc-section > h1::before,
+.doc-section > h2::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 4px;
+  background: var(--accent);
+  margin-bottom: 0.8rem;
+}
+
+.doc h3 {
+  margin-top: 2.2rem;
+  margin-bottom: 0.6rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 1.05rem;
+}
+
+.doc h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.doc p,
+.doc ul,
+.doc ol {
+  margin: 0.8rem 0;
+}
+
+.doc li {
+  margin: 0.3rem 0;
+}
+
+.doc li::marker {
+  color: var(--accent);
+}
+
+.doc img {
+  display: block;
+  margin: 1.5rem 0;
+}
+
+.doc p > img:only-child {
+  margin-inline: auto;
+}
+
+.doc td img {
+  margin: 0;
+}
+
+.doc-lead > p:first-child {
+  margin-top: 0;
+}

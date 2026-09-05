@@ -1,0 +1,805 @@
+/*
+ * Configurator component styles. Reads the site's design tokens when mounted inside
+ * homeracker.org and falls back to matching values when running standalone.
+ */
+
+.cfg {
+  --cfg-bg: var(--bg, #0b0c10);
+  --cfg-panel: var(--panel, #15171c);
+  --cfg-panel-2: var(--panel-2, #1c1f26);
+  --cfg-line: var(--line, #2a2e38);
+  --cfg-text: var(--text, #e8e6df);
+  --cfg-muted: var(--muted, #a3a49f);
+  --cfg-accent: var(--accent, #f7b600);
+  --cfg-accent-ink: var(--accent-ink, #1a1300);
+  --cfg-danger: var(--danger, #ff4d6a);
+  --cfg-label: var(--font-label, "Source Code Pro", ui-monospace, Consolas, monospace);
+  --cfg-display: var(--font-display, "Orbitron", "Segoe UI", sans-serif);
+
+  display: grid;
+  grid-template-columns: 27rem minmax(0, 1fr) 22rem;
+  min-height: 640px;
+  height: calc(100vh - 4.5rem);
+  color: var(--cfg-text);
+  border-top: 1px solid var(--cfg-line);
+  border-bottom: 1px solid var(--cfg-line);
+}
+
+.cfg-controls,
+.cfg-bom {
+  padding: 1.25rem;
+  overflow: auto;
+  background: var(--cfg-panel);
+}
+
+.cfg-controls {
+  border-right: 1px solid var(--cfg-line);
+}
+
+.cfg-bom {
+  border-left: 1px solid var(--cfg-line);
+}
+
+.cfg-stage {
+  position: relative;
+  min-height: 60vh;
+  background: var(--cfg-bg);
+}
+
+.cfg-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cfg fieldset,
+.cfg-section {
+  border: 1px solid var(--cfg-line);
+  padding: 0.6rem 0.9rem 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.cfg-section > summary {
+  font-family: var(--cfg-label);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cfg-accent);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 32px;
+}
+
+.cfg-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cfg-section > summary::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 120ms ease;
+}
+
+.cfg-section[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.cfg-section[open] > summary {
+  margin-bottom: 0.6rem;
+}
+
+.cfg legend {
+  font-family: var(--cfg-label);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cfg-accent);
+  padding: 0 0.4rem;
+}
+
+.cfg .field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.55rem 0;
+}
+
+.cfg .field.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+}
+
+.cfg label {
+  font-size: 0.95rem;
+  color: var(--cfg-text);
+}
+
+.cfg input[type="number"],
+.cfg input[type="text"],
+.cfg select {
+  font: inherit;
+  min-height: 44px;
+  padding: 0.4rem 0.6rem;
+  color: var(--cfg-text);
+  background: var(--cfg-bg);
+  border: 1px solid var(--cfg-line);
+  border-radius: 0;
+}
+
+.cfg input:focus-visible,
+.cfg select:focus-visible {
+  outline: 2px solid var(--cfg-accent);
+  outline-offset: 1px;
+  border-color: var(--cfg-accent);
+}
+
+.cfg input[type="checkbox"],
+.cfg input[type="radio"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--cfg-accent);
+  margin: 0;
+}
+
+.cfg output,
+.cfg .readout {
+  font-family: var(--cfg-label);
+  font-size: 0.9rem;
+  color: var(--cfg-muted);
+  margin: 0;
+}
+
+.cfg #issues {
+  color: var(--cfg-danger);
+  padding-left: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.cfg #issues:empty {
+  display: none;
+}
+
+.cfg h2 {
+  font-family: var(--cfg-display);
+  font-weight: 900;
+  font-size: 1.3rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+  margin: 0 0 0.4rem;
+}
+
+.cfg table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.cfg td,
+.cfg th {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid var(--cfg-line);
+}
+
+.cfg tr.group th {
+  padding-top: 1rem;
+  font-family: var(--cfg-label);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cfg-accent);
+  border-bottom-color: var(--cfg-accent);
+}
+
+.cfg td.qty {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  width: 3rem;
+}
+
+.cfg td.note {
+  font-size: 0.8rem;
+  color: var(--cfg-muted);
+}
+
+.cfg tr.total td {
+  font-weight: 600;
+  border-bottom: none;
+  padding-top: 0.8rem;
+}
+
+.cfg button {
+  margin-top: 1.2rem;
+  min-height: 44px;
+  padding: 0.6rem 1.2rem;
+  font-family: var(--cfg-label);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cfg-accent-ink);
+  background: var(--cfg-accent);
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.cfg button:hover,
+.cfg button:focus-visible {
+  background: #ffcd3a;
+}
+
+.cfg textarea {
+  width: 100%;
+  min-height: 12rem;
+  margin-top: 0.5rem;
+  font: inherit;
+  color: var(--cfg-text);
+  background: var(--cfg-bg);
+  border: 1px solid var(--cfg-line);
+}
+
+@media (max-width: 1200px) {
+  .cfg {
+    grid-template-columns: 23rem minmax(0, 1fr) 20rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .cfg {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  .cfg-controls,
+  .cfg-bom {
+    border: none;
+    border-bottom: 1px solid var(--cfg-line);
+  }
+
+  .cfg-stage {
+    height: 60vh;
+    min-height: 360px;
+  }
+}
+
+/* Row editor */
+
+.cfg-add {
+  margin: 0.2rem 0 0.8rem;
+  width: 100%;
+}
+
+.cfg-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cfg-row {
+  border: 1px solid var(--cfg-line);
+  border-left: 3px solid var(--cfg-accent);
+  background: var(--cfg-bg);
+  padding: 0.5rem 0.7rem 0.6rem;
+}
+
+.cfg-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.4rem;
+}
+
+.cfg-row-tools {
+  margin-left: auto;
+}
+
+.cfg-row-name {
+  font-family: var(--cfg-label);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cfg-row-name {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cfg-row-name small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cfg input.cfg-row-title {
+  font: inherit;
+  font-family: var(--cfg-label);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cfg-text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom-color: var(--cfg-line);
+  padding: 0 0.15rem;
+  min-height: 0;
+  height: 1.6rem;
+  max-width: 100%;
+}
+
+.cfg input.cfg-row-title::placeholder {
+  color: var(--cfg-text);
+  opacity: 0.85;
+}
+
+.cfg input.cfg-row-title:hover {
+  border-bottom-color: var(--cfg-accent);
+}
+
+.cfg input.cfg-row-title:focus-visible {
+  outline: none;
+  border-color: var(--cfg-accent);
+  background: var(--cfg-panel);
+  text-transform: none;
+}
+
+.cfg-row-tools {
+  flex: 0 0 auto;
+}
+
+.cfg-row-summary {
+  display: none;
+  flex-basis: 100%;
+  order: 10;
+  padding-left: 2.4rem;
+  font-size: 0.85rem;
+  color: var(--cfg-muted);
+}
+
+.cfg-row.is-collapsed .cfg-row-summary {
+  display: block;
+}
+
+.cfg-row.is-collapsed .cfg-row-fields,
+.cfg-row.is-collapsed .cfg-through {
+  display: none;
+}
+
+.cfg-row-head .cfg-icon[data-action="toggle"] svg {
+  transition: transform 120ms ease;
+  transform: rotate(90deg);
+}
+
+.cfg-row.is-collapsed .cfg-icon[data-action="toggle"] svg {
+  transform: rotate(0deg);
+}
+
+.cfg-row-name small {
+  margin-left: 0.15rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--cfg-muted);
+}
+
+.cfg-row-tools {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.cfg .cfg-icon {
+  margin: 0;
+  min-height: 32px;
+  width: 32px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  color: var(--cfg-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  clip-path: none;
+}
+
+.cfg .cfg-icon:hover,
+.cfg .cfg-icon:focus-visible {
+  color: var(--cfg-accent);
+  background: var(--cfg-panel-2);
+  border-color: var(--cfg-line);
+}
+
+.cfg-row-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.cfg-row-fields .wide {
+  grid-column: 1 / -1;
+}
+
+.cfg-row-fields .field {
+  margin: 0.3rem 0 0;
+}
+
+.cfg-row-fields label {
+  font-size: 0.85rem;
+  color: var(--cfg-muted);
+}
+
+.cfg-row-fields input {
+  min-height: 40px;
+  padding: 0.3rem 0.5rem;
+}
+
+/* Column syntax info popover */
+
+.cfg .cfg-info-btn {
+  margin: 0;
+  min-height: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  color: var(--cfg-muted);
+  background: transparent;
+  border: none;
+  clip-path: none;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.cfg .cfg-info-btn:hover,
+.cfg .cfg-info-btn:focus-visible {
+  color: var(--cfg-accent);
+  background: transparent;
+}
+
+.cfg-info-tip {
+  position: fixed;
+  z-index: 9999;
+  width: max-content;
+  max-width: 280px;
+  padding: 0.6rem 0.75rem;
+  background: var(--cfg-panel-2, #1c1f26);
+  border: 1px solid var(--cfg-line, #2a2e38);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  color: var(--cfg-text, #e8e6df);
+}
+
+.cfg-info-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 0.6rem;
+}
+
+.cfg-info-list dt {
+  font-family: var(--cfg-label, "Source Code Pro", ui-monospace, monospace);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cfg-accent, #f7b600);
+  white-space: nowrap;
+}
+
+.cfg-info-list dd {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--cfg-muted, #a3a49f);
+  line-height: 1.4;
+}
+
+/* Outer size: the conclusion of the rows panel, so it gets its own block. */
+.cfg-outer {
+  margin-top: 1.1rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--cfg-panel-2);
+  border: 1px solid var(--cfg-line);
+}
+
+.cfg-outer-label {
+  display: block;
+  font-family: var(--cfg-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cfg-muted);
+}
+
+.cfg-outer-value {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--cfg-label);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--cfg-accent);
+}
+
+/* Opening legend swatches and face diagrams */
+
+.cfg .cfg-open {
+  width: 0.9rem;
+  height: 0.9rem;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.15rem;
+  border: 2px solid var(--cfg-accent);
+  background: transparent;
+}
+
+.cfg .cfg-open[data-state="interfit"] {
+  background: linear-gradient(135deg, var(--cfg-accent) 50%, transparent 50%);
+}
+
+.cfg .cfg-open[data-state="fullcover"] {
+  background: var(--cfg-accent);
+}
+
+.cfg-legend {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--cfg-muted);
+}
+
+.cfg-faces {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.cfg-face-group {
+  border-top: 1px solid var(--cfg-line);
+  padding-top: 0.5rem;
+}
+
+.cfg-face-group-title {
+  font-family: var(--cfg-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cfg-accent);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 28px;
+}
+
+.cfg-face-group-title::-webkit-details-marker {
+  display: none;
+}
+
+.cfg-face-group-title::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 120ms ease;
+}
+
+.cfg-face-group[open] > .cfg-face-group-title::before {
+  transform: rotate(45deg);
+}
+
+.cfg-face-group-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1.2rem;
+  align-items: flex-end;
+}
+
+.cfg-face {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cfg-face figcaption {
+  font-family: var(--cfg-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cfg-muted);
+}
+
+.cfg-diagram {
+  display: block;
+  overflow: visible;
+}
+
+.cfg-diagram-frame {
+  fill: var(--cfg-panel-2);
+  stroke: var(--cfg-line);
+  stroke-width: 0.15;
+}
+
+.cfg-cell {
+  fill: var(--cfg-bg);
+  stroke: var(--cfg-accent);
+  stroke-width: 0.25;
+  cursor: pointer;
+  outline: none;
+}
+
+.cfg-cell[data-state="interfit"] {
+  fill: var(--cfg-accent);
+  fill-opacity: 0.45;
+}
+
+.cfg-cell[data-state="fullcover"] {
+  fill: var(--cfg-accent);
+}
+
+.cfg-cell[data-state="blocked"] {
+  fill: var(--cfg-panel-2);
+  stroke: var(--cfg-line);
+  stroke-dasharray: 0.4 0.3;
+  cursor: not-allowed;
+}
+
+.cfg-cell:hover,
+.cfg-cell:focus-visible,
+.cfg-cell.is-hot {
+  stroke: var(--cfg-text);
+  stroke-width: 0.4;
+}
+
+.cfg-face figcaption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cfg-face-all {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin-left: auto;
+}
+
+.cfg .cfg-face-all .cfg-open {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 0;
+  clip-path: none;
+  min-height: 0;
+}
+
+.cfg .cfg-face-all .cfg-open:hover,
+.cfg .cfg-face-all .cfg-open:focus-visible {
+  outline: 2px solid var(--cfg-text);
+  outline-offset: 1px;
+}
+
+.cfg-through {
+  margin-top: 0.4rem;
+}
+
+.cfg-through label {
+  font-size: 0.85rem;
+}
+
+/* Printer bed and printability */
+
+.cfg-bed {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.cfg-bed .field {
+  margin: 0.2rem 0 0;
+}
+
+.cfg-bom-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+.cfg .cfg-bom-actions .cfg-copy {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+
+.cfg-warning {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid var(--cfg-danger);
+  background: rgba(255, 77, 106, 0.1);
+  color: var(--cfg-text);
+  font-size: 0.9rem;
+}
+
+.cfg tr.is-unprintable td {
+  color: var(--cfg-danger);
+}
+
+.cfg tr.is-unprintable td.qty {
+  box-shadow: inset 3px 0 0 var(--cfg-danger);
+}
+
+.cfg tr.is-unprintable td.note {
+  color: var(--cfg-danger);
+  opacity: 0.9;
+}
+
+/* Plan views stack one per line so tops read top-down like the rack itself. */
+.cfg-face-group[data-group="Tops and bottom"] .cfg-face-group-list {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.cfg-cell[data-state="problem"] {
+  fill: var(--cfg-danger);
+  fill-opacity: 0.7;
+  stroke: var(--cfg-danger);
+  stroke-dasharray: 0.4 0.3;
+}
+
+.cfg-problems {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cfg-problems:empty {
+  display: none;
+}
+
+.cfg-problems li {
+  margin: 0.4rem 0;
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid var(--cfg-danger);
+  background: rgba(255, 77, 106, 0.1);
+  font-size: 0.9rem;
+}
+
+.cfg-credit {
+  margin-top: 1.5rem;
+  padding: 0.8rem 0 0.2rem;
+  border-top: 1px solid var(--cfg-line);
+  font-family: var(--cfg-label);
+  font-size: 0.75rem;
+  color: var(--cfg-muted);
+  text-align: center;
+}
+
+.cfg-credit a {
+  color: var(--cfg-accent);
+  text-decoration: none;
+}
+
+.cfg-credit a:hover {
+  text-decoration: underline;
+}

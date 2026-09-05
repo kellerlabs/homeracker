@@ -96,7 +96,7 @@ Assembly is straightforward and requires no tools:
 
    ![Army of Parts](https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_army.jpg)
 
-   Make a parts list:
+   Make a parts list, or let the [Configurator](https://homeracker.org/configurator/) count for you:
    * How many supports of what lengths (in `base units`)?
    * How many connectors of each type (pull-throughs, feet, regular)?
    * Print a ton of Lock Pins. You'll need more than you might think. The [Core model](https://makerworld.com/en/models/1317298-homeracker-core) on MakerWorld includes a 100-pin plate and a [Gridfinity](https://gridfinity.xyz/) box for storage.
@@ -254,6 +254,16 @@ HomeRacker includes custom tooling to streamline development:
   - Installs OpenSCAD, system dependencies, and libraries in one step
   - Uses scadm under the hood, with caching for fast runs
   - Usage: `uses: kellerlabs/homeracker/.github/actions/setup-openscad@setup-openscad-v1`
+
+- **[Style Guide](docs/styleguide.md)** - colours from `constants.scad`, Orbitron Black + Source Code Pro, layout rules
+
+- **[Site](site/README.md)** - homeracker.org, built by Astro from the READMEs in this repo
+  - Home page, model catalog and model pages come straight from `README.md` and `models/*/README.md`
+  - Relative links and render images are resolved at build time
+
+- **[Configurator](configurator/README.md)** - Web-based rack planner with parts list
+  - Define a rack, preview it, copy the bill of materials
+  - Live at [homeracker.org/configurator](https://homeracker.org/configurator/)
 
 - **[Renovate Preset](renovate-dependencies.json)** - Automated dependency updates
   - Tracks OpenSCAD versions, GitHub releases, and Python packages

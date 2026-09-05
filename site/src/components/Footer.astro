@@ -1,0 +1,56 @@
+---
+import Beam from "./Beam.astro";
+---
+
+<footer>
+  <Beam />
+  <div class="wrap inner">
+    <p>
+      HomeRacker by <a href="https://github.com/kellervater" target="_blank" rel="noopener">Patrick Pötz</a>. Source code MIT, 3D models
+      CC BY-SA 4.0. HomeRacker is an unregistered trademark, first used publicly on 12.04.2025.
+      Site &amp; configurator by <a href="https://ko-fi.com/dirnei" target="_blank" rel="noopener">Dirnei</a>.
+    </p>
+    <ul>
+      <li><a href="https://github.com/kellerlabs/homeracker" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kellerlabs/homeracker-community" target="_blank" rel="noopener">Community repo</a></li>
+      <li><a href="https://discord.gg/b6myzHRxc3" target="_blank" rel="noopener">Discord</a></li>
+      <li><a href="https://www.youtube.com/@kellerlabs" target="_blank" rel="noopener">YouTube</a></li>
+      <li><a href="https://makerworld.com/@kellerlab" target="_blank" rel="noopener">MakerWorld</a></li>
+    </ul>
+  </div>
+</footer>
+
+<style>
+  footer {
+    margin-top: 4rem;
+  }
+
+  .inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding: 2rem 0 3rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  p {
+    max-width: 48ch;
+    margin: 0;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+</style>

@@ -1,0 +1,191 @@
+---
+/** The home page hero: the system itself, drawn live from the configurator's engine. */
+---
+
+<section class="hero">
+  <div class="wrap grid">
+    <div class="copy">
+      <p class="eyebrow">Open source · Fully modular · 3D printable</p>
+      <h1><span class="line">Server rack.</span><span class="line">Shoe rack.</span><span class="line hi">Any rack.</span></h1>
+      <p class="lede">
+        HomeRacker is a fully modular, 3D-printable rack-building system. Supports, connectors and lock pins snap
+        into whatever shape you need today, and get rebuilt when that changes.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="/configurator/">Plan your rack</a>
+        <a class="button" href="https://makerworld.com/en/models/1317298-homeracker-core" target="_blank" rel="noopener">Get the core model</a>
+      </div>
+    </div>
+    <figure class="stage">
+      <canvas id="hero-rack" aria-label="HomeRacker parts assembling into a cube and coming apart again"></canvas>
+      <figcaption>
+        <span class="eyebrow">How it goes together</span> 8 connectors · 12 supports · 24 lock pins, straight from the OpenSCAD models
+      </figcaption>
+    </figure>
+  </div>
+  <dl class="wrap specs" aria-label="Core measurements">
+    <div><dt>Base unit</dt><dd>15 mm</dd></div>
+    <div><dt>Lock pin</dt><dd>4 mm square</dd></div>
+    <div><dt>Wall thickness</dt><dd>2 mm</dd></div>
+    <div><dt>Tolerance</dt><dd>0.2 mm</dd></div>
+    <div><dt>Connector core</dt><dd>1 unit, always</dd></div>
+  </dl>
+</section>
+
+<script>
+  import { mountHero } from "../lib/hero";
+
+  const canvas = document.querySelector<HTMLCanvasElement>("#hero-rack");
+  if (canvas) void mountHero(canvas);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    padding: 4rem 0 0;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(60% 70% at 70% 40%, rgba(247, 182, 0, 0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: center;
+  }
+
+  h1 {
+    margin: 1rem 0 1.25rem;
+    font-size: clamp(1.8rem, 3.6vw, 3.2rem);
+    line-height: 1;
+  }
+
+  .line {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .hi {
+    color: var(--accent);
+    text-shadow: 0 0 18px rgba(247, 182, 0, 0.35);
+  }
+
+  .lede {
+    font-size: 1.15rem;
+    max-width: 46ch;
+    color: var(--muted);
+    margin: 0 0 2rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .stage {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 1;
+    max-height: 560px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(21, 23, 28, 0.6), rgba(11, 12, 16, 0.9));
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* HUD corners and faint scanlines: the one place the cyberpunk register is allowed to show. */
+  .stage::before,
+  .stage::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .stage::before {
+    inset: 0;
+    background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px);
+    mix-blend-mode: screen;
+  }
+
+  .stage::after {
+    inset: 8px;
+    background:
+      linear-gradient(var(--accent), var(--accent)) top left / 18px 2px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) top left / 2px 18px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) top right / 18px 2px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) top right / 2px 18px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) bottom left / 18px 2px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) bottom left / 2px 18px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) bottom right / 18px 2px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) bottom right / 2px 18px no-repeat;
+  }
+
+  figcaption {
+    padding: 0.6rem 0.9rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    color: var(--muted);
+    display: flex;
+    gap: 0.8rem;
+    align-items: baseline;
+  }
+
+  .specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    margin: 4rem auto 0;
+    padding: 0;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .specs div {
+    background: var(--panel);
+    padding: 1rem 1.1rem;
+  }
+
+  dt {
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: var(--accent);
+  }
+
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stage {
+      max-height: 420px;
+    }
+  }
+</style>

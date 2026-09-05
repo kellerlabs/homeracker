@@ -32,5 +32,14 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest -r requirements.txt
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            configurator/package-lock.json
+            site/package-lock.json
+
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1

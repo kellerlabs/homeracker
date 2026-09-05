@@ -1,0 +1,125 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+export async function getStaticPaths() {
+  const models = await getCollection("models");
+  return models.map((model) => ({ params: { slug: model.id }, props: { model } }));
+}
+
+const { model } = Astro.props;
+const { Content, headings } = await render(model);
+const title = headings.find((h) => h.depth === 1)?.text ?? model.id;
+const description = model.body?.match(/## 📌 What\s+([^\n]+)/)?.[1] ?? `HomeRacker ${model.id} model`;
+---
+
+<Base title={`${title} – HomeRacker models`} description={description}>
+  <div class="wrap page">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/models/">Models</a>
+      <span aria-hidden="true">/</span>
+      <span>{model.id}</span>
+    </nav>
+    <div class="columns">
+      <aside class="toc">
+        <p class="eyebrow">On this page</p>
+        <ul>
+          {
+            headings
+              .filter((h) => h.depth === 2)
+              .map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))
+          }
+        </ul>
+        <p class="eyebrow">Source</p>
+        <ul>
+          <li>
+            <a href={`https://github.com/kellerlabs/homeracker/tree/main/models/${model.id}`} target="_blank" rel="noopener">
+              models/{model.id} ↗
+            </a>
+          </li>
+        </ul>
+      </aside>
+      <article class="doc">
+        <Content />
+      </article>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-top: 2rem;
+  }
+
+  .crumbs {
+    display: flex;
+    gap: 0.6rem;
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .toc {
+    position: sticky;
+    top: 4.5rem;
+    padding: 1.2rem;
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+
+  .toc ul {
+    list-style: none;
+    margin: 0.5rem 0 1.5rem;
+    padding: 0;
+  }
+
+  .toc li {
+    margin: 0.35rem 0;
+    font-size: 0.9rem;
+  }
+
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .toc a:hover {
+    color: var(--accent);
+  }
+
+  .doc :global(h1) {
+    margin: 1rem 0 0.5rem;
+  }
+
+  .doc :global(.doc-lead) {
+    padding: 1rem 0 2rem;
+  }
+
+  .doc :global(.doc-section) {
+    scroll-margin-top: 5rem;
+  }
+
+  @media (max-width: 860px) {
+    .columns {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .toc {
+      position: static;
+    }
+  }
+</style>

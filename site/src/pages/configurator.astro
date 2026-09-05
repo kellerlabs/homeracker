@@ -1,0 +1,51 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="Configurator – HomeRacker"
+  description="Plan a HomeRacker rack: set width, depth, height, levels, feet and panels, preview it in 3D, and copy the parts list."
+  app
+>
+  <h1 class="sr-only">Configurator</h1>
+  <div id="configurator" class="app"></div>
+</Base>
+
+<script>
+  import "../../../configurator/src/configurator.css";
+  import { mountConfigurator } from "../../../configurator/src/app";
+
+  const root = document.querySelector<HTMLElement>("#configurator");
+  if (root) mountConfigurator(root, { partsUrl: "/parts/" });
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .app {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app :global(.cfg) {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    border-top: none;
+  }
+
+  @media (max-width: 1000px) {
+    .app :global(.cfg) {
+      min-height: 0;
+    }
+  }
+</style>

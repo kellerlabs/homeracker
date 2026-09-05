@@ -1,0 +1,129 @@
+---
+import { Image } from "astro:assets";
+
+const LOGO = "https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_logo.png";
+const links = [
+  { href: "/", label: "Home" },
+  { href: "/models/", label: "Models" },
+  { href: "/configurator/", label: "Configurator" },
+];
+const external = [
+  { href: "https://github.com/kellerlabs/homeracker", label: "GitHub" },
+  { href: "https://discord.gg/b6myzHRxc3", label: "Discord" },
+  { href: "https://makerworld.com/@kellerlab", label: "MakerWorld" },
+];
+const current = Astro.url.pathname;
+---
+
+<header class="nav">
+  <div class="wrap bar">
+    <a class="brand" href="/">
+      <Image class="mark" src={LOGO} alt="" width={64} height={64} loading="eager" />
+      HomeRacker
+    </a>
+    <nav aria-label="Site">
+      <ul>
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} aria-current={current === l.href ? "page" : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+        {
+          external.map((l) => (
+            <li class="ext">
+              <a href={l.href} target="_blank" rel="noopener">
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(11, 12, 16, 0.86);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 3.6rem;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .brand :global(.mark) {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    background: transparent;
+  }
+
+  ul {
+    display: flex;
+    gap: 0.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.45rem 0.7rem;
+    touch-action: manipulation;
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  nav a:hover,
+  nav a[aria-current="page"] {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .ext a::after {
+    content: " ↗";
+    opacity: 0.6;
+  }
+
+  @media (max-width: 720px) {
+    .ext {
+      display: none;
+    }
+  }
+</style>

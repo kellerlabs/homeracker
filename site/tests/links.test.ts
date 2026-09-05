@@ -1,0 +1,35 @@
+import { describe, expect, test } from "vitest";
+import { rewriteHref } from "../src/lib/links";
+
+describe("rewriteHref", () => {
+  test("leaves absolute urls and anchors alone", () => {
+    expect(rewriteHref("https://makerworld.com/x", "README.md")).toBe("https://makerworld.com/x");
+    expect(rewriteHref("#-use-cases", "README.md")).toBe("#-use-cases");
+  });
+
+  test("maps model readmes to model pages", () => {
+    expect(rewriteHref("models/core/README.md", "README.md")).toBe("/models/core/");
+    expect(rewriteHref("models/core/", "README.md")).toBe("/models/core/");
+    expect(rewriteHref("core/README.md", "models/README.md")).toBe("/models/core/");
+    expect(rewriteHref("../core/README.md", "models/panel/README.md")).toBe("/models/core/");
+  });
+
+  test("maps the models index and root readme", () => {
+    expect(rewriteHref("../README.md", "models/core/README.md")).toBe("/models/");
+    expect(rewriteHref("../../README.md#-tech-specs", "models/core/README.md")).toBe("/#-tech-specs");
+  });
+
+  test("maps the configurator readme to the app", () => {
+    expect(rewriteHref("configurator/README.md", "README.md")).toBe("/configurator/");
+  });
+
+  test("sends everything else to github", () => {
+    expect(rewriteHref("CONTRIBUTING.md", "README.md")).toBe("https://github.com/kellerlabs/homeracker/blob/main/CONTRIBUTING.md");
+    expect(rewriteHref("../../docs/decisions/x.md", "models/panel/README.md")).toBe(
+      "https://github.com/kellerlabs/homeracker/blob/main/docs/decisions/x.md",
+    );
+    expect(rewriteHref("lib/truss.scad", "models/panel/README.md")).toBe(
+      "https://github.com/kellerlabs/homeracker/blob/main/models/panel/lib/truss.scad",
+    );
+  });
+});

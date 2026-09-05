@@ -1,0 +1,79 @@
+---
+import { getEntry, render } from "astro:content";
+import Beam from "../components/Beam.astro";
+import Hero from "../components/Hero.astro";
+import Base from "../layouts/Base.astro";
+
+const home = await getEntry("docs", "home");
+if (!home) throw new Error("README.md not found in the docs collection");
+const { Content } = await render(home);
+---
+
+<Base
+  title="HomeRacker – the printable modular rack system"
+  description="A fully modular, 3D-printable rack-building system. Supports, connectors and lock pins snap into any rack you need."
+>
+  <Hero />
+  <div class="wrap">
+    <Beam class="divider" />
+    <article class="doc home-doc">
+      <Content />
+    </article>
+  </div>
+</Base>
+
+<style>
+  .divider {
+    margin: 4rem 0 0;
+  }
+
+  .home-doc {
+    max-width: none;
+  }
+
+  .home-doc :global(.doc-lead) {
+    max-width: var(--measure);
+  }
+
+  .home-doc :global(.doc-section) {
+    display: grid;
+    grid-template-columns: minmax(0, 18rem) minmax(0, var(--measure));
+    column-gap: 3rem;
+    padding: 3.5rem 0;
+  }
+
+  .home-doc :global(.doc-section > h2) {
+    grid-column: 1;
+    position: sticky;
+    top: 4.5rem;
+    align-self: start;
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+  }
+
+  .home-doc :global(.doc-section > :not(h2)) {
+    grid-column: 2;
+  }
+
+  .home-doc :global(.doc-section h3) {
+    font-size: 1.15rem;
+    color: var(--text);
+  }
+
+  .home-doc :global(.doc-section h4) {
+    color: var(--accent);
+  }
+
+  @media (max-width: 860px) {
+    .home-doc :global(.doc-section) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .home-doc :global(.doc-section > h2) {
+      position: static;
+    }
+
+    .home-doc :global(.doc-section > :not(h2)) {
+      grid-column: 1;
+    }
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+/** A HomeRacker support drawn as a divider: 1 unit tall, one lock-pin hole per unit, a connector core at each end. */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class:list={["beam", className]} aria-hidden="true">
+  <span class="core"></span>
+  <span class="support"></span>
+  <span class="core"></span>
+</div>
+
+<style>
+  .beam {
+    display: flex;
+    height: var(--unit);
+  }
+
+  .core {
+    flex: 0 0 var(--unit);
+    background: var(--core);
+  }
+
+  .support {
+    flex: 1;
+    background: var(--accent) var(--pins-strong);
+  }
+</style>

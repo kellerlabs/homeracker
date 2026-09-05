@@ -1,0 +1,55 @@
+/* Standalone shell: the same tokens homeracker.org defines, so the app looks identical on its own. */
+
+:root {
+  --bg: #0b0c10;
+  --panel: #15171c;
+  --panel-2: #1c1f26;
+  --line: #2a2e38;
+  --text: #e8e6df;
+  --muted: #a3a49f;
+  --accent: #f7b600;
+  --accent-ink: #1a1300;
+  --danger: #ff4d6a;
+  --font-display: "Orbitron", "Segoe UI", sans-serif;
+  --font-label: "Source Code Pro", ui-monospace, Consolas, monospace;
+  --font-body: "Source Code Pro", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+body {
+  margin: 0;
+}
+
+.standalone-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+}
+
+.standalone-header h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.standalone-header a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.standalone-header p {
+  margin: 0;
+  color: var(--muted);
+}

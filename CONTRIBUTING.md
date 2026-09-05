@@ -87,6 +87,16 @@ The hooks can be found here: [.pre-commit-config.yaml](.pre-commit-config.yaml)
 - Group parameters with `/* [Section] */` comments
 - Add sanity checks: `assert(height % 15 == 0, "Must be multiple of 15mm")`
 
+### Configurator (TypeScript)
+- Lives in `configurator/`; run `npm ci && npm run check` before committing (the pre-commit hook does this when files under `configurator/` change)
+- Keep `src/engine/` free of DOM and Three.js; put geometry rules there with a Vitest case
+- See [configurator/README.md](configurator/README.md)
+
+### Site (Astro)
+- Lives in `site/`; renders the READMEs of this repo. Run `npm ci && npm run check` there (the pre-commit hook does this when the site or a rendered README changes)
+- Relative README links become site links; keep using them instead of absolute GitHub URLs
+- See [site/README.md](site/README.md)
+
 ### Python Code Standards
 - **Docstrings**: All functions must use [Google style docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
   ```python

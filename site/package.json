@@ -1,0 +1,36 @@
+{
+  "name": "homeracker-site",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "parts": "node scripts/export-parts.mjs",
+    "build": "node scripts/export-parts.mjs && astro build",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "lint": "astro check",
+    "check": "npm run lint && npm run test"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "7.3.0",
+    "@fontsource/orbitron": "5.3.0",
+    "@fontsource/source-code-pro": "5.3.0",
+    "astro": "7.2.10",
+    "sharp": "0.35.4",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@types/hast": "3.0.5",
+    "@types/node": "26.4.1",
+    "@types/three": "0.185.4",
+    "hast-util-to-string": "3.0.1",
+    "typescript": "6.0.3",
+    "unist-util-visit": "5.1.0",
+    "vitest": "4.1.11"
+  }
+}

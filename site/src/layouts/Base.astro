@@ -1,0 +1,57 @@
+---
+import "../styles/global.css";
+import Footer from "../components/Footer.astro";
+import Nav from "../components/Nav.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Full-height app page: no footer, the main region fills the viewport and the page itself never scrolls. */
+  app?: boolean;
+}
+const { title, description, app = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_logo.png" />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#0b0c10" />
+  </head>
+  <body class:list={{ "app-shell": app }}>
+    <a class="skip" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    {!app && <Footer />}
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 20;
+    padding: 0.6rem 1rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-label);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .skip:focus {
+    top: 1rem;
+  }
+</style>

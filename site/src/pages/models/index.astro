@@ -1,0 +1,138 @@
+---
+import { Image } from "astro:assets";
+import { getEntry } from "astro:content";
+import Beam from "../../components/Beam.astro";
+import Base from "../../layouts/Base.astro";
+import { parseCatalog } from "../../lib/catalog";
+
+const index = await getEntry("docs", "models");
+if (!index?.body) throw new Error("models/README.md not found in the docs collection");
+const cards = parseCatalog(index.body);
+const renders = import.meta.glob<{ default: ImageMetadata }>("../../../../models/*/parts/renders/*.png", {
+  eager: true,
+});
+const renderFor = (image: string | null) => (image ? renders[`../../../../models/${image}`]?.default : undefined);
+---
+
+<Base title="Models – HomeRacker" description="Every parametric HomeRacker model family: core, panels, racklink, gridfinity, keystone, feet and more.">
+  <div class="wrap">
+    <header class="head">
+      <p class="eyebrow">Parametric OpenSCAD · CC BY-SA 4.0</p>
+      <h1>Model catalog</h1>
+      <p class="lede">
+        Every family in the repository, rendered from its own source. Open any part in the OpenSCAD Customizer, or grab
+        the ready-made profiles on MakerWorld.
+      </p>
+    </header>
+    <Beam />
+    <ul class="cards">
+      {
+        cards.map((card) => {
+          const render = renderFor(card.image);
+          return (
+            <li class:list={["card", { deprecated: card.deprecated }]}>
+              <a href={`/models/${card.slug}/`}>
+                <div class="thumb">
+                  {render ? <Image src={render} alt={`${card.title} render`} width={480} /> : <span class="none">no render</span>}
+                </div>
+                <h2>{card.title}</h2>
+                <p>{card.description}</p>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .head {
+    padding: 3.5rem 0 2.5rem;
+    max-width: var(--measure);
+  }
+
+  h1 {
+    margin: 0.6rem 0 1rem;
+  }
+
+  .lede {
+    color: var(--muted);
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-top: none;
+  }
+
+  .card a {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.2rem;
+    background: var(--panel);
+    color: var(--text);
+    text-decoration: none;
+    transition: background 120ms ease;
+  }
+
+  .card a:hover,
+  .card a:focus-visible {
+    background: var(--panel-2);
+  }
+
+  .card a:hover h2 {
+    color: var(--accent);
+  }
+
+  .thumb {
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    background: #f0f0f0;
+    border: 1px solid var(--line);
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .thumb :global(img) {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.5rem;
+  }
+
+  .none {
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  h2 {
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .deprecated a {
+    opacity: 0.55;
+  }
+</style>
