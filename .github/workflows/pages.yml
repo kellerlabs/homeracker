@@ -12,12 +12,6 @@ on:
         required: false
         type: string
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-  pull-requests: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -25,6 +19,14 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      # Listing and downloading the preview artifacts, and checking whether each one's PR
+      # still qualifies. An explicit permissions block sets every scope it omits to none.
+      actions: read
+      pull-requests: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -73,6 +75,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
