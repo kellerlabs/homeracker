@@ -96,15 +96,27 @@
       "automerge": true
     },
     {
-      // The runtime and its types have separate version lines and must land together.
+      // One PR per npm batch, so updates are tested together rather than merged one at a
+      // time where each can break the last. separateMajorMinor still splits majors off, so
+      // this yields two streams: patches and minors in one PR, majors in another.
+      "matchManagers": ["npm"],
+      "groupName": "npm dependencies",
+      "groupSlug": "npm"
+    },
+    {
+      // Kept out of the npm group: three is 0.x and treats minors as breaking, and no test
+      // renders a frame, so it needs reading on its own. Its types share the version line.
       "matchPackageNames": ["three", "@types/three"],
       "groupName": "three.js",
       "groupSlug": "three-js"
     },
-    // Automerge allow-lists. A package earns its place here once CI is known to catch its
-    // breakage; anything absent is reviewed by hand. The sibling globs are there because
-    // Renovate groups these into monorepo PRs, and a group only automerges when every
-    // package in it is listed.
+    // Automerge allow-list, patches only. Minors and majors are read by hand, because no
+    // check renders a frame: a runtime dependency can break the site while eslint, tsc, the
+    // unit tests and the build all stay green. Revisit once a click-through test exists.
+    //
+    // Add a package here deliberately as it is adopted. A new dependency is reviewed until
+    // someone lists it. three and @types/three are absent on purpose: three is 0.x and does
+    // not follow semver, so even a patch can carry a breaking change.
     {
       "matchPackageNames": [
         "astro",
@@ -114,21 +126,15 @@
         "typescript-eslint",
         "typescript",
         "vitest",
-        "@vitest/**"],
+        "@vitest/**",
+        "vite",
+        "sharp",
+        "@fontsource/**",
+        "@types/hast",
+        "@types/node",
+        "hast-util-to-string",
+        "unist-util-visit"],
       "matchUpdateTypes": ["patch"],
-      "automerge": true
-    },
-    {
-      "matchPackageNames": [
-        "astro",
-        "@astrojs/**",
-        "eslint",
-        "@eslint/**",
-        "typescript-eslint",
-        "typescript",
-        "vitest",
-        "@vitest/**"],
-      "matchUpdateTypes": ["minor"],
       "automerge": true
     }
   ]
