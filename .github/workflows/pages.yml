@@ -6,11 +6,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      preview_pr:
-        description: PR number whose preview this deployment publishes
-        required: false
-        type: string
 
 concurrency:
   group: pages
@@ -27,6 +22,8 @@ jobs:
       # still qualifies. An explicit permissions block sets every scope it omits to none.
       actions: read
       pull-requests: read
+    outputs:
+      previews: ${{ steps.collect.outputs.previews }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -40,11 +37,13 @@ jobs:
       # Every live preview is re-collected from scratch on each deployment, so a cancelled run
       # loses nothing and a preview that no longer qualifies is pruned here.
       - name: Collect PR previews
+        id: collect
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          published=""
           # Artifacts come back newest first, so the first sighting of a name is the current one.
           gh api --paginate "repos/$REPO/actions/artifacts" \
             --jq '.artifacts[] | select(.expired == false) | select(.name | startswith("preview-pr-")) | "\(.name) \(.id)"' \
@@ -65,7 +64,9 @@ jobs:
               "https://api.github.com/repos/$REPO/actions/artifacts/$id/zip"
             mkdir -p "site/dist/preview/pr-$pr"
             unzip -q "$name.zip" -d "site/dist/preview/pr-$pr"
+            published="$published $pr"
           done < artifacts.txt
+          echo "previews=$(echo "$published" | xargs)" >> "$GITHUB_OUTPUT"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
@@ -87,26 +88,32 @@ jobs:
         uses: actions/deploy-pages@v5
 
   comment:
-    needs: deploy
-    if: inputs.preview_pr != ''
+    needs: [build, deploy]
+    if: needs.build.outputs.previews != ''
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
-      # One comment per PR, edited in place, so a busy branch does not stack up links.
-      - name: Post the preview link
+      # One comment per PR, left alone once it says the right thing, so a busy branch neither
+      # stacks up links nor collects an edit history of identical bodies.
+      - name: Post the preview links
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          PR: ${{ inputs.preview_pr }}
+          PREVIEWS: ${{ needs.build.outputs.previews }}
         run: |
           set -euo pipefail
-          body=$(printf '%s\n🔭 **Preview:** https://homeracker.org/preview/pr-%s/\n\nRebuilt on every push, removed when this PR closes.' '<!-- preview-url -->' "$PR")
-          existing=$(gh api "repos/$REPO/issues/$PR/comments" \
-            --jq 'map(select(.body | startswith("<!-- preview-url -->"))) | first | .id // empty')
-          if [ -n "$existing" ]; then
-            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -f body="$body" --silent
-          else
-            gh api -X POST "repos/$REPO/issues/$PR/comments" -f body="$body" --silent
-          fi
+          for pr in $PREVIEWS; do
+            url="https://homeracker.org/preview/pr-$pr/"
+            # Surfaces the live set on the run page, so a deployment says what it published.
+            echo "::notice title=Preview pr-$pr::$url"
+            body=$(printf '%s\n🔭 **Preview:** %s\n\nRebuilt on every push, removed when this PR closes.' '<!-- preview-url -->' "$url")
+            existing=$(gh api "repos/$REPO/issues/$pr/comments" \
+              --jq 'map(select(.body | startswith("<!-- preview-url -->"))) | first | .id // empty')
+            if [ -z "$existing" ]; then
+              gh api -X POST "repos/$REPO/issues/$pr/comments" -f body="$body" --silent
+            elif [ "$(gh api "repos/$REPO/issues/comments/$existing" --jq .body)" != "$body" ]; then
+              gh api -X PATCH "repos/$REPO/issues/comments/$existing" -f body="$body" --silent
+            fi
+          done
 ...

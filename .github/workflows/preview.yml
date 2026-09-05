@@ -61,13 +61,13 @@ jobs:
           retention-days: 14
 
       # Pages serves one artifact for the whole domain, so publishing a preview means
-      # redeploying the site with every live preview collected into it.
+      # redeploying the site with every live preview collected into it. The dispatch carries no
+      # inputs: it runs main's workflow, which finds this artifact by name on its own.
       - name: Trigger the Pages deployment
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh workflow run pages.yml \
             --repo "${{ github.repository }}" \
-            --ref main \
-            -f preview_pr="${{ github.event.number }}"
+            --ref main
 ...
