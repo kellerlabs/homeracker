@@ -30,7 +30,7 @@
     "@types/node": "26.4.1",
     "@types/three": "0.185.4",
     "hast-util-to-string": "3.0.1",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "unist-util-visit": "5.1.0",
     "vitest": "4.1.11"
   }
