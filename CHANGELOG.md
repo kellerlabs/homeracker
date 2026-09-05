@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.14.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.8...homeracker-v3.14.0) (2026-09-05)
+
+
+### ✨ Features
+
+* add a 3d configurator and rework github pages ([#460](https://github.com/kellerlabs/homeracker/issues/460)) ([0336a9f](https://github.com/kellerlabs/homeracker/commit/0336a9f7b906b6a192b13b82d925336333ddfcc2))
+* add release-age guard and npm automerge allow-lists to renovate ([#470](https://github.com/kellerlabs/homeracker/issues/470)) ([691a1da](https://github.com/kellerlabs/homeracker/commit/691a1da95a9aa461a1b3b543153631620aeba47a))
+* batch npm updates into one PR and automerge patches only ([#477](https://github.com/kellerlabs/homeracker/issues/477)) ([3e1c37c](https://github.com/kellerlabs/homeracker/commit/3e1c37c14585643192b8984947716c4cde100c80))
+* **ci:** deploy a preview of each pull request to GitHub Pages ([#472](https://github.com/kellerlabs/homeracker/issues/472)) ([4f986cb](https://github.com/kellerlabs/homeracker/commit/4f986cb87d92e7f68e51bfae819ca936e4a2e884))
+* **ci:** pin every action to a commit SHA and enforce it with zizmor ([#475](https://github.com/kellerlabs/homeracker/issues/475)) ([569b564](https://github.com/kellerlabs/homeracker/commit/569b564762600cf9321bf3b33f32d614d3d1b03b))
+* make Dirnei codeowner of configurator and site ([#469](https://github.com/kellerlabs/homeracker/issues/469)) ([210814b](https://github.com/kellerlabs/homeracker/commit/210814b5864934160ac5b9bc4fa52e35f7aa9f20))
+* **site:** serve the site from a configurable base path ([#471](https://github.com/kellerlabs/homeracker/issues/471)) ([c19a579](https://github.com/kellerlabs/homeracker/commit/c19a579abb6eeeeea76c57c0a4a69b421267ea73))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.752 ([#461](https://github.com/kellerlabs/homeracker/issues/461)) ([554256d](https://github.com/kellerlabs/homeracker/commit/554256decbd53cc348af2e8414791db6ee57a62d))
+* update dependency kellerlab-pre-commit-hooks to v0.3.11 ([#462](https://github.com/kellerlabs/homeracker/issues/462)) ([44a62fa](https://github.com/kellerlabs/homeracker/commit/44a62fa10a229d9ad260cc68dd548ea9fb53d1ac))
+* update dependency openscad to v2026.09.03 ([#463](https://github.com/kellerlabs/homeracker/issues/463)) ([1b52244](https://github.com/kellerlabs/homeracker/commit/1b522445bdc34e5cd02daf2ef605930da28996d9))
+* update pre-commit hooks ([#458](https://github.com/kellerlabs/homeracker/issues/458)) ([2e178a8](https://github.com/kellerlabs/homeracker/commit/2e178a8b44ee625780c9eae1d235f89974c8c355))
+
 ## [3.13.8](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.7...homeracker-v3.13.8) (2026-08-29)
 
 
