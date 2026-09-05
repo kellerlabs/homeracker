@@ -1,0 +1,73 @@
+---
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+concurrency:
+  group: preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    # A preview publishes this PR's own HTML and JS on homeracker.org, same-origin with the live
+    # site, so a fork must never reach that path. The repository's fork-approval setting only
+    # holds back first-time contributors and is not a sufficient gate on its own.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      build: ${{ steps.decide.outputs.build }}
+    steps:
+      - name: Decide whether this PR gets a preview
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.number }}
+          LABELLED: ${{ contains(github.event.pull_request.labels.*.name, 'deploy-preview') }}
+        run: |
+          set -euo pipefail
+          if gh pr diff "$PR" --repo "$REPO" --name-only | grep -qE '^(site|configurator)/'; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=$LABELLED" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: gate
+    if: needs.gate.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build site
+        uses: ./.github/actions/build-site
+        with:
+          base: /preview/pr-${{ github.event.number }}/
+
+      - name: Upload preview
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-pr-${{ github.event.number }}
+          path: site/dist
+          retention-days: 14
+
+      # Pages serves one artifact for the whole domain, so publishing a preview means
+      # redeploying the site with every live preview collected into it.
+      - name: Trigger the Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run pages.yml \
+            --repo "${{ github.repository }}" \
+            --ref main \
+            -f preview_pr="${{ github.event.number }}"
+...
