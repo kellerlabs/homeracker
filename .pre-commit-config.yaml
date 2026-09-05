@@ -10,6 +10,12 @@ repos:
     rev: v1.7.12
     hooks:
       - id: actionlint
+  # Fails on any action reference that is not pinned to a full commit SHA. Its other audits are
+  # switched off for now; see zizmor.yml.
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.30.0
+    hooks:
+      - id: zizmor
   - repo: https://github.com/psf/black
     rev: 26.5.1
     hooks:

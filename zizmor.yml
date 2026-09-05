@@ -1,0 +1,17 @@
+---
+# zizmor is here for one job right now: every action reference must be a full commit SHA.
+# The `unpinned-uses` audit stays on and applies to every org without exception, including
+# actions/* and camunda/*, because a tag is a moving target its owner can repoint at any time.
+#
+# The audits below are switched off because the repository has a pre-existing backlog of
+# findings under them, not because they are wrong. Re-enable them one at a time as that backlog
+# is worked through, rather than in bulk.
+rules:
+  template-injection:
+    disable: true
+  artipacked:
+    disable: true
+  self-repository:
+    disable: true
+  github-app:
+    disable: true

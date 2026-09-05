@@ -3,6 +3,9 @@
   "extends": [
     "config:recommended",
     ":enablePreCommit",
+    // Keeps every action reference on a full commit SHA. A tag is a moving target an upstream
+    // owner can repoint at any time; a digest cannot be changed under us.
+    "helpers:pinGitHubActionDigests",
     "local>kellerlabs/homeracker:renovate-dependencies.json"
   ],
   // Ignore any repository config presets
@@ -20,6 +23,24 @@
   "minimumReleaseAgeBehaviour": "timestamp-optional",
   // Without this, an update that has not served its five days still gets a branch and a PR.
   "internalChecksFilter": "strict",
+  "customManagers": [
+    {
+      // Sub-actions of infra-global-github-actions are released under a per-action tag
+      // ("pull-request-1.0.3"). The built-in github-actions manager drops the sub-action path
+      // from depName, so it cannot tell those tag families apart and silently stops finding
+      // releases. Matching the pinned digest and its version comment restores that.
+      "description": "Track camunda/infra-global-github-actions sub-actions pinned to a per-action release tag",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "uses:\\s*camunda/infra-global-github-actions/[\\w./-]+@(?<currentDigest>[a-f0-9]{40})\\s+#\\s*(?<family>[a-z0-9-]+?)-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\b"
+      ],
+      "depNameTemplate": "camunda/infra-global-github-actions/{{{family}}}",
+      "packageNameTemplate": "camunda/infra-global-github-actions",
+      "datasourceTemplate": "github-tags",
+      "extractVersionTemplate": "^{{{family}}}-(?<version>\\d+\\.\\d+\\.\\d+)$"
+    }
+  ],
   "schedule": ["* * * * 0,6"],
   // Use "deps" as commit type instead of "chore(deps)"
   "semanticCommits": "enabled",
@@ -60,9 +81,10 @@
       "automerge": true
     },
     {
-      // infra-global-github-actions uses per-component semver tags (e.g. pull-request-1.0.0)
+      // The custom manager strips the per-action tag prefix, so these arrive as plain semver
+      // and need no versioning override. Matching on packageName covers both the sub-action
+      // depNames the custom manager emits and any bare reference to the repository.
       "matchPackageNames": ["camunda/infra-global-github-actions"],
-      "versioning": "regex:^pull-request-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
       "automerge": true
     },
     {
