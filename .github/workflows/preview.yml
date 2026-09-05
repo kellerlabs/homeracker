@@ -3,7 +3,7 @@ name: Preview
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened, labeled, unlabeled, closed]
 
 concurrency:
   group: preview-${{ github.event.number }}
@@ -14,7 +14,10 @@ jobs:
     # A preview publishes this PR's own HTML and JS on homeracker.org, same-origin with the live
     # site, so a fork must never reach that path. The repository's fork-approval setting only
     # holds back first-time contributors and is not a sufficient gate on its own.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.action != 'closed'
+      && github.event.action != 'unlabeled'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -67,7 +70,34 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           gh workflow run pages.yml \
             --repo "${{ github.repository }}" \
             --ref main
+
+  # Closing a PR or dropping its label leaves its preview published until something redeploys.
+  # pages.yml re-evaluates every artifact on each run, so a deployment is all the pruning takes.
+  prune:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && (github.event.action == 'closed'
+      || (github.event.action == 'unlabeled' && github.event.label.name == 'deploy-preview'))
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Redeploy only if this PR had a preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.number }}
+        run: |
+          set -euo pipefail
+          found=$(gh api --paginate "repos/$REPO/actions/artifacts" \
+            --jq "[.artifacts[] | select(.expired == false) | select(.name == \"preview-pr-$PR\")] | length")
+          if [ "$found" -eq 0 ]; then
+            echo "no preview artifact for pr-$PR, nothing to prune"
+            exit 0
+          fi
+          gh workflow run pages.yml --repo "$REPO" --ref main
 ...
