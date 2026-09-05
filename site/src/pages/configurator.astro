@@ -16,7 +16,7 @@ import Base from "../layouts/Base.astro";
   import { mountConfigurator } from "../../../configurator/src/app";
 
   const root = document.querySelector<HTMLElement>("#configurator");
-  if (root) mountConfigurator(root, { partsUrl: "/parts/" });
+  if (root) mountConfigurator(root, { partsUrl: `${import.meta.env.BASE_URL}parts/` });
 </script>
 
 <style>

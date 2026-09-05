@@ -10,6 +10,9 @@ interface Props {
   app?: boolean;
 }
 const { title, description, app = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+// Anything not served from the site root is a PR preview and must stay out of search results.
+const isPreview = base !== "/";
 ---
 
 <!doctype html>
@@ -19,8 +22,9 @@ const { title, description, app = false } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href={`${base}favicon.ico`} />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    {isPreview && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content="https://raw.githubusercontent.com/kellerlabs/assets/main/homeracker/img/homeracker_logo.png" />

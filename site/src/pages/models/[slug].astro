@@ -16,7 +16,7 @@ const description = model.body?.match(/## 📌 What\s+([^\n]+)/)?.[1] ?? `HomeRa
 <Base title={`${title} – HomeRacker models`} description={description}>
   <div class="wrap page">
     <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="/models/">Models</a>
+      <a href={`${import.meta.env.BASE_URL}models/`}>Models</a>
       <span aria-hidden="true">/</span>
       <span>{model.id}</span>
     </nav>

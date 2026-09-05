@@ -7,6 +7,9 @@ import { rewriteHref } from "./links";
 import { demoteHeadings, sectionize, type SectionizeOptions } from "./sections";
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+// Read from the environment rather than import.meta.env: rehype plugins run in Node during the
+// build, outside the client bundle Vite injects BASE_URL into. Mirrors base in astro.config.mjs.
+const BASE = process.env.SITE_BASE ?? "/";
 
 /** Rewrite relative markdown links to site routes or GitHub, based on the file being rendered. */
 export function rehypeRepoLinks() {
@@ -14,7 +17,7 @@ export function rehypeRepoLinks() {
     const sourcePath = path.relative(REPO_ROOT, file.path ?? "").split(path.sep).join("/");
     visit(tree, "element", (node) => {
       if (node.tagName !== "a" || typeof node.properties.href !== "string") return;
-      node.properties.href = rewriteHref(node.properties.href, sourcePath);
+      node.properties.href = rewriteHref(node.properties.href, sourcePath, BASE);
       if (/^https?:/.test(node.properties.href)) {
         node.properties.target = "_blank";
         node.properties.rel = ["noopener"];
