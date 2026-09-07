@@ -6,6 +6,9 @@
     // Keeps every action reference on a full commit SHA. A tag is a moving target an upstream
     // owner can repoint at any time; a digest cannot be changed under us.
     "helpers:pinGitHubActionDigests",
+    // Version-tracks camunda/infra-global-github-actions sub-action pins (`# <family>-X.Y.Z`),
+    // which the built-in github-actions manager cannot tell apart per family.
+    "github>camunda/infra-global-github-actions:renovate-action-versions.json5",
     "local>kellerlabs/homeracker:renovate-dependencies.json"
   ],
   // Ignore any repository config presets
@@ -23,24 +26,6 @@
   "minimumReleaseAgeBehaviour": "timestamp-optional",
   // Without this, an update that has not served its five days still gets a branch and a PR.
   "internalChecksFilter": "strict",
-  "customManagers": [
-    {
-      // Sub-actions of infra-global-github-actions are released under a per-action tag
-      // ("pull-request-1.0.3"). The built-in github-actions manager drops the sub-action path
-      // from depName, so it cannot tell those tag families apart and silently stops finding
-      // releases. Matching the pinned digest and its version comment restores that.
-      "description": "Track camunda/infra-global-github-actions sub-actions pinned to a per-action release tag",
-      "customType": "regex",
-      "managerFilePatterns": ["/^\\.github/.+\\.ya?ml$/"],
-      "matchStrings": [
-        "uses:\\s*camunda/infra-global-github-actions/[\\w./-]+@(?<currentDigest>[a-f0-9]{40})\\s+#\\s*(?<family>[a-z0-9-]+?)-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\b"
-      ],
-      "depNameTemplate": "camunda/infra-global-github-actions/{{{family}}}",
-      "packageNameTemplate": "camunda/infra-global-github-actions",
-      "datasourceTemplate": "github-tags",
-      "extractVersionTemplate": "^{{{family}}}-(?<version>\\d+\\.\\d+\\.\\d+)$"
-    }
-  ],
   "schedule": ["* * * * 0,6"],
   // Use "deps" as commit type instead of "chore(deps)"
   "semanticCommits": "enabled",
