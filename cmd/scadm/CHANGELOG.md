@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/kellerlabs/homeracker/compare/scadm-v0.10.0...scadm-v0.10.1) (2026-09-12)
+
+
+### ♻️ Code Refactoring
+
+* **instructions:** make AGENTS.md canonical and align docs with house-style ([#484](https://github.com/kellerlabs/homeracker/issues/484)) ([ef337d5](https://github.com/kellerlabs/homeracker/commit/ef337d57ba903edb2602e5dc6b36c18c2fe36a8d))
+
 ## [0.10.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.9.0...scadm-v0.10.0) (2026-07-04)
 
 

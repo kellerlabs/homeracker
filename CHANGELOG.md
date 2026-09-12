@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.14.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.14.0...homeracker-v3.14.1) (2026-09-12)
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.754 ([#481](https://github.com/kellerlabs/homeracker/issues/481)) ([d0cd7a2](https://github.com/kellerlabs/homeracker/commit/d0cd7a20530b3617a03efedac62f801d7117099c))
+* update dependency openscad to v2026.09.11 ([#482](https://github.com/kellerlabs/homeracker/issues/482)) ([150a416](https://github.com/kellerlabs/homeracker/commit/150a4164c6b625974f358074c171c4d1f2974c98))
+* update pre-commit hook renovatebot/pre-commit-hooks to v44.57.3 ([#476](https://github.com/kellerlabs/homeracker/issues/476)) ([ab296e0](https://github.com/kellerlabs/homeracker/commit/ab296e09b858535f99bca30abed239ee73dbf743))
+* update vitest to v5 and skip the TypeScript 7.0 line ([#485](https://github.com/kellerlabs/homeracker/issues/485)) ([3ef4b7c](https://github.com/kellerlabs/homeracker/commit/3ef4b7cb2958afeddb7f6e3c312177bba05335b2))
+
+
+### ♻️ Code Refactoring
+
+* **ci:** source the igga version manager from its published preset ([#479](https://github.com/kellerlabs/homeracker/issues/479)) ([742f80e](https://github.com/kellerlabs/homeracker/commit/742f80ee188a26a471812ad4e028b2849fc311de))
+* **instructions:** make AGENTS.md canonical and align docs with house-style ([#484](https://github.com/kellerlabs/homeracker/issues/484)) ([ef337d5](https://github.com/kellerlabs/homeracker/commit/ef337d57ba903edb2602e5dc6b36c18c2fe36a8d))
+
 ## [3.14.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.13.8...homeracker-v3.14.0) (2026-09-05)
 
 
