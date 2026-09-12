@@ -24,6 +24,7 @@ jobs:
       pull-requests: read
     outputs:
       previews: ${{ steps.collect.outputs.previews }}
+      meta: ${{ steps.collect.outputs.meta }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -44,11 +45,12 @@ jobs:
         run: |
           set -euo pipefail
           published=""
-          # Artifacts come back newest first, so the first sighting of a name is the current one.
+          : > meta.txt
+          # Artifact ids do not increase with age, so the current upload per name is the newest by date.
           gh api --paginate "repos/$REPO/actions/artifacts" \
-            --jq '.artifacts[] | select(.expired == false) | select(.name | startswith("preview-pr-")) | "\(.name) \(.id)"' \
-            | awk '!seen[$1]++' > artifacts.txt
-          while read -r name id; do
+            --jq '.artifacts[] | select(.expired == false) | select(.name | startswith("preview-pr-")) | "\(.name) \(.id) \(.created_at) \(.workflow_run.head_sha)"' \
+            | sort -k3,3r | awk '!seen[$1]++' > artifacts.txt
+          while read -r name id built sha; do
             pr="${name#preview-pr-}"
             qualifies=$(gh pr view "$pr" --repo "$REPO" --json state,labels,files --jq '
               if .state != "OPEN" then "no"
@@ -65,8 +67,10 @@ jobs:
             mkdir -p "site/dist/preview/pr-$pr"
             unzip -q "$name.zip" -d "site/dist/preview/pr-$pr"
             published="$published $pr"
+            printf '%s %s %s\n' "$pr" "$built" "$sha" >> meta.txt
           done < artifacts.txt
           echo "previews=$(echo "$published" | xargs)" >> "$GITHUB_OUTPUT"
+          echo "meta=$(jq -cRn '[inputs | split(" ") | {pr: .[0], built: .[1], sha: .[2]}]' < meta.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
@@ -94,20 +98,25 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      # One comment per PR, left alone once it says the right thing, so a busy branch neither
-      # stacks up links nor collects an edit history of identical bodies.
+      # One comment per PR, edited in place, so a busy branch neither stacks up links nor
+      # collects an edit history of identical bodies. Republishing an unchanged preview leaves
+      # the build line alone, so an edit here means that preview really was rebuilt.
       - name: Post the preview links
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PREVIEWS: ${{ needs.build.outputs.previews }}
+          META: ${{ needs.build.outputs.meta }}
         run: |
           set -euo pipefail
           for pr in $PREVIEWS; do
             url="https://homeracker.org/preview/pr-$pr/"
             # Surfaces the live set on the run page, so a deployment says what it published.
             echo "::notice title=Preview pr-$pr::$url"
-            body=$(printf '%s\n🔭 **Preview:** %s\n\nRebuilt on every push, removed when this PR closes.' '<!-- preview-url -->' "$url")
+            built=$(jq -r --arg pr "$pr" '.[] | select(.pr == $pr) | .built' <<< "$META")
+            sha=$(jq -r --arg pr "$pr" '.[] | select(.pr == $pr) | .sha' <<< "$META")
+            body=$(printf '%s\n🔭 **Preview:** %s\n\nLast rebuilt %s from %s. Removed when this PR closes.' \
+              '<!-- preview-url -->' "$url" "$(date -u -d "$built" '+%d.%m.%Y %H:%M UTC')" "${sha:0:7}")
             existing=$(gh api "repos/$REPO/issues/$pr/comments" \
               --jq 'map(select(.body | startswith("<!-- preview-url -->"))) | first | .id // empty')
             if [ -z "$existing" ]; then
