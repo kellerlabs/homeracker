@@ -89,6 +89,11 @@
       "groupSlug": "npm"
     },
     {
+      // The 7.0 line ships no compiler API, which typescript-eslint and @astrojs/check need.
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7 || >=7.1"
+    },
+    {
       // Kept out of the npm group: three is 0.x and treats minors as breaking, and no test
       // renders a frame, so it needs reading on its own. Its types share the version line.
       "matchPackageNames": ["three", "@types/three"],
