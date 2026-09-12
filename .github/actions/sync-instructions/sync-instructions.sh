@@ -74,12 +74,18 @@ if [[ "${FAILED}" -eq 1 ]]; then
 fi
 
 # TODO: delete this block once homeracker-exclusive and homeracker-community have each completed
-# one sync. A downstream repo that keeps the old directory carries both copies of every guideline,
-# and Copilot still applies the stale ones through their applyTo frontmatter.
+# one sync. A downstream repo that keeps the old directory carries both copies of every guideline
+# and Copilot still applies the stale ones through their applyTo frontmatter; one that keeps the old
+# copilot-instructions.md keeps a second entry point that no longer receives updates.
 readonly LEGACY_RULES_DIR=".github/instructions"
+readonly LEGACY_COPILOT_FILE=".github/copilot-instructions.md"
 if [[ -d "${LEGACY_RULES_DIR}" ]]; then
     rm -rf "${LEGACY_RULES_DIR}"
     echo "  ✓ pruned ${LEGACY_RULES_DIR}"
+fi
+if [[ -f "${LEGACY_COPILOT_FILE}" ]]; then
+    rm -f "${LEGACY_COPILOT_FILE}"
+    echo "  ✓ pruned ${LEGACY_COPILOT_FILE}"
 fi
 
 echo ""

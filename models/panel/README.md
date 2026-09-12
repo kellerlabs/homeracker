@@ -23,13 +23,13 @@ Open `parts/panel.scad` in OpenSCAD and use the **Customizer** panel.
 | `units_x` | 4 | 2-16 | Panel width in HR units |
 | `units_y` | 3 | 2-16 | Panel height in HR units |
 | `panel_clearance` | 0.0 | 0-0.4 | Full Cover only, gap between adjacent panels (mm). Default 0.0 works for most printers; increase slightly if panels are too tight |
-| `corner_mounts` | true |, | Full-height corner mounts with lockpin holes (false = contour only) |
-| `mount_north` | true |, | Mount plate on north (back) edge (only effective when units_x > 2) |
-| `mount_south` | true |, | Mount plate on south (front) edge (only effective when units_x > 2) |
-| `mount_east` | true |, | Mount plate on east (right) edge (only effective when units_y > 2) |
-| `mount_west` | true |, | Mount plate on west (left) edge (only effective when units_y > 2) |
-| `debug_colors` | false |, | Show distinct colors per section for debugging |
-| `chamfer_enabled` | true |, | Apply chamfers to edges |
+| `corner_mounts` | true | true/false | Full-height corner mounts with lockpin holes (false = contour only) |
+| `mount_north` | true | true/false | Mount plate on north (back) edge (only effective when units_x > 2) |
+| `mount_south` | true | true/false | Mount plate on south (front) edge (only effective when units_x > 2) |
+| `mount_east` | true | true/false | Mount plate on east (right) edge (only effective when units_y > 2) |
+| `mount_west` | true | true/false | Mount plate on west (left) edge (only effective when units_y > 2) |
+| `debug_colors` | false | true/false | Show distinct colors per section for debugging |
+| `chamfer_enabled` | true | true/false | Apply chamfers to edges |
 
 ## 📸 Catalog
 
@@ -103,12 +103,12 @@ A standard 10"/19" rack-compatible panel with configurable bore patterns. Open `
 | `height_units` | 1 | 1-8 | Panel height in rack units |
 | `bore_mode` | 0 (Default) | 0-2 | Bore hole pattern |
 | `panel_depth_type` | 1 (Regular) | 1-2 | Panel depth (wall thickness): 1 = Regular (2mm), 2 = Strong (4mm) |
-| `back_brace` | false |, | Add a triangulated truss stiffener on the panel back, flush with the split-knuckle plane, see [Stiffening](#-stiffening-depth-vs-back-brace) |
+| `back_brace` | false | true/false | Add a triangulated truss stiffener on the panel back, flush with the split-knuckle plane, see [Stiffening](#-stiffening-depth-vs-back-brace) |
 | `back_brace_density` | regular | regular, dense | Truss band density when `back_brace` is on, `regular` = 1 band per unit, `dense` = 2 bands per unit (finer triangles, but noticeably more material) |
 | `split_mode` | 0 (Full) | 0-1 | Print whole (Full) or split into halves (Half), see [Split Panels](#-split-panels) |
 | `view_mode` | 0 (Assembled) | 0-3 | When split: assembled panel (pin seated), left half only, right half only, or exploded preview (halves apart + pin floating above) |
-| `debug_colors` | false |, | Show distinct colors per section for debugging |
-| `chamfer_enabled` | true |, | Apply chamfers to edges |
+| `debug_colors` | false | true/false | Show distinct colors per section for debugging |
+| `chamfer_enabled` | true | true/false | Apply chamfers to edges |
 
 ### Bore Modes
 
@@ -256,16 +256,16 @@ A 19" rack panel (482.6mm) is wider than most printer beds. **Split mode** divid
 |-----------|---------|-------|-------------|
 | `height_units` | 1 | 1-8 | Connector height in rack units (match the split panel) |
 | `knuckle_side` | all | all, left, right | Which knuckles to keep: both halves, or a single panel half's two knuckles |
-| `debug_colors` | false |, | Show distinct colors per section for debugging |
-| `chamfer_enabled` | true |, | Chamfer the knuckle edges |
+| `debug_colors` | false | true/false | Show distinct colors per section for debugging |
+| `chamfer_enabled` | true | true/false | Chamfer the knuckle edges |
 
 **Split Lock Pin** (`parts/split_lockpin.scad`)
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
 | `height_units` | 1 | 1-8 | Match the split panel this pin locks |
-| `debug_colors` | false |, | Show distinct colors per section for debugging |
-| `chamfer_enabled` | true |, | Chamfer the insertion ends |
+| `debug_colors` | false | true/false | Show distinct colors per section for debugging |
+| `chamfer_enabled` | true | true/false | Chamfer the insertion ends |
 
 ### Variants
 

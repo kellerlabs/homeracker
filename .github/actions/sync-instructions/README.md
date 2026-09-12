@@ -13,7 +13,7 @@ Synced files:
 
 `AGENTS.md` and `CLAUDE.md` must stay in the same sync set. A pointer that arrives without its target dangles.
 
-A successful sync also deletes `.github/instructions/` if the consumer still has one. The guidelines live in `.claude/rules/` now, and a repo holding both applies each rule twice. The script carries a `TODO` marking this prune for removal once every consumer has synced once.
+A successful sync also deletes `.github/instructions/` and `.github/copilot-instructions.md` if the consumer still has them. The guidelines live in `.claude/rules/` now and agents read `AGENTS.md` directly, so a repo holding the old paths applies each rule twice and keeps an entry point that no longer receives updates. The script carries a `TODO` marking this prune for removal once every consumer has synced once.
 
 ### Requirements
 

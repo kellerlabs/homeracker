@@ -121,7 +121,7 @@ The system is based on 4 core measurements:
 3. **2mm**: Wall thickness of connectors.
 4. **0.2mm**: Tolerance added to connector interiors for print/material variances.
 
-> These values (except tolerance) are arbitrary, just made sense during design.
+> These values (except tolerance) are arbitrary and just made sense during design.
 
 ### 🧱 Supports
 
@@ -222,7 +222,7 @@ So, "HomeRacker" was born, part practical, part tongue-in-cheek. It fits the hom
 # 📜 Licensing
 
 > 💡 **tl;dr**
->, Use it for ANY purpose (even commercial), but credit me and share alike!
+> Use it for ANY purpose (even commercial), but credit me and share alike!
 
 * Source code: `MIT License` ([LICENSE](https://github.com/kellerlabs/homeracker/blob/main/LICENSE))
 * 3D models & creative assets (`/models/`): `CC BY-SA 4.0 License` ([/models/LICENSE](https://github.com/kellerlabs/homeracker/blob/main/models/LICENSE))
