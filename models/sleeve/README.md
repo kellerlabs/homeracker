@@ -6,7 +6,7 @@ A general-purpose 3-sided U-shaped sleeve that slides onto a HomeRacker support.
 
 ## 🤔 Why
 
-A reusable attachment primitive for anything that needs to sit on a HomeRacker support — connecting rack columns (Racklink), labeling rack sections, or mounting custom accessories.
+A reusable attachment primitive for anything that needs to sit on a HomeRacker support, connecting rack columns (Racklink), labeling rack sections, or mounting custom accessories.
 
 ## 🔧 How
 
@@ -14,11 +14,11 @@ Open `parts/sleeve.scad` in OpenSCAD and use the **Customizer** panel.
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
-| `length` | 3 | 1–20 | Sleeve height in HomeRacker units |
+| `length` | 3 | 1-20 | Sleeve height in HomeRacker units |
 | `debug_colors` | false | bool | Color-code geometry for debugging |
 | `disable_chamfer` | false | bool | Remove chamfers (useful for debugging fit) |
 
-**Library usage** — include in your own model:
+**Library usage**, include in your own model:
 
 ```scad
 include <../sleeve/lib/sleeve.scad>
@@ -42,5 +42,5 @@ scadm export-png models/sleeve/parts/sleeve.scad
 
 ## 📚 References
 
-- [HomeRacker core](../core/README.md) — base constants and measurements
-- [Racklink](../racklink/README.md) — uses sleeve as a sub-component
+- [HomeRacker core](../core/README.md): base constants and measurements
+- [Racklink](../racklink/README.md): uses sleeve as a sub-component

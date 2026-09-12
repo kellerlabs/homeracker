@@ -1,20 +1,14 @@
 ---
-applyTo: "**/*.md"
+paths: ["**/*.md"]
 ---
 
 # 📝 Markdown Documentation Guidelines
 
-## Purpose & Scope
-
-These guidelines ensure documentation in HomeRacker stays consistent, discoverable, and actionable.
-Every code change that adds, modifies, or removes functionality **must** include a corresponding documentation update.
-
 ## ✍️ Writing Style
 
-- Use **emojis** to improve scannability (section headers, admonitions, list bullets where fitting).
-- Be **brief** — prefer bullet points over prose. Link to existing docs instead of duplicating content.
-- Use **code blocks** with language hints for commands and config snippets.
-- Cross-reference from the parent `README.md` when adding new pages so they remain discoverable.
+Load the [house-style skill](https://github.com/kellervater/kellervater/blob/main/.claude/skills/house-style/SKILL.md) before writing any prose here. It owns voice, brevity, dashes, emoji and wrapping across every surface. This file owns only what homeracker's documents must contain.
+
+Every code change that adds, modifies, or removes functionality must include a corresponding documentation update.
 
 ## 📐 Document Structure
 
@@ -53,7 +47,7 @@ Each model folder (`models/<name>/`) should have a `README.md` following this st
 
 ## 📌 What
 
-Brief description of the model — what it is, what problem it solves.
+Brief description of the model: what it is, what problem it solves.
 
 ## 🤔 Why
 
@@ -93,9 +87,9 @@ To generate or refresh previews:
 
 ## 🗂️ File Organization
 
-- **Placement:** READMEs live next to their code — each model folder and `cmd/` subfolder gets its own `README.md`.
+- **Placement:** READMEs live next to their code. Each model folder and `cmd/` subfolder gets its own `README.md`.
 - **Naming:** Use lowercase `kebab-case`. Name files after the topic, not the ticket.
-- **Restructuring:** When adding docs, check if existing files should be renamed or reorganized to avoid overlap. Keep the directory tree tidy — fewer well-named files beat many scattered ones.
+- **Restructuring:** When adding docs, check if existing files should be renamed or reorganized to avoid overlap. Fewer well-named files beat many scattered ones.
 - **Index:** Reference new model folders from `models/README.md`.
 
 ## 🔗 Linking Conventions
@@ -105,9 +99,8 @@ To generate or refresh previews:
 
 ## 🚫 Anti-Patterns
 
-- Don't create docs that only repeat what the code already says — add *context* the code can't convey.
-- Don't leave placeholder sections empty — either fill them or remove the heading.
-- Don't duplicate content across files — link to the single source of truth.
+- Don't create docs that only repeat what the code already says. Add *context* the code can't convey.
+- Don't leave placeholder sections empty. Either fill them or remove the heading.
 - Don't commit PNGs without a corresponding README entry linking them.
 - Don't add or modify parts files without generating/refreshing preview PNGs.
 - Don't update a model README without checking if the parent `models/README.md` index needs updating too.

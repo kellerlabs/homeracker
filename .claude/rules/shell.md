@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.sh,**/*.yml,**/*.yaml"
+paths: ["**/*.sh", "**/*.yml", "**/*.yaml"]
 ---
 
 # Shell Guidelines
@@ -21,14 +21,14 @@ set -euo pipefail
 Capture command output before iterating so failures are caught by `set -e`:
 
 ```bash
-# Bad — pipe masks command failure
+# Bad: pipe masks command failure
 gh pr list --json number --jq '.[].number' | while read -r pr; do ...
 
-# Bad — process substitution does not reliably trip set -e
+# Bad: process substitution does not reliably trip set -e
 while read -r pr; do ...
 done < <(gh pr list --json number --jq '.[].number')
 
-# Good — command failure is caught before iterating
+# Good: command failure is caught before iterating
 prs="$(gh pr list --json number --jq '.[].number')"
 [[ -z "$prs" ]] && exit 0
 while read -r pr; do ...

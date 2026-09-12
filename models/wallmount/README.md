@@ -2,12 +2,11 @@
 
 ## 📌 What
 
-A wall-mountable bracket that attaches HomeRacker supports to a wall using screws.
-Accepts a support beam via the standard connector interface and secures it with lock pins.
+A wall-mountable bracket that attaches HomeRacker supports to a wall using screws. Accepts a support beam via the standard connector interface and secures it with lock pins.
 
 ## 🤔 Why
 
-Not every setup sits on a desk — this lets you mount HomeRacker racks directly to walls or vertical surfaces (or even the ceiling).
+Not every setup sits on a desk. This lets you mount HomeRacker racks directly to walls or vertical surfaces (or even the ceiling).
 
 ## 🔧 How
 

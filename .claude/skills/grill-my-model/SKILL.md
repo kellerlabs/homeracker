@@ -10,35 +10,24 @@ description: >
   gaps a newbie couldn't understand, improving model README / configuration &
   printing guides / MakerWorld descriptions, rendering missing parameter-config
   images, and creating or updating a model's decision record (ADR).
-  DO NOT USE FOR: writing the OpenSCAD geometry itself (use the @makerworld-model
-  agent), extracting MakerWorld descriptions from the web (use the
-  makerworld-description skill), or routine version/config/dependency changes.
+  DO NOT USE FOR: writing the OpenSCAD geometry itself, extracting MakerWorld
+  descriptions from the web (use the makerworld-description skill), or routine
+  version/config/dependency changes.
 ---
 
-# 🔥 Grill My Model — homeracker Skill
+# 🔥 Grill My Model, homeracker Skill
 
 ## 📌 What
 
-A relentless interview that walks every branch of a model's design tree and
-challenges **each design decision** until a newbie could understand *why* the model
-is the way it is. The resolved answers are then folded back into the model's
-documentation (README, configuration/printing guide, MakerWorld description) and,
-where warranted, a decision record (ADR).
+A relentless interview that walks every branch of a model's design tree and challenges **each design decision** until a newbie could understand *why* the model is the way it is. The resolved answers are then folded back into the model's documentation (README, configuration/printing guide, MakerWorld description) and, where warranted, a decision record (ADR).
 
-The goal is not to be nice. The goal is the **most comprehensive yet concise
-documentation possible**. Ask 10 questions or 100 — whatever it takes to leave no
-unexplained decision behind.
+The goal is not to be nice. The goal is the **most comprehensive yet concise documentation possible**. Ask 10 questions or 100, whatever it takes to leave no unexplained decision behind.
 
 ## 🤔 Why
 
-Models accrete parameters, magic defaults, and geometry tricks whose rationale lives
-only in the author's head. New users (and future AI agents) then can't tell which
-knob to turn or why a default is what it is. Grilling surfaces that hidden rationale
-while it's still recoverable and captures it where people will actually read it.
+Models accrete parameters, magic defaults, and geometry tricks whose rationale lives only in the author's head. New users (and future AI agents) then can't tell which knob to turn or why a default is what it is. Grilling surfaces that hidden rationale while it's still recoverable and captures it where people will actually read it.
 
-This skill is the OpenSCAD-model translation of the popular "grill my plan" pattern
-(e.g. [mattpocock/skills `grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md)):
-a one-question-at-a-time, recommend-an-answer, explore-before-asking loop.
+This skill is the OpenSCAD-model translation of the popular "grill my plan" pattern (e.g. [mattpocock/skills `grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md)): a one-question-at-a-time, recommend-an-answer, explore-before-asking loop.
 
 ---
 
@@ -46,7 +35,7 @@ a one-question-at-a-time, recommend-an-answer, explore-before-asking loop.
 
 | Situation | What the grill produces |
 |---|---|
-| **Planning** a new model | A clear design brief: justified parameters, defaults, scope, print plan — captured in a fresh README + ADR before code exists |
+| **Planning** a new model | A clear design brief: justified parameters, defaults, scope, print plan, captured in a fresh README + ADR before code exists |
 | **After building** a model or changing one | Gap-filled README, configuration/printing guide, MakerWorld description, refreshed config images, updated/created ADR |
 
 It works the same way in both cases: gather context, grill, then act on docs.
@@ -68,7 +57,7 @@ Before asking anything, read everything that already exists for the model:
 
 > **Rule (from the source pattern):** if a question can be answered by exploring the
 > codebase, explore the codebase instead of asking. Only ask the human what the code
-> cannot tell you — intent, trade-offs, target user, and the "why".
+> cannot tell you, intent, trade-offs, target user, and the "why".
 
 Build a checklist of every decision you found. That checklist is your grill agenda.
 
@@ -86,14 +75,13 @@ For each question:
 4. Resolve dependencies first: if decision B depends on A, settle A first.
 5. When an answer reveals a new branch, push onto the agenda and keep going.
 
-Stay relentless but constructive. Keep each question tight — no walls of text.
+Stay relentless but constructive. Keep each question tight, no walls of text.
 
 ---
 
-## 4. What to Grill — Question Catalog
+## 4. What to Grill, Question Catalog
 
-Walk these lenses for the model as a whole **and for every single parameter**. Skip
-only what context already answers conclusively.
+Walk these lenses for the model as a whole **and for every single parameter**. Skip only what context already answers conclusively.
 
 ### 4.1 Every parameter (ask for each one)
 
@@ -104,9 +92,9 @@ only what context already answers conclusively.
 - **Default:** Why *this* default and not another? Is it the most common real-world
   case? Does it satisfy HomeRacker standards out of the box?
 - **Range & step:** Are the Customizer `[min:step:max]` / enum choices justified?
-  What happens at the extremes — does it still print and fit?
+  What happens at the extremes, does it still print and fit?
 - **Name:** Does the name spell out intent for a newbie? (See naming conventions in
-  the OpenSCAD instructions — descriptive over abbreviated.)
+  the OpenSCAD instructions, descriptive over abbreviated.)
 - **Interactions:** Which other parameters does it couple with? Any invalid
   combinations that need an `assert` or a doc warning?
 - **Units & frame:** mm? degrees? Which axis/anchor? Is that obvious from the name/doc?
@@ -128,8 +116,7 @@ only what context already answers conclusively.
 
 ## 5. Act on the Documentation
 
-Only **after** the relevant branch is resolved, update docs. Act on **existing** docs;
-create only the crucial README if it is missing.
+Only **after** the relevant branch is resolved, update docs. Act on **existing** docs; create only the crucial README if it is missing.
 
 ### 5.1 Which docs
 
@@ -145,11 +132,10 @@ create only the crucial README if it is missing.
 
 ### 5.2 Missing parameter-config images
 
-If a parameter configuration that matters for understanding has **no** illustrating
-render:
+If a parameter configuration that matters for understanding has **no** illustrating render:
 
 1. **Ask the user** whether to render it (and at which parameter values).
-2. On confirmation, render with `scadm export-png` — full F6 renders, `BeforeDawn`
+2. On confirmation, render with `scadm export-png`, full F6 renders, `BeforeDawn`
    colorscheme (the intentional default). Use a preset or `-D var=val` overrides:
    - `scadm export-png models/<name>/parts/<part>.scad -D 'param=value' --output models/<name>/parts/renders/<name>_<variant>.png`
    - or with a preset: `scadm export-png <file> -p <presets.json> -P <preset>`
@@ -159,7 +145,7 @@ render:
 
 ### 5.3 Writing quality
 
-- Be **brief** — bullet points over prose, < ~100 lines where possible.
+- Be **brief**, bullet points over prose, < ~100 lines where possible.
 - Add the *context the code cannot convey*; never restate what the code already says.
 - Use HomeRacker emoji section headers and cross-link from the parent index.
 
@@ -172,7 +158,7 @@ A model carries **one** decision record capturing its core design rationale. App
 | Situation | Action |
 |---|---|
 | **No ADR exists** for this model | Build one **from the ground up** in `docs/decisions/<model>.md` capturing the grilled rationale (problem, key parameters/defaults, geometry & build method, alternatives rejected, consequences). Load the `decision-records` skill for the exact template and index update. |
-| **ADR exists but has gaps** | **Adapt** the existing ADR — fill the missing context the grill surfaced. Do not create a second record. |
+| **ADR exists but has gaps** | **Adapt** the existing ADR, fill the missing context the grill surfaced. Do not create a second record. |
 | **Behavior changed significantly** (geometry or build method materially different) | Create a **new** ADR that supersedes the old one (per the supersede flow in the `decision-records` skill). |
 
 > A single ADR per model is enough unless geometry or building methods change
@@ -184,7 +170,7 @@ A model carries **one** decision record capturing its core design rationale. App
 
 The grill is done when:
 
-- Every parameter has a justified existence, default, and range — or was removed.
+- Every parameter has a justified existence, default, and range, or was removed.
 - A newbie could read the README and understand *why*, not just *how*.
 - Configuration/printing guide and MakerWorld description (where they exist) reflect
   the resolved rationale and any new config images.
@@ -195,10 +181,10 @@ The grill is done when:
 
 ## 📚 References
 
-- [`humanizer` skill](../humanizer/SKILL.md) — run it over any README/description/ADR text this grill writes or edits, to strip AI tells
-- [`grill-my-plan` skill](../grill-my-plan/SKILL.md) — the plan-shaped sibling (use it to stress-test a plan before code exists)
-- [`decision-records` skill](../decision-records/SKILL.md) — ADR template, index, supersede flow
-- [`makerworld-description` skill](../makerworld-description/SKILL.md) — MakerWorld `DESCRIPTION.md` handling
-- [Markdown guidelines](../../instructions/markdown.instructions.md) — Model README template, Catalog rules
-- [OpenSCAD guidelines](../../instructions/openscad.instructions.md) — naming, geometry conventions
-- [mattpocock/skills `grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — the upstream "grill my plan" pattern this adapts
+- [`humanizer` skill](../humanizer/SKILL.md): run it over any README/description/ADR text this grill writes or edits, to strip AI tells
+- [`grill-my-plan` skill](../grill-my-plan/SKILL.md): the plan-shaped sibling (use it to stress-test a plan before code exists)
+- [`decision-records` skill](../decision-records/SKILL.md): ADR template, index, supersede flow
+- [`makerworld-description` skill](../makerworld-description/SKILL.md): MakerWorld `DESCRIPTION.md` handling
+- [Markdown guidelines](../../rules/markdown.md): Model README template, Catalog rules
+- [OpenSCAD guidelines](../../rules/openscad.md): naming, geometry conventions
+- [mattpocock/skills `grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md): the upstream "grill my plan" pattern this adapts

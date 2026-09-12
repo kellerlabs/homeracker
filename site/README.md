@@ -48,6 +48,6 @@ Astro caches rendered markdown in `.astro/`. After changing the rehype transform
 
 ## 📚 References
 
-- [astro-site-replaces-jekyll](../docs/decisions/astro-site-replaces-jekyll.md) — decision record
+- [astro-site-replaces-jekyll](../docs/decisions/astro-site-replaces-jekyll.md): decision record
 - [web-configurator-on-github-pages](../docs/decisions/web-configurator-on-github-pages.md)
 - [Astro content collections](https://docs.astro.build/en/guides/content-collections/)

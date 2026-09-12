@@ -93,7 +93,7 @@ scadm install --libs-only
 
 ### Flatten .scad files
 
-Flatten include trees into single files — useful for platforms that require single-file uploads (e.g. MakerWorld Customizer).
+Flatten include trees into single files, useful for platforms that require single-file uploads (e.g. MakerWorld Customizer).
 
 ```bash
 # Single file
@@ -124,29 +124,27 @@ The flattener expects source `.scad` files to follow OpenSCAD Customizer convent
 
 **Root files** (the files being flattened):
 
-1. **Parameter sections** — `/* [SectionName] */` blocks with customizable variables
-2. **Hidden section** — `/* [Hidden] */` with constants/variables hidden from the Customizer UI
-3. **Main code** — module/function calls that generate geometry
+1. **Parameter sections**: `/* [SectionName] */` blocks with customizable variables
+2. **Hidden section**: `/* [Hidden] */` with constants/variables hidden from the Customizer UI
+3. **Main code**: module/function calls that generate geometry
 
 Variable placement rules:
 
 - Variables inside `/* [SectionName] */` blocks → preserved in their respective sections
 - Variables in `/* [Hidden] */` section → included in the Hidden section
 - In **root files**, place top-level variables inside a section block (`/* [Hidden] */` or named) so they are preserved reliably during flattening
-- In **library files**, variables may appear anywhere — the flattener collects them regardless of position
+- In **library files**, variables may appear anywhere, the flattener collects them regardless of position
 
 **Library files** (resolved via `include <...>`):
 
 - May contain module/function definitions, constants, and variables in any order
-- Section markers (`/* [SectionName] */`) in library files are silently ignored — only root file sections are preserved in the output
-- Only **effectively used** definitions (modules, functions, variables) from the dependency chain are included — unused code is omitted
+- Section markers (`/* [SectionName] */`) in library files are silently ignored, only root file sections are preserved in the output
+- Only **effectively used** definitions (modules, functions, variables) from the dependency chain are included, unused code is omitted
 - Library variables appear in the Hidden section with an origin comment (e.g. `// --- from constants.scad ---`)
 
 ### Render .scad files
 
-Validate .scad files by rendering them through the bundled OpenSCAD binary.
-"Rendering" means compiling the .scad source into a binary STL — this validates syntax,
-geometry, and that all includes resolve correctly. A non-zero exit code means something is broken.
+Validate .scad files by rendering them through the bundled OpenSCAD binary. "Rendering" means compiling the .scad source into a binary STL, which validates syntax, geometry, and that all includes resolve correctly. A non-zero exit code means something is broken.
 
 ```bash
 # Explicit files
@@ -221,8 +219,8 @@ scadm vscode --python     # Install and configure Python extension
 }
 ```
 
-**OpenSCAD fields** (optional — defaults to nightly/latest if omitted):
-- `type`: `"nightly"` (default) or `"stable"` — which build channel to use
+**OpenSCAD fields** (optional, defaults to nightly/latest if omitted):
+- `type`: `"nightly"` (default) or `"stable"`, which build channel to use
 - `version`: `"latest"` (default) or a pinned version string (e.g., `"2026.03.28"`)
   - `"latest"` resolves dynamically by scraping the [OpenSCAD snapshots page](https://files.openscad.org/snapshots/) (nightly) or the [GitHub releases API](https://api.github.com/repos/openscad/openscad/releases/latest) (stable)
   - Pinned versions are used as-is without network access

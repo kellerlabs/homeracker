@@ -1,31 +1,33 @@
-# 🔄 Sync Copilot Instructions
+# 🔄 Sync Agent Instructions
 
 ## 📌 What
 
-Downloads the canonical Copilot instruction set from [kellerlabs/homeracker](https://github.com/kellerlabs/homeracker)
-and overwrites local copies.
+Downloads the canonical agent instruction set from [kellerlabs/homeracker](https://github.com/kellerlabs/homeracker) and overwrites local copies.
 
 Synced files:
 
-- `.github/copilot-instructions.md` — repo-wide Copilot instructions
-- `.github/instructions/*.instructions.md` — all path-specific guidelines (discovered dynamically via GitHub API)
-- `.github/pull_request_template.md` — PR template
+- `AGENTS.md`: the canonical repo-wide instructions, read by every coding agent
+- `CLAUDE.md`: pointer to `AGENTS.md`, imported by Claude Code
+- `.claude/rules/*.md`: all path-specific guidelines (discovered dynamically via GitHub API)
+- `.github/pull_request_template.md`: PR template
+
+`AGENTS.md` and `CLAUDE.md` must stay in the same sync set. A pointer that arrives without its target dangles.
+
+A successful sync also deletes `.github/instructions/` and `.github/copilot-instructions.md` if the consumer still has them. The guidelines live in `.claude/rules/` now and agents read `AGENTS.md` directly, so a repo holding the old paths applies each rule twice and keeps an entry point that no longer receives updates. The script carries a `TODO` marking this prune for removal once every consumer has synced once.
 
 ### Requirements
 
-- `curl`, `jq` — both pre-installed on GitHub Actions runners
-- `GITHUB_TOKEN` (optional) — used for API authentication to avoid rate limits; automatically available in GitHub Actions via `${{ github.token }}`
+- `curl`, `jq`, both pre-installed on GitHub Actions runners
+- `GITHUB_TOKEN` (optional), used for API authentication to avoid rate limits; automatically available in GitHub Actions via `${{ github.token }}`
 
 ## 🤔 Why
 
-HomeRacker maintains a well-proven, optimized instruction set that ensures consistent AI behavior
-across all repos. Instead of maintaining diverging copies, downstream repos can sync from the
-single source of truth.
+HomeRacker maintains a well-proven, optimized instruction set that ensures consistent AI behavior across all repos. Instead of maintaining diverging copies, downstream repos can sync from the single source of truth.
 
 Current consumers:
 
-- **homeracker-exclusive** — syncs daily via CI + manual trigger
-- **homeracker-community** — planned
+- **homeracker-exclusive**: syncs daily via CI + manual trigger
+- **homeracker-community**: planned
 
 ## 🔧 How
 
@@ -49,12 +51,12 @@ curl -fsSL https://raw.githubusercontent.com/kellerlabs/homeracker/sync-instruct
     ref: main  # optional, defaults to main
 ```
 
-The action only downloads files — it does not commit. The caller workflow handles git operations.
+The action only downloads files, it does not commit. The caller workflow handles git operations.
 
 ### Example workflow
 
 ```yaml
-name: Sync Copilot Instructions
+name: Sync Agent Instructions
 on:
   schedule:
     - cron: '0 6 * * 1'  # weekly Monday 06:00 UTC
@@ -86,8 +88,7 @@ jobs:
 
 ### Versioning
 
-The action is tagged following the `sync-instructions-v<major>.<minor>.<patch>` convention
-(managed by release-please). Renovate picks up tag updates automatically.
+The action is tagged following the `sync-instructions-v<major>.<minor>.<patch>` convention (managed by release-please). Renovate picks up tag updates automatically.
 
 ## 📚 References
 

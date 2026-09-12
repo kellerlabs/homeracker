@@ -226,7 +226,7 @@ short bullet list of what changed. Skip the bullets for tiny edits.
 
 - [blader/humanizer](https://github.com/blader/humanizer/blob/main/SKILL.md) — upstream skill this adapts
 - [Wikipedia: Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) — source patterns
-- [Markdown guidelines](../../instructions/markdown.instructions.md) — emoji headers, structure conventions
+- [Markdown guidelines](../../rules/markdown.md) — emoji headers, structure conventions
 - Text-creating skills that should run this pass:
   [`makerworld-description`](../makerworld-description/SKILL.md),
   [`grill-my-model`](../grill-my-model/SKILL.md),

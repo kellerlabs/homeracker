@@ -3,7 +3,7 @@
 ## General Testing Principles
 
 Always test changes before committing:
-- **Use existing test scripts** in `/cmd/test/` when available
+- **Use existing test scripts** in `cmd/test/` when available
 - **Write simple tests** if none exist (bash scripts, Python tests, or manual verification steps)
 - **Document test steps** in commit messages or PR descriptions
 
@@ -11,7 +11,7 @@ Always test changes before committing:
 
 ### Unit Tests
 
-Fast, mocked tests that run via pre-commit hooks on every commit.
+Fast, mocked tests. The `scadm-tests` pre-commit hook runs them when a commit touches `cmd/scadm/`, so a commit elsewhere in the repo will not exercise them. Run them by hand after changing anything scadm depends on.
 
 ```bash
 cd cmd/scadm
@@ -79,31 +79,16 @@ When modifying `renovate.json5`, always test changes before merging to prevent i
    - Verify version extraction matches expected format
    - Confirm updates are grouped as intended
 
-### Example: Testing OpenSCAD Updates
+### What to Check in the Output
 
-```bash
-# Checkout the branch you want to test
-git checkout fix/renovate-openscad-separate-extractors
-./cmd/test/test-renovate-local.sh
-```
-
-Expected output should show:
+**OpenSCAD version extraction**, which uses a separate datasource per platform:
 - `OpenSCAD-Windows`: version without `.ai` suffix
 - `OpenSCAD-Linux`: version with `.ai` suffix preserved
 
-### Example: Testing Grouping and Automerge
-
-```bash
-# Test pre-commit hooks grouping
-git checkout renovate-pre-commit
-./cmd/test/test-renovate-local.sh
-```
-
-Expected output should show:
-- **Single branch** `renovate/pre-commit-hooks` containing all pre-commit hook updates
-- Both **major and minor** updates combined (verify `separateMajorMinor: false`)
-- `"automerge": true` in the branch configuration
-- No separate `renovate/major-pre-commit-hooks` branch
+**Grouping and automerge**, for any rule in `renovate.json5` carrying a `groupSlug`:
+- A **single branch** `renovate/<groupSlug>` holding every dependency in the group
+- Major and minor updates combined in that one branch where the rule sets `separateMajorMinor: false`, with no separate `renovate/major-<groupSlug>` branch
+- `"automerge": true` in the branch configuration where the rule enables it
 
 ### Why Remote Push is Required
 

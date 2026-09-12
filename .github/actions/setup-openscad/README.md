@@ -1,6 +1,6 @@
 # Setup OpenSCAD Action
 
-Composite GitHub Action that installs OpenSCAD, system dependencies, and libraries via [scadm](../../../cmd/scadm/README.md) — with caching.
+Composite GitHub Action that installs OpenSCAD, system dependencies, and libraries via [scadm](../../../cmd/scadm/README.md), with caching.
 
 > ⚠️ Requires `ubuntu` runners (uses `apt` for system dependencies).
 
@@ -52,7 +52,7 @@ steps:
 2. Installs system dependencies (`xvfb`, `libglu1-mesa`, `libfuse2`, `libegl1`, `libxcb-cursor0`)
 3. Resolves scadm version from inputs (source > explicit version > requirements file)
 4. Caches `bin/openscad/` keyed on runner OS, resolved scadm version, `scadm.json`, and `**/constants.py` under `scadm-source` (when set)
-5. Installs [scadm](../../../cmd/scadm/README.md) — pinned from PyPI, or from a local path if `scadm-source` is set
+5. Installs [scadm](../../../cmd/scadm/README.md), pinned from PyPI, or from a local path if `scadm-source` is set
 6. Runs `scadm install` to download OpenSCAD and libraries
 
 ## Versioning

@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.py"
+paths: ["**/*.py"]
 ---
 
 # Python Guidelines
@@ -31,7 +31,7 @@ Example: See `cmd/scadm/scadm/flatten.py` for reference.
   ```
 - Prefer `disable-next` (single line) over inline `# pylint: disable=...` when possible.
 - Common legitimate suppressions: data classes with no methods (`too-few-public-methods`), parsers (`too-many-branches`).
-- Never suppress without fixing first — if the code *can* be refactored to resolve the warning, do that instead.
+- Never suppress without fixing first, if the code *can* be refactored to resolve the warning, do that instead.
 
 ## Testing
 
@@ -41,23 +41,9 @@ Example: See `cmd/scadm/scadm/flatten.py` for reference.
 
 ### Unit vs Integration Tests
 
-- **Unit tests** (`test_*.py` without markers): fast, no network, mocked dependencies. Run via pre-commit hooks.
+- **Unit tests** (`test_*.py` without markers): fast, no network, mocked dependencies. The `scadm-tests` pre-commit hook runs them only when a commit touches `cmd/scadm/`.
 - **Integration tests** (`test_cli_integration.py`, marked `@pytest.mark.integration`): exercise real CLI commands against temp workspaces. Run via CI workflow (`.github/workflows/integration-tests.yml`) on ubuntu + windows matrix.
   - **Slow tests** (`@pytest.mark.slow`): download binaries from the network. Subset of integration tests.
   - Non-`slow` integration tests may still make lightweight network calls (e.g., version resolution) but avoid large downloads.
 
-### Running Integration Tests
-
-```bash
-# All integration tests (fast + slow)
-python -m pytest tests/ -m integration -v
-
-# Fast only (no downloads)
-python -m pytest tests/ -m "integration and not slow" -v
-```
-
-### When to Add/Update Integration Tests
-
-- Adding or modifying a CLI subcommand → add/update integration test.
-- Changing `scadm.json` config schema → update config-dependent tests.
-- Changing installer/resolver behavior → update relevant slow tests.
+Commands for running them, and the rules for when to add or update one, live in [TESTING.md](../../TESTING.md). Keep them there rather than repeating them here.

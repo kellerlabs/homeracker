@@ -2,8 +2,7 @@
 
 ## 📌 What
 
-Fully customizable rackmount ears for standard 10" and 19" rack mounting.
-Attaches devices to server racks with proper bore spacing per rack standards.
+Fully customizable rackmount ears for standard 10" and 19" rack mounting. Attaches devices to server racks with proper bore spacing per rack standards.
 
 ## 🤔 Why
 

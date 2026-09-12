@@ -8,7 +8,7 @@ description: >
   DESCRIPTION.md files, updating existing descriptions after releases,
   converting markdown descriptions to HTML for MakerWorld publishing.
   DO NOT USE FOR: uploading files to MakerWorld, managing print profiles, or
-  OpenSCAD model creation (use @makerworld-model agent instead).
+  OpenSCAD model creation.
 ---
 
 # 🌐 MakerWorld Description Skill
@@ -18,7 +18,7 @@ description: >
 Manages MakerWorld model descriptions as git-tracked `DESCRIPTION.md` files. Supports three flows:
 
 1. **Extract** (MakerWorld → Git): Scrape a MakerWorld model page and produce a clean `DESCRIPTION.md` + images
-2. **Update** (Git ↻ Git): Update an existing `DESCRIPTION.md` after model changes — new changelog entries, feature bullets, images
+2. **Update** (Git ↻ Git): Update an existing `DESCRIPTION.md` after model changes, new changelog entries, feature bullets, images
 3. **Publish** (Git → MakerWorld): Convert `DESCRIPTION.md` to HTML for pasting into MakerWorld's CKEditor
 
 ## 🔧 Extract Flow
@@ -46,7 +46,7 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
    - Preserve: headings (##, ###), bold/italic, bullet lists, numbered lists, links, images, linked images (`[![alt](img)](url)`), horizontal rules
    - Strip: `[Image: Image]` placeholders, duplicate blank lines, trailing whitespace
    - Keep image URLs as-is initially (they'll be downloaded next)
-   - **Use `<img>` tags instead of markdown image syntax** for all images. This allows preserving the `width` attribute. Use `width="800"` for images whose native width is ≥ 800px; for smaller images use their native width. Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`). Do NOT set `height` — omitting it lets the browser scale proportionally. Example:
+   - **Use `<img>` tags instead of markdown image syntax** for all images. This allows preserving the `width` attribute. Use `width="800"` for images whose native width is ≥ 800px; for smaller images use their native width. Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`). Do NOT set `height`, omitting it lets the browser scale proportionally. Example:
      ```html
      <img src="https://raw.githubusercontent.com/.../logo.webp" alt="Logo" width="800">
      ```
@@ -56,21 +56,21 @@ Given a MakerWorld model URL, extract the description into a `DESCRIPTION.md` fi
      ```
    - **Alignment is lost during extraction**: `fetch_webpage` strips `style` attributes, so centered text/headings from MakerWorld come through as plain markdown. This is a known limitation. After extraction, add a note at the bottom of the DESCRIPTION.md:
      ```markdown
-     <!-- TODO: Review alignment — fetch_webpage strips style attributes. Compare with MakerWorld page and wrap centered elements in HTML blocks. -->
+     <!-- TODO: Review alignment: fetch_webpage strips style attributes. Compare with MakerWorld page and wrap centered elements in HTML blocks. -->
      ```
      When fixing alignment, use:
      - `<h2 style="text-align: center">Title</h2>` for centered headings
      - `<p style="text-align: center">...</p>` for centered paragraphs, images, or links
      - This renders correctly on GitHub (HTML passthrough) and in `md-to-mw.py`
-   - **Detect orphan linked images**: `fetch_webpage` drops `<img>` elements inside `<a>` tags, producing empty links like `[](https://...)`. Collect all such `[](url)` patterns — these are linked images whose `src` was lost. See step 5a for resolution
-   - **Be aware of invisible drops**: `fetch_webpage` silently drops `<iframe>` embeds (YouTube videos, etc.) with no trace at all — just blank whitespace. See step 5b for resolution
+   - **Detect orphan linked images**: `fetch_webpage` drops `<img>` elements inside `<a>` tags, producing empty links like `[](https://...)`. Collect all such `[](url)` patterns, these are linked images whose `src` was lost. See step 5a for resolution
+   - **Be aware of invisible drops**: `fetch_webpage` silently drops `<iframe>` embeds (YouTube videos, etc.) with no trace at all, just blank whitespace. See step 5b for resolution
 
 5. **Download images**:
    - Identify all image URLs in the description (from `makerworld.bblmw.com` CDN or other sources)
-   - Skip external reference images (e.g. `encrypted-tbn0.gstatic.com` meme images) — keep those as URLs
+   - Skip external reference images (e.g. `encrypted-tbn0.gstatic.com` meme images), keep those as URLs
    - Download MakerWorld CDN images to the **assets repo**: `assets/<target-repo>/models/<name>/makerworld/images/`
    - Use descriptive filenames based on context (e.g. `diagonal_supports.png`, `showcase_rack.jpg`)
-   - After downloading, get pixel dimensions with `python cmd/export/image_dimensions.py <images-dir>` (for reference only — do not use native dimensions for `width`)
+   - After downloading, get pixel dimensions with `python cmd/export/image_dimensions.py <images-dir>` (for reference only, do not use native dimensions for `width`)
    - **Standard image width**: Use `width="800"` for all description images whose native width is ≥ 800px. For smaller images, use their native width. Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`). This ensures a uniform look across all model descriptions.
    - **Check for common images**: Some images are shared across all models (e.g. `collection_banner.webp`, `kofi_qr_code.webp`). These live in `assets/common/makerworld/images/`. If a downloaded image already exists there (same content), delete the per-model copy and reference the common one: `https://raw.githubusercontent.com/kellerlabs/assets/main/common/makerworld/images/filename.webp`
    - Reference model-specific images using absolute URLs in `<img>` tags, applying the standard width rule above: use `width="800"` when the native width is ≥ 800px; otherwise use the native width. Example: `<img src="https://raw.githubusercontent.com/kellerlabs/assets/main/<target-repo>/models/<name>/makerworld/images/filename.png" alt="Description" width="800">`
@@ -141,9 +141,9 @@ Update an existing `DESCRIPTION.md` after model changes (new release, new featur
    Present a summary of relevant changes and ask the user to confirm or adjust before editing.
 
 5. **Update the description**:
-   - **Changelog section**: Add new entries at the top of the `📜 Changelog` list. Follow the existing emoji + version + dash + description pattern. Drop entries that are no longer the most recent 3–4 (keep the list concise).
+   - **Changelog section**: Add new entries at the top of the `📜 Changelog` list. Follow the existing emoji + version + dash + description pattern. Drop entries that are no longer the most recent 3-4 (keep the list concise).
    - **Feature sections**: Add, update, or remove bullets in "What's in the Box" or equivalent sections to reflect added/removed parts or features.
-   - **Flag rewrites**: If a feature was removed or significantly changed, flag the affected section with a `<!-- TODO: verify — feature X was removed/changed in vN.N.N -->` comment and ask the user for guidance.
+   - **Flag rewrites**: If a feature was removed or significantly changed, flag the affected section with a `<!-- TODO: verify, feature X was removed/changed in vN.N.N -->` comment and ask the user for guidance.
 
 6. **Check for new images**: Scan `assets/<repo>/models/<name>/makerworld/images/` for images added since the last update. If new images exist, suggest where to insert them. If none exist but the new features would benefit from visuals, ask the user whether to add any.
 
@@ -197,16 +197,16 @@ Reference via: `https://raw.githubusercontent.com/kellerlabs/assets/main/common/
 
 All HomeRacker MakerWorld descriptions share recurring elements. When extracting, verify these are present:
 
-1. **Centered header block** — everything from the top of the description until the first video embed or model-specific content must be centered using HTML style blocks. The logo is always `width="300"` and linked to `homeracker.org`. Pattern:
+1. **Centered header block**: everything from the top of the description until the first video embed or model-specific content must be centered using HTML style blocks. The logo is always `width="300"` and linked to `homeracker.org`. Pattern:
    ```html
    <p style="text-align: center">Intro text</p>
    <h2 style="text-align: center">Model Title</h2>
    <p style="text-align: center"><a href="https://homeracker.org/"><img src=".../common/makerworld/images/homeracker_logo_banner.webp" alt="HomeRacker Logo" width="300"></a></p>
    <p style="text-align: center">Subtitle / links</p>
    ```
-2. **Collection banner** — linked image to the Official HomeRacker Collection. Uses `common/makerworld/images/collection_banner.webp`
-3. **Ko-fi QR code** — in the ☕ Support section. Uses `common/makerworld/images/kofi_qr_code.webp`
-4. **"🏡 What is HomeRacker?" section** (non-core models only) — includes the HomeRacker Core video embed (`g8k6X_axYug`) immediately after the heading, followed by links to homeracker.org and the collection
+2. **Collection banner**: linked image to the Official HomeRacker Collection. Uses `common/makerworld/images/collection_banner.webp`
+3. **Ko-fi QR code**: in the ☕ Support section. Uses `common/makerworld/images/kofi_qr_code.webp`
+4. **"🏡 What is HomeRacker?" section** (non-core models only), includes the HomeRacker Core video embed (`g8k6X_axYug`) immediately after the heading, followed by links to homeracker.org and the collection
 
 These elements are often dropped by `fetch_webpage` (logo as orphan linked image, video as invisible iframe). Always check for them during extraction.
 
@@ -215,8 +215,8 @@ These elements are often dropped by `fetch_webpage` (logo as orphan linked image
 - **Cross-repo skill**: Requires both the source repo (`homeracker` or `homeracker-exclusive`) and the [`kellerlabs/assets`](https://github.com/kellerlabs/assets) repo. Maintainers push images directly to `assets/main`. Outside collaborators must open a PR on the assets repo for image changes.
 - `DESCRIPTION.md` is the **source of truth**. Always edit it in git, never in MakerWorld directly.
 - After editing `DESCRIPTION.md`, re-run `md-to-mw.py` and re-paste into MakerWorld.
-- The conversion script embeds local images as base64 data URIs so the HTML is fully self-contained — no broken links, no browser permissions needed. External image URLs (http/https) are passed through unchanged.
-- Since images are now hosted in the `kellerlabs/assets` repo with absolute URLs, `md-to-mw.py` passes them through directly — no base64 encoding needed for assets-hosted images.
+- The conversion script embeds local images as base64 data URIs so the HTML is fully self-contained, no broken links, no browser permissions needed. External image URLs (http/https) are passed through unchanged.
+- Since images are now hosted in the `kellerlabs/assets` repo with absolute URLs, `md-to-mw.py` passes them through directly, no base64 encoding needed for assets-hosted images.
 - **Alignment**: Use inline HTML blocks (`<h2 style="text-align: center">`, `<p style="text-align: center">`) to preserve centered headings, images, and text from MakerWorld. These render correctly on GitHub and pass through to `md-to-mw.py` HTML output.
 - **Image sizing**: Use `width="800"` as the standard for all description images whose native width is ≥ 800px; for smaller images use their native width (omit `height` so images scale proportionally). Exceptions: HomeRacker logo (`width="300"`), Ko-fi QR code (`width="328"`).
 - MakerWorld CDN images (from `makerworld.bblmw.com`) should be downloaded to the assets repo during extraction. External reference images (memes, badges, etc.) can stay as external URLs.
@@ -237,7 +237,7 @@ These elements are often dropped by `fetch_webpage` (logo as orphan linked image
 
 ### `fetch_webpage` silently drops embedded iframes
 
-`fetch_webpage` completely discards `<iframe>` elements (YouTube embeds, etc.) with **no trace** — no placeholder, no URL, just blank whitespace. Unlike linked images which leave a detectable `[](url)` pattern, embedded videos are entirely invisible in the output.
+`fetch_webpage` completely discards `<iframe>` elements (YouTube embeds, etc.) with **no trace**, no placeholder, no URL, just blank whitespace. Unlike linked images which leave a detectable `[](url)` pattern, embedded videos are entirely invisible in the output.
 
 **Common patterns affected**:
 - YouTube video embeds in description sections

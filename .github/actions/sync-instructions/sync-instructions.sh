@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sync Copilot instructions from kellerlabs/homeracker
+# Sync agent instructions from kellerlabs/homeracker
 #
 # Downloads the canonical instruction set and overwrites local copies.
 # Designed for downstream repos (e.g., homeracker-exclusive, homeracker-community).
@@ -13,27 +13,30 @@ set -euo pipefail
 REPO="kellerlabs/homeracker"
 REF="${1:-main}"
 BASE_URL="https://raw.githubusercontent.com/${REPO}/${REF}"
-API_BASE="https://api.github.com/repos/${REPO}/contents/.github/instructions"
+API_BASE="https://api.github.com/repos/${REPO}/contents/.claude/rules"
 
 AUTH_ARGS=()
 if [[ -n "${GITHUB_TOKEN:-}" ]]; then
     AUTH_ARGS=(-H "Authorization: token ${GITHUB_TOKEN}")
 fi
 
-# Explicit files outside .github/instructions/
+# Explicit files outside .claude/rules/
+# AGENTS.md is the canonical instruction set and CLAUDE.md points at it, so the two must travel
+# together or the import dangles.
 EXPLICIT_FILES=(
-    ".github/copilot-instructions.md"
+    "AGENTS.md"
+    "CLAUDE.md"
     ".github/pull_request_template.md"
 )
 
-echo "Syncing Copilot instructions from ${REPO}@${REF}..."
+echo "Syncing agent instructions from ${REPO}@${REF}..."
 
-# Discover all .instructions.md files dynamically
-instruction_names="$(
+# Discover all path-scoped rule files dynamically
+rule_names="$(
     curl -fsSL "${AUTH_ARGS[@]}" --get --data-urlencode "ref=${REF}" "${API_BASE}" \
     | jq -r '
         if type == "array" then
-            .[].name | select(endswith(".instructions.md"))
+            .[] | select(.type == "file") | .name | select(endswith(".md"))
         else
             error("Expected array from GitHub contents API")
         end
@@ -43,8 +46,8 @@ instruction_names="$(
 FILES=("${EXPLICIT_FILES[@]}")
 while read -r name; do
     [[ -z "${name}" ]] && continue
-    FILES+=(".github/instructions/${name}")
-done <<< "${instruction_names}"
+    FILES+=(".claude/rules/${name}")
+done <<< "${rule_names}"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "${TMPDIR}"' EXIT
@@ -68,6 +71,21 @@ if [[ "${FAILED}" -eq 1 ]]; then
     echo ""
     echo "ERROR: One or more files failed to download"
     exit 1
+fi
+
+# TODO: delete this block once homeracker-exclusive and homeracker-community have each completed
+# one sync. A downstream repo that keeps the old directory carries both copies of every guideline
+# and Copilot still applies the stale ones through their applyTo frontmatter; one that keeps the old
+# copilot-instructions.md keeps a second entry point that no longer receives updates.
+readonly LEGACY_RULES_DIR=".github/instructions"
+readonly LEGACY_COPILOT_FILE=".github/copilot-instructions.md"
+if [[ -d "${LEGACY_RULES_DIR}" ]]; then
+    rm -rf "${LEGACY_RULES_DIR}"
+    echo "  ✓ pruned ${LEGACY_RULES_DIR}"
+fi
+if [[ -f "${LEGACY_COPILOT_FILE}" ]]; then
+    rm -f "${LEGACY_COPILOT_FILE}"
+    echo "  ✓ pruned ${LEGACY_COPILOT_FILE}"
 fi
 
 echo ""

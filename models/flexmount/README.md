@@ -2,7 +2,7 @@
 
 ## 📌 What
 
-A universal device mount for HomeRacker — brackets a device and attaches to the rack via connectors and lock pins.
+A universal device mount for HomeRacker, brackets a device and attaches to the rack via connectors and lock pins.
 
 > **Deprecated**: This model is no longer maintained. Its successor is the [Customizable Rackmount](https://makerworld.com/en/models/2128492-customizable-rackmount-any-racksize#profileId-2304669) on MakerWorld.
 
@@ -34,4 +34,4 @@ scadm export-png models/flexmount/flexmount.scad
 ## 📚 References
 
 - [HomeRacker Core](../core/README.md)
-- [MakerWorld: Customizable Rackmount](https://makerworld.com/en/models/2128492-customizable-rackmount-any-racksize#profileId-2304669) — closed-source implementation on MakerWorld
+- [MakerWorld: Customizable Rackmount](https://makerworld.com/en/models/2128492-customizable-rackmount-any-racksize#profileId-2304669): closed-source implementation on MakerWorld
