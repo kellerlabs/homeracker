@@ -10,8 +10,7 @@ description: >
   shaping a refactor or migration before code is touched, producing the artifact
   the plan needs.
   DO NOT USE FOR: grilling a built model's parameters and geometry (use
-  grill-my-model), writing OpenSCAD code (use the @makerworld-model agent),
-  routine config/version/dependency bumps.
+  grill-my-model), writing OpenSCAD code, routine config/version/dependency bumps.
 ---
 
 # 🔥 Grill My Plan — homeracker Skill
@@ -187,6 +186,6 @@ The grill is done when:
 - [`humanizer` skill](../humanizer/SKILL.md) — run it over any artifact text (ADR, roadmap, PR/issue) this grill writes or edits, to strip AI tells
 - [`grill-my-model` skill](../grill-my-model/SKILL.md) — the model-shaped sibling (use it for built OpenSCAD models, not plans)
 - [`decision-records` skill](../decision-records/SKILL.md) — ADR template, index, supersede flow
-- [Markdown guidelines](../../instructions/markdown.instructions.md) — emoji headers, structure
-- [Pull request template](../../pull_request_template.md) — What / Why / How sections for PR-shaped artifacts
+- [Markdown guidelines](../../rules/markdown.md) — emoji headers, structure
+- [Pull request template](../../../.github/pull_request_template.md) — What / Why / How sections for PR-shaped artifacts
 - [mattpocock/skills `grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — the upstream "grill my plan" pattern this adapts

@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.sh,**/*.yml,**/*.yaml"
+paths: ["**/*.sh", "**/*.yml", "**/*.yaml"]
 ---
 
 # Shell Guidelines

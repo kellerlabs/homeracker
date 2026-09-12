@@ -10,9 +10,9 @@ description: >
   gaps a newbie couldn't understand, improving model README / configuration &
   printing guides / MakerWorld descriptions, rendering missing parameter-config
   images, and creating or updating a model's decision record (ADR).
-  DO NOT USE FOR: writing the OpenSCAD geometry itself (use the @makerworld-model
-  agent), extracting MakerWorld descriptions from the web (use the
-  makerworld-description skill), or routine version/config/dependency changes.
+  DO NOT USE FOR: writing the OpenSCAD geometry itself, extracting MakerWorld
+  descriptions from the web (use the makerworld-description skill), or routine
+  version/config/dependency changes.
 ---
 
 # 🔥 Grill My Model — homeracker Skill
@@ -199,6 +199,6 @@ The grill is done when:
 - [`grill-my-plan` skill](../grill-my-plan/SKILL.md) — the plan-shaped sibling (use it to stress-test a plan before code exists)
 - [`decision-records` skill](../decision-records/SKILL.md) — ADR template, index, supersede flow
 - [`makerworld-description` skill](../makerworld-description/SKILL.md) — MakerWorld `DESCRIPTION.md` handling
-- [Markdown guidelines](../../instructions/markdown.instructions.md) — Model README template, Catalog rules
-- [OpenSCAD guidelines](../../instructions/openscad.instructions.md) — naming, geometry conventions
+- [Markdown guidelines](../../rules/markdown.md) — Model README template, Catalog rules
+- [OpenSCAD guidelines](../../rules/openscad.md) — naming, geometry conventions
 - [mattpocock/skills `grilling`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — the upstream "grill my plan" pattern this adapts

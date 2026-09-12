@@ -1,15 +1,20 @@
-# 🔄 Sync Copilot Instructions
+# 🔄 Sync Agent Instructions
 
 ## 📌 What
 
-Downloads the canonical Copilot instruction set from [kellerlabs/homeracker](https://github.com/kellerlabs/homeracker)
-and overwrites local copies.
+Downloads the canonical agent instruction set from [kellerlabs/homeracker](https://github.com/kellerlabs/homeracker) and overwrites local copies.
 
 Synced files:
 
-- `.github/copilot-instructions.md` — repo-wide Copilot instructions
-- `.github/instructions/*.instructions.md` — all path-specific guidelines (discovered dynamically via GitHub API)
-- `.github/pull_request_template.md` — PR template
+- `AGENTS.md`: the canonical repo-wide instructions, read by every coding agent
+- `CLAUDE.md`: pointer to `AGENTS.md`, imported by Claude Code
+- `.github/copilot-instructions.md`: pointer to `AGENTS.md`, so Copilot finds it at the path it expects
+- `.claude/rules/*.md`: all path-specific guidelines (discovered dynamically via GitHub API)
+- `.github/pull_request_template.md`: PR template
+
+`AGENTS.md` and both pointer files must stay in the same sync set. A pointer that arrives without its target dangles.
+
+A successful sync also deletes `.github/instructions/` if the consumer still has one. The guidelines live in `.claude/rules/` now, and a repo holding both applies each rule twice. The script carries a `TODO` marking this prune for removal once every consumer has synced once.
 
 ### Requirements
 
@@ -54,7 +59,7 @@ The action only downloads files — it does not commit. The caller workflow hand
 ### Example workflow
 
 ```yaml
-name: Sync Copilot Instructions
+name: Sync Agent Instructions
 on:
   schedule:
     - cron: '0 6 * * 1'  # weekly Monday 06:00 UTC

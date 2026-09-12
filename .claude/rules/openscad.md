@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.scad"
+paths: ["**/*.scad"]
 ---
 
 # OpenSCAD Guidelines

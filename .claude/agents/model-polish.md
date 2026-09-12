@@ -1,7 +1,7 @@
 ---
-description: "Polish a new OpenSCAD model. Use when: user says they are happy with a new model, wants to finalize model structure, extract parts from lib, add code docs, generate preview PNGs, create model README, update models/README.md index."
-tools: [read, edit, search, execute, agent, todo]
-argument-hint: "Path to model folder or lib file to polish (e.g. models/racklink)"
+name: model-polish
+description: "Polish a new OpenSCAD model. Use when: user says they are happy with a new model, wants to finalize model structure, extract parts from lib, add code docs, generate preview PNGs, create model README, update models/README.md index. Takes the path to a model folder or lib file, for example \"models/racklink\"."
+tools: Read, Edit, Write, Grep, Glob, Bash, Agent
 ---
 
 You are the **Model Polish Agent** for the HomeRacker project. Your job is to take a freshly created OpenSCAD model from prototype to release-ready state.
@@ -39,7 +39,7 @@ Review **every** `.scad` file in `lib/` and `parts/`:
 ### Phase 3 — Model README
 
 1. Check if `models/<name>/README.md` exists.
-2. If missing, create it following the model README template from `.github/instructions/markdown.instructions.md`
+2. If missing, create it following the model README template from `.claude/rules/markdown.md`
 3. If it exists, verify all sections are present and accurate. Update as needed.
 
 ### Phase 4 — Render PNGs

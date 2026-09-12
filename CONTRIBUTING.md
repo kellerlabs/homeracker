@@ -2,6 +2,8 @@
 
 Thanks for your interest in contributing! Even getting this far is already worth a ton 🏋
 
+> 🤖 Using a coding agent? Point it at [AGENTS.md](AGENTS.md), the canonical instruction set for this repo (see [CLAUDE.md](CLAUDE.md) for example).
+
 ## 📦 Contribution Scope
 
 This repository contains the **HomeRacker Core** system. We accept **bugfixes and improvements to the core model** here.
@@ -57,10 +59,6 @@ scadm render models/wallmount/parts/wallmount.scad
 
 # Install the git hooks
 pre-commit install --install-hooks -t commit-msg -t pre-commit
-
-# Optional: Skip manual venv activation in VS Code each time you open a terminal
-# Run `scadm vscode --python` to auto-configure the Python interpreter
-# (see Quick Start section above)
 ```
 
 Now pre-commit will automatically run on `git commit`. To manually run hooks on all files:
@@ -233,14 +231,27 @@ SITE_BASE=/preview/pr-999/ npm run build
 ## 📂 Project Structure
 
 ```
-models/              # OpenSCAD models
-  ├── core/         # Core components (supports, connectors, lock pins)
-  ├── gridfinity/   # Gridfinity-compatible baseplates
-  ├── wallmount/    # Wall mounting
-  ├── flexmount/    # Flexible mounts
-  └── rackmount_ears/  # Customizable rack ears
-cmd/                # Command-line utilities (setup, test, lib)
+models/           # OpenSCAD models, one folder per model type
+                  # (core, crates, elgato_prompter_adapter, flexmount, foot,
+                  #  gridfinity, inception, keystone, panel, pinpusher,
+                  #  racklink, rackmount_ears, sleeve, wallmount)
+cmd/              # Python and shell tooling
+  ├── scadm/      # OpenSCAD dependency manager, published to PyPI
+  ├── test/       # Model render and Renovate config test scripts
+  ├── export/     # MakerWorld description export tooling
+  ├── setup/      # VS Code OpenSCAD setup script
+  ├── linux/      # OpenSCAD wrapper for Linux
+  └── lib/        # Shared shell helpers
+configurator/     # TypeScript web configurator
+site/             # Astro site, renders this repo's READMEs
+docs/             # Style guide, workflows, and ADRs in docs/decisions/
+png_creation/     # Marketing render generation
+.claude/          # Agent config: skills/, rules/ (path-scoped guidelines), agents/
+.github/          # Workflows, composite actions, PR template
+bin/              # OpenSCAD binaries and libraries, created by `scadm install` (gitignored)
 ```
+
+`models/README.md` is the catalog index. Add an entry there whenever you add a model folder.
 
 ## 💬 Getting Help
 
@@ -257,7 +268,6 @@ The repository is integrated with Discord to announce updates:
 - **Webhook Name**: GitHub Releases
 - **Events**: Release events
 - **Configuration**: Discord GitHub-formatted webhook (`/github` suffix)
-- **Status**: Active (last response: 204 OK)
 
 Releases automatically post to the Discord server, keeping the community updated.
 

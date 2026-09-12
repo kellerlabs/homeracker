@@ -1,5 +1,5 @@
 ---
-applyTo: "renovate.json5,renovate-dependencies.json"
+paths: ["renovate.json5", "renovate-dependencies.json"]
 ---
 
 # Renovate Guidelines

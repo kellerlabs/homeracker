@@ -8,7 +8,7 @@ description: >
   DESCRIPTION.md files, updating existing descriptions after releases,
   converting markdown descriptions to HTML for MakerWorld publishing.
   DO NOT USE FOR: uploading files to MakerWorld, managing print profiles, or
-  OpenSCAD model creation (use @makerworld-model agent instead).
+  OpenSCAD model creation.
 ---
 
 # 🌐 MakerWorld Description Skill

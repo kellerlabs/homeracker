@@ -14,7 +14,7 @@ How to manage MakerWorld model descriptions as git-tracked `DESCRIPTION.md` file
 
 ### Extract (MakerWorld → Git)
 
-Use the `@makerworld-description` Copilot skill to extract a description from a MakerWorld model page:
+Use the `makerworld-description` skill to extract a description from a MakerWorld model page:
 
 1. Provide the MakerWorld model URL
 2. The skill scrapes the page, downloads images to the **assets repo**, and creates `DESCRIPTION.md`
@@ -37,7 +37,7 @@ This generates `DESCRIPTION.html` (gitignored). Open it in a browser, `Ctrl+A`, 
 
 ### Update (After Model Changes)
 
-Use the `@makerworld-description` Copilot skill's **Update flow** to refresh a description after a release:
+Use the `makerworld-description` skill's **Update flow** to refresh a description after a release:
 
 1. Invoke the skill with a request like "update core description with latest changes"
 2. The skill reads `CHANGELOG.md`, filters model-relevant changes, and proposes edits
@@ -64,15 +64,15 @@ https://raw.githubusercontent.com/kellerlabs/assets/main/<repo>/models/<name>/ma
 
 ### Create (New Description)
 
-Use the `@makerworld-description` Copilot agent to create a new `DESCRIPTION.md` from scratch:
+Use the `makerworld-description` agent to create a new `DESCRIPTION.md` from scratch:
 
-1. Invoke: `@makerworld-description foot homeracker-exclusive`
+1. Invoke the agent with a model name and target repo, e.g. `foot homeracker-exclusive`
 2. The agent interviews you for model details, verifies images in the assets repo, creates `DESCRIPTION.md`, enhances `CUSTOMIZATION.md` with images, and opens a PR
 3. Optionally publish with `md-to-mw.py` (see above)
 
 ## 📚 References
 
 - [image-hosting-assets-repo](decisions/image-hosting-assets-repo.md) — why images live in a separate repo
-- `.github/agents/makerworld-description.agent.md` — Copilot agent for creating new descriptions
-- `.github/skills/makerworld-description/SKILL.md` — Copilot skill for extracting existing descriptions
+- `.claude/agents/makerworld-description.md` — agent for creating new descriptions
+- `.claude/skills/makerworld-description/SKILL.md` — skill for extracting existing descriptions
 - `cmd/export/md-to-mw.py` — conversion script

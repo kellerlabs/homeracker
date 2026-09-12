@@ -1,8 +1,8 @@
 ---
-name: Sync Copilot Instructions
+name: Sync Agent Instructions
 description: >
-  Download the canonical Copilot instruction set from kellerlabs/homeracker
-  and overwrite local copies. Does not commit — caller handles git operations.
+  Download the canonical agent instruction set from kellerlabs/homeracker
+  and overwrite local copies. Does not commit, the caller handles git operations.
 
 inputs:
   ref:
