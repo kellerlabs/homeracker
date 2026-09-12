@@ -50,7 +50,7 @@ Both are open fonts (SIL OFL) and are self-hosted through `@fontsource` packages
 
 ## 📚 References
 
-- [`models/core/lib/constants.scad`](../models/core/lib/constants.scad) — colour source of truth
-- [`site/src/styles/global.css`](../site/src/styles/global.css) — web tokens and type scale
-- [`configurator/src/configurator.css`](../configurator/src/configurator.css) — the configurator reads the same tokens
-- [homeracker.org](https://homeracker.org) — the site, [MakerWorld](https://makerworld.com/@kellerlab) — model listings
+- [`models/core/lib/constants.scad`](../models/core/lib/constants.scad): colour source of truth
+- [`site/src/styles/global.css`](../site/src/styles/global.css): web tokens and type scale
+- [`configurator/src/configurator.css`](../configurator/src/configurator.css): the configurator reads the same tokens
+- [homeracker.org](https://homeracker.org): the site, [MakerWorld](https://makerworld.com/@kellerlab), model listings

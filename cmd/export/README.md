@@ -30,12 +30,12 @@ This script follows **OpenSCAD Customizer** conventions:
 - Variables inside `/* [SectionName] */` blocks → preserved in their respective sections
 - Variables in `/* [Hidden] */` section → included in the Hidden section
 - In **root files**, place top-level variables inside a section block (`/* [Hidden] */` or named) so they are preserved reliably during flattening
-- In **library files**, variables may appear anywhere — they are collected and placed in the Hidden section with an origin comment
+- In **library files**, variables may appear anywhere. They are collected and placed in the Hidden section with an origin comment
 
 **Library files** (included via `include <...>`):
 - May contain module/function definitions, constants, and variables in any order
-- Section markers in library files are silently ignored — only root file sections matter
-- Only **effectively used** definitions are included — unused code is omitted
+- Section markers in library files are silently ignored, only root file sections matter
+- Only **effectively used** definitions are included, unused code is omitted
 - Library variables appear in the Hidden section with an origin comment
 
 > [!NOTE]
@@ -126,11 +126,11 @@ To add a new model type (e.g., `models/newtype/`):
      ]
    }
    ```
-3. Commit — the pre-commit hook will automatically flatten to `models/newtype/flattened/`
+3. Commit, the pre-commit hook will automatically flatten to `models/newtype/flattened/`
 
 ## 📐 Image Dimensions
 
-Prints pixel dimensions of image files (WebP, PNG, JPEG) by reading file headers directly — no external dependencies.
+Prints pixel dimensions of image files (WebP, PNG, JPEG) by reading file headers directly, no external dependencies.
 
 ```bash
 # Directory of images

@@ -31,7 +31,7 @@ Example: See `cmd/scadm/scadm/flatten.py` for reference.
   ```
 - Prefer `disable-next` (single line) over inline `# pylint: disable=...` when possible.
 - Common legitimate suppressions: data classes with no methods (`too-few-public-methods`), parsers (`too-many-branches`).
-- Never suppress without fixing first — if the code *can* be refactored to resolve the warning, do that instead.
+- Never suppress without fixing first, if the code *can* be refactored to resolve the warning, do that instead.
 
 ## Testing
 

@@ -2,7 +2,7 @@
 
 ## 📌 Status
 
-**Accepted** — 2026-09-02
+**Accepted**, 2026-09-02
 
 ## 🤔 Context
 
@@ -38,4 +38,4 @@ homeracker.org was the root `README.md` rendered by the classic GitHub Pages Jek
 
 - [site/README.md](../../site/README.md)
 - [web-configurator-on-github-pages](web-configurator-on-github-pages.md)
-- [image-hosting-assets-repo](image-hosting-assets-repo.md) — external images stay in `kellerlabs/assets`
+- [image-hosting-assets-repo](image-hosting-assets-repo.md): external images stay in `kellerlabs/assets`

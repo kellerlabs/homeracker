@@ -4,8 +4,7 @@ The canonical instruction set for every coding agent working in this repository.
 
 ## 📌 Project Overview
 
-HomeRacker is a modular 3D-printable rack-building system. Core components are parametric OpenSCAD models built on the BOSL2 library.
-Licensed MIT (code) and CC BY-SA 4.0 (models).
+HomeRacker is a modular 3D-printable rack-building system. Core components are parametric OpenSCAD models built on the BOSL2 library. Licensed MIT (code) and CC BY-SA 4.0 (models).
 
 ## 🗂️ Tools & Structure
 

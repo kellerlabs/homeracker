@@ -10,7 +10,7 @@ You are the **Model Polish Agent** for the HomeRacker project. Your job is to ta
 
 Work through these phases **in order**. Skip steps that are already done, but verify first.
 
-### Phase 1 — Structure Check
+### Phase 1, Structure Check
 
 1. Read the model folder contents.
 2. Verify the standard layout exists:
@@ -24,10 +24,10 @@ Work through these phases **in order**. Skip steps that are already done, but ve
    - Create a proper `parts/<name>.scad` file.
    - Move all Customizer parameter blocks (`/* [Section] */` groups) and the top-level module instantiation from the lib file into the parts file.
    - The parts file includes the lib via relative path (`include <../lib/<name>.scad>`).
-   - The lib file must **only** define modules/functions — no top-level geometry, no Customizer parameters.
+   - The lib file must **only** define modules/functions, no top-level geometry, no Customizer parameters.
 4. If the structure is already correct, confirm and move on.
 
-### Phase 2 — Code Documentation
+### Phase 2, Code Documentation
 
 Review **every** `.scad` file in `lib/` and `parts/`:
 
@@ -36,13 +36,13 @@ Review **every** `.scad` file in `lib/` and `parts/`:
 3. **Parameter descriptions**: Every Customizer parameter must have a `//` comment on the line above it describing what it controls, valid range, and default behavior.
 4. Do NOT over-document obvious code. Keep docs concise per project conventions.
 
-### Phase 3 — Model README
+### Phase 3, Model README
 
 1. Check if `models/<name>/README.md` exists.
 2. If missing, create it following the model README template from `.claude/rules/markdown.md`
 3. If it exists, verify all sections are present and accurate. Update as needed.
 
-### Phase 4 — Render PNGs
+### Phase 4, Render PNGs
 
 1. For each `.scad` file in `parts/`, generate a full F6 render PNG (`scadm export-png` always passes `--render`):
    ```bash
@@ -51,7 +51,7 @@ Review **every** `.scad` file in `lib/` and `parts/`:
 2. Verify the PNG was created in the `renders/` subfolder (e.g., `parts/renders/<part>.png`).
 3. Update the model README 📸 Catalog table to reference each PNG from `parts/renders/`.
 
-### Phase 5 — Test File
+### Phase 5, Test File
 
 1. Check if `models/<name>/test/` exists.
 2. If missing, create `models/<name>/test/<name>.scad` with a minimal render test:
@@ -68,7 +68,7 @@ Review **every** `.scad` file in `lib/` and `parts/`:
 3. Follow the pattern from existing test files (e.g., `models/inception/test/supportgrid.scad`).
 4. Run `./cmd/test/test-models.sh` to verify the test is picked up and passes.
 
-### Phase 6 — Central Index
+### Phase 6, Central Index
 
 1. Open `models/README.md`.
 2. Add or update the entry for this model in the index, following the existing pattern:
@@ -79,10 +79,10 @@ Review **every** `.scad` file in `lib/` and `parts/`:
 
 ## Constraints
 
-- Do NOT modify module logic or geometry — only restructure, document, and catalog.
-- Do NOT create flattened exports — `scadm flatten` handles that separately.
-- Do NOT skip PNG generation — preview images are mandatory for every parts file.
-- Do NOT skip test file creation — every model needs at least a minimal render test for CI coverage.
+- Do NOT modify module logic or geometry, only restructure, document, and catalog.
+- Do NOT create flattened exports, `scadm flatten` handles that separately.
+- Do NOT skip PNG generation, preview images are mandatory for every parts file.
+- Do NOT skip test file creation, every model needs at least a minimal render test for CI coverage.
 - Follow existing code style and conventions found in sibling models (e.g., `core/`, `wallmount/`).
 - Use emojis in README content per project conventions.
 

@@ -21,12 +21,11 @@ if [[ -n "${GITHUB_TOKEN:-}" ]]; then
 fi
 
 # Explicit files outside .claude/rules/
-# AGENTS.md is the canonical instruction set; CLAUDE.md and copilot-instructions.md point at it,
-# so all three must travel together or the pointers dangle.
+# AGENTS.md is the canonical instruction set and CLAUDE.md points at it, so the two must travel
+# together or the import dangles.
 EXPLICIT_FILES=(
     "AGENTS.md"
     "CLAUDE.md"
-    ".github/copilot-instructions.md"
     ".github/pull_request_template.md"
 )
 

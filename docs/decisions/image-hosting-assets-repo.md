@@ -2,7 +2,7 @@
 
 ## 📌 Status
 
-**Accepted** — 2026-04-13
+**Accepted**, 2026-04-13
 
 ## 🤔 Context
 
@@ -58,7 +58,7 @@ https://raw.githubusercontent.com/kellerlabs/assets/main/<repo>/<path>
 Source repos block all image extensions and whitelist only auto-generated renders:
 
 ```gitignore
-# Images — hosted in kellerlabs/assets repo
+# Images: hosted in kellerlabs/assets repo
 *.png
 *.jpg
 *.jpeg
@@ -82,6 +82,6 @@ Source repos block all image extensions and whitelist only auto-generated render
 
 ## 📚 References
 
-- [kellerlabs/assets](https://github.com/kellerlabs/assets) — the assets repository
-- `scadm export-png` — auto-generates render PNGs next to source `.scad` files
-- `cmd/export/md-to-mw.py` — converts DESCRIPTION.md to MakerWorld HTML
+- [kellerlabs/assets](https://github.com/kellerlabs/assets): the assets repository
+- `scadm export-png`: auto-generates render PNGs next to source `.scad` files
+- `cmd/export/md-to-mw.py`: converts DESCRIPTION.md to MakerWorld HTML

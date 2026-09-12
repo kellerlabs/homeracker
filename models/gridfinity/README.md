@@ -2,8 +2,7 @@
 
 ## 📌 What
 
-Gridfinity-compatible baseplates and bin bases implemented as reusable OpenSCAD modules for anyone to use.
-This library makes it easy to integrate Gridfinity interfaces into your models.
+Gridfinity-compatible baseplates and bin bases implemented as reusable OpenSCAD modules for anyone to use. This library makes it easy to integrate Gridfinity interfaces into your models.
 
 - **Baseplate**: Use for Gridfinity-compatible shelves or drawers
 - **Bin Base**: Use as a foundation for custom Gridfinity bins
@@ -12,8 +11,8 @@ This library makes it easy to integrate Gridfinity interfaces into your models.
 
 Mainly because I can, but also other implementations I found were pretty complicated and I just wanted simple interfaces.
 
-- Standard 42mm Gridfinity grid — compatible with the entire ecosystem
-- Parametric OpenSCAD modules — include in your own projects
+- Standard 42mm Gridfinity grid, compatible with the entire ecosystem
+- Parametric OpenSCAD modules, include in your own projects
 - Spec-compliant with [grizzie17's Gridfinity specification](https://www.printables.com/model/417152-gridfinity-specification)
 
 ## 🔧 How
@@ -61,7 +60,7 @@ Bottom mounting component for custom Gridfinity-compatible containers.
 - Standard Gridfinity 42mm grid spacing
 - Matches baseplate cutout geometry
 - Stack securely on Gridfinity baseplates
-- `binbase_with_topplate()` adds a flat plate on top — handy as a foundation for custom geometry
+- `binbase_with_topplate()` adds a flat plate on top, handy as a foundation for custom geometry
 - All modules are BOSL2-attachable (`anchor`, `spin`, `orient`)
 
 ## 📐 Dimensional Standards

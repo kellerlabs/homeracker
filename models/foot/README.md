@@ -6,7 +6,7 @@ A standalone foot insert that plugs into any HomeRacker connector arm from the o
 
 ## 🤔 Why
 
-- **Flexibility**: Feet are now independent — add or remove them without needing special connector variants. When extending a rack vertically, just unmount the feet and add levels to the bottom.
+- **Flexibility**: Feet are now independent, add or remove them without needing special connector variants. When extending a rack vertically, just unmount the feet and add levels to the bottom.
 - **Simplicity**: Removes `is_foot` complexity from the connector module (fewer variants to maintain and export).
 - **Material choice**: Can be printed in **TPU** for better grip and load distribution, while the connector stays rigid (PLA/PETG).
 
@@ -27,7 +27,7 @@ Open `parts/foot.scad` in OpenSCAD and use the **Customizer** panel.
 Three stacked parts (top → bottom, using BOSL2 `attach()`):
 
 1. **Support section** (15×15×15mm): A 1-unit `support()` with `x_holes=true`, oriented downward. Plugs into the connector arm with lock pin holes in both perpendicular directions.
-2. **Spacer** (15×15×1.1mm): Inset shim at the arm entry — `TOLERANCE/2` shift-out plus `BASE_CHAMFER` inset for a flush transition. Chamfered on side edges.
+2. **Spacer** (15×15×1.1mm): Inset shim at the arm entry, `TOLERANCE/2` shift-out plus `BASE_CHAMFER` inset for a flush transition. Chamfered on side edges.
 3. **Base plate** (19.2×19.2×2mm): Wider platform for load distribution and grip. Chamfered on all edges except the top face.
 
 ### Usage
@@ -59,5 +59,5 @@ scadm export-png models/foot/parts/foot.scad
 
 ## 📚 References
 
-- [HomeRacker core](../core/README.md) — connectors, supports, lock pins
-- [Connector module](../core/lib/connector.scad) — the connector arms where feet insert
+- [HomeRacker core](../core/README.md): connectors, supports, lock pins
+- [Connector module](../core/lib/connector.scad): the connector arms where feet insert

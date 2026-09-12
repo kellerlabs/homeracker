@@ -2,7 +2,7 @@
 
 ## 📌 Status
 
-**Accepted** — 2026-09-02
+**Accepted**, 2026-09-02
 
 ## 🤔 Context
 
@@ -49,6 +49,6 @@ A configurator needs a place to live, a toolchain, a way to publish, and a previ
 ## 📚 References
 
 - [configurator/README.md](../../configurator/README.md)
-- [models/core/lib/connector.scad](../../models/core/lib/connector.scad) — `CONNECTOR_CONFIGS`
-- [models/panel/lib/panel.scad](../../models/panel/lib/panel.scad) — inter-fit deduction
-- [image-hosting-assets-repo](image-hosting-assets-repo.md) — why the app ships no image files
+- [models/core/lib/connector.scad](../../models/core/lib/connector.scad): `CONNECTOR_CONFIGS`
+- [models/panel/lib/panel.scad](../../models/panel/lib/panel.scad): inter-fit deduction
+- [image-hosting-assets-repo](image-hosting-assets-repo.md): why the app ships no image files

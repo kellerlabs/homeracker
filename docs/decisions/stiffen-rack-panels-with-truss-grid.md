@@ -2,36 +2,33 @@
 
 ## 📌 Status
 
-**Accepted** — 2026-06-19
+**Accepted**, 2026-06-19
 
 ## 🤔 Context
 
-Large rack panels (19", multi-U) flex under load. We needed a way to add stiffness
-without a wholesale redesign, and had to decide *how* to add it:
+Large rack panels (19", multi-U) flex under load. We needed a way to add stiffness without a wholesale redesign, and had to decide *how* to add it:
 
 - FDM panels print **face-down**, so panel depth is the vertical (Z) print direction.
-  Increasing `panel_depth` adds volume that the slicer fills with sparse gyroid infill —
+  Increasing `panel_depth` adds volume that the slicer fills with sparse gyroid infill,
   cheap broad bending resistance (a sandwich/I-beam), but stiffness depends on the user's
   infill settings and gyroid resists **torsion/racking** poorly.
 - Split panels already grow knuckles to a back depth of `HR_SPLIT_KNUCKLE_STRENGTH_SLIM`
-  (8.8mm). Any structure that stays within that envelope is "free" — it adds no bounding
+  (8.8mm). Any structure that stays within that envelope is "free", it adds no bounding
   footprint beyond what the connector already claims.
 
-We also had to decide whether the stiffener should be panel-specific or reusable, and how
-it should behave on split panels (where a centerline connector interrupts the back face).
+We also had to decide whether the stiffener should be panel-specific or reusable, and how it should behave on split panels (where a centerline connector interrupts the back face).
 
 ## 🔧 Decision
 
-Add an **optional back-side truss stiffener** built from a new **generic, dimension-driven**
-module `models/panel/lib/truss.scad` (`truss_grid`):
+Add an **optional back-side truss stiffener** built from a new **generic, dimension-driven** module `models/panel/lib/truss.scad` (`truss_grid`):
 
-- `truss_grid` knows nothing about panels, bores, or splits — it takes `size`, `rows`, and
+- `truss_grid` knows nothing about panels, bores, or splits, it takes `size`, `rows`, and
   `rib` and produces a framed, triangulated lattice (frame and diagonals are always on). It is
   **row-driven**: `rows` sets the number of horizontal bands and columns auto-size for ~square
   cells, so every cell is full-length (no clipped partial cells). Each cell's diagonal
   **alternates direction in a checkerboard** (a Warren/zigzag lattice) so the grid resists
   racking/shear equally in both directions rather than favouring one handedness. The chamfer
-  (`chamfer_enabled`) is applied **only to the outer back (+Y) perimeter edge** — the face that
+  (`chamfer_enabled`) is applied **only to the outer back (+Y) perimeter edge**, the face that
   shows on an assembled panel; interior ribs stay square. Kept generic for reuse by future
   models.
 - `rackpanel` orchestrates: the brace attaches at the panel **back** face and protrudes to the
@@ -51,24 +48,24 @@ module `models/panel/lib/truss.scad` (`truss_grid`):
 
 Alternatives considered:
 
-- **Solid/deeper panel only** — rejected as the *sole* mechanism: infill-dependent and weak
+- **Solid/deeper panel only**: rejected as the *sole* mechanism: infill-dependent and weak
   in torsion. Kept as a complementary option (`panel_depth`); the two combine.
-- **A wider (`strong`, full `BASE_UNIT`) split connector for seam stiffness** — added as an option
+- **A wider (`strong`, full `BASE_UNIT`) split connector for seam stiffness**: added as an option
   first, then **removed**. A four-panel print test (19" 1U, Bambu X1C, HomeRacker defaults:
   3 walls, Arachne, 15 % gyroid, Bambu PLA Matte Charcoal) hand-loaded in shear and bending showed
-  the wider knuckle flexed *more* along the seam and cost extra filament for no gain — stiffness
+  the wider knuckle flexed *more* along the seam and cost extra filament for no gain, stiffness
   came from `panel_depth` and `back_brace`, not connector width. So `split_connector_strength` /
   `connector_strength` and the `HR_SPLIT_KNUCKLE_STRENGTH_BASE` / `knuckle_strength` plumbing were
   dropped; the slim knuckle is the only connector. See the README's
   [real-world print test](../../models/panel/README.md#-stiffening-depth-vs-back-brace).
-- **All diagonals one direction** (initial draft) — rejected: asymmetric racking stiffness and
+- **All diagonals one direction** (initial draft), rejected: asymmetric racking stiffness and
   it left clipped partial cells along one edge from the 45° clip. The row-based alternating
   pattern fixes both.
-- **Spacing-driven grid** (initial draft) — rejected: a fixed pitch left ragged partial cells.
+- **Spacing-driven grid** (initial draft), rejected: a fixed pitch left ragged partial cells.
   Row count + auto columns gives clean, evenly-spread triangles at any size.
-- **Naming it `isogrid`** — rejected. Isogrid implies a fixed equilateral 60° lattice;
+- **Naming it `isogrid`**: rejected. Isogrid implies a fixed equilateral 60° lattice;
   our pattern is a rectangular grid with alternating diagonals, so `truss_grid` is honest.
-- **Panel-specific brace module** — rejected in favor of a generic reusable file.
+- **Panel-specific brace module**: rejected in favor of a generic reusable file.
 
 ## 📊 Consequences
 

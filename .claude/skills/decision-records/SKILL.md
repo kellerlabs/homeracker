@@ -11,13 +11,11 @@ description: >
   changes that are self-explanatory from the code or commit message.
 ---
 
-# 📋 Decision Records — homeracker Skill
+# 📋 Decision Records, homeracker Skill
 
-This skill guides the creation and management of lightweight decision records that capture
-the **why** behind architecture, tooling, and workflow decisions.
+This skill guides the creation and management of lightweight decision records that capture the **why** behind architecture, tooling, and workflow decisions.
 
-Decision records help contributors and AI agents understand the original intent behind
-choices, especially when the reasoning isn't obvious from the code alone.
+Decision records help contributors and AI agents understand the original intent behind choices, especially when the reasoning isn't obvious from the code alone.
 
 ---
 
@@ -46,7 +44,7 @@ Before creating a new decision, **always check** if one already exists:
 ### 3.1 File Location & Naming
 
 - **Location:** `docs/decisions/`
-- **Naming:** `kebab-case-title.md` — name after the component/topic and action.
+- **Naming:** `kebab-case-title.md`, name after the component/topic and action.
   - ✅ `image-hosting-assets-repo.md`
   - ✅ `unify-export-png-into-scadm.md`
   - ❌ `ADR-001-image-hosting.md` (no numeric prefixes)
@@ -61,7 +59,7 @@ Use this exact structure:
 
 ## 📌 Status
 
-**Accepted** — YYYY-MM-DD
+**Accepted**: YYYY-MM-DD
 
 ## 🤔 Context
 
@@ -81,7 +79,7 @@ What follows from this decision? Include both positive and negative effects.
 
 - **Context** must explain the problem clearly enough that someone unfamiliar can understand it.
 - **Decision** must state the choice explicitly and include alternatives considered with brief reasons for rejection.
-- **Consequences** must include both positive and negative effects — every decision has trade-offs.
+- **Consequences** must include both positive and negative effects, every decision has trade-offs.
 - Keep it concise. Prefer bullet points over prose. Link to code, PRs, or other docs rather than duplicating content.
 - Use the homeracker emoji conventions (📋 title, 📌 Status, 🤔 Context, 🔧 Decision, 📊 Consequences).
 
@@ -99,7 +97,7 @@ When a previous decision is being replaced:
 1. Create a new decision record (§3) explaining the new choice.
 2. In the new record's **Context**, link to the last commit containing the old decision so readers can find it in history.
    Format: `Supersedes [old-decision.md](https://github.com/kellerlabs/homeracker/blob/<commit-sha>/docs/decisions/old-decision.md)`
-3. **Delete the old decision file** — it remains available in git history.
+3. **Delete the old decision file**: it remains available in git history.
 4. Update `docs/decisions/README.md` to remove the old entry and add the new one.
 
 ---

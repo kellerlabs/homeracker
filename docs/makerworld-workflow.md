@@ -72,7 +72,7 @@ Use the `makerworld-description` agent to create a new `DESCRIPTION.md` from scr
 
 ## 📚 References
 
-- [image-hosting-assets-repo](decisions/image-hosting-assets-repo.md) — why images live in a separate repo
-- `.claude/agents/makerworld-description.md` — agent for creating new descriptions
-- `.claude/skills/makerworld-description/SKILL.md` — skill for extracting existing descriptions
-- `cmd/export/md-to-mw.py` — conversion script
+- [image-hosting-assets-repo](decisions/image-hosting-assets-repo.md): why images live in a separate repo
+- `.claude/agents/makerworld-description.md`: agent for creating new descriptions
+- `.claude/skills/makerworld-description/SKILL.md`: skill for extracting existing descriptions
+- `cmd/export/md-to-mw.py`: conversion script

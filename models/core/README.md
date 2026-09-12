@@ -2,12 +2,11 @@
 
 ## 📌 What
 
-The core building system for HomeRacker — the fully modular 3D-printable rack-building platform.
-Provides supports, connectors, and lock pins as parametric OpenSCAD modules.
+The core building system for HomeRacker, the fully modular 3D-printable rack-building platform. Provides supports, connectors, and lock pins as parametric OpenSCAD modules.
 
 ## 🤔 Why
 
-- **Modularity**: Snap-together system using standardized 15mm units — no glue, no screws
+- **Modularity**: Snap-together system using standardized 15mm units, no glue, no screws
 - **Parametric**: Every component is fully customizable via OpenSCAD Customizer
 - **Extensible**: Library modules (`lib/`) can be included in your own projects
 

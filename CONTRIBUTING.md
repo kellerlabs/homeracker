@@ -10,7 +10,7 @@ This repository contains the **HomeRacker Core** system. We accept **bugfixes an
 
 **New features, modules, and extensions** (e.g. new mount types, adapters, accessories) should be contributed to the [HomeRacker Community Repository](https://github.com/kellerlabs/homeracker-community).
 
-> 💡 Not sure where your contribution belongs? [Open an issue](https://github.com/kellerlabs/homeracker/issues) or [start a discussion](https://github.com/kellerlabs/homeracker/discussions) first — we're happy to help you find the right place.
+> 💡 Not sure where your contribution belongs? [Open an issue](https://github.com/kellerlabs/homeracker/issues) or [start a discussion](https://github.com/kellerlabs/homeracker/discussions) first, we're happy to help you find the right place.
 
 ## 🚀 Quick Start
 
