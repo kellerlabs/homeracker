@@ -79,11 +79,21 @@ export function connectorPartName(node: RackNode): { name: string; rotation: Qua
   return { name: `connector-${label}${variant === "none" ? "" : `-${variant}`}`, rotation: new Quaternion().setFromRotationMatrix(m) };
 }
 
-/** Side a lock pin is pushed in from: across the arm, from the top for horizontal arms, from +x for posts. */
+/**
+ * Axis the lock pin holes of a support run along. A support is modelled along y with its holes
+ * along z (models/core/lib/support.scad, x_holes stays off), and `alongAxis` lays a post down so
+ * its holes end up front to back.
+ */
+const HOLE_AXIS: Record<Axis, Axis> = { x: "z", y: "z", z: "y" };
+
+/**
+ * Side a lock pin is pushed in from: the hole axis of the support in that arm, from the inside of
+ * the rack, so the grip stays out of the way of panels and of whatever stands next to the rack.
+ */
 export function lockpinInsert(arm: Dir, armCenter: Vector3, rackCenter: Vector3): Vector3 {
-  const axis = arm[1] === "z" ? AXIS_VECTOR.x : AXIS_VECTOR.z;
-  const side = Math.sign(armCenter.clone().sub(rackCenter).dot(axis)) || 1;
-  return axis.clone().multiplyScalar(side);
+  const axis = AXIS_VECTOR[HOLE_AXIS[arm[1] as Axis]];
+  const outward = Math.sign(armCenter.clone().sub(rackCenter).dot(axis)) || 1;
+  return axis.clone().multiplyScalar(-outward);
 }
 
 /** Offset of the foot mesh origin from the centre of the arm cell it plugs into (its support section is not centred). */
