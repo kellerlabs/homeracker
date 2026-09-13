@@ -88,11 +88,13 @@ The hooks can be found here: [.pre-commit-config.yaml](.pre-commit-config.yaml)
 ### Configurator (TypeScript)
 - Lives in `configurator/`; run `npm ci && npm run check` before committing (the pre-commit hook does this when files under `configurator/` change)
 - Keep `src/engine/` free of DOM and Three.js; put geometry rules there with a Vitest case
+- Anything visible in the 3D view: run `npm run dev` and check it in the browser before you commit, and hand the URL to whoever reviews the change
 - See [configurator/README.md](configurator/README.md)
 
 ### Site (Astro)
 - Lives in `site/`; renders the READMEs of this repo. Run `npm ci && npm run check` there (the pre-commit hook does this when the site or a rendered README changes)
 - Relative README links become site links; keep using them instead of absolute GitHub URLs
+- Anything visible on a page: run `npm run dev` and check it in the browser before you commit, and hand the URL to whoever reviews the change
 - See [site/README.md](site/README.md)
 
 ### Python Code Standards

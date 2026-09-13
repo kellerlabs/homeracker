@@ -3,7 +3,7 @@ import { STLLoader } from "three/addons/loaders/STLLoader.js";
 import { BASE_STRENGTH, BASE_UNIT, TOLERANCE } from "../engine/constants";
 import { classifyConnector, connectorLabel } from "../engine/connector";
 import { connectorLabelOf, orientConnector } from "../engine/orientation";
-import type { Axis, Dir, RackModel, RackNode, RackPanel, Vec3 } from "../engine/types";
+import type { Axis, Dir, PanelType, RackModel, RackNode, RackPanel, Vec3 } from "../engine/types";
 import type { BoxKind } from "./layout";
 
 interface Manifest {
@@ -156,6 +156,17 @@ const INTERFIT_DEDUCTION = (2 * BASE_STRENGTH + TOLERANCE) * MM;
 const CORNER_MOUNT = (BASE_UNIT - BASE_STRENGTH) * MM;
 /** Mount height: BASE_UNIT + TOLERANCE for inter-fit, one wall more for full cover (get_panel_mount_height). */
 const MOUNT_HEIGHT = { interfit: (BASE_UNIT + TOLERANCE) * MM, fullcover: (BASE_UNIT + TOLERANCE + BASE_STRENGTH) * MM };
+/** Wall of a connector arm, which wraps the support it slides over (connector_outer_side_length in core/lib/connector.scad). */
+const CONNECTOR_WALL = BASE_STRENGTH * MM;
+
+/**
+ * How far a panel's outer face sits in front of the plane of the opening. An inter-fit panel is
+ * flush with it; a full cover panel covers the supports and the connectors, so it clears the
+ * connector arms standing proud of the supports.
+ */
+export function panelStandoff(type: PanelType): number {
+  return type === "interfit" ? 0 : PLATE + CONNECTOR_WALL;
+}
 /** Bottom plate of a support mount plate: 2 walls + half the tolerance (support_mount_plate). */
 const MOUNT_PLATE_WIDTH = (BASE_STRENGTH * 2 + TOLERANCE / 2) * MM;
 
@@ -192,7 +203,7 @@ function panelMesh(panel: RackPanel, library: PartLibrary, material: MeshStandar
   // Plate: inter-fit sits inside the opening flush with the outer face; full cover sits outside, one unit wider.
   const plateWidth = Lu - INTERFIT_DEDUCTION;
   const plateDepth = Hu - INTERFIT_DEDUCTION;
-  const plateBottom = panel.type === "interfit" ? 0 : -PLATE;
+  const plateBottom = -panelStandoff(panel.type);
   const plate = new Mesh(unitBoxGeometry, material);
   plate.scale.set(panel.type === "interfit" ? plateWidth : Lu + 1, panel.type === "interfit" ? plateDepth : Hu + 1, PLATE);
   plate.position.set(0, 0, plateBottom + PLATE / 2);
