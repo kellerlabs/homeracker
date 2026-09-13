@@ -23,7 +23,9 @@ function panelBox(panel: RackPanel): Box {
   const axis = AXIS_INDEX[panel.normal[1] as Axis];
   const sign = normal[axis];
   const plane = sign > 0 ? panel.origin[axis] + 1 : panel.origin[axis];
-  const offset = (panel.type === "interfit" ? -sign : sign) * (PANEL_THICKNESS / 2);
+  // Inter-fit hangs on the inside of the frame, its mounts reaching back out to the plane of the
+  // opening; full cover laps over the frame from outside.
+  const offset = panel.type === "interfit" ? -sign * (1 - PANEL_THICKNESS / 2) : sign * (PANEL_THICKNESS / 2);
   const center: [number, number, number] = [0, 0, 0];
   const size: [number, number, number] = [0, 0, 0];
   center[axis] = plane + offset;

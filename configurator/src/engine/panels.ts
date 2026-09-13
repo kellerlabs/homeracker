@@ -12,14 +12,12 @@ export function panelSize(length: number, height: number): { unitsX: number; uni
 }
 
 /**
- * Lock pins to fasten a panel: one per mount-plate hole (units - 2 per edge, only when > 2),
- * plus four extended pins for corner mounts when a side is 3 units or shorter
- * (models/panel/README.md, "When to use corner mounts").
+ * Lock pins to fasten a panel: one per mount-plate hole, units - 2 per edge and only when the edge
+ * is longer than 2 units. The corners are held by the pins of the frame, which carry an extension
+ * for the job instead (`framePins` in pins.ts).
  */
-export function panelPins(length: number, height: number): { standard: number; extended: number } {
-  const standard = 2 * Math.max(length - 2, 0) + 2 * Math.max(height - 2, 0);
-  const extended = Math.min(length, height) <= 3 ? 4 : 0;
-  return { standard, extended };
+export function panelPins(length: number, height: number): { standard: number } {
+  return { standard: 2 * Math.max(length - 2, 0) + 2 * Math.max(height - 2, 0) };
 }
 
 export function openingId(face: PanelSpec["face"], at: number, index: number): string {

@@ -42,9 +42,15 @@ function parts() {
     }
   }
   for (let units = 1; units <= MAX_SUPPORT; units++) {
-    list.push({ name: `support-${units}`, file: "models/core/parts/support.scad", defines: [`units=${units}`] });
+    // Holes on both axes: a panel mount needs the one across the face its bracket lies on.
+    list.push({ name: `support-${units}`, file: "models/core/parts/support.scad", defines: [`units=${units}`, "x_holes=true"] });
   }
   list.push({ name: "lockpin", file: "models/core/parts/lockpin.scad", defines: [] });
+  // Extended lock pins: a corner pin reaches through the panel bracket that shares its hole, on the
+  // neck side, the tail side or both (neck_extension of models/core/parts/lockpin.scad).
+  for (const [name, mode] of [["lockpin-neck", 1], ["lockpin-both", 2], ["lockpin-tail", 3]]) {
+    list.push({ name, file: "models/core/parts/lockpin.scad", defines: [`neck_extension=${mode}`] });
+  }
   list.push({ name: "foot", file: "models/foot/parts/foot.scad", defines: [] });
   // Panel kit: panels are assembled in the browser from their mount plates and corner brackets.
   const kit = "site/scripts/scad/panel_kit.scad";

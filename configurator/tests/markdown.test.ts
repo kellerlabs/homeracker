@@ -43,7 +43,8 @@ describe("bomToMarkdown", () => {
   test("lists one table row per line with quantities", () => {
     expect(md).toContain("| 12 | Support 6 units (90 mm) |");
     expect(md).toContain("| 8 | Connector 3D4W |");
-    expect(md).toContain("| 44 | Lock pin |");
+    expect(md).toContain("| 36 | Lock pin |");
+    expect(md).toContain("| 8 | Lock pin, extended neck |");
     expect(md).toContain("| 4 | Foot insert |");
     expect(md).toContain("| 1 | Panel 6x6 units full cover |");
   });

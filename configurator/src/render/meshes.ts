@@ -3,7 +3,8 @@ import { STLLoader } from "three/addons/loaders/STLLoader.js";
 import { BASE_STRENGTH, BASE_UNIT, TOLERANCE } from "../engine/constants";
 import { classifyConnector, connectorLabel } from "../engine/connector";
 import { connectorLabelOf, orientConnector } from "../engine/orientation";
-import type { Axis, Dir, RackModel, RackNode, RackPanel, Vec3 } from "../engine/types";
+import { framePins, gripDir, lockpinPart } from "../engine/pins";
+import type { Axis, Dir, PanelType, RackModel, RackNode, RackPanel, Vec3 } from "../engine/types";
 import type { BoxKind } from "./layout";
 
 interface Manifest {
@@ -79,13 +80,6 @@ export function connectorPartName(node: RackNode): { name: string; rotation: Qua
   return { name: `connector-${label}${variant === "none" ? "" : `-${variant}`}`, rotation: new Quaternion().setFromRotationMatrix(m) };
 }
 
-/** Side a lock pin is pushed in from: across the arm, from the top for horizontal arms, from +x for posts. */
-export function lockpinInsert(arm: Dir, armCenter: Vector3, rackCenter: Vector3): Vector3 {
-  const axis = arm[1] === "z" ? AXIS_VECTOR.x : AXIS_VECTOR.z;
-  const side = Math.sign(armCenter.clone().sub(rackCenter).dot(axis)) || 1;
-  return axis.clone().multiplyScalar(side);
-}
-
 /** Offset of the foot mesh origin from the centre of the arm cell it plugs into (its support section is not centred). */
 const FOOT_OFFSET_UNITS = -1.55 / BASE_UNIT;
 
@@ -97,7 +91,6 @@ export async function buildRealRack(
 ): Promise<Group> {
   const pick = (key: string, material: MeshStandardMaterial) => (flagged.has(key) ? materials.flagged : material);
   const group = new Group();
-  const rackCenter = new Vector3(model.extent[0] / 2, model.extent[1] / 2, model.extent[2] / 2);
   const pending: Promise<void>[] = [];
   const place = (name: string, material: MeshStandardMaterial, position: Vector3, rotation: Quaternion) => {
     pending.push(
@@ -123,16 +116,17 @@ export async function buildRealRack(
     const spec = classifyConnector(n.arms, n.pullThrough);
     const key = `connector:${connectorLabel({ ...spec, pullThrough: "none" })}:${spec.pullThrough}`;
     place(name, pick(key, n.pullThrough === "none" ? materials.core : materials["core-pullthrough"]), core, rotation);
-    for (const arm of n.arms) {
-      if (arm === "-z" && n.foot) {
-        const cell = core.clone().add(dirVector(arm));
-        place("foot", materials.foot, cell.add(new Vector3(0, 0, FOOT_OFFSET_UNITS)), new Quaternion());
-        continue;
-      }
-      const armCenter = core.clone().add(dirVector(arm));
-      const insert = lockpinInsert(arm, armCenter, rackCenter);
-      place("lockpin", materials.arm, armCenter, alongAxis(insert));
+    if (n.foot) {
+      const cell = core.clone().add(dirVector("-z"));
+      place("foot", materials.foot, cell.add(new Vector3(0, 0, FOOT_OFFSET_UNITS)), new Quaternion());
     }
+  }
+
+  // One lock pin per connector arm, along the hole axis of the support there, extended where a
+  // panel corner bracket hangs on the same hole.
+  for (const pin of framePins(model)) {
+    const part = lockpinPart(pin.extension);
+    place(library.has(part) ? part : "lockpin", materials.arm, cellCenter(pin.cell), alongAxis(dirVector(gripDir(pin))));
   }
 
   // Panels are parametric in two dimensions, so each one is assembled from exported mount plates and
@@ -156,13 +150,27 @@ const INTERFIT_DEDUCTION = (2 * BASE_STRENGTH + TOLERANCE) * MM;
 const CORNER_MOUNT = (BASE_UNIT - BASE_STRENGTH) * MM;
 /** Mount height: BASE_UNIT + TOLERANCE for inter-fit, one wall more for full cover (get_panel_mount_height). */
 const MOUNT_HEIGHT = { interfit: (BASE_UNIT + TOLERANCE) * MM, fullcover: (BASE_UNIT + TOLERANCE + BASE_STRENGTH) * MM };
+/** Wall of a connector arm, which wraps the support it slides over (connector_outer_side_length in core/lib/connector.scad). */
+const CONNECTOR_WALL = BASE_STRENGTH * MM;
+
+/**
+ * Where the back of a panel's plate sits, along the panel's own axis with zero on the plane of the
+ * opening and up towards the mounts. An inter-fit panel is turned around: it lies against the
+ * inside of the frame with its mounts reaching back out, tips flush with the plane, which is what
+ * lines its holes up with the ones in the supports and keeps its fixings reachable from outside. A
+ * full cover panel covers the frame from outside, one connector wall clear of the supports so the
+ * connector arms stay behind it.
+ */
+export function panelPlateBottom(type: PanelType): number {
+  return type === "interfit" ? -(PLATE + MOUNT_HEIGHT.interfit) : -(PLATE + CONNECTOR_WALL);
+}
 /** Bottom plate of a support mount plate: 2 walls + half the tolerance (support_mount_plate). */
 const MOUNT_PLATE_WIDTH = (BASE_STRENGTH * 2 + TOLERANCE / 2) * MM;
 
 /**
  * A panel assembled the way panel() in panel.scad assembles it: the plate, a real support mount
  * plate on every edge longer than 2 units, and a real corner bracket in every corner.
- * Local frame: x along the opening's length, y along its height, z pointing into the rack.
+ * Local frame: x along the opening's length, y along its height, z along the mounts.
  * Mount plates and corners are exported meshes; only the plate is a box.
  */
 function panelMesh(panel: RackPanel, library: PartLibrary, material: MeshStandardMaterial): Promise<Group> {
@@ -177,11 +185,13 @@ function panelMesh(panel: RackPanel, library: PartLibrary, material: MeshStandar
   const code = panel.type === "interfit" ? "i" : "f";
   const mountHeight = MOUNT_HEIGHT[panel.type];
 
-  // Local -> world: x = length axis, y = height axis, z = inward (opposite the outward normal).
+  // Local -> world: x = length axis, y = height axis, z = the way the mounts point. An inter-fit
+  // panel is turned over on its length axis, so its mounts face out of the rack.
+  const turned = panel.type === "interfit" ? -1 : 1;
   const basis = [new Vector3(), new Vector3(), new Vector3()];
   basis[0]!.setComponent(l, 1);
-  basis[1]!.setComponent(h, 1);
-  basis[2]!.setComponent(n, -sign);
+  basis[1]!.setComponent(h, turned);
+  basis[2]!.setComponent(n, -sign * turned);
   const origin = new Vector3();
   origin.setComponent(l, (panel.origin[l] ?? 0) + 1 + Lu / 2);
   origin.setComponent(h, (panel.origin[h] ?? 0) + 1 + Hu / 2);
@@ -189,10 +199,11 @@ function panelMesh(panel: RackPanel, library: PartLibrary, material: MeshStandar
   group.matrixAutoUpdate = false;
   group.matrix.makeBasis(basis[0]!, basis[1]!, basis[2]!).setPosition(origin);
 
-  // Plate: inter-fit sits inside the opening flush with the outer face; full cover sits outside, one unit wider.
+  // Plate: inter-fit fits between the connector arms of the opening; full cover is one unit wider
+  // and laps over the frame.
   const plateWidth = Lu - INTERFIT_DEDUCTION;
   const plateDepth = Hu - INTERFIT_DEDUCTION;
-  const plateBottom = panel.type === "interfit" ? 0 : -PLATE;
+  const plateBottom = panelPlateBottom(panel.type);
   const plate = new Mesh(unitBoxGeometry, material);
   plate.scale.set(panel.type === "interfit" ? plateWidth : Lu + 1, panel.type === "interfit" ? plateDepth : Hu + 1, PLATE);
   plate.position.set(0, 0, plateBottom + PLATE / 2);
