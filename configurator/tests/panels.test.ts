@@ -19,12 +19,12 @@ describe("panelSize", () => {
 
 describe("panelPins", () => {
   test("counts one pin per mount plate hole on large panels", () => {
-    expect(panelPins(6, 5)).toEqual({ standard: 2 * 4 + 2 * 3, extended: 0 });
+    expect(panelPins(6, 5)).toEqual({ standard: 2 * 4 + 2 * 3 });
   });
 
-  test("adds four extended pins for corner mounts on small panels", () => {
-    expect(panelPins(6, 3)).toEqual({ standard: 2 * 4 + 2 * 1, extended: 4 });
-    expect(panelPins(2, 2)).toEqual({ standard: 0, extended: 4 });
+  test("leaves the corners to the pins of the frame", () => {
+    expect(panelPins(6, 3)).toEqual({ standard: 2 * 4 + 2 * 1 });
+    expect(panelPins(2, 2)).toEqual({ standard: 0 });
   });
 });
 

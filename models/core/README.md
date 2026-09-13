@@ -57,7 +57,7 @@ The `presets/` folder contains modules for batch-exporting all logical variants:
 Structural elements with standardized connection points.
 - 15mm × 15mm cross-section
 - Configurable length (multiples of 15mm)
-- Optional X-axis holes for cable management
+- Optional second set of lock pin holes across the X axis (`x_holes`), the ones a panel mount needs on the face it lies on. The configurator asks for them on every support, see [x-hole supports by default](../../docs/decisions/x-hole-supports-by-default.md)
 
 ### 2. **Connectors**
 Junction pieces that join supports in multiple directions.

@@ -1,6 +1,7 @@
 import { classifyConnector, connectorLabel } from "./connector";
 import { BASE_STRENGTH, BASE_UNIT, LIMITS, TOLERANCE } from "./constants";
 import { panelPins } from "./panels";
+import { framePins, NECK_EXTENSION, type PinExtension } from "./pins";
 import type { Bom, BomLine, Dir, RackModel } from "./types";
 
 const PANEL_TYPE_PARAM = { interfit: 1, fullcover: 2 } as const;
@@ -21,6 +22,7 @@ function panelSizeMm(unitsX: number, unitsY: number, type: "interfit" | "fullcov
   return [round(unitsX * BASE_UNIT - deduction), round(unitsY * BASE_UNIT - deduction), round(BASE_STRENGTH + MOUNT_HEIGHT[type])];
 }
 const PANEL_TYPE_LABEL = { interfit: "inter-fit", fullcover: "full cover" } as const;
+const EXTENSION_LABEL = { none: "", neck: "extended neck", tail: "extended tail", both: "both ends extended" } as const;
 
 function add(lines: Map<string, BomLine>, line: Omit<BomLine, "qty">, qty = 1): void {
   const existing = lines.get(line.key);
@@ -38,11 +40,10 @@ export function computeBom(model: RackModel): Bom {
       label: `Support ${s.length} units (${s.length * BASE_UNIT} mm)`,
       size: [BASE_UNIT, BASE_UNIT, s.length * BASE_UNIT],
       ...(s.length < LIMITS.span.min ? { note: `cannot be assembled: two connectors need at least ${LIMITS.span.min} units between them` } : {}),
-      scad: { part: "core/support", params: { units: s.length } },
+      scad: { part: "core/support", params: { units: s.length, x_holes: true } },
     });
   }
 
-  let framePins = 0;
   let feet = 0;
   for (const n of model.nodes) {
     const spec = classifyConnector(n.arms, n.pullThrough);
@@ -56,16 +57,12 @@ export function computeBom(model: RackModel): Bom {
         params: { dimensions: spec.dimensions, directions: spec.ways, pull_through_axis: spec.pullThrough },
       },
     });
-    framePins += n.arms.size;
     if (n.foot) feet++;
   }
 
   let panelPinsStandard = 0;
-  let panelPinsExtended = 0;
   for (const p of model.panels) {
-    const pins = panelPins(p.unitsX, p.unitsY);
-    panelPinsStandard += pins.standard;
-    panelPinsExtended += pins.extended;
+    panelPinsStandard += panelPins(p.unitsX, p.unitsY).standard;
     const oversize = Math.max(p.unitsX, p.unitsY) > LIMITS.panelCustomizer;
     const note = p.blocked ?? (oversize ? `beyond the Customizer slider (${LIMITS.panelCustomizer}); type the units in or print split` : undefined);
     add(lines, {
@@ -79,7 +76,22 @@ export function computeBom(model: RackModel): Bom {
   }
 
   const pinSize: [number, number, number] = [8, 22.1, 3.8];
-  add(lines, { kind: "lockpin", key: "lockpin:frame", label: "Lock pin", size: pinSize, scad: { part: "core/lockpin", params: { grip_type: 0 } } }, framePins);
+  const byExtension = new Map<PinExtension, number>();
+  for (const pin of framePins(model)) byExtension.set(pin.extension, (byExtension.get(pin.extension) ?? 0) + 1);
+  for (const [extension, qty] of byExtension) {
+    add(
+      lines,
+      {
+        kind: "lockpin",
+        key: extension === "none" ? "lockpin:frame" : `lockpin:frame-${extension}`,
+        label: extension === "none" ? "Lock pin" : `Lock pin, ${EXTENSION_LABEL[extension]}`,
+        ...(extension === "none" ? {} : { note: "holds a panel corner bracket on the outermost hole" }),
+        size: pinSize,
+        scad: { part: "core/lockpin", params: { grip_type: 0, neck_extension: NECK_EXTENSION[extension] } },
+      },
+      qty,
+    );
+  }
   if (panelPinsStandard > 0) {
     add(
       lines,
@@ -92,20 +104,6 @@ export function computeBom(model: RackModel): Bom {
         scad: { part: "core/lockpin", params: { grip_type: 0 } },
       },
       panelPinsStandard,
-    );
-  }
-  if (panelPinsExtended > 0) {
-    add(
-      lines,
-      {
-        kind: "lockpin",
-        key: "lockpin:panel-extended",
-        label: "Extended lock pin for panel corners",
-        note: "small panels use corner mounts; estimate",
-        size: pinSize,
-        scad: { part: "core/lockpin", params: { grip_type: 0, neck_extension: 1 } },
-      },
-      panelPinsExtended,
     );
   }
   if (feet > 0) add(lines, { kind: "foot", key: "foot", label: "Foot insert", size: [19.2, 19.2, 17.1], scad: { part: "foot/foot", params: {} } }, feet);

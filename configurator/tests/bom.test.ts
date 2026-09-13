@@ -71,13 +71,17 @@ describe("computeBom panels", () => {
   test("lists panel pins separately from frame pins", () => {
     // 6x5: 8+6=14, 6x4: 8+4=12, 6x6: 8+8=16, twice for the pairs => 2*14 + 2*12 + 16
     expect(qty(bom, "lockpin:panel")).toBe(68);
-    expect(qty(bom, "lockpin:panel-extended")).toBe(0);
+    // Every panel corner takes over a pin of the frame; the middle frame carries two panels at once.
+    expect(qty(bom, "lockpin:frame-neck")).toBe(28);
+    expect(qty(bom, "lockpin:frame-both")).toBe(4);
+    expect(qty(bom, "lockpin:frame")).toBe(44 - 32);
     expect(bom.totals.lockPins).toBe(44 + 68);
   });
 
-  test("small panels need extended pins for their corner mounts", () => {
+  test("the frame pins that carry a panel corner are extended", () => {
     const small = bomOf(closeFace({ ...smallestRack, depth: 3, rows: [{ height: 3, columns: [3], shift: 0, through: false }] }, "front", "interfit"));
-    expect(qty(small, "lockpin:panel-extended")).toBe(4);
+    expect(qty(small, "lockpin:frame-neck")).toBe(8);
+    expect(small.lines.find((l) => l.key === "lockpin:frame-neck")?.scad?.params.neck_extension).toBe(1);
   });
 });
 
@@ -111,7 +115,7 @@ describe("computeBom shape", () => {
     expect(bom.lines.map((l) => l.kind)).toEqual([
       "support", "support", "support",
       "connector", "connector",
-      "lockpin", "lockpin",
+      "lockpin", "lockpin", "lockpin",
       "foot",
       "panel",
     ]);
@@ -126,7 +130,7 @@ describe("computeBom shape", () => {
 
   test("carries OpenSCAD parameters for every printable line", () => {
     const bom = bomOf(closeFace(exampleB, "top", "fullcover"));
-    expect(bom.lines.find((l) => l.key === "support:10")?.scad).toEqual({ part: "core/support", params: { units: 10 } });
+    expect(bom.lines.find((l) => l.key === "support:10")?.scad).toEqual({ part: "core/support", params: { units: 10, x_holes: true } });
     expect(bom.lines.find((l) => l.key === "connector:3D4W:z")?.scad).toEqual({
       part: "core/connector",
       params: { dimensions: 3, directions: 4, pull_through_axis: "z" },

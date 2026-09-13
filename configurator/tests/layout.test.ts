@@ -55,14 +55,14 @@ describe("rackBoxes", () => {
     const { stepped } = await import("./fixtures");
     const model = buildModel(closeFace(stepped, "right", "interfit"));
     const panels = ofKind(rackBoxes(model), "panel");
-    expect(panels.map((b) => b.center[0])).toEqual([9 - 0.075, 5 - 0.075]);
+    expect(panels.map((b) => b.center[0])).toEqual([9 - 0.925, 5 - 0.925]);
   });
 
-  test("inter-fit panels sit just inside the face, full cover just outside", () => {
+  test("inter-fit panels hang on the inside of the frame, full cover just outside", () => {
     const model = buildModel(closeFace(closeFace(exampleA, "front", "interfit"), "top", "fullcover"));
     const panels = ofKind(rackBoxes(model), "panel");
     const front = panels.find((b) => b.size[0] === 6 && b.size[2] === 5);
-    expect(front).toEqual({ kind: "panel", center: [4, 0.075, 3.5], size: [6, 0.15, 5], key: "panel:6x5:interfit" });
+    expect(front).toEqual({ kind: "panel", center: [4, 0.925, 3.5], size: [6, 0.15, 5], key: "panel:6x5:interfit" });
     const top = panels.find((b) => b.size[2] === 0.15);
     expect(top).toEqual({ kind: "panel", center: [4, 4, 12.075], size: [6, 6, 0.15], key: "panel:6x6:fullcover" });
   });
