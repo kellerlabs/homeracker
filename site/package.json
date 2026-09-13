@@ -17,17 +17,17 @@
     "check": "npm run lint && npm run test"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.3.0",
+    "@astrojs/markdown-remark": "7.3.1",
     "@fontsource/orbitron": "5.3.0",
     "@fontsource/source-code-pro": "5.3.0",
-    "astro": "7.3.1",
+    "astro": "7.3.2",
     "sharp": "0.35.4",
     "three": "0.185.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@types/hast": "3.0.5",
-    "@types/node": "26.4.1",
+    "@types/node": "26.5.0",
     "@types/three": "0.185.4",
     "hast-util-to-string": "3.0.1",
     "typescript": "6.0.3",
