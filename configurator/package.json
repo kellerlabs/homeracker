@@ -16,7 +16,7 @@
     "check": "npm run lint && npm run test"
   },
   "dependencies": {
-    "three": "0.185.1"
+    "three": "0.186.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
