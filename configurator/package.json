@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@types/three": "0.185.4",
+    "@types/three": "0.186.0",
     "eslint": "10.10.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.0",
