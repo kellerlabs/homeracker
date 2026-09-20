@@ -1,8 +1,8 @@
 // HomeRacker - Bracket
 //
 // This file is part of HomeRacker implementation by KellerLab.
-// It contains the bracket module — a clamp that wraps a device from above and
-// hangs it in a HomeRacker frame via lock pins.
+// It contains the bracket module — a clamp that wraps a device from above or below
+// and hangs it in a HomeRacker frame via lock pins.
 //
 // The part has two halves: a shell that grips the device (top plate with a window,
 // plus side walls reaching down as far as you want) and a pair of mount wings on

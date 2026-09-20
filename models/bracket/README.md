@@ -28,6 +28,8 @@ Open `parts/bracket.scad` in OpenSCAD and use the **Customizer** panel.
 
 Measure the device itself, not a gap. The standard 0.2mm `TOLERANCE` is added internally.
 
+The 50mm ceiling on both strengths is a Customizer slider bound, not a limit of the model. Through the library or a `-D` override they take any value from 2mm up and clamp as described under ⚠️ Limits, which is what the `strength_sides=200` render command below does.
+
 **Library usage**, include in your own model:
 
 ```scad

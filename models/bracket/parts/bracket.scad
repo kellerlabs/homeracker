@@ -1,5 +1,5 @@
 // HomeRacker - Bracket
-// Clamp that wraps a device from above and hangs it in a HomeRacker frame via lock pins.
+// Clamp that wraps a device from above or below and hangs it in a HomeRacker frame via lock pins.
 
 include <../lib/bracket.scad>
 
