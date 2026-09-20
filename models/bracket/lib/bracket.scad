@@ -243,6 +243,10 @@ module bracket_mount_pair(device_width, device_height, units_left=0, units_right
   *                       need to sit flush behind something such as a front panel.
   * @param mount_columns Wing columns, 1 or 2. Left undefined, it picks 2 whenever
   *                      the device is deep enough for them to clear each other.
+  * @param mount_axis Which frame supports the wings hook over, BRACKET_AXIS_X for the
+  *                   ones along the device face or BRACKET_AXIS_Y for the frame sides.
+  * @param mount_gap_units Whole units added to the span between the wings. An odd
+  *                        count lands on the left first, shifting the device.
   */
 module bracket(device_width, device_depth, device_height,
   strength_top=BRACKET_DEFAULT_STRENGTH, strength_sides=BRACKET_DEFAULT_STRENGTH,

@@ -62,7 +62,7 @@ Two things behave differently on the Y axis:
 
 ## ⚠️ Limits
 
-Five inputs are refused outright, with an assertion naming the value that would work.
+Seven inputs are refused outright, with an assertion naming the value that would work.
 
 | Limit | Value | Why |
 |-------|-------|-----|
@@ -71,6 +71,8 @@ Five inputs are refused outright, with an assertion naming the value that would 
 | `mount_offset_y` | at most `device_depth - 15` | Beyond that the wings hang off the back of the shell instead of gripping the supports |
 | `mount_columns = 2` | needs `device_depth >= 45 + mount_offset_y` | Two columns any closer would merge into one block |
 | `strength_top`, `strength_sides` | at least 2mm | One wall thickness is the thinnest shell that holds a device at all |
+| `mount_axis` | `x` or `y` | Anything else is a typo rather than a third axis |
+| `mount_gap_units` | whole number, zero or more | A fraction of a unit would put the pins off the grid |
 
 Three inputs are silently clamped at the top end rather than refused, because the clamped result is still the part you asked for:
 
