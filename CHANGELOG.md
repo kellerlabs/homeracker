@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.15.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.14.1...homeracker-v3.15.0) (2026-09-20)
+
+
+### ✨ Features
+
+* add bracket model and retire flexmount ([#496](https://github.com/kellerlabs/homeracker/issues/496)) ([df78bfa](https://github.com/kellerlabs/homeracker/commit/df78bfa42d90ba74a9b7f9cb63ba26147270a648))
+
+
+### 📦 Dependencies
+
+* update dependency @types/three to v0.186.0 ([#494](https://github.com/kellerlabs/homeracker/issues/494)) ([ceaa4fa](https://github.com/kellerlabs/homeracker/commit/ceaa4fa3bd00ee11f489c2a12954caf3865bfaf4))
+* update dependency belfryscad/bosl2 to v2.0.755 ([#491](https://github.com/kellerlabs/homeracker/issues/491)) ([26d6763](https://github.com/kellerlabs/homeracker/commit/26d676359cbdc67e563a349f45804d93a2bfdbb8))
+* update dependency openscad to v2026.09.18 ([#492](https://github.com/kellerlabs/homeracker/issues/492)) ([7784c20](https://github.com/kellerlabs/homeracker/commit/7784c20d6d7ceac044d1f2f87ee26eb965b2cebf))
+
 ## [3.14.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.14.0...homeracker-v3.14.1) (2026-09-14)
 
 
