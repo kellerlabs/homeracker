@@ -127,3 +127,12 @@ bracket_mount_cap(BASE_UNIT, BRACKET_AXIS_Y);
 
 fwd(ROW*5) right(COL)
 bracket_mount_pair(SUB_DEVICE_WIDTH, 25.5, 2, 1, BRACKET_AXIS_Y);
+
+// Largest offset the limit allows, where rounding up would overhang the shell
+fwd(ROW*5) right(COL*2)
+bracket(device_width=90, device_depth=40.2, device_height=25.5,
+  mount_axis=BRACKET_AXIS_Y, mount_offset_y=40.2 - BRACKET_MIN_DEVICE_DEPTH);
+
+fwd(ROW*5) right(COL*3)
+bracket(device_width=90, device_depth=99, device_height=25.5,
+  mount_axis=BRACKET_AXIS_Y, mount_offset_y=84);

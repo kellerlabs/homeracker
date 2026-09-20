@@ -57,7 +57,7 @@ Both work on either axis.
 
 Two things behave differently on the Y axis:
 
-- **Column spacing steps two units at a time** and `mount_offset_y` rounds to a whole unit, because the pins go through the frame's own hole grid. Spacing comes out slightly narrower than the same device gets on X.
+- **Column spacing steps two units at a time** and `mount_offset_y` rounds to a whole unit, because the pins go through the frame's own hole grid. Where rounding up would push the outer cap past the back of the shell, the offset steps down to the last unit that fits. Spacing comes out slightly narrower than the same device gets on X.
 - **The span clears the device edge by 2.1mm**, the amount a sideways cap reaches back. A width in the last 2.1mm before a grid line costs a whole unit: 100.6mm still fits a 105mm span, 100.7mm steps out to 120mm.
 
 ## ⚠️ Limits

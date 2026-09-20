@@ -289,9 +289,15 @@ module bracket(device_width, device_depth, device_height,
   _shift_y = mount_offset_y > 0 ? (-_outer_depth + _spacing + BRACKET_MOUNT_DEPTH)/2 + mount_offset_y : 0;
 
   // An offset moves the pair off the grid, so it rounds to the nearest whole unit too.
-  _grid_snap = mount_axis == BRACKET_AXIS_Y
-    ? round(_shift_y / BASE_UNIT) * BASE_UNIT - _shift_y
-    : 0;
+  // Rounding up can push the outermost cap past the back of the shell, which the
+  // mount_offset_y limit alone does not catch because it is checked before rounding.
+  // Where that happens the offset steps down to the last unit that still fits.
+  _max_shift = max(0, _outer_depth/2 - _spacing/2 - BRACKET_MOUNT_DEPTH/2);
+  _snapped_shift = round(_shift_y / BASE_UNIT) * BASE_UNIT;
+  _safe_shift = abs(_snapped_shift) <= _max_shift + HR_EPSILON
+    ? _snapped_shift
+    : sign(_snapped_shift) * floor(_max_shift / BASE_UNIT) * BASE_UNIT;
+  _grid_snap = mount_axis == BRACKET_AXIS_Y ? _safe_shift - _shift_y : 0;
 
   // An odd unit count starts on the left, so the device shifts within the frame.
   _units_left = ceil(mount_gap_units/2);
