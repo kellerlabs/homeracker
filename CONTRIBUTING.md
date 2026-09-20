@@ -234,7 +234,7 @@ SITE_BASE=/preview/pr-999/ npm run build
 
 ```
 models/           # OpenSCAD models, one folder per model type
-                  # (core, crates, elgato_prompter_adapter, flexmount, foot,
+                  # (bracket, core, crates, elgato_prompter_adapter, foot,
                   #  gridfinity, inception, keystone, panel, pinpusher,
                   #  racklink, rackmount_ears, sleeve, wallmount)
 cmd/              # Python and shell tooling
