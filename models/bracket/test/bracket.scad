@@ -97,3 +97,33 @@ bracket(device_width=90, device_depth=40.2, device_height=25.5,
 
 fwd(ROW*3) right(COL*4)
 bracket(device_width=90, device_depth=45, device_height=25.5, mount_columns=2);
+
+// Row 5: mount axis and gap units
+
+// Hooking the frame side supports instead of the ones along the device face
+fwd(ROW*4)
+bracket(device_width=100, device_depth=99, device_height=25.5, mount_axis=BRACKET_AXIS_Y);
+
+// Single column on the side supports
+fwd(ROW*4) right(COL)
+bracket(device_width=100, device_depth=30, device_height=25.5, mount_axis=BRACKET_AXIS_Y);
+
+// One extra unit, which lands on the left and shifts the device in the frame
+fwd(ROW*4) right(COL*2)
+bracket(device_width=100, device_depth=99, device_height=25.5, mount_gap_units=1);
+
+// Two extra units, one per side
+fwd(ROW*4) right(COL*3)
+bracket(device_width=100, device_depth=99, device_height=25.5, mount_gap_units=2);
+
+// Reaching the frame sides: side supports plus three units of extra span
+fwd(ROW*4) right(COL*4)
+bracket(device_width=100, device_depth=99, device_height=25.5,
+  mount_axis=BRACKET_AXIS_Y, mount_gap_units=3);
+
+// Sub-modules with the new options
+fwd(ROW*5)
+bracket_mount_cap(BASE_UNIT, BRACKET_AXIS_Y);
+
+fwd(ROW*5) right(COL)
+bracket_mount_pair(SUB_DEVICE_WIDTH, 25.5, 2, 1, BRACKET_AXIS_Y);

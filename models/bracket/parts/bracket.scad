@@ -16,6 +16,10 @@ device_height = 25.5; // [9.4:0.1:250]
 strength_top = 7.5; // [2:0.1:50]
 // How far the side walls reach down the device in mm
 strength_sides = 7.5; // [2:0.1:50]
+// Which frame supports the wings hook over
+mount_axis = "x"; // [x:X (device face), y:Y (frame sides)]
+// Whole units added to the span between the wings (odd counts start on the left)
+mount_gap_units = 0; // [0:1:20]
 // Mount wing columns (0 picks 1 or 2 automatically, based on device depth)
 mount_columns = 0; // [0:2]
 // Pushes the mount wings back from the front edge in mm (at most device_depth - 15)
@@ -32,4 +36,5 @@ bracket(device_width, device_depth, device_height,
   strength_top=strength_top, strength_sides=strength_sides,
   mount_offset_y=mount_offset_y,
   mount_columns=mount_columns == 0 ? undef : mount_columns,
+  mount_axis=mount_axis, mount_gap_units=mount_gap_units,
   debug_colors=debug_colors, disable_chamfer=disable_chamfer);
