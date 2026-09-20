@@ -69,7 +69,7 @@ module bracket_shell(device_width, device_depth, device_height,
   color=HR_BRACKET_PRIMARY_COLOR, debug_colors=false, disable_chamfer=false) {
 
   _chamfer = disable_chamfer ? 0 : BASE_CHAMFER;
-  _strength_sides = min(strength_sides, device_height);
+  _strength_sides = min(strength_sides, device_height - BASE_STRENGTH);
   // The top plate can reach inward at most to the middle of the device.
   _strength_top_limit = min(device_depth, device_width)/2;
   _strength_top = min(strength_top, _strength_top_limit);
@@ -108,8 +108,10 @@ module bracket_mount(device_width, device_height,
 
   _chamfer = disable_chamfer ? 0 : BASE_CHAMFER;
 
-  // Widen the wing by half of what the device misses on the grid, on each side.
-  _grid_offset = (BASE_UNIT - (device_width % BASE_UNIT))/2;
+  // Round the clear span between the supports up to the grid, then split what the
+  // device misses across the two wings. A width already on the grid needs no widening.
+  _support_span = ceil((device_width - HR_EPSILON) / BASE_UNIT) * BASE_UNIT;
+  _grid_offset = max(0, (_support_span - device_width)/2);
   _width = BASE_UNIT + _grid_offset;
 
   _height = device_height + BASE_STRENGTH + TOLERANCE/2 - BASE_CHAMFER;

@@ -55,6 +55,17 @@ bracket_shell(90.2, 99.2, 25.5, 7.5, 7.5, 103.2);
 fwd(600) right(400)
 bracket_mount_pair(90.2, 25.5);
 
+// Shell standalone, side strength over its cap, clamped the same as through bracket()
+fwd(600) right(600)
+bracket_shell(90.2, 99.2, 25.5, 7.5, 200, 103.2);
+
+// Widths landing exactly on the grid, where the wings need no widening at all
+fwd(600) right(800)
+bracket_mount_pair(BASE_UNIT*6, 25.5);
+
+fwd(1100)
+bracket(device_width=BASE_UNIT*6 - TOLERANCE, device_depth=99, device_height=25.5);
+
 // Boundaries the assertions guard, each at the value that still passes
 fwd(600) right(600)
 bracket(device_width=90, device_depth=99, device_height=BRACKET_MIN_DEVICE_HEIGHT);

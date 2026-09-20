@@ -26,6 +26,7 @@
 - Unimount keeps its geometry byte for byte, verified by STL volume and bounding box across 94 parameter permutations against the closed original.
 - `homeracker-exclusive` now depends on a released `homeracker` version that contains the bracket, so its `scadm.json` pin has to move before its flattened exports rebuild.
 - In automatic mode the second mount column now appears from 45mm of device depth rather than 49mm, because the threshold follows the wing footprint instead of a reused rackmount constant. `homeracker-exclusive` pins the count explicitly, so Unimount is unaffected.
+- A device whose width lands exactly on the 15mm grid once reserved a whole extra rack unit, because the wing widening was computed without wrapping at zero. The wings now take their width from the support span rounded up to the grid. This narrows the part by one unit at widths of `15n - 0.2mm`, Unimount included, and leaves every other width as it was.
 - Five inputs that used to render broken, empty or pointless geometry now fail an assertion naming the value that works: minimum device height, minimum device depth, maximum mount offset, a forced second column that would not fit, and a shell strength below one wall thickness.
 - The attachable bounding box covers the shell only, not the mount wings. Callers placing parts near the wings position them by hand.
 - Anyone following an old link to `models/flexmount/` lands on a 404 until they find the bracket.
