@@ -6,6 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [return-bracket-to-open-source-catalog](return-bracket-to-open-source-catalog.md) | 2026-09-20 | Bracket comes back into this repo as an open-source part, flexmount retired in its favor |
 | [x-hole-supports-by-default](x-hole-supports-by-default.md) | 2026-09-13 | Supports carry lock pin holes on both axes, so panels have a hole to pin to on every edge |
 | [astro-site-replaces-jekyll](astro-site-replaces-jekyll.md) | 2026-09-02 | homeracker.org is an Astro site rendering the repo READMEs in place; Jekyll removed |
 | [web-configurator-on-github-pages](web-configurator-on-github-pages.md) | 2026-09-02 | Rack configurator + parts list as a Vite app at `/configurator/`, deployed via Pages Actions |

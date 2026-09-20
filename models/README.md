@@ -75,6 +75,14 @@ Modular foot insert that plugs into any connector arm used as contact surface at
 
 See [foot/README.md](foot/README.md) for details.
 
+### 🗜️ Bracket
+
+Clamp that wraps a device from above/below and hangs it in the frame via lock pins. Mount wings on both flanks absorb whatever the device width misses on the 15mm grid, so the lock pins always land on the right position on a support. Nothing sits below/above the device, keeping airflow and cabling clear.
+
+![Bracket](./bracket/parts/renders/bracket.png)
+
+See [bracket/README.md](bracket/README.md) for details.
+
 ### 🧤 Sleeve
 
 A 3-sided U-shaped sleeve that wraps around a vertical HomeRacker support. Reusable attachment primitive with lock pin holes on both sides.
@@ -90,12 +98,6 @@ A utility tool for removing lock pins from connectors.
 ![Pinpusher](./pinpusher/parts/renders/pinpusher.png)
 
 See [pinpusher/README.md](pinpusher/README.md) for details.
-
-### Flexmount (⚠️ Deprecated)
-
-Universal device mount, deprecated in favor of the [Customizable Rackmount](https://makerworld.com/en/models/2128492-customizable-rackmount-any-racksize#profileId-2304669) on MakerWorld.
-
-See [flexmount/README.md](flexmount/README.md) for details.
 
 ### 🔄 Inception
 
