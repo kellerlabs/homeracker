@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.15.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.15.0...homeracker-v3.15.1) (2026-09-21)
+
+
+### 📦 Dependencies
+
+* update dependency @types/node to v26.6.1 ([#499](https://github.com/kellerlabs/homeracker/issues/499)) ([8a5b37a](https://github.com/kellerlabs/homeracker/commit/8a5b37a5463c0d19549187a19b53f72a58e7b0a5))
+* update npm dependencies ([#493](https://github.com/kellerlabs/homeracker/issues/493)) ([5f130ef](https://github.com/kellerlabs/homeracker/commit/5f130ef2abb9e468e9e39df1b77f7d8f95b43be6))
+
 ## [3.15.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.14.1...homeracker-v3.15.0) (2026-09-20)
 
 
