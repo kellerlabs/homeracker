@@ -52,7 +52,7 @@ source = ["scadm"]
 branch = true
 
 [tool.coverage.report]
-# Raise when coverage grows, never lower, and update the README badge. See docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md
+# Raise when coverage grows, never lower. See docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md
 fail_under = 90
 show_missing = true
 skip_covered = true

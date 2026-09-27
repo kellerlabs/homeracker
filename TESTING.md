@@ -57,7 +57,7 @@ python -m pytest tests/ -m "not integration" --cov                        # enfo
 python -m pytest tests/ -m "not integration" --cov --cov-report=html      # browse htmlcov/index.html
 ```
 
-When your change lifts coverage well past the gate, raise `fail_under` and the coverage badge in [`cmd/scadm/README.md`](cmd/scadm/README.md) in the same PR. Never lower it.
+When your change lifts coverage well past the gate, raise `fail_under` in the same PR. Never lower it.
 
 ### Mutation Testing
 
