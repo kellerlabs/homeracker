@@ -15,4 +15,6 @@ runs:
   steps:
     - name: Sync instructions
       shell: bash
-      run: bash "${{ github.action_path }}/sync-instructions.sh" "${{ inputs.ref }}"
+      env:
+        REF: ${{ inputs.ref }}
+      run: bash "$GITHUB_ACTION_PATH/sync-instructions.sh" "$REF"
