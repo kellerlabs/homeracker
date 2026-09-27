@@ -1,10 +1,8 @@
 ---
 # Every audit is on by default. The `unpinned-uses` audit applies to every org without exception,
 # including actions/* and camunda/*, because a tag is a moving target its owner can repoint at any time.
-#
-# The audits below are switched off because the repository has a pre-existing backlog of
-# findings under them, not because they are wrong. Re-enable them one at a time as that backlog
-# is worked through (#474), rather than in bulk.
 rules:
+  # Wants `uses: $/...` for local actions, which actionlint rejects ("ref is missing").
+  # Re-enable once actionlint accepts the self-repository syntax.
   self-repository:
     disable: true
