@@ -13,6 +13,7 @@ on:
       - 'models/**/README.md'
       - '.github/workflows/web.yml'
       - '.github/actions/setup-openscad/**'
+      - 'scadm.json'
   push:
     branches:
       - main
@@ -89,13 +90,14 @@ jobs:
           persist-credentials: false
 
       # Same key as the build-site action, so a PR reuses the meshes its preview or main exported.
-      # A change to a .scad source or the export script misses and exports afresh.
+      # A change to a .scad source, the export script or the OpenSCAD/BOSL2 pins in scadm.json
+      # misses and exports afresh.
       - name: Restore part meshes
         id: parts
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: site/public/parts
-          key: parts-${{ hashFiles('models/**/*.scad', 'site/scripts/scad/*.scad', 'site/scripts/export-parts.mjs') }}
+          key: parts-${{ hashFiles('scadm.json', 'models/**/*.scad', 'site/scripts/scad/*.scad', 'site/scripts/export-parts.mjs') }}
 
       - name: Setup OpenSCAD
         if: steps.parts.outputs.cache-hit != 'true'
