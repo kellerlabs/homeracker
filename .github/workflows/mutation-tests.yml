@@ -112,8 +112,9 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
-            --jq '.[] | select(.body | startswith("<!-- mutation-report -->")) | .id' | head -n 1)
+          ids=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- mutation-report -->")) | .id')
+          existing=${ids%%$'\n'*}
           if [[ -z "$existing" ]]; then
             gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@"$RUNNER_TEMP/report.md" --silent
           else
