@@ -47,6 +47,33 @@ python -m pytest tests/test_cli_integration.py -m "integration and not slow" -v
 - Changing `scadm.json` config schema → update config-dependent tests
 - Changing installer/resolver behavior → update relevant slow tests
 
+### Code Coverage
+
+The `scadm-tests` hook runs the unit tests with `--cov`. It fails when branch coverage drops below `fail_under` in [`cmd/scadm/pyproject.toml`](cmd/scadm/pyproject.toml).
+
+```bash
+cd cmd/scadm
+python -m pytest tests/ -m "not integration" --cov                        # enforce the gate
+python -m pytest tests/ -m "not integration" --cov --cov-report=html      # browse htmlcov/index.html
+```
+
+When your change lifts coverage well past the gate, raise `fail_under` and the coverage badge in [`cmd/scadm/README.md`](cmd/scadm/README.md) in the same PR. Never lower it.
+
+### Mutation Testing
+
+`mutmut` changes `scadm/` one small edit at a time and reruns the unit tests. A **survived** mutant means no test noticed the change, so a test is missing or its assertion is too weak. Linux and macOS only (Windows: use WSL).
+
+```bash
+cd cmd/scadm
+mutmut run                  # full run, ~1-2 min
+mutmut results              # list surviving mutants
+mutmut show <mutant-name>   # diff of one mutant
+```
+
+[`mutation-tests.yml`](.github/workflows/mutation-tests.yml) runs weekly (Monday 03:00 UTC), on manual dispatch, and on PRs that change the workflow, `cmd/scadm/pyproject.toml` or `requirements.txt`. It reports only and never fails on survivors.
+
+See [gate-scadm-coverage-and-mutation-test-weekly](docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md) for why.
+
 ## Renovate Configuration Testing
 
 When modifying `renovate.json5`, always test changes before merging to prevent incorrect PRs.

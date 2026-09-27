@@ -46,3 +46,21 @@ markers = [
     "integration: CLI integration tests (require network, run with -m integration)",
     "slow: slow tests that download binaries (run with -m slow)",
 ]
+
+[tool.coverage.run]
+source = ["scadm"]
+branch = true
+
+[tool.coverage.report]
+# Raise when coverage grows, never lower, and update the README badge. See docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md
+fail_under = 90
+show_missing = true
+skip_covered = true
+exclude_also = [
+    "if __name__ == .__main__.:",
+]
+
+[tool.mutmut]
+source_paths = ["scadm/"]
+pytest_add_cli_args = ["-m", "not integration"]
+pytest_add_cli_args_test_selection = ["tests/"]

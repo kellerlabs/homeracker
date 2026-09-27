@@ -1,0 +1,55 @@
+---
+name: Mutation Tests
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'  # Weekly: Monday 03:00 UTC
+  workflow_dispatch:
+  # Changes to the run setup itself (workflow, mutmut config, pinned versions) get verified on the PR.
+  pull_request:
+    paths:
+      - '.github/workflows/mutation-tests.yml'
+      - 'cmd/scadm/pyproject.toml'
+      - 'requirements.txt'
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadm pytest -r requirements.txt
+
+      # Report only: surviving mutants are leads for better tests, not a failure.
+      - name: Run mutation tests
+        working-directory: cmd/scadm
+        run: |
+          set -euo pipefail
+          mutmut run
+          mutmut export-cicd-stats
+          {
+            echo "## 🧬 Mutation testing"
+            echo
+            echo "| Killed | Survived | Timeout | No tests | Total |"
+            echo "|---|---|---|---|---|"
+            jq -r '"| \(.killed) | \(.survived) | \(.timeout) | \(.no_tests) | \(.total) |"' mutants/mutmut-cicd-stats.json
+            echo
+            echo '<details><summary>Surviving mutants</summary>'
+            echo
+            echo '```'
+            mutmut results
+            echo '```'
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"

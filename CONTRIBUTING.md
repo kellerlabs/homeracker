@@ -45,8 +45,8 @@ scadm install
 scadm vscode --openscad   # For OpenSCAD development
 scadm vscode --python     # Install and configure Python extension
 
-# Install pre-commit
-pip install pre-commit
+# Install pre-commit and the test tooling its hooks use
+pip install pre-commit pytest -r requirements.txt
 
 # Additional dependencies for OpensCAD and pre-commit (Ubuntu / Debian)
 sudo apt install libopengl0 shellcheck
