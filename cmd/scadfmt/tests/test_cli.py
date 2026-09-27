@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 import scadfmt
-from scadfmt import cli
+from scadfmt import cli, fileio
 
 UGLY = "x=1;\n"
 PRETTY = "x = 1;\n"
@@ -83,14 +83,14 @@ def test_write_failure_keeps_original_and_continues(tmp_path, monkeypatch):
     first, second = tmp_path / "a.scad", tmp_path / "b.scad"
     first.write_bytes(UGLY.encode())
     second.write_bytes(UGLY.encode())
-    real_replace = cli.os.replace
+    real_replace = fileio.os.replace
 
     def fail_for_first(src, dst):
         if Path(dst) == first:
             raise OSError("disk full")
         real_replace(src, dst)
 
-    monkeypatch.setattr(cli.os, "replace", fail_for_first)
+    monkeypatch.setattr(fileio.os, "replace", fail_for_first)
     assert cli.main(["format", str(first), str(second)]) == cli.EXIT_ERROR
     assert first.read_bytes() == UGLY.encode()
     assert second.read_bytes() == PRETTY.encode()
@@ -117,6 +117,16 @@ def test_version_comes_from_package_metadata(monkeypatch, installed, expected):
     monkeypatch.setattr(importlib.metadata, "version", fake_version)
     assert importlib.reload(scadfmt).__version__ == expected
     importlib.reload(scadfmt)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="symlinks need extra privileges on Windows")
+def test_symlink_target_is_formatted_and_link_kept(tmp_path):
+    target, link = tmp_path / "real.scad", tmp_path / "link.scad"
+    target.write_bytes(UGLY.encode())
+    link.symlink_to(target)
+    assert cli.main(["format", str(link)]) == cli.EXIT_OK
+    assert link.is_symlink()
+    assert target.read_bytes() == PRETTY.encode()
 
 
 def test_version(capsys):

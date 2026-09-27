@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scadfmt.fileio import write_atomically
+
 logger = logging.getLogger(__name__)
 
 EXTENSION = "jkillian.custom-local-formatters"
@@ -88,7 +90,7 @@ def setup_vscode(workspace: Path) -> bool:
         return False
     try:
         settings_file.parent.mkdir(parents=True, exist_ok=True)
-        settings_file.write_text(json.dumps(merge_settings(settings), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        write_atomically(settings_file, json.dumps(merge_settings(settings), indent=2, sort_keys=True) + "\n")
     except OSError as e:
         logger.error("Cannot write %s: %s", settings_file, e)
         return False

@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from scadfmt import vscode
+from scadfmt import fileio, vscode
 
 
 @pytest.fixture(name="fake_code")
@@ -67,6 +67,20 @@ def test_setup_refuses_settings_with_comments(tmp_path, fake_code):
 def test_setup_when_settings_cannot_be_written(tmp_path, fake_code):
     (tmp_path / ".vscode").write_text("not a directory", encoding="utf-8")
     assert not vscode.setup_vscode(tmp_path)
+
+
+def test_failed_settings_write_keeps_existing_file(tmp_path, fake_code, monkeypatch):
+    settings_file = tmp_path / ".vscode" / "settings.json"
+    settings_file.parent.mkdir()
+    settings_file.write_text('{"keep": 1}', encoding="utf-8")
+
+    def fail(src, dst):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(fileio.os, "replace", fail)
+    assert not vscode.setup_vscode(tmp_path)
+    assert settings_file.read_text(encoding="utf-8") == '{"keep": 1}'
+    assert [p.name for p in settings_file.parent.iterdir()] == ["settings.json"]
 
 
 def test_setup_without_code_cli(tmp_path, monkeypatch):
