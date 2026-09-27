@@ -54,8 +54,8 @@ class _Line:
     blank: bool = False
 
 
-# pylint: disable-next=too-many-instance-attributes  # Plain state holder for one formatting pass
 @dataclass
+# pylint: disable-next=too-many-instance-attributes  # Plain state holder for one formatting pass
 class _State:
     """Everything the formatter carries from one token to the next."""
 
