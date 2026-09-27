@@ -2,7 +2,7 @@
 
 This directory contains tooling scripts for OpenSCAD models.
 
-For installation, use the **scadm** package (see `cmd/scadm/`).
+For installation, use the **scadm** package (see `cmd/scadm/`). For formatting `.scad` files, use **scadfmt** (see [`cmd/scadfmt/`](scadfmt/README.md)).
 
 ## 📦 Quick Start
 
@@ -24,6 +24,10 @@ scadm render models/core/parts/connector.scad
 
 # Flatten include trees for single-file platforms (e.g. MakerWorld)
 scadm flatten --all
+
+# Format OpenSCAD files in place
+pip install -e cmd/scadfmt
+scadfmt format models/
 ```
 
 ## 🤖 Automatic Updates

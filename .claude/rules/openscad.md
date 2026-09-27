@@ -23,6 +23,10 @@ paths: ["**/*.scad"]
 - Local variables in functions/modules carry a leading underscore by convention (`_usable_width`); keep the descriptive name after it.
 
 
+## Formatting
+
+- Format with `scadfmt format <file>` ([cmd/scadfmt/README.md](../../cmd/scadfmt/README.md)); don't hand-format against it. Use `// fmt: off` / `// fmt: on` only for hand-aligned tables.
+
 ## Quality Settings
 
 - Set `$fn=100` for production renders.

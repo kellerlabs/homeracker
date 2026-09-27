@@ -40,10 +40,14 @@ pip install -e cmd/scadm
 # Install OpenSCAD (Windows/Linux/macOS) + Dependencies
 scadm install
 
+# Install scadfmt (OpenSCAD formatter)
+pip install -e cmd/scadfmt
+
 # Optional (Opinionated VSCode Integration)
-# see cmd/scadm/README.md for details
+# see cmd/scadm/README.md and cmd/scadfmt/README.md for details
 scadm vscode --openscad   # For OpenSCAD development
 scadm vscode --python     # Install and configure Python extension
+scadfmt vscode            # Format .scad files with scadfmt (Format Document)
 
 # Install pre-commit and the test tooling its hooks use
 pip install pre-commit pytest -r requirements.txt
@@ -81,6 +85,7 @@ The hooks can be found here: [.pre-commit-config.yaml](.pre-commit-config.yaml)
 
 ### Code Standards
 - **DRY, KISS, YAGNI** - Keep it simple
+- Format `.scad` files with `scadfmt format <path>`, see [cmd/scadfmt/README.md](cmd/scadfmt/README.md)
 - Use [BOSL2](https://github.com/BelfrySCAD/BOSL2/wiki) for complex geometry
 - Group parameters with `/* [Section] */` comments
 - Add sanity checks: `assert(height % 15 == 0, "Must be multiple of 15mm")`

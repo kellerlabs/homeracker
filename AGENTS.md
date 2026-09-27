@@ -11,7 +11,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components are p
 - **Languages**: OpenSCAD (`.scad`), Python, Bash, TypeScript
 - **Key Dirs**:
   - `models/`: OpenSCAD models, one folder per model type
-  - `cmd/`: Python and shell tooling (`scadm`, `test`, `export`, `lib`, `linux`, `setup`)
+  - `cmd/`: Python and shell tooling (`scadm`, `scadfmt`, `test`, `export`, `lib`, `linux`, `setup`)
   - `configurator/`: TypeScript web configurator
   - `site/`: Astro site that renders this repo's READMEs
   - `docs/`: style guide, workflows, and ADRs under `docs/decisions/`
@@ -24,6 +24,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components are p
   - Install: `scadm install`
   - Config: `scadm.json` in the project root
   - Help: `scadm -h`
+- **Formatter**: `scadfmt format <path>` formats `.scad` files. See `cmd/scadfmt/README.md`.
 
 ## 🧭 Core Principles
 
@@ -36,6 +37,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components are p
 - **Documentation Policy**:
   - Every code change that adds, modifies, or removes functionality **must** include a documentation update.
   - Cross-link related documentation and GitHub issues/PRs. Also update links upon refactoring.
+  - **Links must survive squash merges.** Repo docs link files relatively. PR and issue bodies and comments link files as `https://github.com/kellerlabs/homeracker/blob/main/<path>`, since a relative link there resolves against the PR URL. Never link a PR branch or a commit on it: both vanish after the squash merge. An older file version (e.g. a superseded ADR) is linked by its commit on `main`: `git log -1 --format=%H origin/main -- <path>`.
   - When adding or modifying model parts (`parts/*.scad`), **regenerate the render PNGs** with `scadm export-png` (full F6 renders, not previews) and update both the model's README 📸 Catalog and the parent `models/README.md` index.
 - **Assets Policy**: All manually-created images (photos, diagrams, logos, MakerWorld description images) live in [`kellerlabs/assets`](https://github.com/kellerlabs/assets). Push directly to its `main` branch. Reference via `https://raw.githubusercontent.com/kellerlabs/assets/main/<repo>/<path>`. Only auto-generated render PNGs (`**/renders/*.png`) are tracked in source repos. See [image-hosting-assets-repo](docs/decisions/image-hosting-assets-repo.md).
 - **Architecture Decision Records (ADRs)**:

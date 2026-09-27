@@ -95,7 +95,7 @@ What follows from this decision? Include both positive and negative effects.
 When a previous decision is being replaced:
 
 1. Create a new decision record (§3) explaining the new choice.
-2. In the new record's **Context**, link to the last commit containing the old decision so readers can find it in history.
+2. In the new record's **Context**, link to the last commit **on `main`** containing the old decision so readers can find it in history: `git log -1 --format=%H origin/main -- docs/decisions/old-decision.md`. Never a PR branch commit, it vanishes after the squash merge.
    Format: `Supersedes [old-decision.md](https://github.com/kellerlabs/homeracker/blob/<commit-sha>/docs/decisions/old-decision.md)`
 3. **Delete the old decision file**: it remains available in git history.
 4. Update `docs/decisions/README.md` to remove the old entry and add the new one.

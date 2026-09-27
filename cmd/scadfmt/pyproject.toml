@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scadfmt"
+version = "0.0.0"
+description = "Opinionated formatter for OpenSCAD code"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    {name = "Patrick Pötz", email = "kellervater@gmail.com"}
+]
+keywords = ["openscad", "formatter", "scad", "code-style", "pre-commit"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/kellerlabs/homeracker"
+Repository = "https://github.com/kellerlabs/homeracker"
+Documentation = "https://github.com/kellerlabs/homeracker/tree/main/cmd/scadfmt"
+Issues = "https://github.com/kellerlabs/homeracker/issues"
+Changelog = "https://github.com/kellerlabs/homeracker/blob/main/cmd/scadfmt/CHANGELOG.md"
+
+[project.scripts]
+scadfmt = "scadfmt.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scadfmt*"]
+
+[tool.setuptools.package-data]
+scadfmt = ["py.typed"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+# With PYTHONWARNDEFAULTENCODING=1, text I/O without an explicit encoding fails (breaks on non-UTF-8 Windows locales).
+filterwarnings = ["error::EncodingWarning"]
+
+[tool.coverage.run]
+source = ["scadfmt"]
+omit = ["scadfmt/__main__.py"]
+branch = true
+
+[tool.coverage.report]
+# Raise when coverage grows, never lower.
+fail_under = 98
+show_missing = true
+skip_covered = true
+exclude_also = [
+    "if __name__ == .__main__.:",
+]

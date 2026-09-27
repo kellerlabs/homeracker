@@ -20,6 +20,7 @@ jobs:
     outputs:
       integration-tests: ${{ steps.filter.outputs.integration-tests }}
       mutation-tests: ${{ steps.filter.outputs.mutation-tests }}
+      scadfmt-tests: ${{ steps.filter.outputs.scadfmt-tests }}
       test-setup-openscad: ${{ steps.filter.outputs.test-setup-openscad }}
       validate-models: ${{ steps.filter.outputs.validate-models }}
       web: ${{ steps.filter.outputs.web }}
@@ -44,6 +45,12 @@ jobs:
               - 'cmd/test/mutation_report.py'
               - 'requirements.txt'
               - '.github/workflows/mutation-tests.yml'
+            scadfmt-tests:
+              - *ci
+              - 'cmd/scadfmt/**'
+              - 'scadm.json'
+              - '.github/actions/setup-openscad/**'
+              - '.github/workflows/scadfmt-tests.yml'
             test-setup-openscad:
               - *ci
               - '.github/actions/setup-openscad/**'
@@ -87,6 +94,13 @@ jobs:
       contents: write
       pull-requests: write
 
+  scadfmt-tests:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.scadfmt-tests == 'true'
+    uses: ./.github/workflows/scadfmt-tests.yml
+    permissions:
+      contents: read
+
   test-setup-openscad:
     needs: detect-changes
     if: needs.detect-changes.outputs.test-setup-openscad == 'true'
@@ -117,6 +131,7 @@ jobs:
       - integration-tests
       - mutation-tests
       - pre-commit
+      - scadfmt-tests
       - test-setup-openscad
       - validate-models
       - web

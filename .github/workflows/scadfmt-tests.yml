@@ -1,0 +1,68 @@
+---
+name: scadfmt tests
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  integration-tests:
+    name: integration tests (OpenSCAD canary)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup OpenSCAD
+        uses: ./.github/actions/setup-openscad
+        with:
+          scadm-source: cmd/scadm
+
+      - name: Install scadfmt
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadfmt
+
+      - name: Run canary
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/tests/canary/check.sh
+
+  # The pre-commit hook runs them on Linux; stdin/stdout byte handling and paths also need Windows.
+  unit-tests:
+    name: unit tests (windows)
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Install test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          pip install pytest pytest-cov
+
+      - name: Run unit tests
+        shell: bash
+        working-directory: cmd/scadfmt
+        env:
+          PYTHONWARNDEFAULTENCODING: '1'
+        run: |
+          set -euo pipefail
+          python -m pytest tests/ -q --cov

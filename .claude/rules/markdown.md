@@ -96,6 +96,7 @@ To generate or refresh previews:
 
 - Use **relative paths** for repo-internal links.
 - For external resources (BOSL2 wiki, MakerWorld), include the full URL.
+- Links in PR and issue text, and links to older file versions, follow the squash-merge rule in [AGENTS.md](../../AGENTS.md#-core-principles).
 
 ## 🚫 Anti-Patterns
 
