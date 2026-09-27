@@ -27,6 +27,28 @@ SNAPSHOT_HTML = """
 """
 
 
+class RequestTests(unittest.TestCase):
+    """Both resolvers identify themselves and bound the request time."""
+
+    def test_requests_send_user_agent_and_timeout(self):
+        cases = (
+            (lambda: resolve_latest_nightly("linux"), SNAPSHOT_HTML, "https://files.openscad.org/snapshots/"),
+            (
+                resolve_latest_stable,
+                json.dumps({"tag_name": "openscad-2021.01"}),
+                "https://api.github.com/repos/openscad/openscad/releases/latest",
+            ),
+        )
+        for resolve, body, url in cases:
+            with self.subTest(url=url), patch("scadm.resolver.urllib.request.urlopen") as mock_urlopen:
+                mock_urlopen.return_value.__enter__.return_value.read.return_value = body.encode()
+                resolve()
+                (request,), kwargs = mock_urlopen.call_args
+                self.assertEqual(request.full_url, url)
+                self.assertEqual(request.get_header("User-agent"), "scadm")
+                self.assertEqual(kwargs, {"timeout": 30})
+
+
 class ResolveLatestNightlyTests(unittest.TestCase):
     """Tests for resolve_latest_nightly."""
 
@@ -195,6 +217,12 @@ class ResolveVersionTests(unittest.TestCase):
 
 class CacheTests(unittest.TestCase):
     """Tests for cache read/write helpers."""
+
+    def test_write_cache_creates_missing_parents(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_dir = Path(tmpdir) / "bin" / "openscad"
+            _write_cache(install_dir, "stable", "windows", "2021.01")
+            self.assertEqual(_read_cache(install_dir, "stable", "windows"), "2021.01")
 
     def test_read_cache_missing(self):
 

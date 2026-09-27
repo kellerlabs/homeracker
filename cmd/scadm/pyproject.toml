@@ -42,6 +42,8 @@ include = ["scadm*"]
 scadm = ["py.typed"]
 
 [tool.pytest.ini_options]
+# With PYTHONWARNDEFAULTENCODING=1, text I/O without an explicit encoding fails (breaks on non-UTF-8 Windows locales).
+filterwarnings = ["error::EncodingWarning"]
 markers = [
     "integration: CLI integration tests (require network, run with -m integration)",
     "slow: slow tests that download binaries (run with -m slow)",

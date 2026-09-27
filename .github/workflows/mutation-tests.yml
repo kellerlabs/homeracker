@@ -15,6 +15,10 @@ on:
 
 permissions: {}
 
+env:
+  # Lets tests catch text I/O without an explicit encoding (see [tool.pytest.ini_options] in cmd/scadm/pyproject.toml).
+  PYTHONWARNDEFAULTENCODING: '1'
+
 concurrency:
   group: mutation-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true

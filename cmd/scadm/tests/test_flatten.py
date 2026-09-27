@@ -9,6 +9,8 @@ from unittest.mock import patch
 import scadm.flatten as flatten_mod
 from scadm.flatten import (
     _Definition,
+    _extract_hidden_section,
+    _strip_comments,
     _extract_main_code,
     _find_used_names,
     _parse_definitions,
@@ -97,6 +99,71 @@ class ParseDefinitionsTests(unittest.TestCase):
     def test_preserves_origin(self):
         defs = _parse_definitions("A = 1;", origin="constants.scad")
         self.assertEqual(defs[0].origin, "constants.scad")
+
+    def test_full_output_of_every_definition_shape(self):
+        src = (
+            "include <BOSL2/std.scad>\n"
+            "A = 1;\n"
+            "  use <lib/x.scad>\n"
+            "/* [Hidden] */ H = 2;\n"
+            "V = [\n"
+            "  1,\n"
+            "  2];\n"
+            "function one(x) = x + 1;\n"
+            "function multi(x) =\n"
+            "  x\n"
+            "  * 2;\n"
+            "module braces() {\n"
+            "  if (true) {\n"
+            "    cube(1);\n"
+            "  }\n"
+            "}\n"
+            "module sig(\n"
+            "  a = 1,\n"
+            "  b = 2\n"
+            ") {\n"
+            "  if (a) { cube(b); }\n"
+            "  sphere(a);\n"
+            "}\n"
+            "cube(A);\n"
+            "module open_at_eof() {\n"
+            "  cube(1);"
+        )
+        expected = [
+            ("variable", "A", ["A = 1;"]),
+            ("variable", "H", [" H = 2;"]),
+            ("variable", "V", ["V = [", "  1,", "  2];"]),
+            ("function", "one", ["function one(x) = x + 1;"]),
+            ("function", "multi", ["function multi(x) =", "  x", "  * 2;"]),
+            ("module", "braces", ["module braces() {", "  if (true) {", "    cube(1);", "  }", "}"]),
+            (
+                "module",
+                "sig",
+                ["module sig(", "  a = 1,", "  b = 2", ") {", "  if (a) { cube(b); }", "  sphere(a);", "}"],
+            ),
+            ("module", "open_at_eof", ["module open_at_eof() {", "  cube(1);"]),
+        ]
+        defs = _parse_definitions(src, origin="all.scad")
+        self.assertEqual([(d.kind, d.name, d.lines) for d in defs], expected)
+        self.assertEqual({d.origin for d in defs}, {"all.scad"})
+
+    def test_unterminated_function_and_variable_at_eof(self):
+        self.assertEqual(_parse_definitions("function f(x) =\n  x")[0].lines, ["function f(x) =", "  x"])
+        self.assertEqual(_parse_definitions("V = [\n  1")[0].lines, ["V = [", "  1"])
+
+    def test_signature_without_brace_at_eof(self):
+        self.assertEqual(_parse_definitions("module m(\n  a")[0].lines, ["module m(", "  a"])
+
+    def test_signature_with_body_on_brace_line(self):
+        src = "module m(\n  a\n) { cube(a); }\nB = 1;"
+        self.assertEqual(
+            [(d.name, d.lines) for d in _parse_definitions(src)],
+            [("m", ["module m(", "  a", ") { cube(a); }"]), ("B", ["B = 1;"])],
+        )
+
+    def test_signature_with_open_body_at_eof(self):
+        src = "module m(\n  a\n) {\n  cube(a);"
+        self.assertEqual(_parse_definitions(src)[0].lines, ["module m(", "  a", ") {", "  cube(a);"])
 
 
 class ExtractMainCodeTests(unittest.TestCase):
@@ -1004,6 +1071,152 @@ class FlattenTests(unittest.TestCase):
             self.assertNotIn("UNUSED", out)
 
 
+class StripCommentsTests(unittest.TestCase):
+    def test_removes_comments_but_keeps_section_markers(self):
+        src = "a = 1; // trailing\n/* [Size] */\n/* block\n   comment */b = 2;\n/* [Hidden] */ // note\nc = 3;"
+        self.assertEqual(_strip_comments(src), "a = 1; \n/* [Size] */\nb = 2;\n/* [Hidden] */ \nc = 3;")
+
+
+class ExtractHiddenSectionTests(unittest.TestCase):
+    def test_keeps_assignments_until_first_statement(self):
+        src = (
+            "/* [Size] */\n"
+            "w = 1;\n"
+            "/* [Hidden] */\n"
+            "$fn = 64;\n"
+            "\n"
+            "// spacing\n"
+            "BASE =\n"
+            "  15;\n"
+            "EPS = 0.01;\n"
+            "cube(BASE);\n"
+            "LATE = 1;\n"
+        )
+        self.assertEqual(
+            _extract_hidden_section(src),
+            "/* [Hidden] */\n$fn = 64;\n\n// spacing\nBASE =\n  15;\nEPS = 0.01;",
+        )
+
+    def test_stops_at_definitions_and_includes(self):
+        for stop in ("include <x.scad>", "use <x.scad>", "module m() {}", "function f() = 1;"):
+            with self.subTest(stop=stop):
+                self.assertEqual(
+                    _extract_hidden_section(f"/* [Hidden] */\nA = 1;\n{stop}\nB = 2;"), "/* [Hidden] */\nA = 1;"
+                )
+
+    def test_statement_right_after_marker(self):
+        self.assertEqual(_extract_hidden_section("/* [Hidden] */\ncube(1);\nA = 1;"), "/* [Hidden] */")
+
+    def test_no_hidden_section(self):
+        self.assertEqual(_extract_hidden_section("A = 1;\n"), "")
+
+
+class FlattenOutputTests(unittest.TestCase):
+    """Pins the exact flattened output, since that file is what gets published."""
+
+    def test_exact_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            _make_workspace(root, deps='{"dependencies": [{"name": "hrlib"}]}')
+            core = root / "bin" / "openscad" / "libraries" / "hrlib" / "core.scad"
+            core.parent.mkdir()
+            core.write_text(
+                "BASE = 15;\nUNUSED = 1;\nmodule block(n) {\n  cube(BASE * n);   \n}\nmodule unused() {}\n",
+                encoding="utf-8",
+            )
+            (root / "lib").mkdir()
+            (root / "lib" / "helpers.scad").write_text(
+                "include <hrlib/core.scad>\nSCALE = 2;\nfunction twice(x) = x * SCALE;\n", encoding="utf-8"
+            )
+            main = root / "main.scad"
+            main.write_text(
+                "include <BOSL2/std.scad>\ninclude <lib/helpers.scad>\n\n/* [Size] */\n// Units\nunits = 2;\n\n"
+                "/* [Hidden] */\n$fn = 64;\n\n\n\nblock(twice(units));\n",
+                encoding="utf-8",
+            )
+            out = root / "out" / "nested" / "main.scad"
+            out.parent.parent.mkdir()
+            (out.parent).mkdir()
+
+            flatten_file(main, out)
+
+            self.assertEqual(
+                out.read_bytes().decode("utf-8"),
+                "include <BOSL2/std.scad>\n"
+                "\n"
+                "/* [Size] */\n"
+                "// Units\n"
+                "units = 2;\n"
+                "\n"
+                "/* [Hidden] */\n"
+                "// --- from core.scad ---\n"
+                "BASE = 15;\n"
+                "// --- from helpers.scad ---\n"
+                "SCALE = 2;\n"
+                "$fn = 64;\n"
+                "module block(n) {\n"
+                "  cube(BASE * n);\n"
+                "}\n"
+                "function twice(x) = x * SCALE;\n"
+                "\n"
+                "block(twice(units));\n",
+            )
+
+    def test_creates_missing_output_dirs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            _make_workspace(root)
+            (root / "m.scad").write_text("cube(1);\n", encoding="utf-8")
+            out = root / "a" / "b" / "m.scad"
+            flatten_file(root / "m.scad", out, root)
+            self.assertTrue(out.exists())
+
+
+class ComputeChecksumDependencyTests(unittest.TestCase):
+    """compute_checksum covers every transitive local include, and only those."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name).resolve()
+        _make_workspace(self.root, deps='{"dependencies": [{"name": "hrlib"}]}')
+        libs = self.root / "bin" / "openscad" / "libraries"
+        (libs / "BOSL2").mkdir()
+        (libs / "BOSL2" / "std.scad").write_text("// bosl\n", encoding="utf-8")
+        (libs / "hrlib").mkdir()
+        (libs / "hrlib" / "core.scad").write_text("module core() {}\n", encoding="utf-8")
+        self.files = {
+            "main.scad": "include <BOSL2/std.scad>\ninclude <lib/b.scad>\ncube(1);\n",
+            "lib/b.scad": "use <c.scad>\ninclude <missing.scad>\n",
+            "lib/c.scad": "include <../main.scad>\ninclude <hrlib/core.scad>\n",
+            "unrelated.scad": "sphere(1);\n",
+        }
+        for rel, text in self.files.items():
+            path = self.root / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        self.main = self.root / "main.scad"
+
+    def _changed_after(self, rel):
+        before = compute_checksum(self.main, self.root)
+        path = self.root / rel
+        path.write_text(path.read_text(encoding="utf-8") + "// edit\n", encoding="utf-8")
+        return compute_checksum(self.main, self.root) != before
+
+    def test_transitive_local_includes_count(self):
+        self.assertTrue(self._changed_after("lib/c.scad"))
+
+    def test_scadm_library_reached_through_nested_include_counts(self):
+        self.assertTrue(self._changed_after("bin/openscad/libraries/hrlib/core.scad"))
+
+    def test_unrelated_file_and_bosl2_do_not_count(self):
+        self.assertFalse(self._changed_after("unrelated.scad"))
+        self.assertFalse(self._changed_after("bin/openscad/libraries/BOSL2/std.scad"))
+
+    def test_auto_detects_workspace(self):
+        self.assertEqual(compute_checksum(self.main), compute_checksum(self.main, self.root))
+
+
 class FlattenAllTests(unittest.TestCase):
     """Tests for flatten_all batch mode and checksum caching."""
 
@@ -1045,6 +1258,37 @@ class FlattenAllTests(unittest.TestCase):
             self.assertTrue(flatten_all(self.root))
         flattened_inputs = {call.args[0].name for call in mock_flatten.call_args_list}
         self.assertEqual(flattened_inputs, {"a.scad", "b.scad"})
+
+    def test_checksums_sorted_by_path_not_digest(self):
+        digests = {"a.scad": "ffff", "b.scad": "0000"}
+        with patch("scadm.flatten.compute_checksum", side_effect=lambda f, _: digests[f.name]):
+            self.assertTrue(flatten_all(self.root))
+        self.assertEqual(
+            self.checksums.read_text(encoding="utf-8"),
+            "ffff  models/x/a.scad\n0000  models/x/parts/b.scad\n",
+        )
+
+    def test_paths_with_spaces_round_trip(self):
+        (self.src / "my part.scad").write_text("cube(3);\n", encoding="utf-8")
+        self.assertTrue(flatten_all(self.root))
+        with patch("scadm.flatten.flatten_file") as mock_flatten:
+            self.assertTrue(flatten_all(self.root))
+        mock_flatten.assert_not_called()
+        self.assertIn("  models/x/my part.scad\n", self.checksums.read_text(encoding="utf-8"))
+
+    def test_unchanged_file_does_not_stop_later_files(self):
+        self.assertTrue(flatten_all(self.root))
+        (self.src / "parts" / "b.scad").write_text("sphere(2);\n", encoding="utf-8")
+        with patch("scadm.flatten.flatten_file") as mock_flatten:
+            self.assertTrue(flatten_all(self.root))
+        mock_flatten.assert_called_once_with(
+            self.src / "parts" / "b.scad", self.src / "flattened" / "parts" / "b.scad", self.root
+        )
+
+    def test_checksums_file_in_new_directory(self):
+        custom = self.root / "cache" / "deep" / "sums.txt"
+        self.assertTrue(flatten_all(self.root, checksums_file=custom))
+        self.assertTrue(custom.exists())
 
     def test_custom_checksums_file_and_malformed_lines(self):
         custom = self.root / "sums.txt"

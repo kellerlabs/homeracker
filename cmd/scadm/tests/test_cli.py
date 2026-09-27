@@ -24,8 +24,10 @@ class MainTests(unittest.TestCase):
         mock_help.assert_called_once()
 
     def test_version_flag(self):
-        with patch("sys.stdout"):
-            self.assertEqual(run_cli("--version"), 0)
+        for flag in ("--version", "-v"):
+            with self.subTest(flag=flag), patch("sys.stdout") as out:
+                self.assertEqual(run_cli(flag), 0)
+                self.assertIn("scadm", "".join(c.args[0] for c in out.write.call_args_list))
 
 
 class VscodeTests(unittest.TestCase):
@@ -216,6 +218,19 @@ class ExportPngTests(unittest.TestCase):
         self.assertEqual(kwargs["defines"], ["x=1", "y=2"])
         self.assertEqual(kwargs["param_file"], Path("params.json"))
         self.assertEqual(kwargs["param_set"], "set1")
+
+    @patch("scadm.cli.export_png", return_value=True)
+    def test_projection_accepts_ortho_and_perspective(self, mock_export):
+        for projection in ("o", "p"):
+            with self.subTest(projection=projection):
+                self.assertEqual(run_cli("export-png", "a.scad", "--projection", projection), 0)
+                self.assertEqual(mock_export.call_args.kwargs["projection"], projection)
+
+    @patch("scadm.cli.export_png")
+    def test_projection_rejects_unknown_value(self, mock_export):
+        with patch("sys.stderr"):
+            self.assertEqual(run_cli("export-png", "a.scad", "--projection", "x"), 2)
+        mock_export.assert_not_called()
 
     @patch("scadm.cli.export_png")
     def test_param_set_requires_param_file(self, mock_export):
