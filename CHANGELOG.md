@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.17.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.16.0...homeracker-v3.17.0) (2026-09-27)
+
+
+### ✨ Features
+
+* **scadfmt:** add token-based OpenSCAD formatter ([#520](https://github.com/kellerlabs/homeracker/issues/520)) ([830ff0d](https://github.com/kellerlabs/homeracker/commit/830ff0dbf5d20c8a0a128e82f3842a20ab96339d))
+
+
+### 🔄 CI/CD
+
+* gate PRs with a single check-results job ([#519](https://github.com/kellerlabs/homeracker/issues/519)) ([0b052e6](https://github.com/kellerlabs/homeracker/commit/0b052e6bac7f7928ca5154440c87985c0740c053))
+
+
+### 🧪 Tests
+
+* **site:** add Playwright E2E suite for site and configurator ([#515](https://github.com/kellerlabs/homeracker/issues/515)) ([edc2b6e](https://github.com/kellerlabs/homeracker/commit/edc2b6eaf7b3f8da2132d8c3a4190bb3192b64f1))
+
 ## [3.16.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.15.1...homeracker-v3.16.0) (2026-09-27)
 
 
