@@ -158,40 +158,105 @@ def main():
         help="Show the currently installed version of scadm",
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(
+        dest="command",
+        help="Available commands",
+    )
 
     # Install command
-    install_parser = subparsers.add_parser("install", help="Install OpenSCAD and libraries")
-    install_parser.add_argument("--check", action="store_true", help="Check installation status only")
-    install_parser.add_argument("--force", action="store_true", help="Force reinstall")
-    install_parser.add_argument("--info", action="store_true", help="Show OpenSCAD version info")
-    install_parser.add_argument("--openscad-only", action="store_true", help="Install only OpenSCAD binary")
-    install_parser.add_argument("--libs-only", action="store_true", help="Install only libraries")
+    install_parser = subparsers.add_parser(
+        "install",
+        help="Install OpenSCAD and libraries",
+    )
+    install_parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Check installation status only",
+    )
+    install_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force reinstall",
+    )
+    install_parser.add_argument(
+        "--info",
+        action="store_true",
+        help="Show OpenSCAD version info",
+    )
+    install_parser.add_argument(
+        "--openscad-only",
+        action="store_true",
+        help="Install only OpenSCAD binary",
+    )
+    install_parser.add_argument(
+        "--libs-only",
+        action="store_true",
+        help="Install only libraries",
+    )
 
     # VSCode command
-    vscode_parser = subparsers.add_parser("vscode", help="Configure VS Code extensions")
-    vscode_parser.add_argument("--openscad", action="store_true", help="Install and configure OpenSCAD extension")
-    vscode_parser.add_argument("--python", action="store_true", help="Install and configure Python extension")
+    vscode_parser = subparsers.add_parser(
+        "vscode",
+        help="Configure VS Code extensions",
+    )
+    vscode_parser.add_argument(
+        "--openscad",
+        action="store_true",
+        help="Install and configure OpenSCAD extension",
+    )
+    vscode_parser.add_argument(
+        "--python",
+        action="store_true",
+        help="Install and configure Python extension",
+    )
 
     # Flatten command
-    flatten_parser = subparsers.add_parser("flatten", help="Flatten .scad include trees into single files")
-    flatten_parser.add_argument("file", nargs="?", help="Single .scad file to flatten")
-    flatten_parser.add_argument("-o", "--output", help="Output file path (required for single-file mode)")
-    flatten_parser.add_argument(
-        "--all", action="store_true", dest="flatten_all", help="Batch-flatten from scadm.json config"
+    flatten_parser = subparsers.add_parser(
+        "flatten",
+        help="Flatten .scad include trees into single files",
     )
-    flatten_parser.add_argument("--checksum", action="store_true", help="Print transitive dependency checksum")
+    flatten_parser.add_argument(
+        "file",
+        nargs="?",
+        help="Single .scad file to flatten",
+    )
+    flatten_parser.add_argument(
+        "-o",
+        "--output",
+        help="Output file path (required for single-file mode)",
+    )
+    flatten_parser.add_argument(
+        "--all",
+        action="store_true",
+        dest="flatten_all",
+        help="Batch-flatten from scadm.json config",
+    )
+    flatten_parser.add_argument(
+        "--checksum",
+        action="store_true",
+        help="Print transitive dependency checksum",
+    )
 
     # Render command
     render_parser = subparsers.add_parser(
-        "render", help="Render .scad files via OpenSCAD to validate syntax and geometry"
-    )
-    render_parser.add_argument("files", nargs="*", type=Path, help=".scad files to render")
-    render_parser.add_argument(
-        "--source", action="store_true", help="Render source files from scadm.json flatten src dirs"
+        "render",
+        help="Render .scad files via OpenSCAD to validate syntax and geometry",
     )
     render_parser.add_argument(
-        "--flattened", action="store_true", help="Render flattened output files from scadm.json flatten dest dirs"
+        "files",
+        nargs="*",
+        type=Path,
+        help=".scad files to render",
+    )
+    render_parser.add_argument(
+        "--source",
+        action="store_true",
+        help="Render source files from scadm.json flatten src dirs",
+    )
+    render_parser.add_argument(
+        "--flattened",
+        action="store_true",
+        help="Render flattened output files from scadm.json flatten dest dirs",
     )
     render_parser.add_argument(
         "-j",
@@ -203,27 +268,56 @@ def main():
 
     # Export-PNG command
     export_png_parser = subparsers.add_parser(
-        "export-png", help="Export isometric preview PNG from an OpenSCAD model file"
+        "export-png",
+        help="Export isometric preview PNG from an OpenSCAD model file",
     )
-    export_png_parser.add_argument("file", help="Input .scad file")
+    export_png_parser.add_argument(
+        "file",
+        help="Input .scad file",
+    )
     export_png_parser.add_argument(
         "--camera",
         default=DEFAULT_CAMERA,
         help=f"Camera params: translate_x,y,z,rot_x,y,z,dist (default: {DEFAULT_CAMERA})",
     )
     export_png_parser.add_argument(
-        "--imgsize", default=DEFAULT_IMGSIZE, help=f"Image size: width,height (default: {DEFAULT_IMGSIZE})"
+        "--imgsize",
+        default=DEFAULT_IMGSIZE,
+        help=f"Image size: width,height (default: {DEFAULT_IMGSIZE})",
     )
     export_png_parser.add_argument(
-        "--colorscheme", default=DEFAULT_COLORSCHEME, help=f"OpenSCAD color scheme (default: {DEFAULT_COLORSCHEME})"
+        "--colorscheme",
+        default=DEFAULT_COLORSCHEME,
+        help=f"OpenSCAD color scheme (default: {DEFAULT_COLORSCHEME})",
     )
-    export_png_parser.add_argument("--output", help="Output file path (default: renders/<input_basename>.png)")
-    export_png_parser.add_argument("--projection", choices=["o", "p"], help="Projection: (o)rtho or (p)erspective")
     export_png_parser.add_argument(
-        "-D", dest="defines", action="append", metavar="key=value", help="OpenSCAD variable override (repeatable)"
+        "--output",
+        help="Output file path (default: renders/<input_basename>.png)",
     )
-    export_png_parser.add_argument("-p", dest="param_file", metavar="file.json", help="Customizer parameter file")
-    export_png_parser.add_argument("-P", dest="param_set", metavar="set_name", help="Parameter set name")
+    export_png_parser.add_argument(
+        "--projection",
+        choices=["o", "p"],
+        help="Projection: (o)rtho or (p)erspective",
+    )
+    export_png_parser.add_argument(
+        "-D",
+        dest="defines",
+        action="append",
+        metavar="key=value",
+        help="OpenSCAD variable override (repeatable)",
+    )
+    export_png_parser.add_argument(
+        "-p",
+        dest="param_file",
+        metavar="file.json",
+        help="Customizer parameter file",
+    )
+    export_png_parser.add_argument(
+        "-P",
+        dest="param_set",
+        metavar="set_name",
+        help="Parameter set name",
+    )
 
     args = parser.parse_args()
 

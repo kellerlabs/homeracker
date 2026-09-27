@@ -6,7 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
-| [gate-scadm-coverage-and-mutation-test-weekly](gate-scadm-coverage-and-mutation-test-weekly.md) | 2026-09-27 | `scadm` unit tests gate on 90% branch coverage; mutmut reports weekly |
+| [gate-scadm-coverage-and-mutation-test-changed-functions](gate-scadm-coverage-and-mutation-test-changed-functions.md) | 2026-09-27 | `scadm` unit tests gate on 90% branch coverage; mutmut reports on the functions each PR changes, weekly full run to Discord |
 | [return-bracket-to-open-source-catalog](return-bracket-to-open-source-catalog.md) | 2026-09-20 | Bracket comes back into this repo as an open-source part, flexmount retired in its favor |
 | [x-hole-supports-by-default](x-hole-supports-by-default.md) | 2026-09-13 | Supports carry lock pin holes on both axes, so panels have a hole to pin to on every edge |
 | [astro-site-replaces-jekyll](astro-site-replaces-jekyll.md) | 2026-09-02 | homeracker.org is an Astro site rendering the repo READMEs in place; Jekyll removed |

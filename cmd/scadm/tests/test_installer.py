@@ -10,7 +10,7 @@ import unittest
 import urllib.error
 import zipfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from scadm.installer import (
     _show_version_info,
@@ -302,6 +302,22 @@ class GetOpenscadConfigAutoRootTests(unittest.TestCase):
         mock_resolve.assert_called_once_with("nightly", "latest", "windows", install_dir=None, force=False)
 
 
+class GetOpenscadVersionAutoRootTests(unittest.TestCase):
+    """get_openscad_version reads config and cache location from the detected workspace."""
+
+    @patch("scadm.installer.resolve_version", autospec=True, return_value="2021.01")
+    def test_uses_detected_workspace(self, mock_resolve):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            data = {"openscad": {"type": "stable", "version": "latest"}}
+            (root / "scadm.json").write_text(json.dumps(data), encoding="utf-8")
+            with patch("scadm.installer.get_workspace_root", return_value=root):
+                self.assertEqual(get_openscad_version(os_name="windows", force=True), "2021.01")
+        mock_resolve.assert_called_once_with(
+            "stable", "latest", "windows", install_dir=root / "bin" / "openscad", force=True
+        )
+
+
 class GetInstalledVersionFromBinaryTests(unittest.TestCase):
     """Tests for the legacy binary fallback of get_installed_openscad_version."""
 
@@ -317,7 +333,10 @@ class GetInstalledVersionFromBinaryTests(unittest.TestCase):
     def test_parses_linux_binary(self):
         version, mock_run = self._run("linux", "openscad", "OpenSCAD version 2026.04.16.ai123\n")
         self.assertEqual(version, "2026.04.16.ai123")
-        self.assertEqual(mock_run.call_args.args[0][1], "--version")
+        (cmd,), kwargs = mock_run.call_args
+        self.assertEqual(cmd[1:], ["--version"])
+        self.assertTrue(cmd[0].endswith("openscad"))
+        self.assertEqual(kwargs, {"capture_output": True, "text": True, "check": False})
 
     def test_parses_linux_appimage(self):
         version, _ = self._run("linux", "OpenSCAD.AppImage", "OpenSCAD version 2021.01.01")
@@ -359,6 +378,14 @@ class InstallOpenscadWindowsTests(unittest.TestCase):
                 self.assertTrue(install_openscad_windows(install_dir, "2021.01", nightly=False))
             self.assertEqual(dl.call_args.args[0], "https://files.openscad.org/OpenSCAD-2021.01-x86-64.zip")
             self.assertTrue((install_dir / "openscad.exe").exists())
+
+    def test_extracts_zip_with_single_top_level_file(self):
+        archive = _zip_bytes({"openscad.exe": "exe"})
+        with tempfile.TemporaryDirectory() as tmpdir:
+            install_dir = Path(tmpdir)
+            with patch("scadm.installer.urllib.request.urlretrieve", side_effect=_fake_download(archive)):
+                self.assertTrue(install_openscad_windows(install_dir, "2021.01", nightly=False))
+            self.assertEqual((install_dir / "openscad.exe").read_text(encoding="utf-8"), "exe")
 
     @patch("scadm.installer.download_file", return_value=False)
     def test_download_failure(self, _):
@@ -416,9 +443,9 @@ class InstallOpenscadTests(unittest.TestCase):
         self.install_dir = self.root / "bin" / "openscad"
         patches = {
             "platform": patch("scadm.installer.get_system_platform", return_value="linux"),
-            "resolve": patch("scadm.installer.resolve_version", return_value="2026.02.02"),
-            "linux": patch("scadm.installer.install_openscad_linux", return_value=True),
-            "windows": patch("scadm.installer.install_openscad_windows", return_value=True),
+            "resolve": patch("scadm.installer.resolve_version", autospec=True, return_value="2026.02.02"),
+            "linux": patch("scadm.installer.install_openscad_linux", autospec=True, return_value=True),
+            "windows": patch("scadm.installer.install_openscad_windows", autospec=True, return_value=True),
         }
         self.mocks = {name: p.start() for name, p in patches.items()}
         self.addCleanup(patch.stopall)
@@ -434,13 +461,19 @@ class InstallOpenscadTests(unittest.TestCase):
 
     def test_fresh_install_writes_marker(self):
         self.assertTrue(install_openscad(workspace_root=self.root))
+        self.mocks["resolve"].assert_called_once_with(
+            "nightly", "latest", "linux", install_dir=self.install_dir, force=False
+        )
         self.mocks["linux"].assert_called_once_with(self.install_dir, "2026.02.02", True)
         self.assertEqual(get_installed_openscad_version(self.install_dir, "linux"), "2026.02.02")
 
     def test_windows_install(self):
         self.mocks["platform"].return_value = "windows"
         self.assertTrue(install_openscad(workspace_root=self.root))
-        self.mocks["windows"].assert_called_once()
+        self.mocks["resolve"].assert_called_once_with(
+            "nightly", "latest", "windows", install_dir=self.install_dir, force=False
+        )
+        self.mocks["windows"].assert_called_once_with(self.install_dir, "2026.02.02", True)
         self.mocks["linux"].assert_not_called()
 
     def test_failed_install_writes_no_marker(self):
@@ -465,6 +498,12 @@ class InstallOpenscadTests(unittest.TestCase):
         self.assertTrue(install_openscad(check_only=True, workspace_root=self.root))
         self.mocks["linux"].assert_not_called()
 
+    def test_windows_checks_installed_windows_binary(self):
+        self.mocks["platform"].return_value = "windows"
+        with patch("scadm.installer.get_installed_openscad_version", return_value="2026.02.02") as installed:
+            self.assertTrue(install_openscad(check_only=True, workspace_root=self.root))
+        installed.assert_called_once_with(self.install_dir, "windows")
+
     def test_check_only_outdated(self):
         self._set_installed("2026.01.01")
         self.assertFalse(install_openscad(check_only=True, workspace_root=self.root))
@@ -474,31 +513,55 @@ class InstallOpenscadTests(unittest.TestCase):
         self.assertFalse(install_openscad(check_only=True, workspace_root=self.root))
 
     def test_info_does_not_install(self):
-        self.assertTrue(install_openscad(info=True, workspace_root=self.root))
+        with patch("scadm.installer._show_version_info", autospec=True) as show:
+            self.assertTrue(install_openscad(info=True, force=True, workspace_root=self.root))
+        show.assert_called_once_with({"type": "nightly", "version": "latest"}, self.install_dir, "linux", True)
         self.mocks["linux"].assert_not_called()
 
     def test_auto_detects_workspace(self):
+        (self.root / "scadm.json").write_text(
+            json.dumps({"openscad": {"type": "stable", "version": "2021.01"}}), encoding="utf-8"
+        )
         with patch("scadm.installer.get_workspace_root", return_value=self.root):
             self.assertTrue(install_openscad())
-        self.mocks["linux"].assert_called_once()
+        self.mocks["resolve"].assert_called_once_with(
+            "stable", "2021.01", "linux", install_dir=self.install_dir, force=False
+        )
+        self.mocks["linux"].assert_called_once_with(self.install_dir, "2026.02.02", False)
 
 
 class ShowVersionInfoTests(unittest.TestCase):
     """Tests for _show_version_info."""
 
-    def _logged(self, config, resolve_side_effect=None):
+    def _logged(self, config, resolve_side_effect=None, installed=None):
         with (
             tempfile.TemporaryDirectory() as tmpdir,
-            patch("scadm.installer.resolve_version", return_value="2026.03.03", side_effect=resolve_side_effect),
+            patch(
+                "scadm.installer.resolve_version",
+                autospec=True,
+                return_value="2026.03.03",
+                side_effect=resolve_side_effect,
+            ) as resolve,
             self.assertLogs("scadm.installer", level="INFO") as logs,
         ):
-            _show_version_info(config, Path(tmpdir), "linux")
+            if installed:
+                _write_installed_version(Path(tmpdir), installed)
+            _show_version_info(config, Path(tmpdir), "windows", force=True)
+            self.resolve_call = resolve.call_args
+            self.install_dir = Path(tmpdir)
         return "\n".join(logs.output)
 
     def test_latest_shows_resolved(self):
         output = self._logged({"type": "nightly", "version": "latest"})
         self.assertIn("Resolved version:   2026.03.03", output)
         self.assertIn("Installed version:  not installed", output)
+        self.assertEqual(
+            self.resolve_call, (("nightly", "latest", "windows"), {"install_dir": self.install_dir, "force": True})
+        )
+
+    def test_shows_installed_version(self):
+        output = self._logged({"type": "stable", "version": "2021.01"}, installed="2021.01")
+        self.assertIn("Installed version:  2021.01", output)
 
     def test_resolve_error_is_reported(self):
         output = self._logged({"type": "nightly", "version": "latest"}, RuntimeError("offline"))
@@ -534,6 +597,7 @@ class InstallLibraryTests(unittest.TestCase):
         lib = self.libs / "BOSL2"
         self.assertEqual((lib / "std.scad").read_text(encoding="utf-8"), "std")
         self.assertTrue((lib / "sub" / "a.scad").exists())
+        self.assertEqual((lib / "top.txt").read_text(encoding="utf-8"), "t")
         self.assertEqual(get_installed_lib_version(lib), "v2.0.1")
         self.assertFalse((Path(self._tmp.name) / "BOSL2-v2.0.1.tar.gz").exists())
 
@@ -556,7 +620,20 @@ class InstallLibraryTests(unittest.TestCase):
         self.assertEqual(get_installed_lib_version(old), "v2.0.1")
 
     def test_unknown_source(self):
-        self.assertFalse(install_library({**self.DEP, "source": "gitlab"}, self.libs))
+        with patch("scadm.installer.urllib.request.urlretrieve") as dl:
+            self.assertFalse(install_library({**self.DEP, "source": "gitlab"}, self.libs))
+        dl.assert_not_called()
+
+    def test_explicit_github_source(self):
+        archive = _tar_gz_bytes({"BOSL2/std.scad": "std"})
+        with patch("scadm.installer.urllib.request.urlretrieve", side_effect=_fake_download(archive)):
+            self.assertTrue(install_library({**self.DEP, "source": "github"}, self.libs))
+
+    def test_rejects_path_traversal(self):
+        archive = _tar_gz_bytes({"BOSL2/../../evil.scad": "x"})
+        with patch("scadm.installer.urllib.request.urlretrieve", side_effect=_fake_download(archive)):
+            self.assertFalse(install_library(self.DEP, self.libs))
+        self.assertFalse((Path(self._tmp.name) / "evil.scad").exists())
 
     def test_download_error_cleans_up(self):
         def _partial(_url, dest):
@@ -606,8 +683,11 @@ class InstallLibrariesTests(unittest.TestCase):
             root = self._workspace(tmpdir, {"dependencies": deps})
             self.assertFalse(install_libraries(force=True, workspace_root=root))
             self.assertTrue((root / "bin" / "openscad" / "libraries").is_dir())
-        self.assertEqual(mock_install.call_count, 2)
-        self.assertTrue(mock_install.call_args.kwargs["force"])
+        libraries_dir = Path(tmpdir) / "bin" / "openscad" / "libraries"
+        self.assertEqual(
+            mock_install.call_args_list,
+            [call(deps[0], libraries_dir, force=True), call(deps[1], libraries_dir, force=True)],
+        )
 
     @patch("scadm.installer.install_library")
     def test_check_only(self, mock_install):
@@ -625,6 +705,15 @@ class InstallLibrariesTests(unittest.TestCase):
             (root / "bin" / "openscad" / "libraries" / "b" / ".version").write_text("2", encoding="utf-8")
             self.assertTrue(install_libraries(check_only=True, workspace_root=root))
         mock_install.assert_not_called()
+
+    @patch("scadm.installer.install_library", return_value=True)
+    def test_all_succeed_and_missing_key_means_none(self, mock_install):
+        dep = {"name": "a", "repository": "o/a", "version": "1"}
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.assertTrue(install_libraries(workspace_root=self._workspace(tmpdir, {"dependencies": [dep]})))
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.assertTrue(install_libraries(workspace_root=self._workspace(tmpdir, {})))
+        mock_install.assert_called_once()
 
     def test_auto_detects_workspace(self):
         with tempfile.TemporaryDirectory() as tmpdir:

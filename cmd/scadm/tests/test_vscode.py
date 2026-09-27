@@ -131,13 +131,20 @@ class ExtensionTests(unittest.TestCase):
 
     @patch("scadm.vscode.platform.system", return_value="Linux")
     def test_openscad_settings_linux_uses_wrapper(self, _):
-        settings = Extension.OPENSCAD.get_settings(Path("/ws"))
-        self.assertEqual(settings["scad-lsp.launchPath"], str(Path("/ws/cmd/linux/openscad-wrapper.sh")))
+        self.assertEqual(
+            Extension.OPENSCAD.get_settings(Path("/ws")),
+            {
+                "files.associations": {"*.scad": "scad"},
+                "files.eol": "\n",
+                "scad-lsp.launchPath": str(Path("/ws/cmd/linux/openscad-wrapper.sh")),
+            },
+        )
 
     @patch("scadm.vscode.platform.system", return_value="Windows")
     def test_openscad_settings_windows_uses_exe(self, _):
         settings = Extension.OPENSCAD.get_settings(Path("/ws"))
-        self.assertTrue(settings["scad-lsp.launchPath"].endswith("openscad.exe"))
+        expected = str(Path("/ws") / "bin" / "openscad" / "openscad.exe").replace("/", "\\")
+        self.assertEqual(settings["scad-lsp.launchPath"], expected)
         self.assertNotIn("/", settings["scad-lsp.launchPath"])
 
 
@@ -146,8 +153,16 @@ class InstallExtensionTests(unittest.TestCase):
 
     @patch("scadm.vscode.subprocess.run")
     def test_success(self, mock_run):
-        self.assertTrue(install_extension(Extension.PYTHON))
-        self.assertEqual(mock_run.call_args.args[0], ["code", "--install-extension", "ms-python.python", "--force"])
+        for system, shell in (("Linux", False), ("Windows", True)):
+            with self.subTest(system=system), patch("scadm.vscode.platform.system", return_value=system):
+                self.assertTrue(install_extension(Extension.PYTHON))
+                mock_run.assert_called_with(
+                    ["code", "--install-extension", "ms-python.python", "--force"],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    shell=shell,
+                )
 
     @patch("scadm.vscode.subprocess.run", side_effect=FileNotFoundError)
     def test_code_missing(self, _):
@@ -184,6 +199,39 @@ class UpdateSettingsEdgeCaseTests(unittest.TestCase):
             settings = json.loads((root / ".vscode" / "settings.json").read_text(encoding="utf-8"))
             self.assertIn("python.defaultInterpreterPath", settings)
 
+    def test_writes_sorted_two_space_json_into_new_workspace(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "new" / "ws"
+            with patch("scadm.vscode.platform.system", return_value="Linux"):
+                self.assertTrue(update_vscode_settings(root, Extension.OPENSCAD))
+            text = (root / ".vscode" / "settings.json").read_text(encoding="utf-8")
+            expected = {
+                "files.associations": {"*.scad": "scad"},
+                "files.eol": "\n",
+                "scad-lsp.launchPath": str(root / "cmd" / "linux" / "openscad-wrapper.sh"),
+            }
+            self.assertEqual(text, json.dumps(expected, indent=2, sort_keys=True))
+
+    def test_output_keys_are_sorted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / ".vscode").mkdir()
+            (root / ".vscode" / "settings.json").write_text('{"zzz": 1, "aaa": 2}', encoding="utf-8")
+            self.assertTrue(update_vscode_settings(root, Extension.PYTHON))
+            text = (root / ".vscode" / "settings.json").read_text(encoding="utf-8")
+            self.assertEqual(
+                list(json.loads(text)), ["aaa", "python.defaultInterpreterPath", "zzz"], "keys must be written sorted"
+            )
+
+    def test_non_dict_value_replaces_existing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / ".vscode").mkdir()
+            (root / ".vscode" / "settings.json").write_text('{"files.associations": "x"}', encoding="utf-8")
+            self.assertTrue(update_vscode_settings(root, Extension.OPENSCAD))
+            settings = json.loads((root / ".vscode" / "settings.json").read_text(encoding="utf-8"))
+            self.assertEqual(settings["files.associations"], {"*.scad": "scad"})
+
     def test_write_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch("builtins.open", side_effect=OSError("read-only")):
@@ -197,10 +245,16 @@ class SetupExtensionTests(unittest.TestCase):
     @patch("scadm.vscode.update_vscode_settings", return_value=True)
     @patch("scadm.vscode.install_extension", return_value=True)
     @patch("scadm.vscode.get_workspace_root", return_value=Path("/ws"))
-    def test_success(self, _, mock_install, mock_update, __):
-        self.assertTrue(setup_openscad_extension())
-        mock_install.assert_called_once_with(Extension.OPENSCAD)
-        mock_update.assert_called_once_with(Path("/ws"), Extension.OPENSCAD)
+    def test_success(self, _, mock_install, mock_update, mock_which):
+        for setup, extension in (
+            (setup_openscad_extension, Extension.OPENSCAD),
+            (setup_python_extension, Extension.PYTHON),
+        ):
+            with self.subTest(extension=extension):
+                self.assertTrue(setup())
+                mock_install.assert_called_with(extension)
+                mock_update.assert_called_with(Path("/ws"), extension)
+        mock_which.assert_called_with("code")
 
     def test_code_not_on_path(self, mock_which):
         mock_which.return_value = None

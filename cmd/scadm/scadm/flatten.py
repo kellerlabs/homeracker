@@ -168,8 +168,8 @@ def _extract_parameters(content: str) -> str:
 def _extract_hidden_section(content: str) -> str:
     """Extract /* [Hidden] */ section via line-by-line parser.
 
-    Keeps assignments (including $-variables) and stops at the first
-    non-assignment statement (module/function/include/use or geometry call).
+    Keeps assignments (including $-variables), blank lines and comments, and stops
+    at the first other statement (module/function/include/use or geometry call).
     """
     lines = content.splitlines()
     hidden_start = None
@@ -193,10 +193,6 @@ def _extract_hidden_section(content: str) -> str:
             if _has_terminator(stripped):
                 in_multiline_assignment = False
             continue
-
-        # e.g. include <BOSL2/std.scad>, module foo(), function bar()
-        if re.match(r"^(include|use|module|function)\b", stripped):
-            break
 
         if not stripped or stripped.startswith("//"):
             kept.append(line)
@@ -239,9 +235,8 @@ def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
     Returns:
         List of _Definition objects in source order.
     """
-    # Strip includes and section markers before parsing
-    clean = re.sub(r"^\s*(include|use)\s*<[^>]+>\s*$", "", content, flags=re.MULTILINE)
-    clean = _SECTION_MARKER_RE.sub("", clean)
+    # Include lines never match a definition, so only section markers need stripping
+    clean = _SECTION_MARKER_RE.sub("", content)
 
     lines = clean.split("\n")
     defs: list[_Definition] = []
@@ -273,8 +268,6 @@ def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
                 i += 1
                 def_lines.append(lines[i])
                 brace_count += lines[i].count("{") - lines[i].count("}")
-                if "{" in lines[i]:
-                    seen_brace = True
             if not seen_brace:
                 # Multi-line signature before opening brace
                 while i + 1 < len(lines):
@@ -282,7 +275,7 @@ def _parse_definitions(content: str, origin: str = "") -> list[_Definition]:
                     def_lines.append(lines[i])
                     if "{" in lines[i]:
                         seen_brace = True
-                        brace_count += lines[i].count("{") - lines[i].count("}")
+                        brace_count = lines[i].count("{") - lines[i].count("}")
                         break
                 while seen_brace and brace_count > 0 and i + 1 < len(lines):
                     i += 1

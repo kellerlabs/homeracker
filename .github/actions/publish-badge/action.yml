@@ -1,0 +1,51 @@
+---
+name: Publish badge
+description: Commit a shields.io endpoint JSON to the `badges` branch, creating the branch on first use.
+
+inputs:
+  file:
+    description: Path to the badge JSON to publish
+    required: true
+  name:
+    description: File name on the `badges` branch, e.g. coverage.json
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Needs a checkout with push credentials and `contents: write`. The branch only holds badge
+    # JSON, so concurrent publishers touch different files and a rebase on retry never conflicts.
+    - name: Push badge
+      shell: bash
+      env:
+        FILE: ${{ inputs.file }}
+        NAME: ${{ inputs.name }}
+      run: |
+        set -euo pipefail
+        dir=$(mktemp -d)
+        trap 'git worktree remove --force "$dir"' EXIT
+        if git ls-remote --exit-code --heads origin badges > /dev/null; then
+          git fetch --quiet --depth=1 origin badges
+          git worktree add --quiet --detach "$dir" FETCH_HEAD
+        else
+          git worktree add --quiet --detach "$dir"
+          git -C "$dir" checkout --quiet --orphan "badges-$GITHUB_RUN_ID"
+          git -C "$dir" rm -rfq --ignore-unmatch .
+        fi
+        git -C "$dir" config user.name "github-actions[bot]"
+        git -C "$dir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        cp "$FILE" "$dir/$NAME"
+        git -C "$dir" add "$NAME"
+        if git -C "$dir" diff --cached --quiet; then
+          echo "$NAME unchanged"
+          exit 0
+        fi
+        git -C "$dir" commit --quiet -m "chore(badges): update $NAME"
+        for attempt in 1 2 3; do
+          if git -C "$dir" push --quiet origin HEAD:refs/heads/badges; then
+            exit 0
+          fi
+          echo "Push attempt $attempt rejected, rebasing onto the latest badges branch"
+          git -C "$dir" pull --quiet --rebase origin badges
+        done
+        exit 1

@@ -42,6 +42,8 @@ include = ["scadm*"]
 scadm = ["py.typed"]
 
 [tool.pytest.ini_options]
+# With PYTHONWARNDEFAULTENCODING=1, text I/O without an explicit encoding fails (breaks on non-UTF-8 Windows locales).
+filterwarnings = ["error::EncodingWarning"]
 markers = [
     "integration: CLI integration tests (require network, run with -m integration)",
     "slow: slow tests that download binaries (run with -m slow)",
@@ -52,7 +54,7 @@ source = ["scadm"]
 branch = true
 
 [tool.coverage.report]
-# Raise when coverage grows, never lower, and update the README badge. See docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md
+# Raise when coverage grows, never lower. See docs/decisions/gate-scadm-coverage-and-mutation-test-changed-functions.md
 fail_under = 90
 show_missing = true
 skip_covered = true
@@ -64,3 +66,9 @@ exclude_also = [
 source_paths = ["scadm/"]
 pytest_add_cli_args = ["-m", "not integration"]
 pytest_add_cli_args_test_selection = ["tests/"]
+# Mutants no test should pin: log output, argparse help and usage text, exception messages.
+do_not_mutate_patterns = [
+    'logger\.\w+\(',
+    '^\s*(help|description|metavar|prog)=',
+    'raise \w+\(',
+]

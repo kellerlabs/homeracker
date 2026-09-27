@@ -1,7 +1,8 @@
 # scadm - OpenSCAD Dependency Manager
 
 [![Pre-commit](https://github.com/kellerlabs/homeracker/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/kellerlabs/homeracker/actions/workflows/pre-commit.yml?query=branch%3Amain)
-[![Coverage gate](https://img.shields.io/badge/coverage-%E2%89%A590%25-brightgreen)](https://github.com/kellerlabs/homeracker/blob/main/cmd/scadm/pyproject.toml)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkellerlabs%2Fhomeracker%2Fbadges%2Fcoverage.json)](https://github.com/kellerlabs/homeracker/actions/workflows/coverage-badge.yml?query=branch%3Amain)
+[![Mutation score](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkellerlabs%2Fhomeracker%2Fbadges%2Fmutation.json)](https://github.com/kellerlabs/homeracker/actions/workflows/mutation-tests.yml?query=event%3Aschedule)
 
 **scadm** is a lightweight, python-based dependency manager for OpenSCAD projects. It simplifies installing OpenSCAD (nightly or stable) and managing library dependencies through a simple `scadm.json` file.
 

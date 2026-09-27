@@ -3,6 +3,7 @@
 import json
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -141,6 +142,16 @@ class DiscoverFlattenFilesTests(unittest.TestCase):
             with self.assertRaises(ValueError, msg="At least one of source or flattened must be True."):
                 discover_flatten_files(Path(tmp))
 
+    def test_auto_detects_workspace_and_names_missing_src(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._make_workspace(tmp, [{"src": "models/a", "dest": "models/a/flat"}])
+            (root / "models" / "a" / "flat").rmdir()
+            (root / "models" / "a").rmdir()
+            with patch("scadm.render.get_workspace_root", return_value=root):
+                with self.assertRaises(ValueError) as ctx:
+                    discover_flatten_files(source=True)
+            self.assertIn("src: models/a", str(ctx.exception))
+
     def test_missing_configured_dir_raises(self):
         """Raises ValueError when a configured flatten dir doesn't exist."""
         with tempfile.TemporaryDirectory() as tmp:
@@ -199,8 +210,22 @@ class RenderFilesTests(unittest.TestCase):
     def test_workers_capped_to_file_count(self, _mock_root, mock_render):
         """Workers are capped to file count even if max_workers is higher."""
         files = [Path("a.scad"), Path("b.scad")]
-        self.assertTrue(render_files(files, max_workers=100))
-        self.assertEqual(mock_render.call_count, 2)
+        with patch("scadm.render.concurrent.futures.ThreadPoolExecutor", wraps=ThreadPoolExecutor) as pool:
+            self.assertTrue(render_files(files, max_workers=100))
+        pool.assert_called_once_with(max_workers=2)
+        self.assertEqual(sorted(c.args for c in mock_render.call_args_list), [(f, Path("/fake")) for f in files])
+
+    @patch("scadm.render.render_file", return_value=True)
+    def test_default_workers_follow_cpu_count(self, _):
+        files = [Path(f"{i}.scad") for i in range(8)]
+        for cpus, expected in ((4, 4), (None, 1)):
+            with (
+                self.subTest(cpus=cpus),
+                patch("scadm.render.os.cpu_count", return_value=cpus),
+                patch("scadm.render.concurrent.futures.ThreadPoolExecutor", wraps=ThreadPoolExecutor) as pool,
+            ):
+                self.assertTrue(render_files(files, workspace_root=Path("/ws")))
+                pool.assert_called_once_with(max_workers=expected)
 
 
 class RenderFileTests(unittest.TestCase):
@@ -235,7 +260,29 @@ class RenderFileTests(unittest.TestCase):
         result, cmd = self._render()
         self.assertTrue(result)
         self.assertEqual(cmd[0], str(self.install_dir / "openscad"))
+        self.assertEqual(cmd[1], "-o")
+        self.assertTrue(cmd[2].endswith(".stl"))
+        self.assertFalse(Path(cmd[2]).exists(), "temporary STL must be removed")
         self.assertEqual(cmd[-2:], [str(self.scad), "--export-format=binstl"])
+
+    def test_subprocess_options(self):
+        with (
+            patch("scadm.render.subprocess.run") as mock_run,
+            patch("scadm.render.shutil.which", return_value=None) as mock_which,
+            patch("scadm.render.get_system_platform", return_value="linux"),
+        ):
+            mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="")
+            self.assertFalse(render_file(self.scad, self.root))
+        mock_which.assert_called_once_with("xvfb-run")
+        kwargs = mock_run.call_args.kwargs
+        self.assertEqual(
+            {k: kwargs[k] for k in ("capture_output", "text", "check")},
+            {"capture_output": True, "text": True, "check": False},
+        )
+
+    def test_one_byte_output_passes(self):
+        result, _ = self._render(stl=b"x")
+        self.assertTrue(result)
 
     def test_uses_xvfb_on_linux_when_available(self):
         _, cmd = self._render(xvfb="/usr/bin/xvfb-run")
@@ -254,6 +301,14 @@ class RenderFileTests(unittest.TestCase):
     def test_empty_output_fails(self):
         result, _ = self._render(stl=b"")
         self.assertFalse(result)
+
+    def test_output_never_written_fails_cleanly(self):
+        with (
+            patch("scadm.render.subprocess.run", return_value=MagicMock(returncode=1, stdout="", stderr="")),
+            patch("scadm.render.tempfile.NamedTemporaryFile") as mock_tmp,
+        ):
+            mock_tmp.return_value.__enter__.return_value.name = str(self.root / "never.stl")
+            self.assertFalse(render_file(self.scad, self.root))
 
     def test_missing_openscad(self):
         (self.install_dir / "openscad").unlink()

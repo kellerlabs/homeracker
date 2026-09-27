@@ -1,0 +1,51 @@
+---
+name: Coverage Badge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cmd/scadm/**'
+      - 'cmd/test/mutation_report.py'
+      - '.github/actions/publish-badge/**'
+      - '.github/workflows/coverage-badge.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: coverage-badge
+  cancel-in-progress: true
+
+jobs:
+  # The gate itself lives in the scadm-tests pre-commit hook. This only refreshes the README badge.
+  badge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadm pytest -r requirements.txt
+
+      - name: Measure coverage
+        working-directory: cmd/scadm
+        run: |
+          set -euo pipefail
+          python -m pytest tests/ -m "not integration" -q --cov --cov-report=json:"$RUNNER_TEMP/coverage.json"
+          python ../test/mutation_report.py coverage-badge "$RUNNER_TEMP/coverage.json" > "$RUNNER_TEMP/badge.json"
+
+      - name: Publish coverage badge
+        uses: ./.github/actions/publish-badge
+        with:
+          file: ${{ runner.temp }}/badge.json
+          name: coverage.json

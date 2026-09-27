@@ -78,10 +78,16 @@ repos:
     hooks:
       - id: scadm-tests
         name: scadm Python Tests
-        entry: bash -c 'cd cmd/scadm && python -m pytest tests/ -v -m "not integration" --cov'
+        entry: bash -c 'cd cmd/scadm && PYTHONWARNDEFAULTENCODING=1 python -m pytest tests/ -v -m "not integration" --cov'
         language: system
         pass_filenames: false
         files: '^cmd/scadm/'
+      - id: mutation-report-tests
+        name: Mutation report tests
+        entry: python -m pytest cmd/test/tests -q
+        language: system
+        pass_filenames: false
+        files: '^cmd/test/'
   - repo: local
     hooks:
       - id: configurator-check

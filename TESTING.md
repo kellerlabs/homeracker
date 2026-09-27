@@ -49,30 +49,34 @@ python -m pytest tests/test_cli_integration.py -m "integration and not slow" -v
 
 ### Code Coverage
 
-The `scadm-tests` hook runs the unit tests with `--cov`. It fails when branch coverage drops below `fail_under` in [`cmd/scadm/pyproject.toml`](cmd/scadm/pyproject.toml).
+The `scadm-tests` hook runs the unit tests with `--cov`. It fails when branch coverage drops below `fail_under` in [`cmd/scadm/pyproject.toml`](cmd/scadm/pyproject.toml). It also sets `PYTHONWARNDEFAULTENCODING=1`, so text I/O without an explicit `encoding=` fails the tests (it breaks on Windows with a non-UTF-8 locale).
 
 ```bash
 cd cmd/scadm
-python -m pytest tests/ -m "not integration" --cov                        # enforce the gate
-python -m pytest tests/ -m "not integration" --cov --cov-report=html      # browse htmlcov/index.html
+PYTHONWARNDEFAULTENCODING=1 python -m pytest tests/ -m "not integration" --cov                    # enforce the gate
+PYTHONWARNDEFAULTENCODING=1 python -m pytest tests/ -m "not integration" --cov --cov-report=html  # browse htmlcov/index.html
 ```
 
-When your change lifts coverage well past the gate, raise `fail_under` and the coverage badge in [`cmd/scadm/README.md`](cmd/scadm/README.md) in the same PR. Never lower it.
+When your change lifts coverage well past the gate, raise `fail_under` in the same PR. Never lower it.
 
 ### Mutation Testing
 
 `mutmut` changes `scadm/` one small edit at a time and reruns the unit tests. A **survived** mutant means no test noticed the change, so a test is missing or its assertion is too weak. Linux and macOS only (Windows: use WSL).
 
+On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates only the functions the PR changed and edits one PR comment with the survivors (fork PRs: job summary only). Kill each survivor with a test, or mark a true equivalent with `# pragma: no mutate`. Log calls, argparse help text and exception messages are skipped by `do_not_mutate_patterns`. The run stops after 5 minutes and never fails the PR. A weekly full run posts its stats to Discord `#homeracker-ci`.
+
 ```bash
 cd cmd/scadm
-mutmut run                  # full run, ~1-2 min
-mutmut results              # list surviving mutants
-mutmut show <mutant-name>   # diff of one mutant
+export PYTHONWARNDEFAULTENCODING=1 PYTHONWARNINGS=ignore::EncodingWarning  # checks scadm's I/O, not mutmut's
+mutmut run                                        # full run, ~2 min
+mutmut run "scadm.flatten.x_flatten_all__mutmut_*"  # one function, as a PR run does
+mutmut results                                    # list surviving mutants
+mutmut show <mutant-name>                         # diff of one mutant
 ```
 
-[`mutation-tests.yml`](.github/workflows/mutation-tests.yml) runs weekly (Monday 03:00 UTC), on manual dispatch, and on PRs that change the workflow, `cmd/scadm/pyproject.toml` or `requirements.txt`. It reports only and never fails on survivors.
+Known equivalents that survive: `encoding="UTF-8"` for `"utf-8"`, dropping `open()`'s default `"r"` mode, `None` in place of `False`.
 
-See [gate-scadm-coverage-and-mutation-test-weekly](docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md) for why.
+See [gate-scadm-coverage-and-mutation-test-changed-functions](docs/decisions/gate-scadm-coverage-and-mutation-test-changed-functions.md) for why.
 
 ## Renovate Configuration Testing
 

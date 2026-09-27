@@ -303,6 +303,81 @@ class ExportPngTests(unittest.TestCase):
 
             self.assertTrue(custom_output.parent.exists())
 
+    def _export_ok(self, mock_run, output):
+        def _run(cmd, **_):
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(b"png")
+            return MagicMock(returncode=0, stdout="", stderr="")
+
+        mock_run.side_effect = _run
+
+    @patch("scadm.export_png.shutil.which", return_value="/usr/bin/xvfb-run")
+    @patch("scadm.export_png.get_system_platform", return_value="linux")
+    @patch("scadm.export_png.subprocess.run")
+    def test_full_command_under_xvfb(self, mock_run, _, mock_which):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, exe = self._make_workspace(tmp)
+            scad = self._make_scad(root)
+            out = root / "o.png"
+            self._export_ok(mock_run, out)
+
+            self.assertTrue(export_png(scad, output=out, workspace_root=root))
+
+            mock_which.assert_called_once_with("xvfb-run")
+            self.assertEqual(
+                mock_run.call_args.args[0],
+                [
+                    "xvfb-run",
+                    "-a",
+                    str(exe),
+                    "-o",
+                    str(out.resolve()),
+                    "--render",
+                    f"--camera={DEFAULT_CAMERA}",
+                    "--autocenter",
+                    "--viewall",
+                    f"--imgsize={DEFAULT_IMGSIZE}",
+                    f"--colorscheme={DEFAULT_COLORSCHEME}",
+                    str(scad.resolve()),
+                ],
+            )
+            kwargs = mock_run.call_args.kwargs
+            self.assertEqual(
+                {k: kwargs[k] for k in ("capture_output", "text", "check")},
+                {"capture_output": True, "text": True, "check": False},
+            )
+
+    @patch("scadm.export_png.subprocess.run")
+    def test_no_xvfb_off_linux_or_when_missing(self, mock_run):
+        for system, which in (("windows", "/usr/bin/xvfb-run"), ("linux", None)):
+            with (
+                self.subTest(system=system),
+                tempfile.TemporaryDirectory() as tmp,
+                patch("scadm.export_png.get_system_platform", return_value=system),
+                patch("scadm.export_png.shutil.which", return_value=which),
+            ):
+                root, exe = self._make_workspace(tmp)
+                out = root / "o.png"
+                self._export_ok(mock_run, out)
+                self.assertTrue(export_png(self._make_scad(root), output=out, workspace_root=root))
+                self.assertEqual(mock_run.call_args.args[0][0], str(exe))
+
+    @patch("scadm.export_png.subprocess.run")
+    def test_auto_detects_workspace_from_input(self, mock_run):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, exe = self._make_workspace(tmp)
+            scad = self._make_scad(root, "models/deep/part.scad")
+            out = root / "o.png"
+            self._export_ok(mock_run, out)
+            self.assertTrue(export_png(scad, output=out))
+            self.assertIn(str(exe), mock_run.call_args.args[0])
+
+    def test_missing_libraries_returns_false(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, _ = self._make_workspace(tmp)
+            (root / "bin" / "openscad" / "libraries").rmdir()
+            self.assertFalse(export_png(self._make_scad(root), workspace_root=root))
+
 
 class FindOpenscadExeTests(unittest.TestCase):
     """Tests for the shared find_openscad_exe function."""
