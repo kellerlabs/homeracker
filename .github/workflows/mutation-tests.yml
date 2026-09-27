@@ -22,7 +22,9 @@ jobs:
           python-version: '3.14'
 
       - name: Install dependencies
-        run: pip install -e cmd/scadm pytest -r requirements.txt
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadm pytest -r requirements.txt
 
       # Report only: surviving mutants are leads for better tests, not a failure.
       - name: Run mutation tests
