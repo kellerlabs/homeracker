@@ -133,9 +133,30 @@ def test_comment_after_import_block_is_separated():
     assert format_source(source) == "include <a.scad>\n\n// section\nx = 1;\n"
 
 
+def test_definitions_get_one_blank_line_around_them():
+    source = (
+        "x = 1;\n// doc for f\nfunction f(x) = x;\nfunction g(x) =\n  x;\n\n\nmodule m() {\n"
+        "module inner() {\ncube();\n}\ninner();\n}\nm();\n"
+    )
+    expected = (
+        "x = 1;\n\n// doc for f\nfunction f(x) = x;\n\nfunction g(x) =\n  x;\n\nmodule m() {\n"
+        "  module inner() {\n    cube();\n  }\n\n  inner();\n}\n\nm();\n"
+    )
+    assert format_source(source) == expected
+
+
+def test_definition_closing_a_block_gets_no_blank_line_before_the_brace():
+    source = "module m() {\nfunction f() = 1;\n}\n"
+    assert format_source(source) == "module m() {\n  function f() = 1;\n}\n"
+
+
+def test_function_literal_is_not_a_definition():
+    assert format_source("x = 1;\nf = function (x) x;\ny = 2;\n") == "x = 1;\nf = function (x) x;\ny = 2;\n"
+
+
 def test_fmt_off_region_gets_no_added_breaks():
     source = "// fmt: off\nmodule m() { a(); b(); }\n// fmt: on\nmodule n() { c(); }\n"
-    expected = "// fmt: off\nmodule m() { a(); b(); }\n// fmt: on\nmodule n() {\n  c();\n}\n"
+    expected = "// fmt: off\nmodule m() { a(); b(); }\n// fmt: on\n\nmodule n() {\n  c();\n}\n"
     assert format_source(source) == expected
 
 
@@ -156,8 +177,8 @@ def test_comment_only_line_ends_alignment_run():
 
 
 def test_blank_lines_are_capped():
-    source = "\n\na = 1;\n\n\n\n\nmodule m() {\n\n\n\nb();\n}\n\n\n"
-    expected = "a = 1;\n\n\nmodule m() {\n\n  b();\n}\n"
+    source = "\n\na = 1;\n\n\n\n\nb = 2;\nif (c) {\n\n\n\nd();\n}\n\n\n"
+    expected = "a = 1;\n\n\nb = 2;\nif (c) {\n\n  d();\n}\n"
     assert format_source(source) == expected
 
 

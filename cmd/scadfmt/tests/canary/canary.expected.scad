@@ -47,8 +47,8 @@ multi_line_expr = width +
   depth +
   height_total;
 
-
 function square(x) = x * x;
+
 function chained(mode) =
   mode == 1
   ? "one"
@@ -56,20 +56,20 @@ function chained(mode) =
   ? "two"
   : "many";
 
-
 module box(size = [1, 1, 1], center = false) {
   cube(size, center = center);
 }
+
 module wrapper() {
   children();
   children(0);
   echo($children);
 }
+
 module multi_line_signature(first = 1,
   second = 2) {
   echo(first, second);
 }
-
 
 translate([0, 0, width]) rotate([0, 90, 0]) box([1, 2, 3]);
 translate([width, 0, 0])
@@ -117,7 +117,9 @@ assert(true);
 echo(str("done ", width));
 rotate_extrude(angle = 90) square([1, 2]);
 /* inline */ cube(1 /* size */);
+
 module empty() {}
+
 // fmt: off
 aligned_by_hand = [
     1,   0,   0,

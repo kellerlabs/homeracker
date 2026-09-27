@@ -53,6 +53,7 @@ include <BOSL2/std.scad>
 
 wall = 2;          // wall strength
 height_units = 3;  // rack units
+
 module bracket(width = 10, depth = 20, center = false) {
   size = [width, depth, wall * height_units];
   if (center) {
@@ -81,6 +82,7 @@ module bracket(width = 10, depth = 20, center = false) {
 | Space after commas, none inside brackets | `f(a, [1, 2])` |
 | Block contents on their own lines, `}` on its own line except `} else`, empty `{}` stays | `if (a) {`↵`  b();`↵`} else {` |
 | One statement per line (`;` inside `for (...)` excepted) | `a();`↵`b();` |
+| Exactly one blank line before and after each `module` and `function` definition (comments directly above belong to it), none next to a brace | `x = 1;`↵↵`module m() {` |
 | Imports form one block without blank lines, followed by exactly one blank line | `include <a.scad>`↵`use <b.scad>`↵↵`x = 1;` |
 | Trailing comments on consecutive lines share one column, a lone one gets 2 spaces | `x = 1;  // note` |
 | At most 2 blank lines at top level, 1 inside blocks | |

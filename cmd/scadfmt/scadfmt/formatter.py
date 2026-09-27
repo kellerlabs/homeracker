@@ -54,6 +54,7 @@ class _Line:
     blank: bool = False
 
 
+# pylint: disable-next=too-many-instance-attributes  # Plain state holder for one formatting pass
 @dataclass
 class _State:
     """Everything the formatter carries from one token to the next."""
@@ -66,6 +67,9 @@ class _State:
     line_anchor: int = 0
     after_header: bool = False
     newline: str = "\n"
+    # Stack depths at which open module/function definitions started, and whether one just ended.
+    definition_depths: list[int] = field(default_factory=list)
+    definition_ended: bool = False
 
 
 def format_source(source: str) -> str:
@@ -172,6 +176,7 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
     blank_run = 0
     fmt_off = False
     next_code_is_import = _next_code_is_import(lines)
+    definition_starts = _definition_starts(lines)
     after_import = False
     for index, (tokens, first, last) in enumerate(lines):
         if not tokens:
@@ -187,9 +192,13 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
         if not _is_comment_only(tokens):
             after_import = _is_import(tokens)
         if not fmt_off:
+            blank_run = _definition_gap(tokens, blank_run, definition_starts[index], state)
+            if _is_definition(tokens):
+                state.definition_depths.append(len(state.stack))
             out.extend(_blank_lines(blank_run, top_level=len(state.stack) == 1 and level == 0))
         blank_run = 0
         code, comment = _render_tokens(tokens, level, state)
+        _close_definitions(state)
         if fmt_off and marker != FMT_ON:
             out.extend(_Line("", text, verbatim=True) for text in source_lines[first - 1 : last])
             continue
@@ -205,6 +214,67 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
     # Joined with the file's newline directly: a multi-line string keeps its own line endings.
     text = newline.join(line.code if line.verbatim else _join(line) for line in out)
     return text + newline if text else ""
+
+
+def _is_definition(tokens: list[Token]) -> bool:
+    """True for a line starting a `module` or `function` definition (not a function literal)."""
+    first = tokens[0]
+    return (
+        first.kind == Kind.IDENT
+        and first.text in ("module", "function")
+        and tokens[1:2] != []
+        and (tokens[1].kind == Kind.IDENT)
+    )
+
+
+def _definition_starts(lines: list[tuple[list[Token], int, int]]) -> list[bool]:
+    """Per line: whether a definition, including the comments directly above it, starts here."""
+    starts = [False] * len(lines)
+    for index, (tokens, _, _) in enumerate(lines):
+        if not tokens or not _is_definition(tokens):
+            continue
+        top = index
+        while top > 0 and _is_attached_comment(lines[top - 1][0]):
+            top -= 1
+        starts[top] = True
+    return starts
+
+
+def _is_attached_comment(tokens: list[Token]) -> bool:
+    """True for a comment-only line that belongs to the definition below it (fmt markers never do)."""
+    if not tokens or not _is_comment_only(tokens):
+        return False
+    return tokens[0].text.strip() not in (FMT_OFF, FMT_ON)
+
+
+def _definition_gap(tokens: list[Token], blank_run: int, starts_definition: bool, state: _State) -> int:
+    """Exactly one blank line before and after a definition, but none next to a brace or the file start.
+
+    Returns:
+        The number of blank lines to put before this line.
+    """
+    ended, state.definition_ended = state.definition_ended, False
+    if not (starts_definition or ended):
+        return blank_run
+    previous, first = state.previous, tokens[0]
+    if previous is None or (previous.kind == Kind.OP and previous.text == "{"):
+        return blank_run
+    if first.kind == Kind.OP and first.text in CLOSERS:
+        return blank_run
+    return 1
+
+
+def _close_definitions(state: _State) -> None:
+    """Mark a definition as ended once its closing `;` or `}` brings the bracket depth back."""
+    previous = state.previous
+    while (
+        state.definition_depths
+        and len(state.stack) == state.definition_depths[-1]
+        and previous is not None
+        and previous.text in (";", "}")
+    ):
+        state.definition_depths.pop()
+        state.definition_ended = True
 
 
 def _blank_lines(count: int, top_level: bool) -> list[_Line]:
