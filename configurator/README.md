@@ -31,7 +31,7 @@ npm run build    # static bundle in dist/, served under /configurator/
 | `src/configurator.css` | Component styles; reads the site design tokens, falls back to matching values standalone |
 | `src/engine/diagrams.ts` | To-scale elevations and plans of every face and frame for the panel drawings (pure, tested) |
 | `src/ui/` | Row editor (height, shift, column widths with negative widths for gaps, posts continue from below), panel drawings (click a rectangle to cycle open, inter-fit, full cover; one figure per face plus one per gap; the three squares next to a drawing set all of its openings; hover syncs with the 3D view), parts-list table, URL hash sync |
-| `tests/` | Vitest; `fixtures.ts` holds the worked examples |
+| `tests/` | Vitest; `fixtures.ts` holds the worked examples. Browser journeys live in [`site/e2e/`](../site/e2e/), see [TESTING.md](../TESTING.md#site-and-configurator-e2e-tests) |
 
 ### Geometry rules
 

@@ -16,6 +16,7 @@ npm ci
 npm run dev      # local dev server with live reload
 npm run check    # astro check + vitest
 npm run build    # static site in dist/
+npm run e2e      # Playwright against dist/, see TESTING.md
 ```
 
 `npm run build` first runs `scripts/export-parts.mjs`, which needs OpenSCAD (`scadm install` puts it in `bin/openscad/`, or set `OPENSCAD`). Without it the script warns, the build continues, and the hero shows the schematic rack instead. CI sets `PARTS_REQUIRED=1` so a missing OpenSCAD fails the build there.
@@ -34,6 +35,7 @@ Astro caches rendered markdown in `.astro/`. After changing the rehype transform
 | `src/lib/rack.ts` | Fallback hero when no part meshes are present: the default configurator rack as schematic boxes |
 | `scripts/export-parts.mjs` | Exports the part library with OpenSCAD into `public/parts/` (gitignored): every connector type and pull-through variant, supports from 1 to 50 units, the lock pin, the foot, and the panel kit (support mount plates for 3 to 50 units and corner brackets, both panel types) from `scripts/scad/panel_kit.scad`. Used by the hero and by the configurator preview |
 | `src/pages/` | `index.astro` (README), `models/index.astro` (catalog), `models/[slug].astro` (model pages), `configurator.astro` (mounts the configurator app) |
+| `e2e/` | Playwright suite: page smoke tests, configurator journeys, and the control inventory. See [e2e.md](../.claude/rules/e2e.md) |
 | `src/styles/global.css` | Design tokens, the type system from [docs/styleguide.md](../docs/styleguide.md) (Orbitron Black for headings, Source Code Pro for everything else) and markdown styling |
 
 ### Writing docs that render well
@@ -50,4 +52,5 @@ Astro caches rendered markdown in `.astro/`. After changing the rehype transform
 
 - [astro-site-replaces-jekyll](../docs/decisions/astro-site-replaces-jekyll.md): decision record
 - [web-configurator-on-github-pages](../docs/decisions/web-configurator-on-github-pages.md)
+- [e2e-test-site-and-configurator-with-playwright](../docs/decisions/e2e-test-site-and-configurator-with-playwright.md)
 - [Astro content collections](https://docs.astro.build/en/guides/content-collections/)

@@ -286,7 +286,10 @@ export function createViewer(canvas: HTMLCanvasElement, options: ViewerOptions =
       const ticket = ++generation;
       void library.then(async (lib) => {
         const group = lib ? await buildRealRack(model, lib, materials, flagged) : buildRackGroup(model, materials, flagged);
-        if (ticket === generation) present(model, group);
+        if (ticket !== generation) return;
+        present(model, group);
+        // What was drawn, for the E2E tests: real part meshes or the schematic fallback.
+        canvas.dataset.render = lib ? "parts" : "schematic";
       });
     },
   };

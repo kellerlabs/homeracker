@@ -7,6 +7,21 @@ Always test changes before committing:
 - **Write simple tests** if none exist (bash scripts, Python tests, or manual verification steps)
 - **Document test steps** in commit messages or PR descriptions
 
+## Site and Configurator E2E Tests
+
+Playwright drives the built site in Chromium: every page, the hero canvas, and configurator journeys including error paths. The `site` job in [`web.yml`](.github/workflows/web.yml) runs it on every PR touching `site/` or `configurator/`, once at the root and once under a preview subpath.
+
+```bash
+cd site
+npx playwright install chromium   # once per Playwright version
+npm run build
+npm run e2e
+```
+
+A test fails on any page error, console error or failing same-origin request. `inventory.spec.ts` fails when a configurator control is not used by any test, so a new control needs a journey. Without OpenSCAD the build has no part meshes and the tests expect the schematic fallback; CI sets `PARTS_REQUIRED=1`. On failure, CI uploads the HTML report with traces as the `playwright-report` artifact.
+
+See [e2e.md](.claude/rules/e2e.md) for how to write tests and [e2e-test-site-and-configurator-with-playwright](docs/decisions/e2e-test-site-and-configurator-with-playwright.md) for why.
+
 ## scadm Tests
 
 ### Unit Tests

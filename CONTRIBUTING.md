@@ -95,6 +95,7 @@ The hooks can be found here: [.pre-commit-config.yaml](.pre-commit-config.yaml)
 - Lives in `site/`; renders the READMEs of this repo. Run `npm ci && npm run check` there (the pre-commit hook does this when the site or a rendered README changes)
 - Relative README links become site links; keep using them instead of absolute GitHub URLs
 - Anything visible on a page: run `npm run dev` and check it in the browser before you commit, and hand the URL to whoever reviews the change
+- A user-visible change to the site or configurator adds or updates an E2E test in `site/e2e/`, see [TESTING.md](TESTING.md#site-and-configurator-e2e-tests)
 - See [site/README.md](site/README.md)
 
 ### Python Code Standards

@@ -91,4 +91,32 @@ jobs:
         env:
           PARTS_REQUIRED: "1"
         run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests
+        env:
+          PARTS_REQUIRED: "1"
+        run: npm run e2e
+
+      # Previews are served from a subpath, where a root-relative link or asset path breaks.
+      - name: Build for a preview subpath
+        env:
+          SITE_BASE: /preview/pr-0/
+        run: npm run build:site
+
+      - name: E2E tests under a preview subpath
+        env:
+          PARTS_REQUIRED: "1"
+          SITE_BASE: /preview/pr-0/
+        run: npm run e2e
+
+      - name: Upload E2E report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: site/playwright-report
+          retention-days: 7
 ...
