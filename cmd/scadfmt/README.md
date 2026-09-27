@@ -30,6 +30,42 @@ scadfmt format - < in.scad > out.scad   # stdin to stdout
 
 Exit codes: `0` clean, `1` files would change (`--check`), `2` error. On an error (unknown character, unbalanced brackets) the file stays untouched.
 
+### 👀 Before and After
+
+```openscad
+include<BOSL2/std.scad>
+wall=2;// wall strength
+height_units=3; // rack units
+module bracket(width=10,depth=20,center=false){
+    size=[width,depth,wall*height_units];
+    if(center){translate(-size/2)cube(size);}
+    else
+    cube(size);
+    for(i=[0:2:width])
+    translate([i,0,0])
+    rotate([0,0,-90])
+    #cylinder(h=wall,r=1);
+}
+```
+
+becomes
+
+```openscad
+include <BOSL2/std.scad>
+wall = 2;          // wall strength
+height_units = 3;  // rack units
+module bracket(width = 10, depth = 20, center = false) {
+  size = [width, depth, wall * height_units];
+  if (center) { translate(-size / 2) cube(size); }
+  else
+    cube(size);
+  for (i = [0:2:width])
+    translate([i, 0, 0])
+      rotate([0, 0, -90])
+        #cylinder(h = wall, r = 1);
+}
+```
+
 ### 📏 Rules
 
 | Rule | Example |

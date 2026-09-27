@@ -7,7 +7,8 @@ on:
 permissions: {}
 
 jobs:
-  canary:
+  integration-tests:
+    name: integration tests (OpenSCAD canary)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -29,8 +30,9 @@ jobs:
       - name: Run canary
         run: cmd/scadfmt/tests/canary/check.sh
 
-  # The pre-commit hook covers Linux; stdin/stdout byte handling and paths also need Windows.
-  unit-windows:
+  # The pre-commit hook runs them on Linux; stdin/stdout byte handling and paths also need Windows.
+  unit-tests:
+    name: unit tests (windows)
     runs-on: windows-latest
     timeout-minutes: 10
     permissions:

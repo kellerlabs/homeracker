@@ -82,8 +82,8 @@ repos:
         language: system
         pass_filenames: false
         files: '^cmd/scadm/'
-      - id: scadfmt-tests
-        name: scadfmt Python Tests
+      - id: scadfmt-unit-tests
+        name: scadfmt Unit Tests
         entry: bash -c 'cd cmd/scadfmt && PYTHONWARNDEFAULTENCODING=1 python -m pytest tests/ -q --cov'
         language: system
         pass_filenames: false

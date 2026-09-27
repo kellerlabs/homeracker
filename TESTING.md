@@ -26,14 +26,18 @@ See [e2e.md](.claude/rules/e2e.md) for how to write tests and [e2e-test-site-and
 
 ## scadfmt Tests
 
-Unit tests cover every formatting rule, the CLI and the VS Code setup, and format every `.scad` file in the repo twice to prove the output is stable. The `scadfmt-tests` pre-commit hook runs them when a commit touches `cmd/scadfmt/`, with a branch coverage gate in `cmd/scadfmt/pyproject.toml`. The `scadfmt-tests` job in [`ci.yml`](.github/workflows/ci.yml) also runs them on Windows.
+### Unit Tests
+
+Unit tests cover every formatting rule, the CLI and the VS Code setup, and format every `.scad` file in the repo twice to prove the output is stable. The `scadfmt-unit-tests` pre-commit hook runs them on Linux when a commit touches `cmd/scadfmt/`, with a branch coverage gate in `cmd/scadfmt/pyproject.toml`. The `unit tests (windows)` job in [`scadfmt-tests.yml`](.github/workflows/scadfmt-tests.yml) runs them on Windows.
 
 ```bash
 cd cmd/scadfmt
 python -m pytest tests/ -q --cov
 ```
 
-The canary in `cmd/scadfmt/tests/canary/` uses every OpenSCAD construct. `check.sh` asserts that the pinned OpenSCAD parses it, that scadfmt turns it into `canary.expected.scad` and leaves that file unchanged, and that OpenSCAD's `.ast` output is identical before and after formatting. CI runs it when `cmd/scadfmt/` or the OpenSCAD pin in `scadm.json` changes. Locally it needs `scadm install` first:
+### Integration Tests (Canary)
+
+The canary in `cmd/scadfmt/tests/canary/` uses every OpenSCAD construct. `check.sh` asserts that the pinned OpenSCAD parses it, that scadfmt turns it into `canary.expected.scad` and leaves that file unchanged, and that OpenSCAD's `.ast` output is identical before and after formatting. The `integration tests (OpenSCAD canary)` job runs it when `cmd/scadfmt/` or the OpenSCAD pin in `scadm.json` changes. Locally it needs `scadm install` first:
 
 ```bash
 cmd/scadfmt/tests/canary/check.sh

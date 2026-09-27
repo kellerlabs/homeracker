@@ -37,7 +37,7 @@ Each box inside the gate is a workflow file called through `workflow_call`. Its 
 | [`validate-pr-title.yml`](validate-pr-title.yml) | PR, incl. title edits | Conventional Commits title, since PRs are squash-merged. Required directly |
 | [`integration-tests.yml`](integration-tests.yml) | `ci.yml` | `scadm` CLI integration tests on ubuntu and windows. See [TESTING.md](../../TESTING.md#integration-tests) |
 | [`mutation-tests.yml`](mutation-tests.yml) | `ci.yml`, Monday 03:00 UTC, manual | `mutmut` on changed `scadm` functions per PR with a PR comment; weekly full run to Discord and the badge. See [TESTING.md](../../TESTING.md#mutation-testing) |
-| [`scadfmt-tests.yml`](scadfmt-tests.yml) | `ci.yml` | Canary against the pinned OpenSCAD and the `scadfmt` unit tests on windows. See [TESTING.md](../../TESTING.md#scadfmt-tests) |
+| [`scadfmt-tests.yml`](scadfmt-tests.yml) | `ci.yml` | `scadfmt` integration tests (canary against the pinned OpenSCAD) and unit tests on windows; Linux unit tests run in pre-commit. See [TESTING.md](../../TESTING.md#scadfmt-tests) |
 | [`test-setup-openscad.yml`](test-setup-openscad.yml) | `ci.yml` | Input matrix of the `setup-openscad` composite action |
 | [`validate-models.yml`](validate-models.yml) | `ci.yml` | Renders every model with OpenSCAD |
 | [`web.yml`](web.yml) | `ci.yml`, push to `main`, `e2e-probe-failure` label | Configurator and site lint, tests, build and Playwright E2E |
