@@ -8,7 +8,7 @@ permissions: {}
 
 jobs:
   integration-tests:
-    name: integration tests (OpenSCAD canary)
+    name: integration tests (OpenSCAD)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -18,6 +18,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0 # the AST check reads the PR base
 
       - name: Setup OpenSCAD
         uses: ./.github/actions/setup-openscad
@@ -33,6 +34,13 @@ jobs:
         run: |
           set -euo pipefail
           cmd/scadfmt/tests/canary/check.sh
+
+      - name: Check formatting-only changes keep their AST
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/tests/ast_check.sh "$BASE_SHA"
 
   # The pre-commit hook runs them on Linux; stdin/stdout byte handling and paths also need Windows.
   unit-tests:

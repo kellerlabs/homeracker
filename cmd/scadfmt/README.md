@@ -148,7 +148,7 @@ For formatting on save, add `"editor.formatOnSave": true` to the `[scad]` block.
 
 ### 🧪 Tests
 
-See [TESTING.md](../../TESTING.md#scadfmt-tests). `tests/canary/` holds a file using every OpenSCAD construct and its expected output; `check.sh` checks both against the pinned OpenSCAD.
+See [TESTING.md](../../TESTING.md#scadfmt-tests). `tests/canary/` holds a file using every OpenSCAD construct and its expected output; `check.sh` checks both against the pinned OpenSCAD. `tests/ast_check.sh` proves that formatting-only changes in a PR keep OpenSCAD's AST.
 
 ## 📚 References
 

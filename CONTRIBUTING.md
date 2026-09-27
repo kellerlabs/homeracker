@@ -85,7 +85,7 @@ The hooks can be found here: [.pre-commit-config.yaml](.pre-commit-config.yaml)
 
 ### Code Standards
 - **DRY, KISS, YAGNI** - Keep it simple
-- Format `.scad` files with `scadfmt format <path>`, see [cmd/scadfmt/README.md](cmd/scadfmt/README.md)
+- `.scad` files are formatted by `scadfmt`. The pre-commit hook formats staged files and stops the commit when it changed one: stage the result and commit again. By hand: `scadfmt format <path>`, see [cmd/scadfmt/README.md](cmd/scadfmt/README.md)
 - Use [BOSL2](https://github.com/BelfrySCAD/BOSL2/wiki) for complex geometry
 - Group parameters with `/* [Section] */` comments
 - Add sanity checks: `assert(height % 15 == 0, "Must be multiple of 15mm")`
