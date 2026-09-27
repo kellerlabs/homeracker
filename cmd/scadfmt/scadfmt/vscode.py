@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scadfmt.fileio import write_atomically
+from scadfmt.fileio import ENCODING, write_atomically
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +79,7 @@ def setup_vscode(workspace: Path) -> bool:
     settings = {}
     if settings_file.exists():
         try:
-            settings = json.loads(settings_file.read_text(encoding="utf-8"))
+            settings = json.loads(settings_file.read_text(encoding=ENCODING))
         except json.JSONDecodeError as e:
             # Comments or trailing commas: refuse rather than overwrite hand-written settings.
             logger.error(

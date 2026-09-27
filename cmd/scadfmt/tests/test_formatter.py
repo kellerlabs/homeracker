@@ -28,11 +28,15 @@ from scadfmt.formatter import FormatError, format_source
         ("y=let(a=1)-a;", "y = let(a = 1) -a;"),
         ("z=[for(i=v)-i];", "z = [for (i = v) -i];"),
         ("w=assert(c)-1;", "w = assert(c) -1;"),
+        ("x=[each-v];", "x = [each -v];"),
+        ("x=!-a;", "x = !-a;"),
+        ("x=+ +a;", "x = + +a;"),
         ("h=0xFF&0x0f;", "h = 0xFF & 0x0f;"),
         # Ternary vs range colon
         ("x=a?b:c;", "x = a ? b : c;"),
         ("x=[a?b:c,0:2];", "x = [a ? b : c, 0:2];"),
         ("r=[ 0 : 2 : -10 ];", "r = [0:2:-10];"),
+        ("x=a?b?c:d:e;", "x = a ? b ? c : d : e;"),
         # Calls, indexing, members, keywords
         ("x=f (a)[0].y;", "x = f(a)[0].y;"),
         ("if(a)b();", "if (a) b();"),
@@ -42,16 +46,24 @@ from scadfmt.formatter import FormatError, format_source
         ("x=let(a=1)assert(a)echo(a)a;", "x = let(a = 1) assert(a) echo(a) a;"),
         ("x=[each[1,2]];", "x = [each [1, 2]];"),
         ("x=g(1)(2);", "x = g(1)(2);"),
+        ("x=m[0][1];", "x = m[0][1];"),
+        ("x=f(a,[1,2],(3));", "x = f(a, [1, 2], (3));"),
         # Modifiers
         ("#a();%b();*c();!d();", "#a();\n%b();\n*c();\n!d();"),
         ("translate(v) # cube();", "translate(v) #cube();"),
         ("if(a)b();else *c();", "if (a) b();\nelse *c();"),
         ("x=(a)*b;", "x = (a) * b;"),
+        ("x=1;#a();", "x = 1;\n#a();"),
+        ("module m(){x=1;#a();}", "module m() {\n  x = 1;\n  #a();\n}"),
+        ("!#a();", "!#a();"),
         # Braces
         ("module m(){a();b();}", "module m() {\n  a();\n  b();\n}"),
         ("if(a){b();}else{c();}", "if (a) {\n  b();\n} else {\n  c();\n}"),
         ("if(a){b();}else if(c){d();}", "if (a) {\n  b();\n} else if (c) {\n  d();\n}"),
         ("module m(){}", "module m() {}"),
+        ("module m(){a();}m();", "module m() {\n  a();\n}\n\nm();"),
+        ("if(a){b();};", "if (a) {\n  b();\n};"),
+        ("module m(){a();/* c */}", "module m() {\n  a();\n  /* c */\n}"),
         ("x=[for(i=0;i<3;i=i+1)i];", "x = [for (i = 0; i < 3; i = i + 1) i];"),
         ("module m(){// note\na();}", "module m() {  // note\n  a();\n}"),
         ("a();// one\nb();c();// two", "a();  // one\nb();\nc();  // two"),
@@ -108,6 +120,31 @@ def test_expression_continuation_stays_one_level_in():
     assert format_source(source) == "function f(m) =\n  m == 1\n  ? a\n  : b;\n"
 
 
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("x=a\n*b;\n", "x = a\n  * b;\n"),
+        ("module m() {\nx = a\n* b;\n}\n", "module m() {\n  x = a\n    * b;\n}\n"),
+    ],
+)
+def test_operator_starting_a_continuation_is_not_a_modifier(source, expected):
+    assert format_source(source) == expected
+
+
+def test_multi_line_call_arguments_indent_once():
+    assert format_source("x = f(\n1\n);\n") == "x = f(\n  1\n);\n"
+
+
+def test_else_if_chain_inside_unbraced_if():
+    source = "if (o)\nif (a)\nx();\nelse if (b)\ny();\nelse\nz();\n"
+    assert format_source(source) == "if (o)\n  if (a)\n    x();\n  else if (b)\n    y();\n  else\n    z();\n"
+
+
+def test_comment_between_if_and_else_keeps_the_match():
+    source = "if (outer)\nif (inner)\na();\n// note\nelse\nb();\n"
+    assert format_source(source) == "if (outer)\n  if (inner)\n    a();\n// note\n  else\n    b();\n"
+
+
 def test_chain_ending_in_block():
     source = "rotate(r)\ndifference() {\na();\n}\n"
     assert format_source(source) == "rotate(r)\n  difference() {\n    a();\n  }\n"
@@ -128,6 +165,10 @@ def test_imports_form_one_block_followed_by_one_blank_line():
     assert format_source(source) == expected
 
 
+def test_comment_ending_the_file_after_imports_is_separated():
+    assert format_source("include <a.scad>\n// end\n") == "include <a.scad>\n\n// end\n"
+
+
 def test_comment_after_import_block_is_separated():
     source = "include <a.scad>\n// section\nx = 1;\n"
     assert format_source(source) == "include <a.scad>\n\n// section\nx = 1;\n"
@@ -142,6 +183,20 @@ def test_definitions_get_one_blank_line_around_them():
         "x = 1;\n\n// doc for f\nfunction f(x) = x;\n\nfunction g(x) =\n  x;\n\nmodule m() {\n"
         "  module inner() {\n    cube();\n  }\n\n  inner();\n}\n\nm();\n"
     )
+    assert format_source(source) == expected
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("function f() = 1;\nx = 2;\n", "function f() = 1;\n\nx = 2;\n"),
+        ("module m() {}\n#cube();\n", "module m() {}\n\n#cube();\n"),
+        ("x = 1;\nmodule m\n() {}\n", "x = 1;\n\nmodule m\n  () {}\n"),
+        ("module\nm() {}\n", "module\n  m() {}\n"),
+        ("module m() {}\nx = 1;\n// end\n", "module m() {}\n\nx = 1;\n// end\n"),
+    ],
+)
+def test_definition_boundaries(source, expected):
     assert format_source(source) == expected
 
 
@@ -167,8 +222,10 @@ def test_function_literal_is_not_a_definition():
 
 
 def test_fmt_off_region_gets_no_added_breaks():
-    source = "// fmt: off\nmodule m() { a(); b(); }\n// fmt: on\nmodule n() { c(); }\n"
-    expected = "// fmt: off\nmodule m() { a(); b(); }\n// fmt: on\n\nmodule n() {\n  c();\n}\n"
+    source = "// fmt: off\n// note\nmodule m() { a(); b(); }\nx=1; /* a\n   b */\n// fmt: on\nmodule n() { c(); }\n"
+    expected = (
+        "// fmt: off\n// note\nmodule m() { a(); b(); }\nx=1; /* a\n   b */\n// fmt: on\n\nmodule n() {\n  c();\n}\n"
+    )
     assert format_source(source) == expected
 
 
@@ -189,8 +246,8 @@ def test_comment_only_line_ends_alignment_run():
 
 
 def test_blank_lines_are_capped():
-    source = "\n\na = 1;\n\n\n\n\nb = 2;\nif (c) {\n\n\n\nd();\n}\n\n\n"
-    expected = "a = 1;\n\n\nb = 2;\nif (c) {\n\n  d();\n}\n"
+    source = "\n\na = 1;\n\n\n\n\nb = 2;\nif (c) {\n\n\n\nd();\n\n\n}\nx =\n\n\n1;\n\n\n"
+    expected = "a = 1;\n\n\nb = 2;\nif (c) {\n\n  d();\n\n}\nx =\n\n  1;\n"
     assert format_source(source) == expected
 
 
@@ -217,6 +274,8 @@ def test_crlf_inside_a_string_is_kept():
         ("x=1;\ry=2;", "x = 1;\ry = 2;\r"),
         ("x=1;\ny=2;\r\n", "x = 1;\ny = 2;\n"),
         ("x=1;", "x = 1;\n"),
+        ("X=1;\ny=2;", "X = 1;\ny = 2;\n"),
+        ("// fmt: off\nm=[1,  2];\rn=[3,  4];\n// fmt: on\n", "// fmt: off\nm=[1,  2];\nn=[3,  4];\n// fmt: on\n"),
         (
             "/* a\r\n b */\r\n// fmt: off\r\nm=[1,  2];\r\n// fmt: on\r\n",
             "/* a\r\n b */\r\n// fmt: off\r\nm=[1,  2];\r\n// fmt: on\r\n",
@@ -239,6 +298,7 @@ def test_empty_input():
         ("a());", "unexpected ')'"),
         ("a(];", "unexpected ']'"),
         ("module m() {", "unclosed '{'"),
+        ("module m() { x = (", "unclosed '('"),
     ],
 )
 def test_errors(source, message):

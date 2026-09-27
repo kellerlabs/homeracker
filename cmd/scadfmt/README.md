@@ -1,5 +1,10 @@
 # 🎨 scadfmt
 
+[![PyPI](https://img.shields.io/pypi/v/scadfmt)](https://pypi.org/project/scadfmt/)
+[![Pre-commit](https://github.com/kellerlabs/homeracker/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/kellerlabs/homeracker/actions/workflows/pre-commit.yml?query=branch%3Amain)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkellerlabs%2Fhomeracker%2Fbadges%2Fscadfmt-coverage.json)](https://github.com/kellerlabs/homeracker/actions/workflows/coverage-badge.yml?query=branch%3Amain)
+[![Mutation score](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkellerlabs%2Fhomeracker%2Fbadges%2Fscadfmt-mutation.json)](https://github.com/kellerlabs/homeracker/actions/workflows/mutation-tests.yml?query=event%3Aschedule)
+
 ## 📌 What
 
 An opinionated formatter for OpenSCAD code. It fixes indentation and spacing, puts blocks and statements on their own lines, and never joins lines or changes what the code does.

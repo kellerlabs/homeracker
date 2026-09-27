@@ -53,9 +53,19 @@ branch = true
 
 [tool.coverage.report]
 # Raise when coverage grows, never lower.
-fail_under = 98
+fail_under = 100
 show_missing = true
 skip_covered = true
 exclude_also = [
     "if __name__ == .__main__.:",
+]
+
+[tool.mutmut]
+source_paths = ["scadfmt/"]
+pytest_add_cli_args_test_selection = ["tests/"]
+# Mutants no test should pin: log output, argparse help and usage text, exception messages.
+do_not_mutate_patterns = [
+    'logger\.\w+\(',
+    '^\s*(help|description|metavar|prog)=',
+    'raise \w+\(',
 ]

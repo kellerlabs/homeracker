@@ -9,7 +9,7 @@ flowchart LR
     pr([PR push]) --> dc[detect-changes]
     pr --> pc[pre-commit]
     dc -->|cmd/scadm, scadm.json| it[integration-tests]
-    dc -->|cmd/scadm/scadm| mt[mutation-tests]
+    dc -->|scadm, scadfmt sources| mt[mutation-tests]
     dc -->|cmd/scadfmt, scadm.json| sf[scadfmt-tests]
     dc -->|setup-openscad action| so[test-setup-openscad]
     dc -->|models, scadm| vm[validate-models]
@@ -36,7 +36,7 @@ Each box inside the gate is a workflow file called through `workflow_call`. Its 
 | [`pre-commit.yml`](pre-commit.yml) | `ci.yml`, push to `main` | All pre-commit hooks: linters, unit tests, flatten validation |
 | [`validate-pr-title.yml`](validate-pr-title.yml) | PR, incl. title edits | Conventional Commits title, since PRs are squash-merged. Required directly |
 | [`integration-tests.yml`](integration-tests.yml) | `ci.yml` | `scadm` CLI integration tests on ubuntu and windows. See [TESTING.md](../../TESTING.md#integration-tests) |
-| [`mutation-tests.yml`](mutation-tests.yml) | `ci.yml`, Monday 03:00 UTC, manual | `mutmut` on changed `scadm` functions per PR with a PR comment; weekly full run to Discord and the badge. See [TESTING.md](../../TESTING.md#mutation-testing) |
+| [`mutation-tests.yml`](mutation-tests.yml) | `ci.yml`, Monday 03:00 UTC, manual | `mutmut` on changed `scadm` and `scadfmt` functions per PR, one PR comment with a section per package; weekly full run per package to Discord and its badge. See [TESTING.md](../../TESTING.md#mutation-testing) |
 | [`scadfmt-tests.yml`](scadfmt-tests.yml) | `ci.yml` | `scadfmt` integration tests (canary against the pinned OpenSCAD) and unit tests on windows; Linux unit tests run in pre-commit. See [TESTING.md](../../TESTING.md#scadfmt-tests) |
 | [`test-setup-openscad.yml`](test-setup-openscad.yml) | `ci.yml` | Input matrix of the `setup-openscad` composite action |
 | [`validate-models.yml`](validate-models.yml) | `ci.yml` | Renders every model with OpenSCAD |
@@ -47,7 +47,7 @@ Each box inside the gate is a workflow file called through `workflow_call`. Its 
 | [`automerge-release.yml`](automerge-release.yml) | Monday 06:00 UTC, manual | Merges the open release PR, which cuts the release |
 | [`publish-scadm.yml`](publish-scadm.yml) | `scadm-v*` release, manual | Publishes `scadm` to PyPI |
 | [`publish-scadfmt.yml`](publish-scadfmt.yml) | `scadfmt-v*` release, manual | Publishes `scadfmt` to PyPI |
-| [`coverage-badge.yml`](coverage-badge.yml) | Push to `main` touching `cmd/scadm`, manual | Publishes the `scadm` coverage badge |
+| [`coverage-badge.yml`](coverage-badge.yml) | Push to `main` touching `cmd/scadm` or `cmd/scadfmt`, manual | Publishes the `scadm` and `scadfmt` coverage badges |
 
 ## 🔑 GitHub App Setup
 
