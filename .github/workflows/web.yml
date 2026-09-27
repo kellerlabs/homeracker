@@ -10,6 +10,7 @@ on:
       - 'README.md'
       - 'models/**/README.md'
       - '.github/workflows/web.yml'
+      - '.github/actions/setup-openscad/**'
   push:
     branches:
       - main
