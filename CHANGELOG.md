@@ -1,5 +1,38 @@
 # Changelog
 
+## [3.16.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.15.1...homeracker-v3.16.0) (2026-09-27)
+
+
+### ✨ Features
+
+* **scadm:** gate unit coverage at 90% and run weekly mutation tests ([#507](https://github.com/kellerlabs/homeracker/issues/507)) ([0600151](https://github.com/kellerlabs/homeracker/commit/060015180e8fdbf82a5844b68e21862c0e939546))
+* **scadm:** scope mutation tests to changed functions, report weekly to Discord ([#509](https://github.com/kellerlabs/homeracker/issues/509)) ([a252759](https://github.com/kellerlabs/homeracker/commit/a252759ec6aac611df17898c0211c2b4a0c0f00e))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** drop persisted checkout credentials and enforce zizmor artipacked ([#513](https://github.com/kellerlabs/homeracker/issues/513)) ([a7099c5](https://github.com/kellerlabs/homeracker/commit/a7099c5025952593b44ab544f6d79e9bd7d08db5))
+* **ci:** pass action inputs via env and enforce zizmor template-injection ([#510](https://github.com/kellerlabs/homeracker/issues/510)) ([74e77b1](https://github.com/kellerlabs/homeracker/commit/74e77b1e9474b3bb67c7fc0fdd77b05a5aec6229))
+* **ci:** scope GitHub App tokens and enforce zizmor github-app ([#512](https://github.com/kellerlabs/homeracker/issues/512)) ([5b5ee9d](https://github.com/kellerlabs/homeracker/commit/5b5ee9df977290421c62b1b4873aa9441dd2df68))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.757 ([#500](https://github.com/kellerlabs/homeracker/issues/500)) ([3563a22](https://github.com/kellerlabs/homeracker/commit/3563a22c61d02a59c9d02159eb944c1a509f0d79))
+* update dependency openscad to v2026.09.23 ([#502](https://github.com/kellerlabs/homeracker/issues/502)) ([0f0f096](https://github.com/kellerlabs/homeracker/commit/0f0f096e5aa38aac4b13fb4459af0d0df2cdb999))
+* update dependency typescript-eslint to v8.70.1 ([#506](https://github.com/kellerlabs/homeracker/issues/506)) ([015683f](https://github.com/kellerlabs/homeracker/commit/015683f3335d8fed804b34a2f7120d9a5f536722))
+* update npm dependencies ([#503](https://github.com/kellerlabs/homeracker/issues/503)) ([0b6aadd](https://github.com/kellerlabs/homeracker/commit/0b6aaddb104f9fb699612ea8df9db84fe13649c4))
+
+
+### 📚 Documentation
+
+* **ci:** explain why zizmor self-repository stays disabled ([#514](https://github.com/kellerlabs/homeracker/issues/514)) ([d97e1e6](https://github.com/kellerlabs/homeracker/commit/d97e1e608c3b69fc074883fc82c677152c5595f2))
+
+
+### 🔄 CI/CD
+
+* **mutation:** skip mutation tests on release-please PRs ([#511](https://github.com/kellerlabs/homeracker/issues/511)) ([acc4c44](https://github.com/kellerlabs/homeracker/commit/acc4c44a2d83e3706173e9b2b218527b5b5ff7e4))
+
 ## [3.15.1](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.15.0...homeracker-v3.15.1) (2026-09-21)
 
 
