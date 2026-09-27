@@ -18,5 +18,5 @@ panel(4, 4, HR_PANEL_TYPE_FULLCOVER);
 
 // Inter-fit panel with open edges: edge walls subtract panel_lockpin_hole rows.
 right(120)
-panel(4, 4, HR_PANEL_TYPE_INTERFIT,
-  mount_north=false, mount_south=false, mount_east=false, mount_west=false);
+  panel(4, 4, HR_PANEL_TYPE_INTERFIT,
+    mount_north = false, mount_south = false, mount_east = false, mount_west = false);

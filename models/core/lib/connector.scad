@@ -30,8 +30,8 @@ include <BOSL2/std.scad>
 include <constants.scad>
 include <lockpin.scad>
 
-connector_outer_side_length = BASE_UNIT + BASE_STRENGTH*2 + TOLERANCE;
-arm_side_length_inner = connector_outer_side_length - BASE_STRENGTH*2;
+connector_outer_side_length = BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
+arm_side_length_inner = connector_outer_side_length - BASE_STRENGTH * 2;
 
 core_to_arm_translation = BASE_UNIT;
 
@@ -40,24 +40,24 @@ core_to_arm_translation = BASE_UNIT;
 // Axis priority: Z → X → Y
 // Direction priority: + before -
 CONNECTOR_CONFIGS = [
-    // 1D configurations (1-2 ways, Z-axis only)
-    [
-        [true, false, false, false, false, false],  // 1D1W: +Z
-        [true, true, false, false, false, false]    // 1D2W: +Z, -Z
-    ],
-    // 2D configurations (2-4 ways, Z and X axes)
-    [
-        [true, false, true, false, false, false],   // 2D2W: +Z, +X
-        [true, true, true, false, false, false],    // 2D3W: +Z, -Z, +X
-        [true, true, true, true, false, false]      // 2D4W: +Z, -Z, +X, -X
-    ],
-    // 3D configurations (3-6 ways, all three axes)
-    [
-        [true, false, true, false, true, false],    // 3D3W: +Z, +X, +Y
-        [true, true, true, false, true, false],     // 3D4W: +Z, -Z, +X, +Y
-        [true, true, true, true, true, false],      // 3D5W: +Z, -Z, +X, -X, +Y
-        [true, true, true, true, true, true]        // 3D6W: +Z, -Z, +X, -X, +Y, -Y
-    ]
+  // 1D configurations (1-2 ways, Z-axis only)
+  [
+    [true, false, false, false, false, false],  // 1D1W: +Z
+    [true, true, false, false, false, false]    // 1D2W: +Z, -Z
+  ],
+  // 2D configurations (2-4 ways, Z and X axes)
+  [
+    [true, false, true, false, false, false],  // 2D2W: +Z, +X
+    [true, true, true, false, false, false],   // 2D3W: +Z, -Z, +X
+    [true, true, true, true, false, false]     // 2D4W: +Z, -Z, +X, -X
+  ],
+  // 3D configurations (3-6 ways, all three axes)
+  [
+    [true, false, true, false, true, false],  // 3D3W: +Z, +X, +Y
+    [true, true, true, false, true, false],   // 3D4W: +Z, -Z, +X, +Y
+    [true, true, true, true, true, false],    // 3D5W: +Z, -Z, +X, -X, +Y
+    [true, true, true, true, true, true]      // 3D6W: +Z, -Z, +X, -X, +Y, -Y
+  ]
 ];
 
 /**
@@ -84,7 +84,7 @@ CONNECTOR_CONFIGS = [
   *   connector(dimensions=2, directions=4, pull_through_axis="y");
   */
 
-module connector(dimensions=3, directions=6, pull_through_axis="none", optimal_orientation=false) {
+module connector(dimensions = 3, directions = 6, pull_through_axis = "none", optimal_orientation = false) {
 
   // Validate and correct dimensions (1-3)
   valid_dimensions = max(1, min(3, dimensions));
@@ -106,35 +106,35 @@ module connector(dimensions=3, directions=6, pull_through_axis="none", optimal_o
     union() {
       if (valid_directions > 4) {
         // 5-6 way connectors: tetrahedron at chamfered corner
-        rotation_1 = optimal_orientation ? [-(180 - acos(1/sqrt(3))),0,0] : [0,0,0];
-        rotation_2 = optimal_orientation ? [0,0,45] : [0,0,0];
+        rotation_1 = optimal_orientation ? [-(180 - acos(1 / sqrt(3))), 0, 0] : [0, 0, 0];
+        rotation_2 = optimal_orientation ? [0, 0, 45] : [0, 0, 0];
         rotate(rotation_1) rotate(rotation_2)
-        difference() {
-          union() {
-            connector_raw(config);
-            print_interface_3d();
+          difference() {
+            union() {
+              connector_raw(config);
+              print_interface_3d();
+            }
+            pull_through_hole(pull_through_axis);
           }
-          pull_through_hole(pull_through_axis);
-        }
       } else if (valid_directions == 4 && valid_dimensions == 2) {
-        rotation = optimal_orientation ? [0,-135,0] : [0,0,0];
+        rotation = optimal_orientation ? [0, -135, 0] : [0, 0, 0];
         rotate(rotation)
-        difference() {
-          connector_raw(config);
-          pull_through_hole(pull_through_axis);
-        }
+          difference() {
+            connector_raw(config);
+            pull_through_hole(pull_through_axis);
+          }
 
       } else {
         // All other cases: simple flat base with chamfered edge
-        rotation = optimal_orientation ? [90,-45,0] : [0,0,0];
+        rotation = optimal_orientation ? [90, -45, 0] : [0, 0, 0];
         rotate(rotation)
-        difference() {
-          intersection() {
-            connector_raw(config);
-            print_interface_base();
+          difference() {
+            intersection() {
+              connector_raw(config);
+              print_interface_base();
+            }
+            pull_through_hole(pull_through_axis);
           }
-          pull_through_hole(pull_through_axis);
-        }
       }
     }
   }
@@ -149,24 +149,23 @@ module connector_raw(config) {
 
       // Place arms based on configuration
       // Order: +Z, -Z, +X, -X, +Y, -Y
-      if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmOuter();  // +Z
+      if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmOuter();                       // +Z
       if (config[1]) translate([0, 0, -core_to_arm_translation]) rotate([180, 0, 0]) connectorArmOuter();  // -Z
-      if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmOuter();  // +X
+      if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmOuter();    // +X
       if (config[3]) translate([-core_to_arm_translation, 0, 0]) rotate([0, -90, 0]) connectorArmOuter();  // -X
-      if (config[4]) translate([0, core_to_arm_translation, 0]) rotate([-90, 0, 0]) connectorArmOuter();  // +Y
-      if (config[5]) translate([0, -core_to_arm_translation, 0]) rotate([90, 0, 0]) connectorArmOuter();  // -Y
+      if (config[4]) translate([0, core_to_arm_translation, 0]) rotate([-90, 0, 0]) connectorArmOuter();   // +Y
+      if (config[5]) translate([0, -core_to_arm_translation, 0]) rotate([90, 0, 0]) connectorArmOuter();   // -Y
     }
     // Subract Inner Arms
     // Order: +Z, -Z, +X, -X, +Y, -Y
-    if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmInner();  // +Z
+    if (config[0]) translate([0, 0, core_to_arm_translation]) connectorArmInner();                       // +Z
     if (config[1]) translate([0, 0, -core_to_arm_translation]) rotate([180, 0, 0]) connectorArmInner();  // -Z
-    if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmInner();  // +X
+    if (config[2]) translate([core_to_arm_translation, 0, 0]) rotate([0, 90, 0]) connectorArmInner();    // +X
     if (config[3]) translate([-core_to_arm_translation, 0, 0]) rotate([0, -90, 0]) connectorArmInner();  // -X
-    if (config[4]) translate([0, core_to_arm_translation, 0]) rotate([-90, 0, 0]) connectorArmInner();  // +Y
-    if (config[5]) translate([0, -core_to_arm_translation, 0]) rotate([90, 0, 0]) connectorArmInner();  // -Y
+    if (config[4]) translate([0, core_to_arm_translation, 0]) rotate([-90, 0, 0]) connectorArmInner();   // +Y
+    if (config[5]) translate([0, -core_to_arm_translation, 0]) rotate([90, 0, 0]) connectorArmInner();   // -Y
   }
 }
-
 
 /** * Connector Arm Modules
   *
@@ -176,14 +175,14 @@ module connector_raw(config) {
 module connectorArmOuter() {
 
   arm_dimensions_outer = [connector_outer_side_length, connector_outer_side_length, BASE_UNIT];
-  arm_side_length_inner = connector_outer_side_length - BASE_STRENGTH*2;
+  arm_side_length_inner = connector_outer_side_length - BASE_STRENGTH * 2;
   arm_dimensions_inner = [arm_side_length_inner, arm_side_length_inner, BASE_UNIT];
 
   // outer cuboid
   difference() {
-    color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer=BASE_CHAMFER,except=BOTTOM);
-    color(HR_RED) rotate([90, 0, 0]) lockpin_hole(depth=connector_outer_side_length);
-    color(HR_RED) rotate([90, 0, 90]) lockpin_hole(depth=connector_outer_side_length);
+    color(HR_YELLOW) cuboid(arm_dimensions_outer, chamfer = BASE_CHAMFER, except = BOTTOM);
+    color(HR_RED) rotate([90, 0, 0]) lockpin_hole(depth = connector_outer_side_length);
+    color(HR_RED) rotate([90, 0, 90]) lockpin_hole(depth = connector_outer_side_length);
   }
 }
 
@@ -196,7 +195,7 @@ module connectorArmInner() {
 
   arm_dimensions_inner = [arm_side_length_inner, arm_side_length_inner, BASE_UNIT];
   color(HR_GREEN)
-  cuboid(arm_dimensions_inner, chamfer=BASE_CHAMFER,edges=BOTTOM);
+    cuboid(arm_dimensions_inner, chamfer = BASE_CHAMFER, edges = BOTTOM);
 }
 
 /** * Connector Core Module
@@ -207,7 +206,7 @@ module connectorArmInner() {
 module connectorCore() {
   core_dimensions = [connector_outer_side_length, connector_outer_side_length, connector_outer_side_length];
   color(HR_BLUE)
-  cuboid(core_dimensions, chamfer=BASE_CHAMFER);
+    cuboid(core_dimensions, chamfer = BASE_CHAMFER);
 }
 
 /** * 3D Print Interface Module
@@ -217,14 +216,14 @@ module connectorCore() {
 module print_interface_3d() {
   // Create a tetrahedron by defining 4 vertices
   // Right angle at origin, edges along +X, +Y, +Z axes
-  side_length = BASE_UNIT - TOLERANCE/2 - BASE_STRENGTH/2;
+  side_length = BASE_UNIT - TOLERANCE / 2 - BASE_STRENGTH / 2;
   // Position tetrahedron at chamfered corner: from center to outer edge, minus chamfer offset
-  translation = connector_outer_side_length/2 - BASE_CHAMFER;
+  translation = connector_outer_side_length / 2 - BASE_CHAMFER;
   points = [
-    [0, 0, 0],              // Origin (right angle corner)
-    [side_length, 0, 0],      // Along X axis
-    [0, side_length, 0],      // Along Y axis
-    [0, 0, side_length]       // Top point (apex)
+    [0, 0, 0],            // Origin (right angle corner)
+    [side_length, 0, 0],  // Along X axis
+    [0, side_length, 0],  // Along Y axis
+    [0, 0, side_length]   // Top point (apex)
   ];
 
   // Define the 4 triangular faces
@@ -236,8 +235,8 @@ module print_interface_3d() {
   ];
 
   color(HR_CHARCOAL)
-  translate([translation, translation, translation])
-  polyhedron(points=points, faces=faces, convexity=2);
+    translate([translation, translation, translation])
+      polyhedron(points = points, faces = faces, convexity = 2);
 }
 
 /** * Base Print Interface Module
@@ -246,34 +245,34 @@ module print_interface_3d() {
   */
 module print_interface_base() {
   base_height = BASE_UNIT * 3;
-  side_length = connector_outer_side_length *2;
+  side_length = connector_outer_side_length * 2;
   chamfer = BASE_CHAMFER * 3;
 
   // Position the base below the connector core
   //translate([0, 0, -base_height/2 - connector_outer_side_length/2])
   color(HR_CHARCOAL)
     // Main base cuboid with standard chamfer
-  translate([connector_outer_side_length/2,connector_outer_side_length/2,0])
-  cuboid([side_length, side_length, base_height], chamfer=chamfer, edges=LEFT+FRONT);
+    translate([connector_outer_side_length / 2, connector_outer_side_length / 2, 0])
+      cuboid([side_length, side_length, base_height], chamfer = chamfer, edges = LEFT + FRONT);
 }
 
 /* Pull-Through Hole Module
   *
   * Produces a pull-through hole along the specified axis.
   */
-module pull_through_hole(axis="none") {
+module pull_through_hole(axis = "none") {
   // Determine hole orientation and dimensions based on axis
   hole_length = BASE_UNIT * 3;
   hole_dimensions = [hole_length, arm_side_length_inner, arm_side_length_inner];
 
   color(HR_WHITE)
-  if (axis == "y") {
-    rotate([0, 0, 90])
-    cuboid(hole_dimensions);
-  } else if (axis == "z") {
-    rotate([0, -90, 0])
-    cuboid(hole_dimensions);
-  } else if (axis == "x") {
-    cuboid(hole_dimensions);
-  }
+    if (axis == "y") {
+      rotate([0, 0, 90])
+        cuboid(hole_dimensions);
+    } else if (axis == "z") {
+      rotate([0, -90, 0])
+        cuboid(hole_dimensions);
+    } else if (axis == "x") {
+      cuboid(hole_dimensions);
+    }
 }

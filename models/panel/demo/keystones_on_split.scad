@@ -17,8 +17,8 @@ _units = 1;
 _ux = get_rackpanel_usable_x(_pw, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_LEFT);
 
 diff("keystone")
-rackpanel(panel_width=_pw, panel_height_units=_units, panel_depth=4, brace_enabled=true,
-  split_mode=HR_RP_SPLIT_HALF, view_mode=HR_RP_VIEW_HALF_LEFT)
-  align(FRONT, inside=true)
-    right(_ux)
-      keystone_full(panel_depth=get_ks_depth_outer(), debug_colors=true);
+  rackpanel(panel_width = _pw, panel_height_units = _units, panel_depth = 4, brace_enabled = true,
+    split_mode = HR_RP_SPLIT_HALF, view_mode = HR_RP_VIEW_HALF_LEFT)
+    align(FRONT, inside = true)
+      right(_ux)
+        keystone_full(panel_depth = get_ks_depth_outer(), debug_colors = true);

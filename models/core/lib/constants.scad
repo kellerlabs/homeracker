@@ -25,23 +25,23 @@
 // SOFTWARE.
 
 // Epsilon — project-scoped to avoid collision with local definitions
-HR_EPSILON = 0.01; // Small value to enhance preview rendering because of overlapping faces.
+HR_EPSILON = 0.01;  // Small value to enhance preview rendering because of overlapping faces.
 
 // Fitting tolerance between mating parts
-TOLERANCE = 0.2; // in mm
+TOLERANCE = 0.2;  // in mm
 
 // Default 3D printing parameters
-PRINTING_LAYER_WIDTH = 0.4; // in mm
-PRINTING_LAYER_HEIGHT = 0.2; // in mm
+PRINTING_LAYER_WIDTH = 0.4;   // in mm
+PRINTING_LAYER_HEIGHT = 0.2;  // in mm
 
 // HomeRacker base measurements
-BASE_UNIT = 15; // Base unit for all core measurements in mm
-BASE_STRENGTH = 2; // Wall thickness in mm
-BASE_CHAMFER = 1; // Chamfer size in mm
+BASE_UNIT = 15;     // Base unit for all core measurements in mm
+BASE_STRENGTH = 2;  // Wall thickness in mm
+BASE_CHAMFER = 1;   // Chamfer size in mm
 
 // Lock pin hole dimensions
-LOCKPIN_HOLE_CHAMFER = 0.8; // Chamfer size in mm
-LOCKPIN_HOLE_SIDE_LENGTH = 4; // Square hole side length in mm
+LOCKPIN_HOLE_CHAMFER = 0.8;    // Chamfer size in mm
+LOCKPIN_HOLE_SIDE_LENGTH = 4;  // Square hole side length in mm
 LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION = [LOCKPIN_HOLE_SIDE_LENGTH, LOCKPIN_HOLE_SIDE_LENGTH];
 
 // Lock pin grip types
@@ -56,7 +56,7 @@ LP_NECK_EXT_BOTH = 2;
 LP_NECK_EXT_TAIL = 3;
 
 // Lock pin neck extension length per unit
-LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE/2;
+LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE / 2;
 
 // HomeRacker Colors
 HR_YELLOW = "#f7b600";
@@ -67,14 +67,14 @@ HR_CHARCOAL = "#333333";
 HR_WHITE = "#f0f0f0";
 
 // Standard rackmount measurements
-STD_UNIT_HEIGHT = 44.45;  // Height of one rack unit (1U = 44.45mm)
-STD_UNIT_DEPTH = 482.6;   // Standard rackmount depth (19" = 482.6mm)
-STD_WIDTH_10INCH = 254;   // 10" width in mm
-STD_WIDTH_19INCH = 482.6; // 19" width in mm
-STD_MOUNT_SURFACE_WIDTH = 15.875; // Mounting surface width in mm
+STD_UNIT_HEIGHT = 44.45;           // Height of one rack unit (1U = 44.45mm)
+STD_UNIT_DEPTH = 482.6;            // Standard rackmount depth (19" = 482.6mm)
+STD_WIDTH_10INCH = 254;            // 10" width in mm
+STD_WIDTH_19INCH = 482.6;          // 19" width in mm
+STD_MOUNT_SURFACE_WIDTH = 15.875;  // Mounting surface width in mm
 
-STD_RACK_BORE_DISTANCE_Z = 15.875;          // Vertical distance between mounting holes in mm
-STD_RACK_BORE_DISTANCE_MARGIN_Z = 6.35;     // Top/bottom margin to first/last mounting hole in mm
+STD_RACK_BORE_DISTANCE_Z = 15.875;       // Vertical distance between mounting holes in mm
+STD_RACK_BORE_DISTANCE_MARGIN_Z = 6.35;  // Top/bottom margin to first/last mounting hole in mm
 
 // DEPRECATED: Legacy lowercase constants (will be removed in future versions)
 // Use uppercase constants above instead

@@ -3,19 +3,19 @@ include <BOSL2/std.scad>
 /* [Parameters] */
 
 // Type of grip for the lock pin
-grip_type = 0; // [0:Standard, 1:Extended, 2:No Grip]
+grip_type = 0;  // [0:Standard, 1:Extended, 2:No Grip]
 
 // Neck extension mode
-neck_extension = 0; // [0:None, 1:Neck Side, 2:Both Sides, 3:Tail Side]
+neck_extension = 0;  // [0:None, 1:Neck Side, 2:Both Sides, 3:Tail Side]
 
 // Strength of the tension hole (affects how much material is removed for the hole, which in turn affects the flexibility and strength of the lock pin)
-strength = 0; // [0:Regular, 1:Slim]
+strength = 0;  // [0:Regular, 1:Slim]
 
 /* [Debug Parameters] */
 // Show distinct colors per section for easier debugging
-debug_colors = false; // [false,true]
+debug_colors = false;  // [false,true]
 // Enable chamfering on the insertion ends
-chamfer_enabled = true; // [false,true]
+chamfer_enabled = true;  // [false,true]
 
 /* [Hidden] */
 // --- from constants.scad ---
@@ -32,7 +32,7 @@ LP_NECK_EXT_NONE = 0;
 LP_NECK_EXT_NECK = 1;
 LP_NECK_EXT_BOTH = 2;
 LP_NECK_EXT_TAIL = 3;
-LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE/2;
+LP_NECK_EXTENSION_UNIT = BASE_STRENGTH + TOLERANCE / 2;
 HR_YELLOW = "#f7b600";
 HR_BLUE = "#0056b3";
 HR_RED = "#c41e3a";
@@ -44,11 +44,11 @@ lockpin_width_inner = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH * 2;
 lockpin_height = lockpin_width_outer - TOLERANCE;
 lockpin_prismoid_length = (BASE_UNIT - BASE_STRENGTH) / 2;
 lockpin_endpart_length = BASE_STRENGTH + BASE_STRENGTH / 2 + TOLERANCE;
-grip_width = lockpin_width_outer + BASE_STRENGTH*2;
-grip_thickness_inner = PRINTING_LAYER_WIDTH*2;
+grip_width = lockpin_width_outer + BASE_STRENGTH * 2;
+grip_thickness_inner = PRINTING_LAYER_WIDTH * 2;
 grip_thickness_outer = BASE_STRENGTH / 2;
 grip_distance = BASE_STRENGTH / 2;
-grip_base_length = grip_thickness_inner + grip_thickness_outer + grip_distance + lockpin_chamfer + TOLERANCE/2;
+grip_base_length = grip_thickness_inner + grip_thickness_outer + grip_distance + lockpin_chamfer + TOLERANCE / 2;
 HR_CORE_LOCKPIN_PRIMARY_COLOR = HR_YELLOW;
 HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR = 4;
 HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_SLIM = 6;
@@ -74,29 +74,29 @@ module lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE,
   strength = HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR,
   debug_colors = false, chamfer_enabled = true
 ) {
-  rotate([90,0,0])
-  difference() {
+  rotate([90, 0, 0])
+    difference() {
 
-    union() {
+      union() {
 
-      color_this(debug_colors ? HR_BLUE : HR_CORE_LOCKPIN_PRIMARY_COLOR)
-      tension_shape(chamfer_enabled);
+        color_this(debug_colors ? HR_BLUE : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+          tension_shape(chamfer_enabled);
 
-      color_this(debug_colors ? HR_GREEN : HR_CORE_LOCKPIN_PRIMARY_COLOR)
-      end_parts(grip_type, neck_extension, chamfer_enabled);
+        color_this(debug_colors ? HR_GREEN : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+          end_parts(grip_type, neck_extension, chamfer_enabled);
 
-      color_this(debug_colors ? HR_BLUE : HR_CORE_LOCKPIN_PRIMARY_COLOR)
-      neck(neck_extension, grip_type, chamfer_enabled);
+        color_this(debug_colors ? HR_BLUE : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+          neck(neck_extension, grip_type, chamfer_enabled);
 
-      color_this(debug_colors ? HR_YELLOW : HR_CORE_LOCKPIN_PRIMARY_COLOR)
-      grip(grip_type, neck_extension, chamfer_enabled);
+        color_this(debug_colors ? HR_YELLOW : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+          grip(grip_type, neck_extension, chamfer_enabled);
+      }
+
+      color_this(debug_colors ? HR_RED : HR_CORE_LOCKPIN_PRIMARY_COLOR)
+        tension_hole(strength);
     }
-
-    color_this(debug_colors ? HR_RED : HR_CORE_LOCKPIN_PRIMARY_COLOR)
-    tension_hole(strength);
-  }
 }
-module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE, chamfer_enabled=true) {
+module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE, chamfer_enabled = true) {
   if (grip_type != LP_GRIP_NO_GRIP) {
     has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
     grip_side_extension = has_neck_ext ? LP_NECK_EXTENSION_UNIT : 0;
@@ -104,92 +104,92 @@ module grip(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE, cha
     grip_outer_dimensions = [grip_type == LP_GRIP_EXTENDED ? grip_width * 1.5 : grip_width, lockpin_height, grip_thickness_outer];
     grip_inner_dimensions = [grip_width, lockpin_height, grip_thickness_inner];
 
-    base_translation = lockpin_prismoid_length + lockpin_endpart_length - lockpin_chamfer - TOLERANCE/2 + grip_side_extension;
+    base_translation = lockpin_prismoid_length + lockpin_endpart_length - lockpin_chamfer - TOLERANCE / 2 + grip_side_extension;
 
     union() {
 
       translate([0, 0, -base_translation - grip_base_length / 2])
-        cuboid(grip_base_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, except=TOP);
+        cuboid(grip_base_dimensions, chamfer = chamfer_enabled ? lockpin_chamfer : 0, except = TOP);
 
-      if(grip_type == LP_GRIP_STANDARD || grip_type == LP_GRIP_EXTENDED) {
+      if (grip_type == LP_GRIP_STANDARD || grip_type == LP_GRIP_EXTENDED) {
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer / 2])
-          cuboid(grip_outer_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=BOTTOM);
+          cuboid(grip_outer_dimensions, chamfer = chamfer_enabled ? lockpin_chamfer : 0, edges = BOTTOM);
 
         translate([0, 0, -base_translation - grip_base_length + grip_thickness_outer + grip_thickness_inner / 2 + grip_distance])
-          cuboid(grip_inner_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=BOTTOM);
+          cuboid(grip_inner_dimensions, chamfer = chamfer_enabled ? lockpin_chamfer : 0, edges = BOTTOM);
       }
     }
   }
 }
-module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD, chamfer_enabled=true) {
+module neck(neck_extension = LP_NECK_EXT_NONE, grip_type = LP_GRIP_STANDARD, chamfer_enabled = true) {
   lockpin_fillet = lockpin_width_outer / 3;
   neck_dimensions = [lockpin_width_outer, lockpin_height, LP_NECK_EXTENSION_UNIT];
-  neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE/2 + LP_NECK_EXTENSION_UNIT / 2;
+  neck_z = lockpin_prismoid_length + lockpin_endpart_length - TOLERANCE / 2 + LP_NECK_EXTENSION_UNIT / 2;
   has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
   has_tail_neck = neck_extension == LP_NECK_EXT_TAIL || neck_extension == LP_NECK_EXT_BOTH;
 
   if (has_neck_ext) {
     translate([0, 0, -neck_z])
-    if (grip_type != LP_GRIP_NO_GRIP) {
+      if (grip_type != LP_GRIP_NO_GRIP) {
 
-      cuboid(neck_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, except=[TOP, BOTTOM]);
-    } else {
+        cuboid(neck_dimensions, chamfer = chamfer_enabled ? lockpin_chamfer : 0, except = [TOP, BOTTOM]);
+      } else {
 
-      intersection() {
-        cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[BOTTOM + LEFT, BOTTOM + RIGHT]);
-        cuboid(neck_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=[FRONT, BACK], except=TOP);
+        intersection() {
+          cuboid(neck_dimensions, rounding = lockpin_fillet, edges = [BOTTOM + LEFT, BOTTOM + RIGHT]);
+          cuboid(neck_dimensions, chamfer = chamfer_enabled ? lockpin_chamfer : 0, edges = [FRONT, BACK], except = TOP);
+        }
       }
-    }
   }
 
   if (has_tail_neck) {
     translate([0, 0, neck_z])
 
-    intersection() {
-      cuboid(neck_dimensions, rounding=lockpin_fillet, edges=[TOP + LEFT, TOP + RIGHT]);
-      cuboid(neck_dimensions, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=[FRONT, BACK], except=BOTTOM);
-    }
+      intersection() {
+        cuboid(neck_dimensions, rounding = lockpin_fillet, edges = [TOP + LEFT, TOP + RIGHT]);
+        cuboid(neck_dimensions, chamfer = chamfer_enabled ? lockpin_chamfer : 0, edges = [FRONT, BACK], except = BOTTOM);
+      }
   }
 }
-module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE, chamfer_enabled=true) {
+module end_parts(grip_type = LP_GRIP_STANDARD, neck_extension = LP_NECK_EXT_NONE, chamfer_enabled = true) {
   has_neck_ext = neck_extension == LP_NECK_EXT_NECK || neck_extension == LP_NECK_EXT_BOTH;
   has_tail_neck = neck_extension == LP_NECK_EXT_TAIL || neck_extension == LP_NECK_EXT_BOTH;
   end_part_half(true, has_tail_neck, chamfer_enabled);
   mirror([0, 0, 1]) end_part_half(grip_type == LP_GRIP_NO_GRIP && neck_extension == LP_NECK_EXT_NONE, has_neck_ext, chamfer_enabled);
 }
-module end_part_half(front = false, has_neck = false, chamfer_enabled=true) {
+module end_part_half(front = false, has_neck = false, chamfer_enabled = true) {
 
   lockpin_fillet_front = lockpin_width_outer / 3;
   lockpin_endpart_dimension = [lockpin_width_outer, lockpin_height, lockpin_endpart_length];
 
-  translate([0, 0, lockpin_prismoid_length + lockpin_endpart_length / 2 - TOLERANCE/2])
+  translate([0, 0, lockpin_prismoid_length + lockpin_endpart_length / 2 - TOLERANCE / 2])
 
-  intersection() {
-    cuboid(lockpin_endpart_dimension, rounding=front && !has_neck ? lockpin_fillet_front : 0, edges=[TOP + LEFT, TOP + RIGHT]);
-    cuboid(lockpin_endpart_dimension, chamfer=chamfer_enabled ? lockpin_chamfer : 0, edges=[FRONT,BACK], except=has_neck ? [BOTTOM, TOP] : BOTTOM);
-  }
+    intersection() {
+      cuboid(lockpin_endpart_dimension, rounding = front && !has_neck ? lockpin_fillet_front : 0, edges = [TOP + LEFT, TOP + RIGHT]);
+      cuboid(lockpin_endpart_dimension, chamfer = chamfer_enabled ? lockpin_chamfer : 0, edges = [FRONT, BACK], except = has_neck ? [BOTTOM, TOP] : BOTTOM);
+    }
 }
-module tension_shape(chamfer_enabled=true) {
-    tension_shape_half(chamfer_enabled);
-    mirror([0, 0, 1]) tension_shape_half(chamfer_enabled);
+module tension_shape(chamfer_enabled = true) {
+  tension_shape_half(chamfer_enabled);
+  mirror([0, 0, 1]) tension_shape_half(chamfer_enabled);
 }
-module tension_shape_half(chamfer_enabled=true) {
+module tension_shape_half(chamfer_enabled = true) {
   lockpin_inner_dimension = [lockpin_width_inner, lockpin_height];
   lockpin_outer_dimension = [lockpin_width_outer, lockpin_height];
   lockpin_fillet_sides = BASE_UNIT;
 
-  prismoid(lockpin_inner_dimension, lockpin_outer_dimension, height=lockpin_prismoid_length, chamfer=(chamfer_enabled ? lockpin_chamfer : 0));
+  prismoid(lockpin_inner_dimension, lockpin_outer_dimension, height = lockpin_prismoid_length, chamfer = (chamfer_enabled ? lockpin_chamfer : 0));
 }
-module tension_hole(tension_hole_strength_multiplier=HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR){
+module tension_hole(tension_hole_strength_multiplier = HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR) {
   tension_hole_half(tension_hole_strength_multiplier);
-  mirror([0,0,1]) tension_hole_half(tension_hole_strength_multiplier);
+  mirror([0, 0, 1]) tension_hole_half(tension_hole_strength_multiplier);
 }
-module tension_hole_half(tension_hole_strength_multiplier=HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR) {
+module tension_hole_half(tension_hole_strength_multiplier = HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_REGULAR) {
   lockpin_tension_angle = 86.5;
   lockpin_tension_hole_width_inner = PRINTING_LAYER_WIDTH * tension_hole_strength_multiplier;
   lockpin_tension_hole_height = BASE_UNIT / 2;
-  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height+HR_EPSILON];
-  prismoid(size1=lockpin_tension_hole_inner_dimension, height=lockpin_tension_hole_height, xang=lockpin_tension_angle, yang=90);
+  lockpin_tension_hole_inner_dimension = [lockpin_tension_hole_width_inner, lockpin_height + HR_EPSILON];
+  prismoid(size1 = lockpin_tension_hole_inner_dimension, height = lockpin_tension_hole_height, xang = lockpin_tension_angle, yang = 90);
 }
 
-lockpin(grip_type=grip_type, neck_extension=neck_extension, strength=tension_hole_strength_multiplier, chamfer_enabled=chamfer_enabled, debug_colors=debug_colors);
+lockpin(grip_type = grip_type, neck_extension = neck_extension, strength = tension_hole_strength_multiplier, chamfer_enabled = chamfer_enabled, debug_colors = debug_colors);

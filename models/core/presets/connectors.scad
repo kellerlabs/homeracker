@@ -9,15 +9,15 @@ include <../main.scad>
 /* [Hidden] */
 $fn = 100;
 // Spacing between connectors (mm)
-spacing = BASE_UNIT*3 + BASE_STRENGTH; // [20:5:40]
+spacing = BASE_UNIT * 3 + BASE_STRENGTH;  // [20:5:40]
 
 // Grid layout helper
 module grid_position(row, col) {
-    translate([col * spacing, row * spacing, 0])
-        children();
+  translate([col * spacing, row * spacing, 0])
+    children();
 }
 
-module connectors_standard(optimal_orientation=false) {
+module connectors_standard(optimal_orientation = false) {
   // Row 0: 1D variants
   grid_position(0, 0) connector(1, 2, "none", optimal_orientation);
 
@@ -33,7 +33,7 @@ module connectors_standard(optimal_orientation=false) {
   grid_position(2, 3) connector(3, 6, "none", optimal_orientation);
 }
 
-module connectors_pull_through(optimal_orientation=false) {
+module connectors_pull_through(optimal_orientation = false) {
   // Row 0: 1D pull-through variants
   grid_position(0, 0) connector(1, 1, "x", optimal_orientation);
   grid_position(0, 1) connector(1, 2, "x", optimal_orientation);
@@ -55,7 +55,6 @@ module connectors_pull_through(optimal_orientation=false) {
   grid_position(2, 4) connector(3, 5, "y", optimal_orientation);
   grid_position(2, 5) connector(3, 6, "x", optimal_orientation);
 }
-
 
 // Create grid of all standard connectors
 // connectors_standard(true);

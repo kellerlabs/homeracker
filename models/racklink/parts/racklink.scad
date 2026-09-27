@@ -5,23 +5,23 @@ include <../lib/racklink.scad>
 
 /* [General] */
 // height of the HomeRacker supports to be covered in HomeRacker units (use the taller one if the rack columns have different heights)
-height = 3; // [1:1:20]
+height = 3;  // [1:1:20]
 
 /* [Advanced Parameters] */
 // horizontal distance between the two u-shapes in HomeRacker units
-distance = 1; // [1:1:5]
+distance = 1;  // [1:1:5]
 // start of the left u-shape in units. 0 = full coverage. Positive values shift the sleeve upward, negative values shift it downward (for misaligned columns). Ignored (falls back to full coverage) if start >= end or start >= height.
-left_start = 0; // [-10:1:19]
+left_start = 0;  // [-10:1:19]
 // end of the left u-shape in units. Clamped to height if it exceeds it. Ignored (falls back to full coverage) if start >= end.
-left_end = 20; // [0:1:20]
+left_end = 20;  // [0:1:20]
 // start of the right u-shape in units. 0 = full coverage. Positive values shift the sleeve upward, negative values shift it downward (for misaligned columns). Ignored (falls back to full coverage) if start >= end or start >= height.
-right_start = 0; // [-10:1:19]
+right_start = 0;  // [-10:1:19]
 // end of the right u-shape in units. Clamped to height if it exceeds it. Ignored (falls back to full coverage) if start >= end.
-right_end = 20; // [0:1:20]
+right_end = 20;  // [0:1:20]
 
 /* [Debug Parameters] */
-debug_colors = false; // [false,true]
-disable_chamfer = false; // [false,true]
+debug_colors = false;     // [false,true]
+disable_chamfer = false;  // [false,true]
 
 /* [Hidden] */
 $fn = 100;

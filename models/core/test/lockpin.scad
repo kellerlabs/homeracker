@@ -8,5 +8,5 @@ include <../main.scad>
 // Test all neck extension types
 for (i = [0:3]) {
   translate([i * 20, 0, 0])
-  lockpin(grip_type=LP_GRIP_STANDARD, neck_extension=i);
+    lockpin(grip_type = LP_GRIP_STANDARD, neck_extension = i);
 }

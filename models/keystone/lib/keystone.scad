@@ -47,20 +47,20 @@ function ks_use_native() = is_undef($ks_native) ? true : $ks_native;
 // --- Keystone Dimensions ---
 // All dimensions assume the keystone module is oriented with the clip on top.
 
-KS_WIDTH_INNER = 14.7;       // Inner width of front opening (mm)
-KS_BODY_HEIGHT = 22;         // Height of the main keystone body (mm)
-_ks_wall_strength = 1.5;     // Wall strength around the keystone (mm)
+KS_WIDTH_INNER = 14.7;    // Inner width of front opening (mm)
+KS_BODY_HEIGHT = 22;      // Height of the main keystone body (mm)
+_ks_wall_strength = 1.5;  // Wall strength around the keystone (mm)
 
-_ks_front_depth = 1.5;       // Depth of the front plate lip (mm)
-_ks_front_chamfer = 1;       // Chamfer on top edge of front opening (mm)
-_ks_front_offset_y = 2.85;   // Vertical offset from body bottom to opening bottom (mm)
+_ks_front_depth = 1.5;      // Depth of the front plate lip (mm)
+_ks_front_chamfer = 1;      // Chamfer on top edge of front opening (mm)
+_ks_front_offset_y = 2.85;  // Vertical offset from body bottom to opening bottom (mm)
 
-_ks_body_depth = 6.75;       // Depth of the main body section (mm)
-_ks_body_offset_y = 1.350;   // Vertical offset from front to body bottom (mm)
+_ks_body_depth = 6.75;      // Depth of the main body section (mm)
+_ks_body_offset_y = 1.350;  // Vertical offset from front to body bottom (mm)
 
-_ks_hook_depth = 1.5;        // Depth of the rear retention hooks (mm)
-_ks_hook_height = 19.3;      // Height of the rear hook section (mm)
-_ks_hook_chamfer = 1;        // Chamfer on hook edges (mm)
+_ks_hook_depth = 1.5;    // Depth of the rear retention hooks (mm)
+_ks_hook_height = 19.3;  // Height of the rear hook section (mm)
+_ks_hook_chamfer = 1;    // Chamfer on hook edges (mm)
 
 // --- Label Dimensions ---
 
@@ -71,11 +71,11 @@ KS_LABEL_CHAMFER = TOLERANCE * 4;
 // --- Public Dimension Functions ---
 
 /// Returns the outer width of a keystone module including walls and tolerance.
-function get_ks_width_outer(additional_tolerance=0.0) =
+function get_ks_width_outer(additional_tolerance = 0.0) =
   KS_WIDTH_INNER + 2 * _ks_wall_strength + additional_tolerance;
 
 /// Returns the outer height of a keystone module including walls and tolerance.
-function get_ks_height_outer(additional_tolerance=0.0) =
+function get_ks_height_outer(additional_tolerance = 0.0) =
   KS_BODY_HEIGHT + 2 * _ks_wall_strength + additional_tolerance;
 
 /// Returns the total depth of a keystone module (front lip + body + hooks).
@@ -83,37 +83,37 @@ function get_ks_depth_outer() =
   _ks_front_depth + _ks_body_depth + _ks_hook_depth;
 
 /// Returns the inner front opening height with tolerance applied.
-function get_ks_height_inner_front(additional_tolerance=0.0) =
+function get_ks_height_inner_front(additional_tolerance = 0.0) =
   16.4 + additional_tolerance;
 
 /// Returns the effective width accounting for rotation (swaps width/height at 90°/270°).
-function get_effective_keystone_width(additional_tolerance=0.0, yrot=0) =
+function get_effective_keystone_width(additional_tolerance = 0.0, yrot = 0) =
   yrot == 90 || yrot == 270 ? get_ks_height_outer(additional_tolerance) : get_ks_width_outer(additional_tolerance);
 
 /// Returns the effective height accounting for rotation (swaps width/height at 90°/270°).
-function get_effective_keystone_height(additional_tolerance=0.0, yrot=0) =
+function get_effective_keystone_height(additional_tolerance = 0.0, yrot = 0) =
   yrot == 90 || yrot == 270 ? get_ks_width_outer(additional_tolerance) : get_ks_height_outer(additional_tolerance);
 
 /// Returns the vertical offset needed for label slots when keystone is rotated.
-function get_label_slot_vertical_offset(yrot=0, additional_tolerance=0.0) =
+function get_label_slot_vertical_offset(yrot = 0, additional_tolerance = 0.0) =
   yrot == 90 || yrot == 270 ? get_ks_height_outer(additional_tolerance) - get_ks_width_outer(additional_tolerance) : 0;
 
 /// Returns the pocket dimensions [width, depth, height] of a keystone accounting for rotation.
 /// Excludes the label recess — use get_label_attachable_height() for label slot height.
-function get_keystone_dimensions(yrot=0, additional_tolerance=0.0) = [
+function get_keystone_dimensions(yrot = 0, additional_tolerance = 0.0) = [
   get_effective_keystone_width(additional_tolerance, yrot),
   get_ks_depth_outer(),
   get_effective_keystone_height(additional_tolerance, yrot)
 ];
 
 /// Returns the total attachable height of the label recess block.
-function get_label_attachable_height(yrot=0, additional_tolerance=0.0) =
+function get_label_attachable_height(yrot = 0, additional_tolerance = 0.0) =
   KS_LABEL_HEIGHT + TOLERANCE + get_label_slot_vertical_offset(yrot, additional_tolerance) + BASE_STRENGTH;
 
 // --- Debug ---
 
 /// Prints keystone outer dimensions to the console.
-module debug_keystone_dimensions(additional_tolerance=0.0) {
+module debug_keystone_dimensions(additional_tolerance = 0.0) {
   echo("Keystone Module Dimensions:");
   echo("  Width Outer: ", get_ks_width_outer(additional_tolerance), " mm");
   echo("  Height Outer: ", get_ks_height_outer(additional_tolerance), " mm");
@@ -126,44 +126,44 @@ module debug_keystone_dimensions(additional_tolerance=0.0) {
 /// This is the negative shape matching the keystone's 3-section profile
 /// (front lip, body, rear hooks with retention chamfers).
 /// Must be used within a diff("keystone") context.
-module keystone_socket(additional_tolerance=0.0, anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
+module keystone_socket(additional_tolerance = 0.0, anchor = CENTER, spin = 0, orient = UP, debug_colors = false) {
   _width = KS_WIDTH_INNER + additional_tolerance;
   _depth = _ks_front_depth + _ks_body_depth + _ks_hook_depth;
   _height = KS_BODY_HEIGHT + additional_tolerance;
 
-  attachable(anchor=anchor, spin=spin, orient=orient, size=[_width, _height, _depth]) {
+  attachable(anchor = anchor, spin = spin, orient = orient, size = [_width, _height, _depth]) {
     if (ks_use_native()) {
       // Native (BOSL2-free) primitives so identical jacks reuse one cached mesh. Shape is
       // identical to the BOSL2 path below (verified by zero-volume boolean parity). Native
       // geometry is one fused mesh, so it carries a single solid identity color via color()
       // (color_this is a no-op on non-attachable primitives); debug_colors is bosl2-only.
       color(KS_COLOR_PRIMARY)
-      ks_socket_native(
-        width=_width,
-        height=_height,
-        body_depth=_ks_body_depth,
-        front_depth=_ks_front_depth,
-        front_height=get_ks_height_inner_front(additional_tolerance),
-        front_chamfer=_ks_front_chamfer,
-        body_offset_y=_ks_body_offset_y,
-        hook_depth=_ks_hook_depth,
-        hook_height=_ks_hook_height + additional_tolerance,
-        hook_chamfer=_ks_hook_chamfer);
+        ks_socket_native(
+          width = _width,
+          height = _height,
+          body_depth = _ks_body_depth,
+          front_depth = _ks_front_depth,
+          front_height = get_ks_height_inner_front(additional_tolerance),
+          front_chamfer = _ks_front_chamfer,
+          body_offset_y = _ks_body_offset_y,
+          hook_depth = _ks_hook_depth,
+          hook_height = _ks_hook_height + additional_tolerance,
+          hook_chamfer = _ks_hook_chamfer);
     } else {
       // Oriented lying on front face — negative chamfers only work on top/bottom faces
       color_this(debug_colors ? HR_YELLOW : KS_COLOR_PRIMARY)
-      cuboid([_width, _height, _ks_body_depth]) {
-        // Front opening (lip section)
-        fwd(_ks_body_offset_y) align(BOTTOM, BACK)
-          color(debug_colors ? HR_GREEN : KS_COLOR_PRIMARY)
-          cuboid([_width, get_ks_height_inner_front(additional_tolerance), _ks_front_depth],
-            chamfer=-_ks_front_chamfer, edges=[TOP+FRONT]);
-        // Rear hooks (retention section)
-        fwd(_ks_body_offset_y) align(TOP, BACK)
-          color(debug_colors ? HR_RED : KS_COLOR_PRIMARY)
-          cuboid([_width, _ks_hook_height + additional_tolerance, _ks_hook_depth],
-            chamfer=-_ks_hook_chamfer, edges=[TOP+FRONT, TOP+BACK]);
-      }
+        cuboid([_width, _height, _ks_body_depth]) {
+          // Front opening (lip section)
+          fwd(_ks_body_offset_y) align(BOTTOM, BACK)
+            color(debug_colors ? HR_GREEN : KS_COLOR_PRIMARY)
+              cuboid([_width, get_ks_height_inner_front(additional_tolerance), _ks_front_depth],
+                chamfer = -_ks_front_chamfer, edges = [TOP + FRONT]);
+          // Rear hooks (retention section)
+          fwd(_ks_body_offset_y) align(TOP, BACK)
+            color(debug_colors ? HR_RED : KS_COLOR_PRIMARY)
+              cuboid([_width, _ks_hook_height + additional_tolerance, _ks_hook_depth],
+                chamfer = -_ks_hook_chamfer, edges = [TOP + FRONT, TOP + BACK]);
+        }
     }
     children();
   }
@@ -172,46 +172,46 @@ module keystone_socket(additional_tolerance=0.0, anchor=CENTER, spin=0, orient=U
 /// Creates a single label hook on the left side. Used in mirrored pairs by label_hooks().
 /// When inner=true, produces the mating geometry for the label plate.
 /// When inner=false (default), produces the panel-side recess with insertion funnel.
-module _label_hook_left(slot_width, slot_depth, slot_height, label_slot_spacing, inner=false,
-  anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
+module _label_hook_left(slot_width, slot_depth, slot_height, label_slot_spacing, inner = false,
+  anchor = CENTER, spin = 0, orient = UP, debug_colors = false) {
 
   _spacing_sub = inner ? TOLERANCE : 0;
   _color = inner ? KS_COLOR_SECONDARY : KS_COLOR_PRIMARY;
   _hook_width = TOLERANCE;
   _chamfer = inner ? KS_LABEL_CHAMFER : 0;
 
-  attachable(anchor=anchor, spin=spin, orient=orient, size=[slot_width + _hook_width, slot_depth, slot_height]) {
+  attachable(anchor = anchor, spin = spin, orient = orient, size = [slot_width + _hook_width, slot_depth, slot_height]) {
     if (inner) {
       // Label-plate side: chamfered slot with a half-height retention lip (BOSL2).
       color_this(debug_colors ? HR_RED : _color)
-      left((label_slot_spacing - slot_width - _spacing_sub) / 2)
-      cuboid([slot_width, slot_depth, slot_height], chamfer=_chamfer, edges=[BACK, LEFT], except=FRONT) {
-        color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
-        align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, slot_height / 2],
-          chamfer=_hook_width, edges=RIGHT);
-      }
+        left((label_slot_spacing - slot_width - _spacing_sub) / 2)
+          cuboid([slot_width, slot_depth, slot_height], chamfer = _chamfer, edges = [BACK, LEFT], except = FRONT) {
+            color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
+              align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, slot_height / 2],
+                chamfer = _hook_width, edges = RIGHT);
+          }
     } else if (ks_use_native()) {
       // Panel-side recess from native (BOSL2-free) geometry so identical jacks reuse one
       // cached mesh. Shape matches the BOSL2 slot+tab+funnel construction below (verified by
       // boolean parity); see keystone_native.scad. One fused mesh carries a single solid color
       // via color(); per-section debug colors are not available.
       color(_color)
-      _ks_label_hook_single(slot_width, slot_depth, slot_height,
-        label_slot_spacing=label_slot_spacing, hook_width=_hook_width,
-        base_chamfer=BASE_CHAMFER, strength=BASE_STRENGTH);
+        _ks_label_hook_single(slot_width, slot_depth, slot_height,
+          label_slot_spacing = label_slot_spacing, hook_width = _hook_width,
+          base_chamfer = BASE_CHAMFER, strength = BASE_STRENGTH);
     } else {
       // Panel-side recess (BOSL2): chamfered slot, full-height retention tab, insertion funnel.
       color_this(debug_colors ? HR_RED : _color)
-      left((label_slot_spacing - slot_width - _spacing_sub) / 2)
-      cuboid([slot_width, slot_depth, slot_height], chamfer=_chamfer, edges=[BACK, LEFT], except=FRONT) {
-        color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
-        align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, slot_height],
-          chamfer=_hook_width, edges=RIGHT);
-        align(FRONT, inside=true)
-          color_this(debug_colors ? HR_CHARCOAL : _color)
-          cuboid([slot_width + BASE_CHAMFER, BASE_CHAMFER, slot_height + BASE_CHAMFER],
-            chamfer=BASE_CHAMFER, edges=BACK);
-      }
+        left((label_slot_spacing - slot_width - _spacing_sub) / 2)
+          cuboid([slot_width, slot_depth, slot_height], chamfer = _chamfer, edges = [BACK, LEFT], except = FRONT) {
+            color_this(debug_colors ? HR_GREEN : _color) fwd(_chamfer)
+              align(RIGHT, BACK) cuboid([_hook_width, BASE_STRENGTH - _spacing_sub - _chamfer, slot_height],
+                chamfer = _hook_width, edges = RIGHT);
+            align(FRONT, inside = true)
+              color_this(debug_colors ? HR_CHARCOAL : _color)
+                cuboid([slot_width + BASE_CHAMFER, BASE_CHAMFER, slot_height + BASE_CHAMFER],
+                  chamfer = BASE_CHAMFER, edges = BACK);
+          }
     }
     children();
   }
@@ -221,15 +221,15 @@ module _label_hook_left(slot_width, slot_depth, slot_height, label_slot_spacing,
 /// Parameters:
 ///   yrot   - keystone rotation angle (determines slot spacing)
 ///   inner  - true for label-plate side geometry, false for panel-side recess
-module label_hooks(yrot=0, inner=false, debug_colors=false) {
+module label_hooks(yrot = 0, inner = false, debug_colors = false) {
   _spacing = yrot == 90 || yrot == 270 ? KS_BODY_HEIGHT : KS_WIDTH_INNER;
   _tol_add = inner ? 0 : TOLERANCE;
   _width = KS_LABEL_STRENGTH + _tol_add;
   _height = KS_LABEL_HEIGHT + _tol_add;
   _depth = BASE_STRENGTH * 2;
 
-  _label_hook_left(_width, _depth, _height, label_slot_spacing=_spacing, inner=inner, debug_colors=debug_colors);
-  xflip() _label_hook_left(_width, _depth, _height, label_slot_spacing=_spacing, inner=inner, debug_colors=debug_colors);
+  _label_hook_left(_width, _depth, _height, label_slot_spacing = _spacing, inner = inner, debug_colors = debug_colors);
+  xflip() _label_hook_left(_width, _depth, _height, label_slot_spacing = _spacing, inner = inner, debug_colors = debug_colors);
 }
 
 // --- Public Modules ---
@@ -238,13 +238,13 @@ module label_hooks(yrot=0, inner=false, debug_colors=false) {
 /// Print this part separately and insert into the panel from the front.
 /// Parameters:
 ///   yrot - keystone rotation angle (determines plate width)
-module label_plate(yrot=0, anchor=CENTER, spin=0, orient=UP, debug_colors=false) {
+module label_plate(yrot = 0, anchor = CENTER, spin = 0, orient = UP, debug_colors = false) {
   _spacing = yrot == 90 || yrot == 270 ? KS_BODY_HEIGHT : KS_WIDTH_INNER;
   _width = _spacing - TOLERANCE;
   _depth = BASE_STRENGTH * 3;
   _height = KS_LABEL_HEIGHT;
 
-  attachable(anchor=anchor, spin=spin, orient=orient, size=[_width, _depth, _height]) {
+  attachable(anchor = anchor, spin = spin, orient = orient, size = [_width, _depth, _height]) {
     if (ks_use_native()) {
       // Native (BOSL2-free) primitives so identical label plates reuse one cached mesh across a
       // populated panel — the BOSL2 attachable construction defeats that cache and dominates
@@ -252,30 +252,30 @@ module label_plate(yrot=0, anchor=CENTER, spin=0, orient=UP, debug_colors=false)
       // parity). One fused mesh carries a single solid identity color via color() (here the
       // charcoal KS_COLOR_SECONDARY); debug_colors is bosl2-only.
       color(KS_COLOR_SECONDARY)
-      ks_label_plate_native(
-        plate_width=_width,
-        body_depth=BASE_STRENGTH,
-        plate_height=_height,
-        body_chamfer=KS_LABEL_CHAMFER,
-        grip_len=_width - BASE_STRENGTH * 2 - TOLERANCE / 2,
-        grip_chamfer=BASE_STRENGTH - PRINTING_LAYER_HEIGHT,
-        hook_spacing=_spacing,
-        hook_slot_width=KS_LABEL_STRENGTH,
-        hook_depth=BASE_STRENGTH * 2,
-        hook_chamfer=KS_LABEL_CHAMFER,
-        spacing_sub=TOLERANCE,
-        tab_width=TOLERANCE,
-        tab_depth=BASE_STRENGTH - TOLERANCE - KS_LABEL_CHAMFER);
+        ks_label_plate_native(
+          plate_width = _width,
+          body_depth = BASE_STRENGTH,
+          plate_height = _height,
+          body_chamfer = KS_LABEL_CHAMFER,
+          grip_len = _width - BASE_STRENGTH * 2 - TOLERANCE / 2,
+          grip_chamfer = BASE_STRENGTH - PRINTING_LAYER_HEIGHT,
+          hook_spacing = _spacing,
+          hook_slot_width = KS_LABEL_STRENGTH,
+          hook_depth = BASE_STRENGTH * 2,
+          hook_chamfer = KS_LABEL_CHAMFER,
+          spacing_sub = TOLERANCE,
+          tab_width = TOLERANCE,
+          tab_depth = BASE_STRENGTH - TOLERANCE - KS_LABEL_CHAMFER);
     } else {
       fwd(BASE_STRENGTH)
-      color_this(debug_colors ? HR_YELLOW : KS_COLOR_SECONDARY)
-      diff("label_plate_remove")
-      cuboid([_width, BASE_STRENGTH, _height], chamfer=KS_LABEL_CHAMFER, except=[BACK, FRONT]) {
-        tag("label_plate_remove") edge_mask(BACK, except=[LEFT, RIGHT])
-          color_this(debug_colors ? HR_BLUE : KS_COLOR_SECONDARY)
-          chamfer_edge_mask(l=_width - BASE_STRENGTH * 2 - TOLERANCE / 2, chamfer=BASE_STRENGTH - PRINTING_LAYER_HEIGHT);
-        attach(BACK, FRONT) label_hooks(yrot=yrot, inner=true, debug_colors=debug_colors);
-      }
+        color_this(debug_colors ? HR_YELLOW : KS_COLOR_SECONDARY)
+          diff("label_plate_remove")
+            cuboid([_width, BASE_STRENGTH, _height], chamfer = KS_LABEL_CHAMFER, except = [BACK, FRONT]) {
+              tag("label_plate_remove") edge_mask(BACK, except = [LEFT, RIGHT])
+                color_this(debug_colors ? HR_BLUE : KS_COLOR_SECONDARY)
+                  chamfer_edge_mask(l = _width - BASE_STRENGTH * 2 - TOLERANCE / 2, chamfer = BASE_STRENGTH - PRINTING_LAYER_HEIGHT);
+              attach(BACK, FRONT) label_hooks(yrot = yrot, inner = true, debug_colors = debug_colors);
+            }
     }
     children();
   }
@@ -289,7 +289,7 @@ module label_plate(yrot=0, anchor=CENTER, spin=0, orient=UP, debug_colors=false)
 ///   yrot                 - rotation angle (0, 90, 180, 270)
 ///   panel_depth          - total depth of the panel being cut into (mm).
 ///                          When greater than keystone depth, the pocket extends deeper.
-module keystone_pocket(additional_tolerance=0.0, yrot=0, panel_depth, debug_colors=false) {
+module keystone_pocket(additional_tolerance = 0.0, yrot = 0, panel_depth, debug_colors = false) {
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
   assert(_panel_depth >= get_ks_depth_outer(),
     str("panel_depth (", _panel_depth, "mm) must be >= keystone depth (", get_ks_depth_outer(), "mm)"));
@@ -297,16 +297,16 @@ module keystone_pocket(additional_tolerance=0.0, yrot=0, panel_depth, debug_colo
   _height_outer = get_ks_height_outer(additional_tolerance);
   _depth_outer = get_ks_depth_outer();
 
-  attachable(expose_tags=true, anchor=CENTER, spin=0, axis=UP, orient=UP,
-    size=[get_effective_keystone_width(additional_tolerance, yrot), _depth_outer, get_effective_keystone_height(additional_tolerance, yrot)]) {
+  attachable(expose_tags = true, anchor = CENTER, spin = 0, axis = UP, orient = UP,
+    size = [get_effective_keystone_width(additional_tolerance, yrot), _depth_outer, get_effective_keystone_height(additional_tolerance, yrot)]) {
     yrot(yrot) xrot(270) {
       color_this(debug_colors ? HR_YELLOW : KS_COLOR_PRIMARY)
-      cuboid([_width_outer, _height_outer, _depth_outer]) {
-        tag("keystone") keystone_socket(additional_tolerance=additional_tolerance, debug_colors=debug_colors)
-          // Extend pocket beyond keystone depth if panel is thicker
-          align(TOP) color_this(debug_colors ? HR_CHARCOAL : KS_COLOR_PRIMARY)
-            cuboid([_width_outer, _height_outer + EPSILON, _panel_depth - _depth_outer]);
-      }
+        cuboid([_width_outer, _height_outer, _depth_outer]) {
+          tag("keystone") keystone_socket(additional_tolerance = additional_tolerance, debug_colors = debug_colors)
+            // Extend pocket beyond keystone depth if panel is thicker
+            align(TOP) color_this(debug_colors ? HR_CHARCOAL : KS_COLOR_PRIMARY)
+              cuboid([_width_outer, _height_outer + EPSILON, _panel_depth - _depth_outer]);
+        }
     }
     children();
   }
@@ -316,8 +316,8 @@ module keystone_pocket(additional_tolerance=0.0, yrot=0, panel_depth, debug_colo
 /// Must be used within a diff("keystone") context.
 /// Parameters:
 ///   label_position - "above" (default) or "below": which side of the jack the recess sits on
-module label_recess(additional_tolerance=0.0, yrot=0,
-  anchor=CENTER, spin=0, orient=UP, debug_colors=false, label_position="above") {
+module label_recess(additional_tolerance = 0.0, yrot = 0,
+  anchor = CENTER, spin = 0, orient = UP, debug_colors = false, label_position = "above") {
 
   assert(label_position == "above" || label_position == "below",
     str("label_position must be 'above' or 'below', got: '", label_position, "'"));
@@ -326,13 +326,13 @@ module label_recess(additional_tolerance=0.0, yrot=0,
   _height = get_label_attachable_height(yrot, additional_tolerance);
   _below = label_position == "below";
 
-  attachable(expose_tags=true, anchor=anchor, spin=spin, orient=orient, size=[_width, _depth, _height]) {
+  attachable(expose_tags = true, anchor = anchor, spin = spin, orient = orient, size = [_width, _depth, _height]) {
     color_this(debug_colors ? HR_BLUE : KS_COLOR_PRIMARY)
-    cuboid([_width, _depth, _height]) {
-      tag("keystone") align(FRONT, _below ? TOP : BOTTOM, inside=true)
-        up((_below ? -1 : 1) * get_label_slot_vertical_offset(yrot, additional_tolerance))
-        label_hooks(yrot=yrot, debug_colors=debug_colors);
-    }
+      cuboid([_width, _depth, _height]) {
+        tag("keystone") align(FRONT, _below ? TOP : BOTTOM, inside = true)
+          up((_below ? -1 : 1) * get_label_slot_vertical_offset(yrot, additional_tolerance))
+            label_hooks(yrot = yrot, debug_colors = debug_colors);
+      }
     children();
   }
 }
@@ -348,9 +348,9 @@ module label_recess(additional_tolerance=0.0, yrot=0,
 ///   yrot                 - rotation angle: 0, 90, 180, 270 (degrees)
 ///   panel_depth          - depth of the panel being cut into (mm, default: keystone depth)
 ///   label_position       - "above" (default) or "below": which side of the jack the label sits on
-module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="assembly",
-  label_plate_gap=0, additional_tolerance=0.0, yrot=0,
-  panel_depth, anchor=CENTER, spin=0, orient=UP, debug_colors=false, label_position="above") {
+module keystone_full(add_label_slots = true, show_label = false, label_plate_mode = "assembly",
+  label_plate_gap = 0, additional_tolerance = 0.0, yrot = 0,
+  panel_depth, anchor = CENTER, spin = 0, orient = UP, debug_colors = false, label_position = "above") {
 
   assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
     str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
@@ -365,55 +365,55 @@ module keystone_full(add_label_slots=true, show_label=false, label_plate_mode="a
   _below = label_position == "below";
   _label_anchor = _below ? BOTTOM : TOP;
   _label_height = add_label_slots ? get_label_attachable_height(yrot, additional_tolerance) : 0;
-  _width = get_effective_keystone_width(additional_tolerance=additional_tolerance, yrot=yrot);
+  _width = get_effective_keystone_width(additional_tolerance = additional_tolerance, yrot = yrot);
   _depth = get_ks_depth_outer();
-  _height = get_effective_keystone_height(additional_tolerance=additional_tolerance, yrot=yrot) + _label_height;
+  _height = get_effective_keystone_height(additional_tolerance = additional_tolerance, yrot = yrot) + _label_height;
 
-  attachable(expose_tags=true, anchor=anchor, spin=spin, orient=orient, size=[_width, _depth, _height]) {
+  attachable(expose_tags = true, anchor = anchor, spin = spin, orient = orient, size = [_width, _depth, _height]) {
     up((_below ? 1 : -1) * _label_height / 2)
-    keystone_pocket(additional_tolerance=additional_tolerance, yrot=yrot, panel_depth=_panel_depth, debug_colors=debug_colors) {
-      if (add_label_slots) {
-        align(_label_anchor, FRONT) label_recess(additional_tolerance=additional_tolerance, yrot=yrot, label_position=label_position, debug_colors=debug_colors) {
-          if (show_label && label_plate_mode == "assembly") {
-            fwd(BASE_STRENGTH) up((_below ? 1 : -1) * BASE_STRENGTH)
-              align(FRONT, _label_anchor) label_plate(yrot=yrot, debug_colors=debug_colors);
-          }
-          if (show_label && label_plate_mode == "plate") {
-            up((_below ? -1 : 1) * (KS_LABEL_HEIGHT/2 + TOLERANCE + label_plate_gap))
-              align(_label_anchor) label_plate(yrot=yrot, orient=UP, debug_colors=debug_colors);
+      keystone_pocket(additional_tolerance = additional_tolerance, yrot = yrot, panel_depth = _panel_depth, debug_colors = debug_colors) {
+        if (add_label_slots) {
+          align(_label_anchor, FRONT) label_recess(additional_tolerance = additional_tolerance, yrot = yrot, label_position = label_position, debug_colors = debug_colors) {
+            if (show_label && label_plate_mode == "assembly") {
+              fwd(BASE_STRENGTH) up((_below ? 1 : -1) * BASE_STRENGTH)
+                align(FRONT, _label_anchor) label_plate(yrot = yrot, debug_colors = debug_colors);
+            }
+            if (show_label && label_plate_mode == "plate") {
+              up((_below ? -1 : 1) * (KS_LABEL_HEIGHT / 2 + TOLERANCE + label_plate_gap))
+                align(_label_anchor) label_plate(yrot = yrot, orient = UP, debug_colors = debug_colors);
+            }
           }
         }
       }
-    }
     children();
   }
 }
 
 /// Demo panel showing a single keystone mounted in a 1U-height panel strip.
 /// Useful for visualization and testing. Used by the parts/keystone_sample.scad file.
-module keystone_demo_panel(additional_tolerance=0.0, yrot=0, panel_depth, add_label=true,
-  label_plate_mode="assembly", label_plate_gap=0, debug_colors=false, label_position="above") {
+module keystone_demo_panel(additional_tolerance = 0.0, yrot = 0, panel_depth, add_label = true,
+  label_plate_mode = "assembly", label_plate_gap = 0, debug_colors = false, label_position = "above") {
   assert(label_plate_mode == "assembly" || label_plate_mode == "plate",
     str("label_plate_mode must be 'assembly' or 'plate', got: '", label_plate_mode, "'"));
   _panel_depth = is_undef(panel_depth) ? get_ks_depth_outer() : panel_depth;
   _ks_depth = get_ks_depth_outer();
-  _width = get_effective_keystone_width(additional_tolerance=additional_tolerance, yrot=yrot);
+  _width = get_effective_keystone_width(additional_tolerance = additional_tolerance, yrot = yrot);
   _height = STD_UNIT_HEIGHT;
   _orient = label_plate_mode == "plate" ? FRONT : UP;
 
-  attachable(expose_tags=true, anchor=CENTER, spin=0, axis=UP, orient=_orient, size=[_width, _ks_depth, _height]) {
+  attachable(expose_tags = true, anchor = CENTER, spin = 0, axis = UP, orient = _orient, size = [_width, _ks_depth, _height]) {
     fwd(_ks_depth / 2 - BASE_STRENGTH / 2)
-    diff("keystone")
-    color_this(debug_colors ? HR_WHITE : KS_COLOR_PRIMARY)
-    cuboid([_width, BASE_STRENGTH, STD_UNIT_HEIGHT]) {
-      align(FRONT, BOTTOM, inside=true) {
-        keystone_full(add_label_slots=add_label, show_label=add_label,
-          label_plate_mode=label_plate_mode, label_plate_gap=label_plate_gap,
-          label_position=label_position,
-          additional_tolerance=additional_tolerance, yrot=yrot,
-          panel_depth=_panel_depth, debug_colors=debug_colors);
-      }
-    }
+      diff("keystone")
+        color_this(debug_colors ? HR_WHITE : KS_COLOR_PRIMARY)
+          cuboid([_width, BASE_STRENGTH, STD_UNIT_HEIGHT]) {
+            align(FRONT, BOTTOM, inside = true) {
+              keystone_full(add_label_slots = add_label, show_label = add_label,
+                label_plate_mode = label_plate_mode, label_plate_gap = label_plate_gap,
+                label_position = label_position,
+                additional_tolerance = additional_tolerance, yrot = yrot,
+                panel_depth = _panel_depth, debug_colors = debug_colors);
+            }
+          }
     children();
   }
 }
