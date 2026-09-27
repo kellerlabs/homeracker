@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/kellerlabs/homeracker/compare/sync-instructions-v1.2.1...sync-instructions-v1.2.2) (2026-09-27)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** pass action inputs via env and enforce zizmor template-injection ([#510](https://github.com/kellerlabs/homeracker/issues/510)) ([74e77b1](https://github.com/kellerlabs/homeracker/commit/74e77b1e9474b3bb67c7fc0fdd77b05a5aec6229))
+
 ## [1.2.1](https://github.com/kellerlabs/homeracker/compare/sync-instructions-v1.2.0...sync-instructions-v1.2.1) (2026-09-14)
 
 

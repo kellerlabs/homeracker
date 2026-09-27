@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0](https://github.com/kellerlabs/homeracker/compare/scadm-v0.10.1...scadm-v0.11.0) (2026-09-27)
+
+
+### ✨ Features
+
+* **scadm:** gate unit coverage at 90% and run weekly mutation tests ([#507](https://github.com/kellerlabs/homeracker/issues/507)) ([0600151](https://github.com/kellerlabs/homeracker/commit/060015180e8fdbf82a5844b68e21862c0e939546))
+* **scadm:** scope mutation tests to changed functions, report weekly to Discord ([#509](https://github.com/kellerlabs/homeracker/issues/509)) ([a252759](https://github.com/kellerlabs/homeracker/commit/a252759ec6aac611df17898c0211c2b4a0c0f00e))
+
 ## [0.10.1](https://github.com/kellerlabs/homeracker/compare/scadm-v0.10.0...scadm-v0.10.1) (2026-09-14)
 
 
