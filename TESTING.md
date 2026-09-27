@@ -26,7 +26,7 @@ See [e2e.md](.claude/rules/e2e.md) for how to write tests and [e2e-test-site-and
 
 ## scadfmt Tests
 
-Unit tests cover every formatting rule, the CLI and the VS Code setup, and format every `.scad` file in the repo twice to prove the output is stable. The `scadfmt-tests` pre-commit hook runs them when a commit touches `cmd/scadfmt/`, with a branch coverage gate in `cmd/scadfmt/pyproject.toml`. The `scadfmt` job in [`ci.yml`](.github/workflows/ci.yml) also runs them on Windows.
+Unit tests cover every formatting rule, the CLI and the VS Code setup, and format every `.scad` file in the repo twice to prove the output is stable. The `scadfmt-tests` pre-commit hook runs them when a commit touches `cmd/scadfmt/`, with a branch coverage gate in `cmd/scadfmt/pyproject.toml`. The `scadfmt-tests` job in [`ci.yml`](.github/workflows/ci.yml) also runs them on Windows.
 
 ```bash
 cd cmd/scadfmt

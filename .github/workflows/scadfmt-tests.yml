@@ -1,5 +1,5 @@
 ---
-name: scadfmt
+name: scadfmt tests
 
 on:
   workflow_call:
