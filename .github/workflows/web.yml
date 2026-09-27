@@ -204,8 +204,15 @@ jobs:
           PR: ${{ github.event.number }}
           BODY: ${{ needs.site.outputs.e2e-report }}
           STATUS: ${{ needs.site.outputs.e2e-status }}
+          SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
+          # A run that finishes after a newer push must not overwrite the newer result.
+          head="$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)"
+          if [[ "$head" != "$SHA" ]]; then
+            echo "::notice::$SHA is no longer the PR head ($head), leaving the comment alone"
+            exit 0
+          fi
           existing="$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
             --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- e2e-report -->"))) | .id')"
           existing="$(head -n 1 <<< "$existing")"
