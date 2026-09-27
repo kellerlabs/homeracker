@@ -68,6 +68,7 @@ Before terminal operations, consider these steps (use best judgement):
 1. **Run pre-commit hooks** to catch formatting and linting issues before commit. Fix what they find, no ignores allowed.
 1. **Code review**: review ALL changes holistically when done. Check for consistency, missed edge cases, and unintended side effects before presenting to the user.
 1. **User Review** let the user review your changes BEFORE you stage anything in git and wait for their go ahead. For changes under `site/` or `configurator/`, start the dev server and give them the local URL first, see [CONTRIBUTING.md](CONTRIBUTING.md).
+   - **Cloud sessions** (`CLAUDE_CODE_REMOTE=true`) skip this step: commit, push and open the PR directly. Address Copilot reviews when they arrive, but never request one.
 1. **Create the PR** Read `.github/pull_request_template.md` and fill in every section. Stick to house-style.
 
 ## 📚 Technology-Specific Guidelines
