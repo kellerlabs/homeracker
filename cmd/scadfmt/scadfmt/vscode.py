@@ -86,6 +86,9 @@ def setup_vscode(workspace: Path) -> bool:
                 "%s is not plain JSON (%s). Add the settings from the scadfmt README by hand.", settings_file, e
             )
             return False
+        except (OSError, UnicodeDecodeError) as e:
+            logger.error("Cannot read %s: %s", settings_file, e)
+            return False
     if not _install_extension():
         return False
     try:

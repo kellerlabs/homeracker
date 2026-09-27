@@ -25,10 +25,14 @@ jobs:
           scadm-source: cmd/scadm
 
       - name: Install scadfmt
-        run: pip install -e cmd/scadfmt
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadfmt
 
       - name: Run canary
-        run: cmd/scadfmt/tests/canary/check.sh
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/tests/canary/check.sh
 
   # The pre-commit hook runs them on Linux; stdin/stdout byte handling and paths also need Windows.
   unit-tests:
@@ -49,11 +53,16 @@ jobs:
           python-version: '3.14'
 
       - name: Install test dependencies
-        run: pip install pytest pytest-cov
+        shell: bash
+        run: |
+          set -euo pipefail
+          pip install pytest pytest-cov
 
       - name: Run unit tests
         shell: bash
         working-directory: cmd/scadfmt
         env:
           PYTHONWARNDEFAULTENCODING: '1'
-        run: python -m pytest tests/ -q --cov
+        run: |
+          set -euo pipefail
+          python -m pytest tests/ -q --cov

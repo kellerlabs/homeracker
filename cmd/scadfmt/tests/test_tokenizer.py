@@ -23,7 +23,7 @@ def test_multi_char_operators_win(op):
     assert kinds_and_texts(f"a{op}b")[1] == (Kind.OP, op)
 
 
-@pytest.mark.parametrize("number", ["1", "1.", ".5", "1e3", "1.5E-3", "2e+4"])
+@pytest.mark.parametrize("number", ["1", "1.", ".5", "1e3", "1.5E-3", "2e+4", "0xFF", "0x0a"])
 def test_numbers(number):
     assert kinds_and_texts(number) == [(Kind.NUMBER, number)]
 
@@ -59,6 +59,26 @@ def test_positions_and_newlines():
         ("d", 5, 6),
     ]
     assert [t.text for t in tokens if t.kind == Kind.NEWLINE] == ["\n", "\n", "\n"]
+
+
+@pytest.mark.parametrize("source", ["1abc", "2_x", "0x1g"])
+def test_digit_leading_identifier_is_rejected(source):
+    with pytest.raises(TokenizeError, match="1:1: identifiers starting with a digit"):
+        tokenize(source)
+
+
+def test_no_break_space_and_bom_are_whitespace():
+    assert kinds_and_texts("\ufeffa\u00a0=\u00a01;") == kinds_and_texts("a = 1;")
+
+
+def test_line_comment_ends_at_lf_only():
+    tokens = tokenize("// c\ry = 2;\nz")
+    assert [(t.kind, t.text) for t in tokens] == [
+        (Kind.LINE_COMMENT, "// c\ry = 2;"),
+        (Kind.NEWLINE, "\n"),
+        (Kind.IDENT, "z"),
+    ]
+    assert tokens[-1].line == 2
 
 
 def test_unknown_character():

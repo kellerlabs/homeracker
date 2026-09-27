@@ -21,6 +21,7 @@ CLOSERS = {v: k for k, v in OPENERS.items()}
 SPACED_BEFORE_PAREN = {"if", "for", "intersection_for", "function"}
 MODIFIERS = {"#", "%", "!", "*"}
 UNARY = {"-", "+", "!", "~"}
+HEADER_KEYWORDS = {"if", "for", "intersection_for", "let", "function", "assert", "echo"}
 # A previous token after which a line continues the statement instead of starting a new one.
 STATEMENT_ENDS = {";", "{", "}"}
 
@@ -36,6 +37,10 @@ class _Frame:
     char: str
     level: int
     pending_ternaries: int = 0
+    # `(` right after `if`, `for`, `let`, `function`...: a `-` after its `)` starts an operand.
+    header: bool = False
+    # Levels of unbraced `if` lines still waiting for a possible `else`.
+    if_levels: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -59,6 +64,8 @@ class _State:
     in_expression: bool = False
     # Level of the line the last code line belongs to, see `_render_tokens`.
     line_anchor: int = 0
+    after_header: bool = False
+    newline: str = "\n"
 
 
 def format_source(source: str) -> str:
@@ -160,7 +167,7 @@ def _split_lines(tokens: list[Token]) -> list[tuple[list[Token], int, int]]:
 
 def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], newline: str = "\n") -> str:
     """Turn grouped tokens into formatted text joined by newline."""
-    state = _State()
+    state = _State(newline=newline)
     out: list[_Line] = []
     blank_run = 0
     fmt_off = False
@@ -173,7 +180,7 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
             else:
                 blank_run += 1
             continue
-        level = _line_level(tokens[0], state)
+        level = _match_else(tokens, _line_level(tokens[0], state), state)
         marker = tokens[0].text.strip() if len(tokens) == 1 and tokens[0].kind == Kind.LINE_COMMENT else None
         if after_import and not fmt_off:
             blank_run, after_import = _import_block_gap(tokens, next_code_is_import[index])
@@ -195,14 +202,36 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
     while out and out[0].blank:
         out.pop(0)
     _align_comments(out)
-    text = "\n".join(line.code if line.verbatim else _join(line) for line in out)
-    return text.replace("\n", newline) + newline if text else ""
+    # Joined with the file's newline directly: a multi-line string keeps its own line endings.
+    text = newline.join(line.code if line.verbatim else _join(line) for line in out)
+    return text + newline if text else ""
 
 
 def _blank_lines(count: int, top_level: bool) -> list[_Line]:
     """Up to count blank lines, capped by where they sit."""
     allowed = MAX_BLANK_LINES_TOP if top_level else MAX_BLANK_LINES_NESTED
     return [_Line("", "", blank=True) for _ in range(min(count, allowed))]
+
+
+def _match_else(tokens: list[Token], level: int, state: _State) -> int:
+    """Put an `else` at the level of the unbraced `if` it belongs to, and track those `if`s.
+
+    Returns:
+        The line's level, corrected for an `else`.
+    """
+    frame, first = state.stack[-1], tokens[0]
+    if (first.kind == Kind.OP and first.text in CLOSERS) or _is_comment_only(tokens):
+        return level
+    is_else = first.kind == Kind.IDENT and first.text == "else"
+    if is_else and frame.if_levels:
+        level = frame.if_levels.pop()
+    elif frame.char in ("", "{") and level == frame.level + 1:
+        # A new statement ends every `if` at or below its level.
+        frame.if_levels = [pending for pending in frame.if_levels if pending < level]
+    starts_if = first.text == "if" or (is_else and len(tokens) > 1 and tokens[1].text == "if")
+    if first.kind == Kind.IDENT and starts_if:
+        frame.if_levels.append(level)
+    return level
 
 
 def _is_import(tokens: list[Token]) -> bool:
@@ -300,7 +329,7 @@ def _render_tokens(tokens: list[Token], level: int, state: _State) -> tuple[str,
     anchor = level
     for token in tokens:
         role = _role(token, state)
-        text = _token_text(token)
+        text = _token_text(token, state.newline)
         if before is not None and _needs_space(before, before_role, token, role):
             parts.append(" ")
         parts.append(text)
@@ -313,10 +342,10 @@ def _render_tokens(tokens: list[Token], level: int, state: _State) -> tuple[str,
     return "".join(parts), comment
 
 
-def _token_text(token: Token) -> str:
+def _token_text(token: Token, newline: str) -> str:
     """Token text as written to the output."""
     if token.kind == Kind.BLOCK_COMMENT:
-        return "\n".join(part.rstrip() for part in token.text.splitlines())
+        return newline.join(part.rstrip() for part in token.text.splitlines())
     return token.text
 
 
@@ -328,7 +357,7 @@ def _role(token: Token, state: _State) -> str:
     previous, frame = state.previous, state.stack[-1]
     if text in MODIFIERS and _at_statement_start(state):
         return "modifier"
-    if text in UNARY and _expects_operand(previous):
+    if text in UNARY and (state.after_header or _expects_operand(previous)):
         return "unary"
     if text == ":":
         return "binary" if frame.pending_ternaries else "range"
@@ -398,18 +427,21 @@ def _advance(token: Token, role: str, level: int, state: _State) -> _Frame | Non
     """
     if token.kind in (Kind.LINE_COMMENT, Kind.BLOCK_COMMENT):
         return None
-    state.previous, state.previous_role = token, role
+    before = state.previous
+    state.previous, state.previous_role, state.after_header = token, role, False
     if token.kind != Kind.OP:
         return None
     text, frame = token.text, state.stack[-1]
     if text in OPENERS:
-        state.stack.append(_Frame(text, level))
+        header = text == "(" and before is not None and before.kind == Kind.IDENT and before.text in HEADER_KEYWORDS
+        state.stack.append(_Frame(text, level, header=header))
         if text == "{":
             state.in_expression = False
     elif text in CLOSERS:
         if frame.char != CLOSERS[text]:
             raise FormatError(f"{token.line}:{token.col}: unexpected {text!r}")
         state.stack.pop()
+        state.after_header = frame.header
         if text == "}":
             state.in_expression = False
         return frame

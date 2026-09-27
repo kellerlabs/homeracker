@@ -64,6 +64,15 @@ def test_setup_refuses_settings_with_comments(tmp_path, fake_code):
     assert not fake_code
 
 
+def test_setup_refuses_unreadable_settings(tmp_path, fake_code):
+    settings_file = tmp_path / ".vscode" / "settings.json"
+    settings_file.parent.mkdir()
+    settings_file.write_bytes(b"\xff\xfe")
+    assert not vscode.setup_vscode(tmp_path)
+    assert settings_file.read_bytes() == b"\xff\xfe"
+    assert not fake_code
+
+
 def test_setup_when_settings_cannot_be_written(tmp_path, fake_code):
     (tmp_path / ".vscode").write_text("not a directory", encoding="utf-8")
     assert not vscode.setup_vscode(tmp_path)

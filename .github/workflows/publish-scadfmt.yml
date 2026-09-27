@@ -33,16 +33,21 @@ jobs:
 
       - name: Install build tools
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           pip install build twine
 
       - name: Build package
         working-directory: cmd/scadfmt
-        run: python -m build
+        run: |
+          set -euo pipefail
+          python -m build
 
       - name: Check package
         working-directory: cmd/scadfmt
-        run: twine check dist/*
+        run: |
+          set -euo pipefail
+          twine check dist/*
 
       - name: Publish to PyPI
         if: ${{ !inputs.dry_run }}

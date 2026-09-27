@@ -2,7 +2,7 @@
 
 ## 📌 Status
 
-**Accepted**, 2026-09-27
+**Accepted**: 2026-09-27
 
 ## 🤔 Context
 
@@ -46,4 +46,4 @@
 - **Negative**: we maintain the formatter ourselves; kept in check by the canary and a planned weekly nightly check ([#177](https://github.com/kellerlabs/homeracker/issues/177)).
 - **Negative**: `scadfmt vscode` repeats about 60 lines of `scadm vscode` settings handling.
 - **Revisable**: no line length limit for now; a lint rule can add one later.
-- **Negative**: the first repo-wide format run touches most `.scad` files; listed in `.git-blame-ignore-revs`.
+- **Negative**: the first repo-wide format run (a follow-up PR) touches most `.scad` files; its commit goes into `.git-blame-ignore-revs`.

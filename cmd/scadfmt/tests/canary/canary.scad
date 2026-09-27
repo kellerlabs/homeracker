@@ -22,6 +22,9 @@ arith=1+2-3*4/5%6^2;
 compare=[1<2,1>2,1<=2,1>=2,1==2,1!=2];
 logic=!true&&false||!(false);
 bitwise=[5&3,5|3,~5,1<<4,16>>2];
+hex=[0xFF,0x0a];
+unary_after_header=[let(a=1)-a,for(i=[1:2])-i];
+fn_negate=function(x)-x;
 unary=[-width,+width,- - width];
 ternary=width>5?"big":width>2?"mid":"small";
 index=numbers[0]+numbers [ 1 ];
@@ -74,6 +77,13 @@ if (width > 1)
 box();
 else
 sphere(1);
+if(width>1)
+if(width>2)
+box();
+else
+sphere(2);
+else
+sphere(3);
 for(i=[0:2]){translate([i*10,0,0])cube(1);}
 intersection_for(i=[0:1]){rotate([0,0,i*45])cube(10,center=true);}
 #box();

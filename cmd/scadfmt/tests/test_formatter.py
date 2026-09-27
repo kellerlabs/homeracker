@@ -24,6 +24,11 @@ from scadfmt.formatter import FormatError, format_source
         ("x=a- -b;", "x = a - -b;"),
         ("x=f(a)-b;", "x = f(a) - b;"),
         ("x=[for(i=v)if(c)i else -i];", "x = [for (i = v) if (c) i else -i];"),
+        ("f=function(x)-x;", "f = function (x) -x;"),
+        ("y=let(a=1)-a;", "y = let(a = 1) -a;"),
+        ("z=[for(i=v)-i];", "z = [for (i = v) -i];"),
+        ("w=assert(c)-1;", "w = assert(c) -1;"),
+        ("h=0xFF&0x0f;", "h = 0xFF & 0x0f;"),
         # Ternary vs range colon
         ("x=a?b:c;", "x = a ? b : c;"),
         ("x=[a?b:c,0:2];", "x = [a ? b : c, 0:2];"),
@@ -85,6 +90,17 @@ def test_module_chain_nests_per_line():
 def test_comment_lines_inside_a_chain_do_not_nest():
     source = "translate(v)\n// line\n/* block */\ncube();\n"
     assert format_source(source) == "translate(v)\n  // line\n  /* block */\n  cube();\n"
+
+
+def test_else_binds_to_the_nearest_unbraced_if():
+    source = "if (outer)\nif (inner)\na();\nelse\nb();\nelse\nc();\nnext();\n"
+    expected = "if (outer)\n  if (inner)\n    a();\n  else\n    b();\nelse\n  c();\nnext();\n"
+    assert format_source(source) == expected
+
+
+def test_else_after_a_finished_if_chain():
+    source = "if (a) b();\nelse if (c) d();\nelse e();\nf();\n"
+    assert format_source(source) == source
 
 
 def test_expression_continuation_stays_one_level_in():
@@ -154,6 +170,11 @@ def test_fmt_off_keeps_lines_verbatim():
 def test_block_comment_keeps_inner_lines():
     source = "module m() {\n/**\n  * Doc.   \n  */\na();\n}\n"
     assert format_source(source) == "module m() {\n  /**\n  * Doc.\n  */\n  a();\n}\n"
+
+
+def test_crlf_inside_a_string_is_kept():
+    source = 'x = "a\r\nb";\r\n'
+    assert format_source(source) == source
 
 
 @pytest.mark.parametrize(

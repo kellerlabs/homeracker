@@ -74,12 +74,14 @@ OPERATORS = (
 )
 
 _PATTERNS = [
-    (None, re.compile(r"[ \t\f\v]+")),
+    # OpenSCAD also skips U+00A0 (no-break space) and U+FEFF (byte order mark).
+    (None, re.compile("[ \t\f\v\u00a0\ufeff]+")),
     (Kind.NEWLINE, re.compile(r"\r\n|\r|\n")),
-    (Kind.LINE_COMMENT, re.compile(r"//[^\r\n]*")),
+    # Like OpenSCAD's lexer, a line comment ends at LF only; a trailing CR is stripped on output.
+    (Kind.LINE_COMMENT, re.compile(r"//[^\n]*")),
     (Kind.BLOCK_COMMENT, re.compile(r"/\*.*?\*/", re.S)),
     (Kind.STRING, re.compile(r'"(?:\\.|[^"\\])*"', re.S)),
-    (Kind.NUMBER, re.compile(r"(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")),
+    (Kind.NUMBER, re.compile(r"0[xX][0-9A-Fa-f]+|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")),
     (Kind.IDENT, re.compile(r"\$?[A-Za-z_][A-Za-z0-9_]*")),
     (Kind.OP, re.compile("|".join(re.escape(op) for op in OPERATORS))),
 ]
@@ -87,6 +89,7 @@ _PATTERNS = [
 # `include <path>` and `use <path>` take a path, not an expression.
 _PATH = re.compile(r"<[^>\r\n]*>")
 _PATH_KEYWORDS = ("include", "use")
+_IDENT_CHAR = re.compile(r"[A-Za-z_$]")
 
 
 def tokenize(source: str) -> list[Token]:
@@ -120,13 +123,16 @@ def tokenize(source: str) -> list[Token]:
             raise TokenizeError(_unknown_message(source, pos, line, col))
         if kind == Kind.OP and source.startswith("/*", pos):
             raise TokenizeError(_unknown_message(source, pos, line, col))
+        if kind == Kind.NUMBER and _IDENT_CHAR.match(source, match.end()):
+            # OpenSCAD reads `1abc` as one (deprecated) identifier; splitting it would change the code.
+            raise TokenizeError(f"{line}:{col}: identifiers starting with a digit are not supported")
         text = match.group()
         if kind is not None:
             tokens.append(Token(kind, "\n" if kind == Kind.NEWLINE else text, line, col))
-        newlines = text.count("\n") + text.count("\r") - text.count("\r\n")
+        newlines = 1 if kind == Kind.NEWLINE else text.count("\n")
         if newlines:
             line += newlines
-            line_start = pos + max(text.rfind("\n"), text.rfind("\r")) + 1
+            line_start = pos + len(text) if kind == Kind.NEWLINE else pos + text.rfind("\n") + 1
         pos = match.end()
     return tokens
 
