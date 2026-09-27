@@ -14,6 +14,7 @@ from scadm.flatten import (
     _parse_definitions,
     _resolve_dependencies,
     compute_checksum,
+    flatten_all,
     flatten_file,
 )
 
@@ -1001,6 +1002,73 @@ class FlattenTests(unittest.TestCase):
             out = _flatten(root, input_file)
             self.assertIn("$my_resolution", out)
             self.assertNotIn("UNUSED", out)
+
+
+class FlattenAllTests(unittest.TestCase):
+    """Tests for flatten_all batch mode and checksum caching."""
+
+    CONFIG = '{"dependencies": [], "flatten": [{"src": "models/x", "dest": "models/x/flattened"}]}'
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name).resolve()
+        _make_workspace(self.root, deps=self.CONFIG)
+        self.src = self.root / "models" / "x"
+        self.src.mkdir(parents=True)
+        (self.src / "a.scad").write_text("cube(1);\n", encoding="utf-8")
+        (self.src / "parts").mkdir()
+        (self.src / "parts" / "b.scad").write_text("sphere(1);\n", encoding="utf-8")
+        self.checksums = self.root / "models" / ".flatten-checksums"
+
+    def test_flattens_all_and_writes_sorted_checksums(self):
+        self.assertTrue(flatten_all(self.root))
+        dest = self.src / "flattened"
+        self.assertIn("cube(1);", (dest / "a.scad").read_text(encoding="utf-8"))
+        self.assertIn("sphere(1);", (dest / "parts" / "b.scad").read_text(encoding="utf-8"))
+        lines = self.checksums.read_text(encoding="utf-8").splitlines()
+        self.assertEqual([line.split()[1] for line in lines], ["models/x/a.scad", "models/x/parts/b.scad"])
+        self.assertEqual(lines[0].split()[0], compute_checksum(self.src / "a.scad", self.root))
+
+    def test_second_run_skips_unchanged(self):
+        self.assertTrue(flatten_all(self.root))
+        (self.src / "a.scad").write_text("cube(2);\n", encoding="utf-8")
+        with patch("scadm.flatten.flatten_file") as mock_flatten:
+            self.assertTrue(flatten_all(self.root))
+        mock_flatten.assert_called_once()
+        self.assertEqual(mock_flatten.call_args.args[0], self.src / "a.scad")
+
+    def test_skips_files_already_in_dest(self):
+        self.assertTrue(flatten_all(self.root))
+        with patch("scadm.flatten.flatten_file") as mock_flatten:
+            self.checksums.unlink()
+            self.assertTrue(flatten_all(self.root))
+        flattened_inputs = {call.args[0].name for call in mock_flatten.call_args_list}
+        self.assertEqual(flattened_inputs, {"a.scad", "b.scad"})
+
+    def test_custom_checksums_file_and_malformed_lines(self):
+        custom = self.root / "sums.txt"
+        custom.write_text("garbage\n", encoding="utf-8")
+        self.assertTrue(flatten_all(self.root, checksums_file=custom))
+        self.assertEqual(len(custom.read_text(encoding="utf-8").splitlines()), 2)
+
+    def test_failure_is_reported_and_not_cached(self):
+        with patch("scadm.flatten.flatten_file", side_effect=[ValueError("bad"), None]):
+            self.assertFalse(flatten_all(self.root))
+        self.assertEqual(self.checksums.read_text(encoding="utf-8").split()[1:], ["models/x/parts/b.scad"])
+
+    def test_missing_src_dir(self):
+        shutil.rmtree(self.src)
+        self.assertFalse(flatten_all(self.root))
+
+    def test_no_scad_files(self):
+        for scad in self.src.rglob("*.scad"):
+            scad.unlink()
+        self.assertFalse(flatten_all(self.root))
+
+    def test_auto_detects_workspace(self):
+        with patch("scadm.flatten.get_workspace_root", return_value=self.root):
+            self.assertTrue(flatten_all())
 
 
 if __name__ == "__main__":

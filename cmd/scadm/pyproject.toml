@@ -53,7 +53,7 @@ branch = true
 
 [tool.coverage.report]
 # Raise when coverage grows, never lower. See docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md
-fail_under = 80
+fail_under = 90
 show_missing = true
 skip_covered = true
 exclude_also = [

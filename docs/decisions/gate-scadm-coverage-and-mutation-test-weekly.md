@@ -9,14 +9,13 @@
 - More and more of `scadm` is written with AI help. Passing tests alone don't show whether those tests exercise the code or would catch a regression.
 - Code coverage measures how much code the tests run. Mutation testing measures whether the tests notice when that code changes. High coverage with weak assertions passes one check and fails the other, so neither is enough alone.
 - Unit tests already run in the `scadm-tests` pre-commit hook, locally and in the [Pre-commit workflow](../../.github/workflows/pre-commit.yml), whenever `cmd/scadm/` changes.
-- Tracked in [#327](https://github.com/kellerlabs/homeracker/issues/327). First draft in [#343](https://github.com/kellerlabs/homeracker/pull/343).
 
 ## 🔧 Decision
 
 **Coverage: `pytest-cov`, enforced by the existing `scadm-tests` hook.**
 
 - The hook runs pytest with `--cov`. Branch coverage is on.
-- `fail_under = 80` in `[tool.coverage.report]` of [`cmd/scadm/pyproject.toml`](../../cmd/scadm/pyproject.toml) is the gate.
+- `fail_under = 90` in `[tool.coverage.report]` of [`cmd/scadm/pyproject.toml`](../../cmd/scadm/pyproject.toml) is the gate.
 - Ratchet by hand: when coverage grows well past the gate, raise `fail_under` in the same PR. Never lower it.
 - Alternatives rejected:
   - Codecov or Coveralls: an external service for a number coverage.py already computes locally.
@@ -35,10 +34,7 @@
 
 ## 📊 Consequences
 
-- ✅ A commit that drops `scadm` coverage below the gate fails the same hook contributors already run, with no extra CI job.
-- ✅ Surviving mutants point at specific weak assertions to fix.
-- ✅ Both tools run locally with no service accounts.
-- ❌ Contributors need `pytest-cov` installed for the hook, via `requirements.txt`.
-- ❌ The ratchet is manual, so the gate can lag behind real coverage.
-- ❌ mutmut doesn't run natively on Windows. Windows contributors use WSL or the weekly workflow.
-- ❌ Survivors don't block anything. Someone has to read the weekly report.
+- ✅ A commit that drops `scadm` coverage below the gate fails the hook contributors already run, with no extra CI job.
+- ✅ Surviving mutants point at specific weak assertions, and nothing needs a service account.
+- ❌ The hook needs `pytest-cov` from `requirements.txt`, and the ratchet is manual, so the gate can lag real coverage.
+- ❌ mutmut has no native Windows support (use WSL), and survivors block nothing until someone reads the weekly report.

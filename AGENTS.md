@@ -31,7 +31,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components are p
   - **Unit tests**: run via pre-commit hooks, fast and mocked. The `scadm-tests` hook fires on changes under `cmd/scadm/`.
   - **Integration tests**: run in CI on ubuntu and windows (`integration-tests.yml`). Update them when adding or modifying CLI commands or the config schema. See `TESTING.md`.
 - **DRY, KISS, YAGNI**: Keep it simple, don't over-engineer.
-- **Be Brief**: Any written output needs to use the [house-style skill](https://github.com/kellervater/kellervater/blob/main/.claude/skills/house-style/SKILL.md)
+- **Be Brief**: Any written output (docs, ADRs, code comments, commit messages, PR bodies, GitHub comments) needs to use the [house-style skill](https://github.com/kellervater/kellervater/blob/main/.claude/skills/house-style/SKILL.md). It lives outside this repo, so fetch it before drafting: `curl -sS https://raw.githubusercontent.com/kellervater/kellervater/main/.claude/skills/house-style/SKILL.md`
 - **Documentation Policy**:
   - Every code change that adds, modifies, or removes functionality **must** include a documentation update.
   - Cross-link related documentation and GitHub issues/PRs. Also update links upon refactoring.

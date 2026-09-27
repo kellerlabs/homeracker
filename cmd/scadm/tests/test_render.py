@@ -4,9 +4,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
-from scadm.render import discover_flatten_files, render_files
+from scadm.render import discover_flatten_files, render_file, render_files
 
 
 class DiscoverFlattenFilesTests(unittest.TestCase):
@@ -201,6 +201,70 @@ class RenderFilesTests(unittest.TestCase):
         files = [Path("a.scad"), Path("b.scad")]
         self.assertTrue(render_files(files, max_workers=100))
         self.assertEqual(mock_render.call_count, 2)
+
+
+class RenderFileTests(unittest.TestCase):
+    """Tests for render_file."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+        (self.root / "scadm.json").write_text("{}", encoding="utf-8")
+        self.install_dir = self.root / "bin" / "openscad"
+        (self.install_dir / "libraries").mkdir(parents=True)
+        (self.install_dir / "openscad").write_text("", encoding="utf-8")
+        self.scad = self.root / "part.scad"
+        self.scad.write_text("cube(1);\n", encoding="utf-8")
+
+    def _render(self, returncode=0, stl=b"solid", stdout="", stderr="", platform="linux", xvfb=None):
+        def _run(cmd, **kwargs):
+            Path(cmd[cmd.index("-o") + 1]).write_bytes(stl)
+            self.assertEqual(kwargs["env"]["OPENSCADPATH"], str(self.install_dir / "libraries"))
+            return MagicMock(returncode=returncode, stdout=stdout, stderr=stderr)
+
+        with (
+            patch("scadm.render.subprocess.run", side_effect=_run) as mock_run,
+            patch("scadm.render.get_system_platform", return_value=platform),
+            patch("scadm.render.shutil.which", return_value=xvfb),
+        ):
+            result = render_file(self.scad)
+        return result, mock_run.call_args.args[0]
+
+    def test_success(self):
+        result, cmd = self._render()
+        self.assertTrue(result)
+        self.assertEqual(cmd[0], str(self.install_dir / "openscad"))
+        self.assertEqual(cmd[-2:], [str(self.scad), "--export-format=binstl"])
+
+    def test_uses_xvfb_on_linux_when_available(self):
+        _, cmd = self._render(xvfb="/usr/bin/xvfb-run")
+        self.assertEqual(cmd[:2], ["xvfb-run", "-a"])
+
+    def test_no_xvfb_on_windows(self):
+        _, cmd = self._render(platform="windows", xvfb="/usr/bin/xvfb-run")
+        self.assertNotIn("xvfb-run", cmd)
+
+    def test_nonzero_exit_fails(self):
+        with self.assertLogs("scadm.render", level="ERROR") as logs:
+            result, _ = self._render(returncode=1, stdout="out", stderr="ERROR: syntax")
+        self.assertFalse(result)
+        self.assertTrue(any("ERROR: syntax" in line for line in logs.output))
+
+    def test_empty_output_fails(self):
+        result, _ = self._render(stl=b"")
+        self.assertFalse(result)
+
+    def test_missing_openscad(self):
+        (self.install_dir / "openscad").unlink()
+        self.assertFalse(render_file(self.scad, self.root))
+
+    def test_missing_libraries(self):
+        (self.install_dir / "libraries").rmdir()
+        self.assertFalse(render_file(self.scad, self.root))
+
+    def test_missing_file(self):
+        self.assertFalse(render_file(self.root / "nope.scad", self.root))
 
 
 if __name__ == "__main__":
