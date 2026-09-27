@@ -82,6 +82,12 @@ repos:
         language: system
         pass_filenames: false
         files: '^cmd/scadm/'
+      - id: mutation-report-tests
+        name: Mutation report tests
+        entry: python -m pytest cmd/test/tests -q
+        language: system
+        pass_filenames: false
+        files: '^cmd/test/'
   - repo: local
     hooks:
       - id: configurator-check

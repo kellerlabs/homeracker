@@ -5,19 +5,124 @@ on:
   schedule:
     - cron: '0 3 * * 1'  # Weekly: Monday 03:00 UTC
   workflow_dispatch:
-  # Changes to the run setup itself (workflow, mutmut config, pinned versions) get verified on the PR.
   pull_request:
     paths:
-      - '.github/workflows/mutation-tests.yml'
+      - 'cmd/scadm/scadm/**'
       - 'cmd/scadm/pyproject.toml'
+      - 'cmd/test/mutation_report.py'
       - 'requirements.txt'
+      - '.github/workflows/mutation-tests.yml'
+
+permissions: {}
+
+concurrency:
+  group: mutation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  mutation:
+  # Mutates only the functions a PR changed. A change to the run setup itself gets a full run instead.
+  pr:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadm pytest -r requirements.txt
+
+      - name: Pick mutation scope
+        id: scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          python cmd/test/mutation_report.py scope --base "$BASE_SHA" > "$RUNNER_TEMP/globs.txt"
+          setup_changed=$(git diff --name-only "$BASE_SHA...HEAD" -- \
+            cmd/scadm/pyproject.toml cmd/test/mutation_report.py requirements.txt .github/workflows/mutation-tests.yml)
+          if [[ -n "$setup_changed" ]]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+          elif grep -q . "$RUNNER_TEMP/globs.txt"; then
+            echo "mode=scoped" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=none" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Capped at 5 minutes so a growing suite can't stall PRs. Results collected before the cap are kept.
+      - name: Run mutation tests
+        id: run
+        if: steps.scope.outputs.mode != 'none'
+        working-directory: cmd/scadm
+        env:
+          MODE: ${{ steps.scope.outputs.mode }}
+        run: |
+          set -euo pipefail
+          names=()
+          if [[ "$MODE" == "scoped" ]]; then
+            globs=$(grep . "$RUNNER_TEMP/globs.txt")
+            mapfile -t names <<< "$globs"
+          fi
+          rc=0
+          timeout --kill-after=30s 300 mutmut run "${names[@]}" || rc=$?
+          if [[ "$rc" -eq 124 || "$rc" -eq 137 ]]; then
+            echo "::warning title=Mutation run timed out::Results are partial. If this keeps happening, move per-PR mutation runs to a nightly job."
+            echo "timed_out=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$rc" -ne 0 ]]; then
+            exit "$rc"
+          fi
+
+      - name: Build report
+        env:
+          MODE: ${{ steps.scope.outputs.mode }}
+          TIMED_OUT: ${{ steps.run.outputs.timed_out }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ "$MODE" != "full" ]]; then
+            args+=(--globs-file "$RUNNER_TEMP/globs.txt")
+          fi
+          if [[ "$TIMED_OUT" == "true" ]]; then
+            args+=(--timed-out)
+          fi
+          python cmd/test/mutation_report.py report "${args[@]}" > "$RUNNER_TEMP/report.md"
+          cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      # Fork PRs get a read-only token, so they rely on the job summary above.
+      - name: Upsert PR comment
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- mutation-report -->")) | .id' | head -n 1)
+          if [[ -z "$existing" ]]; then
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@"$RUNNER_TEMP/report.md" --silent
+          else
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@"$RUNNER_TEMP/report.md" --silent
+          fi
+
+  # Whole codebase, to keep overall test debt visible: report to Discord, refresh the mutation badge.
+  full:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -32,24 +137,35 @@ jobs:
           set -euo pipefail
           pip install -e cmd/scadm pytest -r requirements.txt
 
-      # Report only: surviving mutants are leads for better tests, not a failure.
       - name: Run mutation tests
         working-directory: cmd/scadm
         run: |
           set -euo pipefail
           mutmut run
           mutmut export-cicd-stats
-          {
-            echo "## 🧬 Mutation testing"
-            echo
-            echo "| Killed | Survived | Timeout | No tests | Total |"
-            echo "|---|---|---|---|---|"
-            jq -r '"| \(.killed) | \(.survived) | \(.timeout) | \(.no_tests) | \(.total) |"' mutants/mutmut-cicd-stats.json
-            echo
-            echo '<details><summary>Surviving mutants</summary>'
-            echo
-            echo '```'
-            mutmut results
-            echo '```'
-            echo '</details>'
-          } >> "$GITHUB_STEP_SUMMARY"
+          mutmut badge --output "$RUNNER_TEMP/mutation.json"
+
+      - name: Build report
+        run: |
+          set -euo pipefail
+          python cmd/test/mutation_report.py report >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post to Discord
+        env:
+          DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$DISCORD_CI_WEBHOOK_URL" ]]; then
+            echo "::warning::DISCORD_CI_WEBHOOK_URL is not set, skipping the Discord report"
+            exit 0
+          fi
+          python cmd/test/mutation_report.py discord --run-url "$RUN_URL" > "$RUNNER_TEMP/discord.json"
+          curl -fsS -H "Content-Type: application/json" -d @"$RUNNER_TEMP/discord.json" "$DISCORD_CI_WEBHOOK_URL"
+
+      - name: Publish mutation badge
+        if: github.ref == 'refs/heads/main'
+        uses: ./.github/actions/publish-badge
+        with:
+          file: ${{ runner.temp }}/mutation.json
+          name: mutation.json
