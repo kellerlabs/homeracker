@@ -82,14 +82,15 @@ _PATTERNS = [
     (Kind.BLOCK_COMMENT, re.compile(r"/\*.*?\*/", re.S)),
     (Kind.STRING, re.compile(r'"(?:\\.|[^"\\])*"', re.S)),
     (Kind.NUMBER, re.compile(r"0[xX][0-9A-Fa-f]+|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")),
-    (Kind.IDENT, re.compile(r"\$?[A-Za-z_][A-Za-z0-9_]*")),
+    # `$`, `$1` and Unicode letters (behind --enable=unicode-identifiers) are valid OpenSCAD identifiers too.
+    (Kind.IDENT, re.compile(r"\$\w*|[^\W\d]\w*")),
     (Kind.OP, re.compile("|".join(re.escape(op) for op in OPERATORS))),
 ]
 
 # `include <path>` and `use <path>` take a path, not an expression.
 _PATH = re.compile(r"<[^>\r\n]*>")
 _PATH_KEYWORDS = ("include", "use")
-_IDENT_CHAR = re.compile(r"[A-Za-z_$]")
+_IDENT_CHAR = re.compile(r"[^\W\d]|\$")
 
 
 def tokenize(source: str) -> list[Token]:

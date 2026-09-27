@@ -28,8 +28,9 @@ def test_numbers(number):
     assert kinds_and_texts(number) == [(Kind.NUMBER, number)]
 
 
-def test_special_variable_is_one_ident():
-    assert kinds_and_texts("$fn") == [(Kind.IDENT, "$fn")]
+@pytest.mark.parametrize("name", ["$fn", "$", "$1", "_x", "π", "größe"])
+def test_identifiers(name):
+    assert kinds_and_texts(name) == [(Kind.IDENT, name)]
 
 
 @pytest.mark.parametrize("keyword", ["include", "use"])
@@ -61,7 +62,7 @@ def test_positions_and_newlines():
     assert [t.text for t in tokens if t.kind == Kind.NEWLINE] == ["\n", "\n", "\n"]
 
 
-@pytest.mark.parametrize("source", ["1abc", "2_x", "0x1g"])
+@pytest.mark.parametrize("source", ["1abc", "2_x", "0x1g", "3π"])
 def test_digit_leading_identifier_is_rejected(source):
     with pytest.raises(TokenizeError, match="1:1: identifiers starting with a digit"):
         tokenize(source)
