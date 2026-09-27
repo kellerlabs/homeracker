@@ -151,17 +151,22 @@ jobs:
         run: npx playwright install-deps chromium
 
       - name: E2E tests
+        id: e2e-root
         env:
           PARTS_REQUIRED: "1"
         run: npm run e2e
 
-      # Previews are served from a subpath, where a root-relative link or asset path breaks.
+      # Previews are served from a subpath, where a root-relative link or asset path breaks. Runs
+      # even when the root suite failed, so the report covers both; the job still fails.
       - name: Build for a preview subpath
+        id: build-subpath
+        if: ${{ !cancelled() && steps.e2e-root.outcome != 'skipped' }}
         env:
           SITE_BASE: /preview/pr-0/
         run: npm run build:site
 
       - name: E2E tests under a preview subpath
+        if: ${{ !cancelled() && steps.build-subpath.outcome == 'success' }}
         env:
           PARTS_REQUIRED: "1"
           SITE_BASE: /preview/pr-0/

@@ -93,15 +93,14 @@ export async function buildRealRack(
   const group = new Group();
   const pending: Promise<void>[] = [];
   const place = (name: string, material: MeshStandardMaterial, position: Vector3, rotation: Quaternion, fallback?: Vector3) => {
-    // A part the library does not hold (a zero-length or over-long support) is drawn as a plain block of its size.
-    if (!library.has(name)) {
-      if (fallback) {
-        const block = new Mesh(unitBoxGeometry, material);
-        block.position.copy(position);
-        block.quaternion.copy(rotation);
-        block.scale.copy(fallback);
-        group.add(block);
-      }
+    // A support length the library does not hold (zero or over-long) is drawn as a plain block of its
+    // size. Any other missing part still fails, so an incomplete export cannot pass as a healthy rack.
+    if (fallback && !library.has(name)) {
+      const block = new Mesh(unitBoxGeometry, material);
+      block.position.copy(position);
+      block.quaternion.copy(rotation);
+      block.scale.copy(fallback);
+      group.add(block);
       return;
     }
     pending.push(
