@@ -88,7 +88,17 @@ jobs:
         with:
           persist-credentials: false
 
+      # Same key as the build-site action, so a PR reuses the meshes its preview or main exported.
+      # A change to a .scad source or the export script misses and exports afresh.
+      - name: Restore part meshes
+        id: parts
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: site/public/parts
+          key: parts-${{ hashFiles('models/**/*.scad', 'site/scripts/scad/*.scad', 'site/scripts/export-parts.mjs') }}
+
       - name: Setup OpenSCAD
+        if: steps.parts.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-openscad
         with:
           scadm-source: cmd/scadm
@@ -109,10 +119,14 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Build
+      - name: Export part meshes
+        if: steps.parts.outputs.cache-hit != 'true'
         env:
           PARTS_REQUIRED: "1"
-        run: npm run build
+        run: npm run parts
+
+      - name: Build
+        run: npm run build:site
 
       - name: Read Playwright version
         id: playwright
