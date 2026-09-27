@@ -6,7 +6,5 @@
 # findings under them, not because they are wrong. Re-enable them one at a time as that backlog
 # is worked through (#474), rather than in bulk.
 rules:
-  artipacked:
-    disable: true
   self-repository:
     disable: true
