@@ -30,5 +30,6 @@ def write_atomically(path: Path, text: str) -> None:
             shutil.copymode(target, temp_name)
         os.replace(temp_name, target)
     except OSError:
-        Path(temp_name).unlink()
+        # No mutation: the temp file always exists here, missing_ok only keeps a cleanup failure from hiding the error.
+        Path(temp_name).unlink(missing_ok=True)  # pragma: no mutate
         raise

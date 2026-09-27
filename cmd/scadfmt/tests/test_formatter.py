@@ -56,6 +56,10 @@ from scadfmt.formatter import FormatError, format_source
         ("x=1;#a();", "x = 1;\n#a();"),
         ("module m(){x=1;#a();}", "module m() {\n  x = 1;\n  #a();\n}"),
         ("!#a();", "!#a();"),
+        ("a*b;", "a * b;"),
+        ("1*b;", "1 * b;"),
+        ("module m(){*a();}", "module m() {\n  *a();\n}"),
+        ("if(a){b();}*c();", "if (a) {\n  b();\n}\n*c();"),
         # Braces
         ("module m(){a();b();}", "module m() {\n  a();\n  b();\n}"),
         ("if(a){b();}else{c();}", "if (a) {\n  b();\n} else {\n  c();\n}"),
@@ -124,7 +128,9 @@ def test_expression_continuation_stays_one_level_in():
     ("source", "expected"),
     [
         ("x=a\n*b;\n", "x = a\n  * b;\n"),
-        ("module m() {\nx = a\n* b;\n}\n", "module m() {\n  x = a\n    * b;\n}\n"),
+        ("x = (a)\n*b;\n", "x = (a)\n  * b;\n"),
+        ("module m() {\nx = (a)\n* b;\n}\n", "module m() {\n  x = (a)\n    * b;\n}\n"),
+        ("a+*b;\n", "a + * b;\n"),
     ],
 )
 def test_operator_starting_a_continuation_is_not_a_modifier(source, expected):

@@ -64,6 +64,7 @@ class _State:
 
     stack: list[_Frame] = field(default_factory=lambda: [_Frame("", -1)])
     previous: Token | None = None
+    previous_role: str = ""
     in_expression: bool = False
     # Level of the line the last code line belongs to, see `_render_tokens`.
     line_anchor: int = 0
@@ -431,11 +432,15 @@ def _role(token: Token, state: _State) -> str:
 
 
 def _at_statement_start(state: _State) -> bool:
-    """True where a `#`, `%`, `!` or `*` is a modifier rather than an operator.
-
-    Outside brackets, binary operators only occur after `=`, so everything else there is a statement.
-    """
-    return state.stack[-1].char in ("", "{") and not state.in_expression
+    """True where a `#`, `%`, `!` or `*` is a modifier rather than an operator."""
+    if state.stack[-1].char not in ("", "{") or state.in_expression:
+        return False
+    previous = state.previous
+    if previous is None or state.previous_role == "modifier":
+        return True
+    if previous.kind == Kind.IDENT:
+        return previous.text == "else"
+    return previous.kind == Kind.OP and previous.text in (";", "{", "}", ")")
 
 
 def _expects_operand(previous: Token | None) -> bool:
@@ -486,7 +491,7 @@ def _advance(token: Token, role: str, level: int, state: _State) -> _Frame | Non
     if token.kind in (Kind.LINE_COMMENT, Kind.BLOCK_COMMENT):
         return None
     before = state.previous
-    state.previous, state.after_header = token, False
+    state.previous, state.previous_role, state.after_header = token, role, False
     if token.kind != Kind.OP:
         return None
     text, frame = token.text, state.stack[-1]
