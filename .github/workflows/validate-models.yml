@@ -2,13 +2,7 @@
 name: Validate OpenSCAD Models
 
 on:
-  pull_request:
-    paths:
-      - 'models/**/*.scad'
-      - '.github/workflows/validate-models.yml'
-      - 'cmd/scadm/**'
-      - 'scadm.json'
-      - 'cmd/test/test-models.sh'
+  workflow_call:
 
 jobs:
   validate:

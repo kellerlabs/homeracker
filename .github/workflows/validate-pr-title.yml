@@ -2,8 +2,10 @@
 name: Validate PR Title
 
 on:
+  workflow_call:
+  # Title edits after the last push; ci.yml covers every push.
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    types: [edited]
 
 permissions:
   pull-requests: read

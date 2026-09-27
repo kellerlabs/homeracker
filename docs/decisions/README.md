@@ -6,6 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [gate-prs-with-a-single-check-results-job](gate-prs-with-a-single-check-results-job.md) | 2026-09-27 | One `ci.yml` PR pipeline; `check-results` is the only required check, so path-filtered jobs are required when they run |
 | [e2e-test-site-and-configurator-with-playwright](e2e-test-site-and-configurator-with-playwright.md) | 2026-09-27 | Playwright E2E suite runs against the built site in `web.yml`; control and page inventories fail CI when a feature ships without a test |
 | [gate-scadm-coverage-and-mutation-test-changed-functions](gate-scadm-coverage-and-mutation-test-changed-functions.md) | 2026-09-27 | `scadm` unit tests gate on 90% branch coverage; mutmut reports on the functions each PR changes, weekly full run to Discord |
 | [return-bracket-to-open-source-catalog](return-bracket-to-open-source-catalog.md) | 2026-09-20 | Bracket comes back into this repo as an open-source part, flexmount retired in its favor |

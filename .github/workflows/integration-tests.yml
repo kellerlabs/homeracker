@@ -2,12 +2,7 @@
 name: Integration Tests
 
 on:
-  pull_request:
-    paths:
-      - 'cmd/scadm/**'
-      - 'scadm.json'
-      - '.github/workflows/integration-tests.yml'
-      - '.github/actions/setup-openscad/**'
+  workflow_call:
 
 jobs:
   integration:
