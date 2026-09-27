@@ -62,8 +62,10 @@ jobs:
             names=()
             if [[ -z "$setup_changed" ]]; then
               args+=(--globs-file "$globs")
-              if grep -q . "$globs"; then
-                mapfile -t names < <(grep . "$globs")
+              # grep exits 1 on an empty scope; any other failure stops the job.
+              scoped=$(grep . "$globs" || [[ $? -eq 1 ]])
+              if [[ -n "$scoped" ]]; then
+                mapfile -t names <<< "$scoped"
               fi
             fi
             if [[ -n "$setup_changed" || ${#names[@]} -gt 0 ]]; then
