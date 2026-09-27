@@ -255,7 +255,9 @@ def coverage_badge(coverage_json: dict) -> dict:
 
 
 def _mutmut(*args: str, cwd: Path) -> str:
-    return subprocess.run(["mutmut", *args], cwd=cwd, capture_output=True, text=True, check=True).stdout
+    return subprocess.run(
+        ["mutmut", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8", check=True
+    ).stdout
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -288,6 +290,7 @@ def main(argv: list[str] | None = None) -> int:
             cwd=repo_root,
             capture_output=True,
             text=True,
+            encoding="utf-8",
             check=True,
         ).stdout
         print("\n".join(scope(diff, repo_root)))

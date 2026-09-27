@@ -67,7 +67,7 @@ On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates on
 
 ```bash
 cd cmd/scadm
-export PYTHONWARNDEFAULTENCODING=1
+export PYTHONWARNDEFAULTENCODING=1 PYTHONWARNINGS=ignore::EncodingWarning  # checks scadm's I/O, not mutmut's
 mutmut run                                        # full run, ~2 min
 mutmut run "scadm.flatten.x_flatten_all__mutmut_*"  # one function, as a PR run does
 mutmut results                                    # list surviving mutants

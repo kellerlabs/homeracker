@@ -18,6 +18,8 @@ permissions: {}
 env:
   # Lets tests catch text I/O without an explicit encoding (see [tool.pytest.ini_options] in cmd/scadm/pyproject.toml).
   PYTHONWARNDEFAULTENCODING: '1'
+  # Silences the same warning from mutmut and other tooling. pytest's own filter still turns it into an error inside tests.
+  PYTHONWARNINGS: 'ignore::EncodingWarning'
 
 concurrency:
   group: mutation-${{ github.event.pull_request.number || github.ref }}
