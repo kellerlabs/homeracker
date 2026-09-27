@@ -21,6 +21,14 @@ on:
       - 'site/**'
       - 'models/**/*.scad'
 
+# A new push supersedes the running PR checks; pushes to main always finish. A label other than
+# e2e-probe-failure skips every job, so it gets a group of its own and cancels nothing.
+concurrency:
+  group: >-
+    web-${{ github.event.pull_request.number || github.ref }}${{ (github.event.action == 'labeled' || github.event.action == 'unlabeled')
+    && github.event.label.name != 'e2e-probe-failure' && format('-{0}', github.run_id) || '' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   configurator:
     if: github.event.action != 'labeled' && github.event.action != 'unlabeled'
