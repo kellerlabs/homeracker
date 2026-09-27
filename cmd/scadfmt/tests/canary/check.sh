@@ -34,6 +34,11 @@ scadfmt format --check "${EXPECTED}"
 
 echo "4/4 OpenSCAD sees the same code before and after formatting"
 run_openscad -o "${work}/expected.ast" "${EXPECTED}"
+# An empty AST on both sides would compare equal without proving anything.
+if [[ ! -s "${work}/input.ast" ]]; then
+  echo "OpenSCAD wrote an empty AST" >&2
+  exit 1
+fi
 diff -u "${work}/input.ast" "${work}/expected.ast"
 
 echo "Canary passed"
