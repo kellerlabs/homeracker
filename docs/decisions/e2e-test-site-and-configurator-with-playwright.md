@@ -54,7 +54,7 @@
 
 ## 📊 Consequences
 
-- ✅ Dependency PRs get a runtime check, so Renovate automerge can widen from patches to minors once the suite has stayed green for a few weeks.
+- ✅ Dependency PRs get a runtime check, so Renovate automerges minor and patch updates of the allow-listed npm packages, `@playwright/test` included. Majors and `three` stay manual.
 - ✅ A new page or control fails CI until a test covers it.
 - ❌ The inventory gate proves a control was used, not that its effect was asserted. Review still has to check the assertion.
 - ❌ The `site` job grows by a few minutes (browser install, second build, two runs).
