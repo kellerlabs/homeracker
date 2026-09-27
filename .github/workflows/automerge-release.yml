@@ -19,6 +19,8 @@ jobs:
         with:
           client-id: ${{ secrets.RELEASES_APP_ID }}
           private-key: ${{ secrets.RELEASES_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Enable auto-merge for labeled PRs
         run: |

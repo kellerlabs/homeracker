@@ -50,6 +50,8 @@ The release and automerge workflows require a GitHub App with the following perm
 - Contents: Read & Write
 - Pull Requests: Read & Write
 
+Both workflows request exactly these two via `permission-*` inputs. A permission added to the app later also needs its matching input in both workflows.
+
 ### Required Repository Secrets
 
 Configure these secrets in your repository settings:

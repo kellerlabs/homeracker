@@ -10,5 +10,3 @@ rules:
     disable: true
   self-repository:
     disable: true
-  github-app:
-    disable: true
