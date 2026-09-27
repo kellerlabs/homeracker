@@ -8,7 +8,7 @@
 
 - More and more of `scadm` is written with AI help. Passing tests alone don't show whether those tests exercise the code or would catch a regression.
 - Code coverage measures how much code the tests run. Mutation testing measures whether the tests notice when that code changes. High coverage with weak assertions passes one check and fails the other, so neither is enough alone.
-- Unit tests already run in the `scadm-tests` pre-commit hook, locally and in the [Pre-commit workflow](../../.github/workflows/pre-commit.yml), whenever `cmd/scadm/` changes.
+- Unit tests already run in the `scadm-tests` pre-commit hook: locally when a commit touches `cmd/scadm/`, and on every PR in the [Pre-commit workflow](../../.github/workflows/pre-commit.yml), which runs all hooks on all files.
 
 ## 🔧 Decision
 
@@ -24,7 +24,7 @@
 
 **Mutation testing: `mutmut`, weekly and report-only.**
 
-- [`mutation-tests.yml`](../../.github/workflows/mutation-tests.yml) runs Mondays at 03:00 UTC and on manual dispatch. It writes the killed and surviving counts to the job summary and never fails on survivors.
+- [`mutation-tests.yml`](../../.github/workflows/mutation-tests.yml) runs Mondays at 03:00 UTC, on manual dispatch, and on PRs that change its workflow, the mutmut config or pinned versions. It writes the killed and surviving counts to the job summary and never fails on survivors.
 - Config lives in `[tool.mutmut]` of `cmd/scadm/pyproject.toml`. It mutates `scadm/` only and runs the unit tests, not the integration ones.
 - Alternatives rejected:
   - cosmic-ray: needs a session database and a separate config file.

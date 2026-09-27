@@ -5,6 +5,12 @@ on:
   schedule:
     - cron: '0 3 * * 1'  # Weekly: Monday 03:00 UTC
   workflow_dispatch:
+  # Changes to the run setup itself (workflow, mutmut config, pinned versions) get verified on the PR.
+  pull_request:
+    paths:
+      - '.github/workflows/mutation-tests.yml'
+      - 'cmd/scadm/pyproject.toml'
+      - 'requirements.txt'
 
 jobs:
   mutation:

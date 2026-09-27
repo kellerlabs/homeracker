@@ -70,7 +70,7 @@ mutmut results              # list surviving mutants
 mutmut show <mutant-name>   # diff of one mutant
 ```
 
-[`mutation-tests.yml`](.github/workflows/mutation-tests.yml) runs weekly (Monday 03:00 UTC) and on manual dispatch. It reports only and never fails on survivors.
+[`mutation-tests.yml`](.github/workflows/mutation-tests.yml) runs weekly (Monday 03:00 UTC), on manual dispatch, and on PRs that change the workflow, `cmd/scadm/pyproject.toml` or `requirements.txt`. It reports only and never fails on survivors.
 
 See [gate-scadm-coverage-and-mutation-test-weekly](docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md) for why.
 
