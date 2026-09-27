@@ -6,6 +6,9 @@ on:
     branches: [main]
     paths:
       - 'cmd/scadm/**'
+      - 'cmd/test/mutation_report.py'
+      - '.github/actions/publish-badge/**'
+      - '.github/workflows/coverage-badge.yml'
   workflow_dispatch:
 
 permissions: {}

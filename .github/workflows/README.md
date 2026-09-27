@@ -40,7 +40,7 @@ Runs `mutmut` on `scadm`. On PRs it mutates only the changed functions and edits
 ### 5. Coverage Badge (`coverage-badge.yml`)
 Measures `scadm` unit test coverage on `main` and publishes the README badge to the `badges` branch. The coverage gate itself runs in the `scadm-tests` pre-commit hook.
 
-**Triggers:** Push to `main` touching `cmd/scadm/**`, manual workflow dispatch
+**Triggers:** Push to `main` touching `cmd/scadm/**` or the badge tooling, manual workflow dispatch
 
 **Requirements:** `contents: write` to push the `badges` branch
 
