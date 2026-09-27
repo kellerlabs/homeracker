@@ -11,7 +11,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components are p
 - **Languages**: OpenSCAD (`.scad`), Python, Bash, TypeScript
 - **Key Dirs**:
   - `models/`: OpenSCAD models, one folder per model type
-  - `cmd/`: Python and shell tooling (`scadm`, `test`, `export`, `lib`, `linux`, `setup`)
+  - `cmd/`: Python and shell tooling (`scadm`, `scadfmt`, `test`, `export`, `lib`, `linux`, `setup`)
   - `configurator/`: TypeScript web configurator
   - `site/`: Astro site that renders this repo's READMEs
   - `docs/`: style guide, workflows, and ADRs under `docs/decisions/`
@@ -24,6 +24,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components are p
   - Install: `scadm install`
   - Config: `scadm.json` in the project root
   - Help: `scadm -h`
+- **Formatter**: `scadfmt format <path>` formats `.scad` files. See `cmd/scadfmt/README.md`.
 
 ## 🧭 Core Principles
 

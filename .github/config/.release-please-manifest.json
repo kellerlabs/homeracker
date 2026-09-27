@@ -1,6 +1,7 @@
 {
   ".": "3.16.0",
   "cmd/scadm": "0.11.0",
+  "cmd/scadfmt": "0.0.0",
   ".github/actions/setup-openscad": "2.2.2",
   ".github/actions/sync-instructions": "1.2.2"
 }

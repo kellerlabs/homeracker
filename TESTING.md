@@ -24,6 +24,23 @@ To check the failure report end to end, add the `e2e-probe-failure` label to the
 
 See [e2e.md](.claude/rules/e2e.md) for how to write tests and [e2e-test-site-and-configurator-with-playwright](docs/decisions/e2e-test-site-and-configurator-with-playwright.md) for why.
 
+## scadfmt Tests
+
+Unit tests cover every formatting rule, the CLI and the VS Code setup, and format every `.scad` file in the repo twice to prove the output is stable. The `scadfmt-tests` pre-commit hook runs them when a commit touches `cmd/scadfmt/`, with a branch coverage gate in `cmd/scadfmt/pyproject.toml`. The `scadfmt` job in [`ci.yml`](.github/workflows/ci.yml) also runs them on Windows.
+
+```bash
+cd cmd/scadfmt
+python -m pytest tests/ -q --cov
+```
+
+The canary in `cmd/scadfmt/tests/canary/` uses every OpenSCAD construct. `check.sh` asserts that the pinned OpenSCAD parses it, that scadfmt turns it into `canary.expected.scad` and leaves that file unchanged, and that OpenSCAD's `.ast` output is identical before and after formatting. CI runs it when `cmd/scadfmt/` or the OpenSCAD pin in `scadm.json` changes. Locally it needs `scadm install` first:
+
+```bash
+cmd/scadfmt/tests/canary/check.sh
+```
+
+A new language construct goes into `canary.scad`, then regenerate the expected file with `scadfmt format - < canary.scad > canary.expected.scad` and review the diff.
+
 ## scadm Tests
 
 ### Unit Tests

@@ -82,6 +82,12 @@ repos:
         language: system
         pass_filenames: false
         files: '^cmd/scadm/'
+      - id: scadfmt-tests
+        name: scadfmt Python Tests
+        entry: bash -c 'cd cmd/scadfmt && PYTHONWARNDEFAULTENCODING=1 python -m pytest tests/ -q --cov'
+        language: system
+        pass_filenames: false
+        files: '^cmd/scadfmt/'
       - id: mutation-report-tests
         name: Mutation report tests
         entry: python -m pytest cmd/test/tests -q

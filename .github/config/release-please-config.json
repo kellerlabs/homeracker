@@ -20,6 +20,7 @@
       "package-name": "homeracker",
       "exclude-paths": [
         "cmd/scadm",
+        "cmd/scadfmt",
         ".github/actions/setup-openscad",
         ".github/actions/sync-instructions",
         ".github/workflows"
@@ -29,6 +30,11 @@
       "release-type": "python",
       "package-name": "scadm",
       "component": "scadm"
+    },
+    "cmd/scadfmt": {
+      "release-type": "python",
+      "package-name": "scadfmt",
+      "component": "scadfmt"
     },
     ".github/actions/setup-openscad": {
       "release-type": "simple",

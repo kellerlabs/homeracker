@@ -35,7 +35,7 @@ _visual_test
 __pycache__/
 *.py[cod]
 cmd/scadm/dist/
-cmd/scadm/*.egg-info/
+cmd/*/*.egg-info/
 
 # Web configurator / site
 node_modules/
