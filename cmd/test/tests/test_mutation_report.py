@@ -76,7 +76,18 @@ class TestModuleName:
         ],
     )
     def test_mapping(self, path, expected):
-        assert mr.module_name(path) == expected
+        assert mr.module_name(path, "scadm") == expected
+
+    @pytest.mark.parametrize(
+        ("path", "expected"),
+        [
+            ("cmd/scadfmt/scadfmt/formatter.py", "scadfmt.formatter"),
+            ("cmd/scadm/scadm/flatten.py", None),
+            ("cmd/scadfmt/tests/test_formatter.py", None),
+        ],
+    )
+    def test_mapping_is_per_package(self, path, expected):
+        assert mr.module_name(path, "scadfmt") == expected
 
 
 class TestChangedFunctions:
@@ -99,7 +110,8 @@ class TestScope:
         target.parent.mkdir(parents=True)
         target.write_text(SOURCE, encoding="utf-8")
         diff = "+++ b/cmd/scadm/scadm/flatten.py\n@@ -6 +6,2 @@\n+x\n+y\n"
-        assert mr.scope(diff, tmp_path) == ["scadm.flatten.x_top__mutmut_*"]
+        assert mr.scope(diff, tmp_path, "scadm") == ["scadm.flatten.x_top__mutmut_*"]
+        assert not mr.scope(diff, tmp_path, "scadfmt")
 
     def test_deleting_last_body_line_selects_that_function(self, tmp_path):
         # git reports a pure deletion's new-side start as the line before the removed block.
@@ -107,11 +119,11 @@ class TestScope:
         target.parent.mkdir(parents=True)
         target.write_text("def a():\n    x = 1\n\n\ndef b():\n    pass\n", encoding="utf-8")
         diff = "+++ b/cmd/scadm/scadm/m.py\n@@ -3 +2,0 @@ def a():\n-    return x\n"
-        assert mr.scope(diff, tmp_path) == ["scadm.m.x_a__mutmut_*"]
+        assert mr.scope(diff, tmp_path, "scadm") == ["scadm.m.x_a__mutmut_*"]
 
     def test_non_source_and_missing_files_are_skipped(self, tmp_path):
         diff = "+++ b/cmd/scadm/tests/test_x.py\n@@ -1 +1 @@\n+x\n+++ b/cmd/scadm/scadm/gone.py\n@@ -1 +1 @@\n+x\n"
-        assert not mr.scope(diff, tmp_path)
+        assert not mr.scope(diff, tmp_path, "scadm")
 
 
 RESULTS = """\
@@ -156,26 +168,28 @@ class TestRenderReport:
             "survivors": list(survivors),
         }
 
-    def test_starts_with_upsert_marker(self):
-        report = mr.render_report(self._summary(), functions=2, timed_out=False, diffs={})
-        assert report.startswith(mr.MARKER)
+    def test_starts_with_package_heading(self):
+        report = mr.render_report(self._summary(), package="scadfmt", functions=2, timed_out=False, diffs={})
+        assert report.startswith("### 🧰 scadfmt\n\n")
         assert "2 changed function(s)" in report
         assert "75.0%" in report
         assert "No surviving mutants" in report
 
     def test_no_changed_functions(self):
-        report = mr.render_report(self._summary(), functions=0, timed_out=False, diffs={})
-        assert "No `scadm` functions changed" in report
+        report = mr.render_report(self._summary(), package="scadfmt", functions=0, timed_out=False, diffs={})
+        assert "No `scadfmt` functions changed" in report
         assert "|" not in report
 
     def test_full_run_scope_and_timeout_warning(self):
-        report = mr.render_report(self._summary(), functions=None, timed_out=True, diffs={})
+        report = mr.render_report(self._summary(), package="scadm", functions=None, timed_out=True, diffs={})
         assert "all `scadm` functions" in report
         assert "nightly job" in report
 
     def test_lists_survivors_with_diffs_and_caps(self):
         names = [f"scadm.m.x_f__mutmut_{i:02d}" for i in range(mr.MAX_LISTED_SURVIVORS + 3)]
-        report = mr.render_report(self._summary(names), functions=1, timed_out=False, diffs={names[0]: "-a\n+b"})
+        report = mr.render_report(
+            self._summary(names), package="scadm", functions=1, timed_out=False, diffs={names[0]: "-a\n+b"}
+        )
         assert "-a\n+b" in report
         assert names[mr.MAX_LISTED_SURVIVORS - 1] in report
         assert names[mr.MAX_LISTED_SURVIVORS] not in report
@@ -183,11 +197,17 @@ class TestRenderReport:
         assert "(diff unavailable)" in report
 
 
+def test_combine_puts_sections_under_one_marker():
+    comment = mr.combine(["### 🧰 scadm\n\nA\n", "### 🧰 scadfmt\n\nB\n"])
+    assert comment == f"{mr.MARKER}\n## 🧬 Mutation testing\n\n### 🧰 scadm\n\nA\n\n### 🧰 scadfmt\n\nB\n"
+
+
 class TestDiscordPayload:
     def test_embed(self):
         summary = mr.summarize(mr.parse_results(RESULTS), None)
-        payload = mr.discord_payload(summary, "https://example.test/run/1")
+        payload = mr.discord_payload(summary, "https://example.test/run/1", "scadfmt")
         embed = payload["embeds"][0]
+        assert embed["title"] == "🧬 Weekly mutation run: scadfmt"
         assert embed["url"] == "https://example.test/run/1"
         fields = {f["name"]: f["value"] for f in embed["fields"]}
         assert fields["🙁 Survived"] == "2"
@@ -219,7 +239,7 @@ class TestMain:
             return RESULTS if args[0] == "results" else "-x\n+y"
 
         with patch.object(mr, "_mutmut", side_effect=fake):
-            assert mr.main(["report", "--globs-file", str(globs), "--timed-out"]) == 0
+            assert mr.main(["report", "--package", "scadm", "--globs-file", str(globs), "--timed-out"]) == 0
         out = capsys.readouterr().out
         assert "1 changed function(s)" in out
         assert "scadm.flatten.x_top__mutmut_2" in out
@@ -230,18 +250,30 @@ class TestMain:
         globs = tmp_path / "globs.txt"
         globs.write_text("\n", encoding="utf-8")
         with patch.object(mr, "_mutmut") as mutmut:
-            assert mr.main(["report", "--globs-file", str(globs)]) == 0
+            assert mr.main(["report", "--package", "scadm", "--globs-file", str(globs)]) == 0
         mutmut.assert_not_called()
         assert "No `scadm` functions changed" in capsys.readouterr().out
 
     def test_discord_command_full_run(self, capsys):
-        with patch.object(mr, "_mutmut", return_value=RESULTS):
-            assert mr.main(["discord", "--run-url", "https://example.test/r"]) == 0
+        with patch.object(mr, "_mutmut", return_value=RESULTS) as mutmut:
+            assert mr.main(["discord", "--package", "scadfmt", "--run-url", "https://example.test/r"]) == 0
+        assert mutmut.call_args.kwargs["cwd"].parts[-2:] == ("cmd", "scadfmt")
         assert json.loads(capsys.readouterr().out)["embeds"][0]["url"] == "https://example.test/r"
 
     def test_scope_command(self, capsys):
         with patch.object(mr.subprocess, "run") as run:
             run.return_value.stdout = ""
-            assert mr.main(["scope", "--base", "abc123"]) == 0
-        assert run.call_args.args[0][:4] == ["git", "diff", "-U0", "abc123...HEAD"]
+            assert mr.main(["scope", "--package", "scadfmt", "--base", "abc123"]) == 0
+        assert run.call_args.args[0] == ["git", "diff", "-U0", "abc123...HEAD", "--", "cmd/scadfmt/scadfmt"]
         assert capsys.readouterr().out == "\n"
+
+    def test_combine_command(self, tmp_path, capsys):
+        first, second = tmp_path / "a.md", tmp_path / "b.md"
+        first.write_text("A\n", encoding="utf-8")
+        second.write_text("B\n", encoding="utf-8")
+        assert mr.main(["combine", str(first), str(second)]) == 0
+        assert capsys.readouterr().out == mr.combine(["A\n", "B\n"])
+
+    def test_package_is_required(self):
+        with pytest.raises(SystemExit):
+            mr.main(["report"])

@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'cmd/scadm/**'
+      - 'cmd/scadfmt/**'
       - 'cmd/test/mutation_report.py'
       - '.github/actions/publish-badge/**'
       - '.github/workflows/coverage-badge.yml'
@@ -18,8 +19,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # The gate itself lives in the scadm-tests pre-commit hook. This only refreshes the README badge.
+  # The gates live in the scadm-tests and scadfmt-unit-tests pre-commit hooks. This only refreshes the README badges.
   badge:
+    strategy:
+      matrix:
+        include:
+          - package: scadm
+            badge: coverage.json
+          - package: scadfmt
+            badge: scadfmt-coverage.json
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -35,12 +43,14 @@ jobs:
           python-version: '3.14'
 
       - name: Install dependencies
+        env:
+          PACKAGE: ${{ matrix.package }}
         run: |
           set -euo pipefail
-          pip install -e cmd/scadm pytest -r requirements.txt
+          pip install -e "cmd/$PACKAGE" pytest -r requirements.txt
 
       - name: Measure coverage
-        working-directory: cmd/scadm
+        working-directory: cmd/${{ matrix.package }}
         run: |
           set -euo pipefail
           python -m pytest tests/ -m "not integration" -q --cov --cov-report=json:"$RUNNER_TEMP/coverage.json"
@@ -51,4 +61,4 @@ jobs:
         uses: ./.github/actions/publish-badge
         with:
           file: ${{ runner.temp }}/badge.json
-          name: coverage.json
+          name: ${{ matrix.badge }}

@@ -28,7 +28,7 @@ See [e2e.md](.claude/rules/e2e.md) for how to write tests and [e2e-test-site-and
 
 ### Unit Tests
 
-Unit tests cover every formatting rule, the CLI and the VS Code setup, and format every `.scad` file in the repo twice to prove the output is stable. The `scadfmt-unit-tests` pre-commit hook runs them on Linux when a commit touches `cmd/scadfmt/`, with a branch coverage gate in `cmd/scadfmt/pyproject.toml`. The `unit tests (windows)` job in [`scadfmt-tests.yml`](.github/workflows/scadfmt-tests.yml) runs them on Windows.
+Unit tests cover every formatting rule, the CLI and the VS Code setup, and format every `.scad` file in the repo twice to prove the output is stable. The `scadfmt-unit-tests` pre-commit hook runs them on Linux when a commit touches `cmd/scadfmt/`, with a branch coverage gate in `cmd/scadfmt/pyproject.toml`. [Mutation testing](#mutation-testing) covers scadfmt like scadm. The `unit tests (windows)` job in [`scadfmt-tests.yml`](.github/workflows/scadfmt-tests.yml) runs them on Windows.
 
 ```bash
 cd cmd/scadfmt
@@ -99,15 +99,16 @@ When your change lifts coverage well past the gate, raise `fail_under` in the sa
 
 ### Mutation Testing
 
-`mutmut` changes `scadm/` one small edit at a time and reruns the unit tests. A **survived** mutant means no test noticed the change, so a test is missing or its assertion is too weak. Linux and macOS only (Windows: use WSL).
+`mutmut` changes the `scadm` and `scadfmt` sources one small edit at a time and reruns the unit tests. A **survived** mutant means no test noticed the change, so a test is missing or its assertion is too weak. Linux and macOS only (Windows: use WSL).
 
-On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates only the functions the PR changed and edits one PR comment with the survivors (fork PRs: job summary only). Kill each survivor with a test, or mark a true equivalent with `# pragma: no mutate`. Log calls, argparse help text and exception messages are skipped by `do_not_mutate_patterns`. The run stops after 5 minutes and never fails the PR. Release-please PRs skip it. A weekly full run posts its stats to Discord `#homeracker-ci`.
+On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates only the functions the PR changed, per package, and edits one PR comment with a section per package listing the survivors (fork PRs: job summary only). Kill each survivor with a test, or mark a true equivalent with `# pragma: no mutate`. Log calls, argparse help text and exception messages are skipped by `do_not_mutate_patterns`. The run stops after 5 minutes and never fails the PR. Release-please PRs skip it. A weekly full run per package posts its stats to Discord `#homeracker-ci` and refreshes that package's badge.
 
 ```bash
-cd cmd/scadm
-export PYTHONWARNDEFAULTENCODING=1 PYTHONWARNINGS=ignore::EncodingWarning  # checks scadm's I/O, not mutmut's
-mutmut run                                        # full run, ~2 min
-mutmut run "scadm.flatten.x_flatten_all__mutmut_*"  # one function, as a PR run does
+cd cmd/scadm   # or cmd/scadfmt
+export PYTHONWARNDEFAULTENCODING=1 PYTHONWARNINGS=ignore::EncodingWarning  # checks the package's I/O, not mutmut's
+mutmut run                                        # full run, ~2 min (scadfmt ~1 min)
+mutmut run "scadm.flatten.x_flatten_all__mutmut_*"  # one function, as a PR run does (scadm)
+mutmut run "scadfmt.formatter.x__role__mutmut_*"    # the same for scadfmt
 mutmut results                                    # list surviving mutants
 mutmut show <mutant-name>                         # diff of one mutant
 ```

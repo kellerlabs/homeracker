@@ -5,6 +5,9 @@ import shutil
 import tempfile
 from pathlib import Path
 
+# Explicit everywhere: the locale default is not UTF-8 on Windows.
+ENCODING = "utf-8"
+
 
 def write_atomically(path: Path, text: str) -> None:
     """Replace the file at path with text in one step, so a failed write never leaves a truncated file.
@@ -18,14 +21,15 @@ def write_atomically(path: Path, text: str) -> None:
     Raises:
         OSError: If the temporary file cannot be written or moved into place.
     """
-    target = path.resolve() if path.is_symlink() else path
+    target = path.resolve()
     handle, temp_name = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.", suffix=".tmp")
     try:
         with os.fdopen(handle, "wb") as temp:
-            temp.write(text.encode("utf-8"))
+            temp.write(text.encode(ENCODING))
         if target.exists():
             shutil.copymode(target, temp_name)
         os.replace(temp_name, target)
     except OSError:
-        Path(temp_name).unlink(missing_ok=True)
+        # No mutation: the temp file always exists here, missing_ok only keeps a cleanup failure from hiding the error.
+        Path(temp_name).unlink(missing_ok=True)  # pragma: no mutate
         raise

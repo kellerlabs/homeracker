@@ -10,7 +10,7 @@ on:
 permissions: {}
 
 env:
-  # Lets tests catch text I/O without an explicit encoding (see [tool.pytest.ini_options] in cmd/scadm/pyproject.toml).
+  # Lets tests catch text I/O without an explicit encoding (see [tool.pytest.ini_options] in cmd/scadm/pyproject.toml and cmd/scadfmt/pyproject.toml).
   PYTHONWARNDEFAULTENCODING: '1'
   # Silences the same warning from mutmut and other tooling. pytest's own filter still turns it into an error inside tests.
   PYTHONWARNINGS: 'ignore::EncodingWarning'
@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Mutates only the functions a PR changed. A change to the run setup itself gets a full run instead.
+  # Mutates only the functions a PR changed, one comment section per package. A change to a package's run setup gets a full run of it.
   # Release PRs only bump versions and changelogs; their code was mutation-tested on its own PRs.
   pr:
     if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')
@@ -43,62 +43,45 @@ jobs:
       - name: Install dependencies
         run: |
           set -euo pipefail
-          pip install -e cmd/scadm pytest -r requirements.txt
+          pip install -e cmd/scadm -e cmd/scadfmt pytest -r requirements.txt
 
-      - name: Pick mutation scope
-        id: scope
+      # Per package: pick the scope, run mutmut capped at 5 minutes so a growing suite can't stall PRs
+      # (results collected before the cap are kept), then render its section of the PR comment.
+      - name: Run mutation tests
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          python cmd/test/mutation_report.py scope --base "$BASE_SHA" > "$RUNNER_TEMP/globs.txt"
-          setup_changed=$(git diff --name-only "$BASE_SHA...HEAD" -- \
-            cmd/scadm/pyproject.toml cmd/test/mutation_report.py requirements.txt .github/workflows/mutation-tests.yml)
-          if [[ -n "$setup_changed" ]]; then
-            echo "mode=full" >> "$GITHUB_OUTPUT"
-          elif grep -q . "$RUNNER_TEMP/globs.txt"; then
-            echo "mode=scoped" >> "$GITHUB_OUTPUT"
-          else
-            echo "mode=none" >> "$GITHUB_OUTPUT"
-          fi
-
-      # Capped at 5 minutes so a growing suite can't stall PRs. Results collected before the cap are kept.
-      - name: Run mutation tests
-        id: run
-        if: steps.scope.outputs.mode != 'none'
-        working-directory: cmd/scadm
-        env:
-          MODE: ${{ steps.scope.outputs.mode }}
-        run: |
-          set -euo pipefail
-          names=()
-          if [[ "$MODE" == "scoped" ]]; then
-            globs=$(grep . "$RUNNER_TEMP/globs.txt")
-            mapfile -t names <<< "$globs"
-          fi
-          rc=0
-          timeout --kill-after=30s 300 mutmut run "${names[@]}" || rc=$?
-          if [[ "$rc" -eq 124 || "$rc" -eq 137 ]]; then
-            echo "::warning title=Mutation run timed out::Results are partial. If this keeps happening, move per-PR mutation runs to a nightly job."
-            echo "timed_out=true" >> "$GITHUB_OUTPUT"
-          elif [[ "$rc" -ne 0 ]]; then
-            exit "$rc"
-          fi
-
-      - name: Build report
-        env:
-          MODE: ${{ steps.scope.outputs.mode }}
-          TIMED_OUT: ${{ steps.run.outputs.timed_out }}
-        run: |
-          set -euo pipefail
-          args=()
-          if [[ "$MODE" != "full" ]]; then
-            args+=(--globs-file "$RUNNER_TEMP/globs.txt")
-          fi
-          if [[ "$TIMED_OUT" == "true" ]]; then
-            args+=(--timed-out)
-          fi
-          python cmd/test/mutation_report.py report "${args[@]}" > "$RUNNER_TEMP/report.md"
+          sections=()
+          for package in scadm scadfmt; do
+            globs="$RUNNER_TEMP/$package-globs.txt"
+            python cmd/test/mutation_report.py scope --package "$package" --base "$BASE_SHA" > "$globs"
+            setup_changed=$(git diff --name-only "$BASE_SHA...HEAD" -- \
+              "cmd/$package/pyproject.toml" cmd/test/mutation_report.py requirements.txt .github/workflows/mutation-tests.yml)
+            args=()
+            names=()
+            if [[ -z "$setup_changed" ]]; then
+              args+=(--globs-file "$globs")
+              # grep exits 1 on an empty scope; any other failure stops the job.
+              scoped=$(grep . "$globs" || [[ $? -eq 1 ]])
+              if [[ -n "$scoped" ]]; then
+                mapfile -t names <<< "$scoped"
+              fi
+            fi
+            if [[ -n "$setup_changed" || ${#names[@]} -gt 0 ]]; then
+              rc=0
+              (cd "cmd/$package" && timeout --kill-after=30s 300 mutmut run "${names[@]}") || rc=$?
+              if [[ "$rc" -eq 124 || "$rc" -eq 137 ]]; then
+                echo "::warning title=Mutation run timed out ($package)::Results are partial. If this keeps happening, move per-PR mutation runs to a nightly job."
+                args+=(--timed-out)
+              elif [[ "$rc" -ne 0 ]]; then
+                exit "$rc"
+              fi
+            fi
+            python cmd/test/mutation_report.py report --package "$package" "${args[@]}" > "$RUNNER_TEMP/$package.md"
+            sections+=("$RUNNER_TEMP/$package.md")
+          done
+          python cmd/test/mutation_report.py combine "${sections[@]}" > "$RUNNER_TEMP/report.md"
           cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
 
       # Fork PRs get a read-only token, so they rely on the job summary above.
@@ -119,13 +102,23 @@ jobs:
             gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@"$RUNNER_TEMP/report.md" --silent
           fi
 
-  # Whole codebase, to keep overall test debt visible: report to Discord, refresh the mutation badge.
+  # Whole package, to keep overall test debt visible: report to Discord, refresh the package's mutation badge.
   full:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: scadm
+            badge: mutation.json
+          - package: scadfmt
+            badge: scadfmt-mutation.json
+    env:
+      PACKAGE: ${{ matrix.package }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -140,10 +133,10 @@ jobs:
       - name: Install dependencies
         run: |
           set -euo pipefail
-          pip install -e cmd/scadm pytest -r requirements.txt
+          pip install -e "cmd/$PACKAGE" pytest -r requirements.txt
 
       - name: Run mutation tests
-        working-directory: cmd/scadm
+        working-directory: cmd/${{ matrix.package }}
         run: |
           set -euo pipefail
           mutmut run
@@ -153,7 +146,7 @@ jobs:
       - name: Build report
         run: |
           set -euo pipefail
-          python cmd/test/mutation_report.py report >> "$GITHUB_STEP_SUMMARY"
+          python cmd/test/mutation_report.py report --package "$PACKAGE" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Post to Discord
         env:
@@ -165,7 +158,7 @@ jobs:
             echo "::warning::DISCORD_CI_WEBHOOK_URL is not set, skipping the Discord report"
             exit 0
           fi
-          python cmd/test/mutation_report.py discord --run-url "$RUN_URL" > "$RUNNER_TEMP/discord.json"
+          python cmd/test/mutation_report.py discord --package "$PACKAGE" --run-url "$RUN_URL" > "$RUNNER_TEMP/discord.json"
           curl -fsS -H "Content-Type: application/json" -d @"$RUNNER_TEMP/discord.json" "$DISCORD_CI_WEBHOOK_URL"
 
       - name: Publish mutation badge
@@ -173,4 +166,4 @@ jobs:
         uses: ./.github/actions/publish-badge
         with:
           file: ${{ runner.temp }}/mutation.json
-          name: mutation.json
+          name: ${{ matrix.badge }}

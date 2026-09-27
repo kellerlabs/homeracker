@@ -26,6 +26,7 @@ def test_merge_settings_replaces_other_scad_formatters():
         "customLocalFormatters.formatters": [
             {"command": "old", "languages": ["scad"]},
             {"command": "keep", "languages": ["yaml"]},
+            {"command": "no languages"},
         ],
         "[scad]": {"editor.tabSize": 2},
         "other": True,
@@ -33,6 +34,7 @@ def test_merge_settings_replaces_other_scad_formatters():
     merged = vscode.merge_settings(settings)
     assert merged["customLocalFormatters.formatters"] == [
         {"command": "keep", "languages": ["yaml"]},
+        {"command": "no languages"},
         {"command": vscode.formatter_command(), "languages": ["scad"]},
     ]
     assert merged["[scad]"] == {"editor.tabSize": 2, "editor.defaultFormatter": vscode.EXTENSION}
@@ -40,10 +42,26 @@ def test_merge_settings_replaces_other_scad_formatters():
 
 
 def test_setup_creates_settings(tmp_path, fake_code):
-    assert vscode.setup_vscode(tmp_path)
+    workspace = tmp_path / "new" / "workspace"
+    assert vscode.setup_vscode(workspace)
     assert fake_code == [["code", "--install-extension", vscode.EXTENSION, "--force"]]
-    settings = json.loads((tmp_path / ".vscode" / "settings.json").read_text(encoding="utf-8"))
-    assert settings["[scad]"]["editor.defaultFormatter"] == vscode.EXTENSION
+    expected = {
+        "[scad]": {"editor.defaultFormatter": vscode.EXTENSION},
+        "customLocalFormatters.formatters": [{"command": vscode.formatter_command(), "languages": ["scad"]}],
+    }
+    text = (workspace / ".vscode" / "settings.json").read_text(encoding="utf-8")
+    assert text == json.dumps(expected, indent=2) + "\n"
+
+
+@pytest.mark.parametrize(("system", "shell"), [("Linux", False), ("Windows", True)])
+def test_install_runs_code_cli(monkeypatch, system, shell):
+    looked_up, calls = [], []
+    monkeypatch.setattr(vscode.shutil, "which", lambda name: looked_up.append(name) or "/usr/bin/code")
+    monkeypatch.setattr(vscode.platform, "system", lambda: system)
+    monkeypatch.setattr(vscode.subprocess, "run", lambda args, **kwargs: calls.append(kwargs))
+    assert vscode._install_extension()  # pylint: disable=protected-access
+    assert looked_up == ["code"]
+    assert calls == [{"check": True, "capture_output": True, "text": True, "shell": shell}]
 
 
 def test_setup_keeps_existing_settings(tmp_path, fake_code):

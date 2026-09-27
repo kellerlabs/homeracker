@@ -52,3 +52,4 @@ _site/
 htmlcov/
 .coverage
 cmd/scadm/mutants/
+cmd/scadfmt/mutants/

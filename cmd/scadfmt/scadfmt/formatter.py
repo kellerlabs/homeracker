@@ -50,8 +50,11 @@ class _Line:
     indent: str
     code: str
     comment: str | None = None
-    verbatim: bool = False
-    blank: bool = False
+
+
+_BLANK = _Line("", "")
+# A line break the formatter adds. Its position is never read: only source lines matter.
+_BREAK = Token(Kind.NEWLINE, "\n", 0, 0)
 
 
 @dataclass
@@ -107,15 +110,15 @@ def _insert_breaks(tokens: list[Token]) -> list[Token]:
     """Put block contents and statements on their own lines.
 
     Adds a line break after `{`, around `}` (keeping `} else`) and after `;` outside parentheses, except in empty
-    `{}`, before a trailing comment and inside `// fmt: off` regions. Added breaks have empty text.
+    `{}`, before a trailing comment and inside `// fmt: off` regions.
     """
     out: list[Token] = []
     stack: list[str] = []
-    fmt_off = False
+    fmt_off = False  # pragma: no mutate  (None reads the same)
 
-    def ensure_break(after: Token) -> None:
+    def ensure_break() -> None:
         if out and out[-1].kind != Kind.NEWLINE:
-            out.append(Token(Kind.NEWLINE, "", after.line, after.col))
+            out.append(_BREAK)
 
     for index, token in enumerate(tokens):
         following = tokens[index + 1] if index + 1 < len(tokens) else None
@@ -123,7 +126,7 @@ def _insert_breaks(tokens: list[Token]) -> list[Token]:
             fmt_off = token.text.strip() == FMT_OFF
         is_op = token.kind == Kind.OP
         if not fmt_off and is_op and token.text == "}" and not (out and out[-1].text == "{"):
-            ensure_break(token)
+            ensure_break()
         out.append(token)
         if is_op and token.text in OPENERS:
             stack.append(token.text)
@@ -134,7 +137,7 @@ def _insert_breaks(tokens: list[Token]) -> list[Token]:
         if following.kind in (Kind.NEWLINE, Kind.LINE_COMMENT):
             continue
         if _breaks_after(token.text, following.text, not stack or stack[-1] == "{"):
-            ensure_break(token)
+            ensure_break()
     return out
 
 
@@ -147,46 +150,45 @@ def _breaks_after(text: str, following: str, at_statement_level: bool) -> bool:
     return text == ";" and at_statement_level
 
 
-def _split_lines(tokens: list[Token]) -> list[tuple[list[Token], int, int]]:
-    """Group tokens into physical lines.
-
-    Returns:
-        (tokens, first source line, last source line) per line. A multi-line comment or string keeps the lines it
-        spans in one group.
-    """
-    lines = []
-    current: list[Token] = []
-    start = 1
+def _split_lines(tokens: list[Token]) -> list[list[Token]]:
+    """Group tokens into lines; an empty group is a blank line."""
+    lines: list[list[Token]] = [[]]
     for token in tokens:
         if token.kind == Kind.NEWLINE:
-            lines.append((current, start, token.line))
-            # An added break (empty text) splits a source line, so the next group starts on the same one.
-            current, start = [], token.line + 1 if token.text else token.line
+            lines.append([])
         else:
-            current.append(token)
-    if current:
-        lines.append((current, start, current[-1].line + current[-1].text.count("\n")))
+            lines[-1].append(token)
+    if not lines[-1]:
+        lines.pop()
     return lines
 
 
-def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], newline: str = "\n") -> str:
+def _source_span(tokens: list[Token]) -> range:
+    """Indexes into the source lines that tokens span; a multi-line comment or string spans several."""
+    last = tokens[-1]
+    return range(tokens[0].line - 1, last.line + last.text.count("\n"))
+
+
+def _render(lines: list[list[Token]], source_lines: list[str], newline: str) -> str:
     """Turn grouped tokens into formatted text joined by newline."""
     state = _State(newline=newline)
     out: list[_Line] = []
-    blank_run = 0
-    fmt_off = False
+    # Leading blank lines are dropped below, so these start values never show.
+    blank_run = 0  # pragma: no mutate
+    fmt_off = False  # pragma: no mutate
     next_code_is_import = _next_code_is_import(lines)
     definition_starts = _definition_starts(lines)
-    after_import = False
-    for index, (tokens, first, last) in enumerate(lines):
+    after_import = False  # pragma: no mutate
+    for index, tokens in enumerate(lines):
         if not tokens:
             if fmt_off:
-                out.append(_Line("", "", verbatim=True))
+                out.append(_Line("", ""))
             else:
                 blank_run += 1
             continue
         level = _match_else(tokens, _line_level(tokens[0], state), state)
-        marker = tokens[0].text.strip() if len(tokens) == 1 and tokens[0].kind == Kind.LINE_COMMENT else None
+        # Only a line holding just `// fmt: off` or `// fmt: on` starts with that text.
+        marker = tokens[0].text.strip()
         if after_import and not fmt_off:
             blank_run, after_import = _import_block_gap(tokens, next_code_is_import[index])
         if not _is_comment_only(tokens):
@@ -200,7 +202,7 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
         code, comment = _render_tokens(tokens, level, state)
         _close_definitions(state)
         if fmt_off and marker != FMT_ON:
-            out.extend(_Line("", text, verbatim=True) for text in source_lines[first - 1 : last])
+            out.extend(_Line("", source_lines[i]) for i in _source_span(tokens))
             continue
         out.append(_Line(INDENT * level, code, comment))
         fmt_off = marker == FMT_OFF or (fmt_off and marker != FMT_ON)
@@ -208,11 +210,11 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
         frame = state.stack[-1]
         raise FormatError(f"unclosed {frame.char!r} at end of file")
     # Blank lines only reach out before a following line, so only leading ones need trimming.
-    while out and out[0].blank:
+    while out and out[0] == _BLANK:
         out.pop(0)
     _align_comments(out)
     # Joined with the file's newline directly: a multi-line string keeps its own line endings.
-    text = newline.join(line.code if line.verbatim else _join(line) for line in out)
+    text = newline.join(_join(line) for line in out)
     return text + newline if text else ""
 
 
@@ -222,19 +224,19 @@ def _is_definition(tokens: list[Token]) -> bool:
     return (
         first.kind == Kind.IDENT
         and first.text in ("module", "function")
-        and tokens[1:2] != []
-        and (tokens[1].kind == Kind.IDENT)
+        and len(tokens) > 1
+        and tokens[1].kind == Kind.IDENT
     )
 
 
-def _definition_starts(lines: list[tuple[list[Token], int, int]]) -> list[bool]:
+def _definition_starts(lines: list[list[Token]]) -> list[bool]:
     """Per line: whether a definition, including the comments directly above it, starts here."""
     starts = [False] * len(lines)
-    for index, (tokens, _, _) in enumerate(lines):
+    for index, tokens in enumerate(lines):
         if not tokens or not _is_definition(tokens):
             continue
         top = index
-        while top > 0 and _is_attached_comment(lines[top - 1][0]):
+        while top and _is_attached_comment(lines[top - 1]):
             top -= 1
         starts[top] = True
     return starts
@@ -280,7 +282,7 @@ def _close_definitions(state: _State) -> None:
 def _blank_lines(count: int, top_level: bool) -> list[_Line]:
     """Up to count blank lines, capped by where they sit."""
     allowed = MAX_BLANK_LINES_TOP if top_level else MAX_BLANK_LINES_NESTED
-    return [_Line("", "", blank=True) for _ in range(min(count, allowed))]
+    return [_BLANK] * min(count, allowed)
 
 
 def _match_else(tokens: list[Token], level: int, state: _State) -> int:
@@ -290,15 +292,13 @@ def _match_else(tokens: list[Token], level: int, state: _State) -> int:
         The line's level, corrected for an `else`.
     """
     frame, first = state.stack[-1], tokens[0]
-    if (first.kind == Kind.OP and first.text in CLOSERS) or _is_comment_only(tokens):
+    if _is_comment_only(tokens):
         return level
+    # An `else` takes the most recent open `if`; ones it never takes (braced or finished) just stay below.
     is_else = first.kind == Kind.IDENT and first.text == "else"
     if is_else and frame.if_levels:
         level = frame.if_levels.pop()
-    elif frame.char in ("", "{") and level == frame.level + 1:
-        # A new statement ends every `if` at or below its level.
-        frame.if_levels = [pending for pending in frame.if_levels if pending < level]
-    starts_if = first.text == "if" or (is_else and len(tokens) > 1 and tokens[1].text == "if")
+    starts_if = first.text == "if" or [token.text for token in tokens[:2]] == ["else", "if"]
     if first.kind == Kind.IDENT and starts_if:
         frame.if_levels.append(level)
     return level
@@ -324,22 +324,19 @@ def _import_block_gap(tokens: list[Token], next_code_is_import: bool) -> tuple[i
     return (0 if inside else 1), inside
 
 
-def _next_code_is_import(lines: list[tuple[list[Token], int, int]]) -> list[bool]:
+def _next_code_is_import(lines: list[list[Token]]) -> list[bool]:
     """Per line: whether the next line with code after it is an import."""
-    result = [False] * len(lines)
-    following = False
-    for index in range(len(lines) - 1, -1, -1):
-        result[index] = following
-        tokens = lines[index][0]
-        if tokens and not _is_comment_only(tokens):
+    result = []
+    following = False  # pragma: no mutate  (None reads the same)
+    for tokens in reversed(lines):
+        result.append(following)
+        if not _is_comment_only(tokens):
             following = _is_import(tokens)
-    return result
+    return result[::-1]
 
 
 def _join(line: _Line) -> str:
     """Build one output line from its parts."""
-    if line.blank:
-        return ""
     if line.comment is None:
         return line.indent + line.code
     if not line.code:
@@ -351,10 +348,10 @@ def _align_comments(out: list[_Line]) -> None:
     """Align trailing comments of consecutive lines to one column; a lone one keeps the default gap."""
     run: list[_Line] = []
     for line in [*out, None]:
-        if line is not None and not line.verbatim and line.code and line.comment is not None:
+        if line is not None and line.code and line.comment is not None:
             run.append(line)
             continue
-        if len(run) > 1:
+        if run:
             width = max(len(item.indent + item.code) for item in run)
             for item in run:
                 item.code += " " * (width - len(item.indent + item.code))
@@ -393,19 +390,18 @@ def _render_tokens(tokens: list[Token], level: int, state: _State) -> tuple[str,
         comment = tokens[-1].text.rstrip()
         tokens = tokens[:-1]
     parts: list[str] = []
-    before: Token | None = None
-    before_role = ""
-    # A bracket opened after closing a multi-line `(` or `[` on this line belongs to the line that opened it.
+    emitted: list[tuple[Token, str]] = []
+    # A bracket opened after closing a multi-line one on this line belongs to the line that opened that one.
     anchor = level
     for token in tokens:
         role = _role(token, state)
         text = _token_text(token, state.newline)
-        if before is not None and _needs_space(before, before_role, token, role):
+        if emitted and _needs_space(*emitted[-1], token, role):
             parts.append(" ")
         parts.append(text)
-        before, before_role = token, role
+        emitted.append((token, role))
         closed = _advance(token, role, anchor, state)
-        if closed is not None and closed.char in ("(", "["):
+        if closed is not None:
             anchor = min(anchor, closed.level)
     if any(token.kind != Kind.BLOCK_COMMENT for token in tokens):
         state.line_anchor = anchor
@@ -420,20 +416,19 @@ def _token_text(token: Token, newline: str) -> str:
 
 
 def _role(token: Token, state: _State) -> str:
-    """Classify an operator by its position: binary, unary, modifier, range or plain."""
-    if token.kind != Kind.OP:
-        return ""
+    """Classify an operator whose spacing depends on its position: modifier, unary, ternary or range colon.
+
+    Returns:
+        The role, or "" for every other token, which is spaced by its text alone.
+    """
     text = token.text
-    previous, frame = state.previous, state.stack[-1]
     if text in MODIFIERS and _at_statement_start(state):
         return "modifier"
-    if text in UNARY and (state.after_header or _expects_operand(previous)):
+    if text in UNARY and (state.after_header or _expects_operand(state.previous)):
         return "unary"
     if text == ":":
-        return "binary" if frame.pending_ternaries else "range"
-    if text in OPENERS or text in CLOSERS or text in (",", ";", "."):
-        return ""
-    return "binary"
+        return "ternary" if state.stack[-1].pending_ternaries else "range"
+    return ""  # pragma: no mutate  (any other plain role reads the same)
 
 
 def _at_statement_start(state: _State) -> bool:
@@ -467,12 +462,10 @@ def _needs_space(left: Token, left_role: str, right: Token, right_role: str) -> 
         return False
     if right.kind == Kind.OP and rt == ".":
         return False
-    if left_role == "unary" and right_role == "unary" and lt in "+-" and rt in "+-":
+    if left_role == "unary" and right_role == "unary" and lt in ("+", "-") and rt in ("+", "-"):
         return True  # `- -x`, never `--x`
     if left_role in ("unary", "modifier") or "range" in (left_role, right_role):
         return False
-    if "binary" in (left_role, right_role):
-        return True
     if right.kind == Kind.OP and rt == "}":
         return lt != "{"
     if right.kind == Kind.OP and rt in ("(", "["):
@@ -505,23 +498,18 @@ def _advance(token: Token, role: str, level: int, state: _State) -> _Frame | Non
     if text in OPENERS:
         header = text == "(" and before is not None and before.kind == Kind.IDENT and before.text in HEADER_KEYWORDS
         state.stack.append(_Frame(text, level, header=header))
-        if text == "{":
-            state.in_expression = False
     elif text in CLOSERS:
         if frame.char != CLOSERS[text]:
             raise FormatError(f"{token.line}:{token.col}: unexpected {text!r}")
         state.stack.pop()
         state.after_header = frame.header
-        if text == "}":
-            state.in_expression = False
         return frame
     elif text == "?":
         frame.pending_ternaries += 1
-    elif text == ":" and role == "binary":
+    elif role == "ternary":
         frame.pending_ternaries -= 1
     elif text == ";" and frame.char in ("", "{"):
-        state.in_expression = False
-        frame.pending_ternaries = 0
+        state.in_expression = False  # pragma: no mutate  (None reads the same)
     elif text == "=" and frame.char in ("", "{"):
         state.in_expression = True
     return None

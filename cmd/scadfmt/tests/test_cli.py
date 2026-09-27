@@ -3,6 +3,7 @@
 import importlib
 import importlib.metadata
 import io
+import logging
 import subprocess
 import sys
 from pathlib import Path
@@ -48,7 +49,7 @@ def test_check_reports_without_writing(tmp_path):
     ugly.write_bytes(UGLY.encode())
     pretty.write_bytes(PRETTY.encode())
     assert cli.main(["format", "--check", str(pretty)]) == cli.EXIT_OK
-    assert cli.main(["format", "--check", str(ugly), str(pretty)]) == cli.EXIT_CHANGES
+    assert cli.main(["format", "--check", str(pretty), str(ugly)]) == cli.EXIT_CHANGES
     assert ugly.read_text(encoding="utf-8") == UGLY
 
 
@@ -56,7 +57,9 @@ def test_diff_prints_without_writing(tmp_path, capsysbinary):
     path = tmp_path / "a.scad"
     path.write_bytes(UGLY.encode())
     assert cli.main(["format", "--diff", str(path)]) == cli.EXIT_OK
-    assert b"-x=1;\n+x = 1;\n" in capsysbinary.readouterr().out
+    out = capsysbinary.readouterr().out.decode()
+    assert out.startswith(f"--- {path} (original)\n+++ {path} (formatted)\n")
+    assert "-x=1;\n+x = 1;\n" in out
     assert path.read_text(encoding="utf-8") == UGLY
 
 
@@ -70,13 +73,16 @@ def test_directory_is_searched_recursively(tmp_path):
     assert (tmp_path / "notes.txt").read_text(encoding="utf-8") == UGLY
 
 
-def test_error_leaves_file_and_continues(tmp_path):
-    bad, ugly = tmp_path / "bad.scad", tmp_path / "ugly.scad"
+@pytest.mark.parametrize("check", [False, True])
+def test_error_leaves_file_and_continues(tmp_path, check):
+    bad, bad2, ugly = tmp_path / "bad.scad", tmp_path / "bad2.scad", tmp_path / "ugly.scad"
     bad.write_bytes("x = @;\n".encode())
+    bad2.write_bytes("x = @;\n".encode())
     ugly.write_bytes(UGLY.encode())
-    assert cli.main(["format", str(bad), str(ugly)]) == cli.EXIT_ERROR
+    args = ["format", *(["--check"] if check else []), str(bad), str(bad2), str(ugly)]
+    assert cli.main(args) == cli.EXIT_ERROR
     assert bad.read_text(encoding="utf-8") == "x = @;\n"
-    assert ugly.read_text(encoding="utf-8") == PRETTY
+    assert ugly.read_text(encoding="utf-8") == (UGLY if check else PRETTY)
 
 
 def test_write_failure_keeps_original_and_continues(tmp_path, monkeypatch):
@@ -91,10 +97,30 @@ def test_write_failure_keeps_original_and_continues(tmp_path, monkeypatch):
         real_replace(src, dst)
 
     monkeypatch.setattr(fileio.os, "replace", fail_for_first)
-    assert cli.main(["format", str(first), str(second)]) == cli.EXIT_ERROR
+    assert cli.main(["format", str(first), str(first), str(second)]) == cli.EXIT_ERROR
     assert first.read_bytes() == UGLY.encode()
     assert second.read_bytes() == PRETTY.encode()
     assert sorted(p.name for p in tmp_path.iterdir()) == ["a.scad", "b.scad"]
+
+
+def test_temp_file_sits_next_to_the_target(tmp_path, monkeypatch):
+    path = tmp_path / "a.scad"
+    path.write_bytes(UGLY.encode())
+    temps = []
+    real_mkstemp = fileio.tempfile.mkstemp
+
+    def recording_mkstemp(**kwargs):
+        handle, name = real_mkstemp(**kwargs)
+        temps.append(Path(name))
+        return handle, name
+
+    monkeypatch.setattr(fileio.tempfile, "mkstemp", recording_mkstemp)
+    assert cli.main(["format", str(path)]) == cli.EXIT_OK
+    assert len(temps) == 1
+    # Same folder, so the final rename stays on one file system; hidden, and recognizable if left behind.
+    assert temps[0].parent == path.resolve().parent
+    assert temps[0].name.startswith(".a.scad.")
+    assert temps[0].name.endswith(".tmp")
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows has no POSIX file modes")
@@ -129,6 +155,13 @@ def test_symlink_target_is_formatted_and_link_kept(tmp_path):
     assert target.read_bytes() == PRETTY.encode()
 
 
+def test_command_is_required(capsys):
+    with pytest.raises(SystemExit) as exc:
+        cli.main([])
+    assert exc.value.code == 2
+    assert "scadfmt" in capsys.readouterr().err
+
+
 def test_version(capsys):
     with pytest.raises(SystemExit):
         cli.main(["--version"])
@@ -149,7 +182,7 @@ def test_stdin_check_and_diff(monkeypatch, capsysbinary):
     assert run_stdin(monkeypatch, PRETTY.encode(), "--check") == cli.EXIT_OK
     assert capsysbinary.readouterr().out == b""
     assert run_stdin(monkeypatch, UGLY.encode(), "--diff") == cli.EXIT_OK
-    assert b"+x = 1;" in capsysbinary.readouterr().out
+    assert capsysbinary.readouterr().out.startswith(b"--- <stdin> (original)\n+++ <stdin> (formatted)\n")
 
 
 def test_stdin_error(monkeypatch, capsysbinary):
@@ -158,8 +191,9 @@ def test_stdin_error(monkeypatch, capsysbinary):
     assert capsysbinary.readouterr().out == b""
 
 
-def test_stdin_mixed_with_paths_is_rejected(tmp_path):
-    assert cli.main(["format", "-", str(tmp_path)]) == cli.EXIT_ERROR
+def test_stdin_mixed_with_paths_is_rejected(tmp_path, caplog):
+    assert cli.main(["format", str(tmp_path), "-"]) == cli.EXIT_ERROR
+    assert "cannot be combined" in caplog.text
 
 
 def test_vscode_subcommand(monkeypatch, tmp_path):
@@ -167,8 +201,9 @@ def test_vscode_subcommand(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "setup_vscode", lambda workspace: calls.append(workspace) or True)
     assert cli.main(["vscode", "--workspace", str(tmp_path)]) == cli.EXIT_OK
     assert calls == [tmp_path]
-    monkeypatch.setattr(cli, "setup_vscode", lambda workspace: False)
+    monkeypatch.setattr(cli, "setup_vscode", lambda workspace: calls.append(workspace) and False)
     assert cli.main(["vscode"]) == cli.EXIT_ERROR
+    assert calls[-1] == Path(".")
 
 
 def test_module_entry_point(tmp_path):
@@ -178,3 +213,17 @@ def test_module_entry_point(tmp_path):
         [sys.executable, "-m", "scadfmt", "format", "--check", str(path)], capture_output=True, check=False
     )
     assert result.returncode == cli.EXIT_OK
+
+
+def test_log_lines_are_plain_messages(tmp_path, capsys, monkeypatch):
+    # Unconfigured, as in a real run, so main's logging setup takes effect. setLevel also resets cached levels.
+    monkeypatch.setattr(logging.root, "handlers", [])
+    level = logging.root.level
+    logging.root.setLevel(logging.WARNING)
+    path = tmp_path / "a.scad"
+    path.write_bytes(UGLY.encode())
+    try:
+        assert cli.main(["format", "--check", str(path)]) == cli.EXIT_CHANGES
+    finally:
+        logging.root.setLevel(level)
+    assert capsys.readouterr().err == f"would reformat {path}\n"

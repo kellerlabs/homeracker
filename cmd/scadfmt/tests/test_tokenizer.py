@@ -36,6 +36,8 @@ def test_identifiers(name):
 @pytest.mark.parametrize("keyword", ["include", "use"])
 def test_include_path_is_one_token(keyword):
     assert kinds_and_texts(f"{keyword} <BOSL2/std.scad>") == [(Kind.IDENT, keyword), (Kind.PATH, "<BOSL2/std.scad>")]
+    path = tokenize(f"x;\n{keyword}  <a.scad>")[-1]
+    assert (path.line, path.col) == (2, len(keyword) + 3)
 
 
 def test_less_than_after_other_ident_is_operator():
@@ -59,6 +61,7 @@ def test_positions_and_newlines():
         ("/* x\ny */", 4, 1),
         ("d", 5, 6),
     ]
+    assert tokenize("/* a\nb\nc */ d")[-1].col == 6
     assert [t.text for t in tokens if t.kind == Kind.NEWLINE] == ["\n", "\n", "\n"]
 
 
@@ -92,11 +95,19 @@ def test_unterminated_string():
         tokenize('x = "abc')
 
 
-def test_unterminated_block_comment():
-    with pytest.raises(TokenizeError, match="1:1: unterminated block comment"):
-        tokenize("/* never closed")
+@pytest.mark.parametrize(("source", "position"), [("/* never closed", "1:1"), ("x /* never closed", "1:3")])
+def test_unterminated_block_comment(source, position):
+    with pytest.raises(TokenizeError, match=f"{position}: unterminated block comment"):
+        tokenize(source)
 
 
 def test_significant_ignores_newlines_and_comment_trailing_whitespace():
     assert significant(tokenize("a // c  \n/* x  \ny */")) == significant(tokenize("a // c\n/* x\ny */"))
     assert (Kind.NEWLINE, "\n") not in significant(tokenize("a\nb"))
+
+
+def test_significant_strips_comment_line_ends():
+    assert significant(tokenize("/* a  \nb */ // c  ")) == [
+        (Kind.BLOCK_COMMENT, "/* a\nb */"),
+        (Kind.LINE_COMMENT, "// c"),
+    ]

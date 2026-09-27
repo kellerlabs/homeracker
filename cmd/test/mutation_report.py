@@ -2,8 +2,9 @@
 """Mutation testing helpers for CI: scope a mutmut run to a PR and render its results.
 
 Subcommands:
-    scope           Print mutmut name globs for scadm functions changed since a base commit.
-    report          Render a markdown report of a mutmut run (PR comment and job summary).
+    scope           Print mutmut name globs for a package's functions changed since a base commit.
+    report          Render one package's section of the markdown report (PR comment and job summary).
+    combine         Join package sections into the PR comment.
     discord         Print a Discord webhook payload for a full run.
     coverage-badge  Convert coverage.py JSON into a shields.io endpoint badge.
 """
@@ -18,8 +19,7 @@ import sys
 from pathlib import Path
 
 MARKER = "<!-- mutation-report -->"
-SOURCE_ROOT = "cmd/scadm"
-PACKAGE = "scadm"
+PACKAGES = ("scadm", "scadfmt")
 MAX_LISTED_SURVIVORS = 25
 _HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
 _RESULT_RE = re.compile(r"^\s*(\S+): (.+)$")
@@ -50,19 +50,32 @@ def parse_changed_lines(diff: str) -> dict[str, set[int]]:
     return changed
 
 
-def module_name(path: str) -> str | None:
-    """Map a repo path to the dotted module mutmut uses, or None if it isn't scadm source.
+def source_root(package: str) -> str:
+    """Return the repo path of a package's project folder.
+
+    Args:
+        package: One of ``PACKAGES``.
+
+    Returns:
+        Path relative to the repo root, such as ``cmd/scadm``.
+    """
+    return f"cmd/{package}"
+
+
+def module_name(path: str, package: str) -> str | None:
+    """Map a repo path to the dotted module mutmut uses, or None if it isn't the package's source.
 
     Args:
         path: File path relative to the repo root.
+        package: One of ``PACKAGES``.
 
     Returns:
         Dotted module name such as ``scadm.flatten``, or None.
     """
-    prefix = f"{SOURCE_ROOT}/{PACKAGE}/"
-    if not path.startswith(prefix) or not path.endswith(".py"):
+    root = source_root(package)
+    if not path.startswith(f"{root}/{package}/") or not path.endswith(".py"):
         return None
-    parts = path[len(SOURCE_ROOT) + 1 : -3].split("/")
+    parts = path[len(root) + 1 : -3].split("/")
     if parts[-1] == "__init__":
         parts = parts[:-1]
     return ".".join(parts)
@@ -95,19 +108,20 @@ def changed_functions(source: str, lines: set[int]) -> list[str]:
     return keys
 
 
-def scope(diff: str, repo_root: Path) -> list[str]:
-    """Turn a diff into mutmut name globs for every changed scadm function.
+def scope(diff: str, repo_root: Path, package: str) -> list[str]:
+    """Turn a diff into mutmut name globs for every changed function of a package.
 
     Args:
         diff: Output of ``git diff -U0 <base>...HEAD``.
         repo_root: Repository root, to read the changed files at HEAD.
+        package: One of ``PACKAGES``.
 
     Returns:
         Globs such as ``scadm.flatten.x__parse_definitions__mutmut_*``.
     """
     globs = []
     for path, lines in sorted(parse_changed_lines(diff).items()):
-        module = module_name(path)
+        module = module_name(path, package)
         file = repo_root / path
         if module is None or not file.is_file():
             continue
@@ -158,22 +172,23 @@ def summarize(results: dict[str, str], globs: list[str] | None) -> dict:
     return {**counts, "total": len(in_scope), "score": score, "survivors": survivors}
 
 
-def render_report(summary: dict, *, functions: int | None, timed_out: bool, diffs: dict[str, str]) -> str:
-    """Render the markdown report.
+def render_report(summary: dict, *, package: str, functions: int | None, timed_out: bool, diffs: dict[str, str]) -> str:
+    """Render one package's section of the markdown report.
 
     Args:
         summary: Output of ``summarize``.
+        package: One of ``PACKAGES``.
         functions: Number of changed functions in scope, or None for a full run.
         timed_out: Whether the run hit its time limit.
         diffs: ``mutmut show`` output per listed survivor.
 
     Returns:
-        Markdown starting with the upsert marker.
+        Markdown starting with the package's heading.
     """
-    scope_text = "all `scadm` functions" if functions is None else f"{functions} changed function(s)"
-    out = [MARKER, "## 🧬 Mutation testing", ""]
+    scope_text = f"all `{package}` functions" if functions is None else f"{functions} changed function(s)"
+    out = [f"### 🧰 {package}", ""]
     if functions == 0:
-        out.append("No `scadm` functions changed in this PR, nothing to mutate.")
+        out.append(f"No `{package}` functions changed in this PR, nothing to mutate.")
         return "\n".join(out) + "\n"
     score = "n/a" if summary["score"] is None else f"{summary['score']:.1f}%"
     out += [
@@ -211,12 +226,25 @@ def render_report(summary: dict, *, functions: int | None, timed_out: bool, diff
     return "\n".join(out) + "\n"
 
 
-def discord_payload(summary: dict, run_url: str) -> dict:
+def combine(sections: list[str]) -> str:
+    """Join package sections into one PR comment.
+
+    Args:
+        sections: Outputs of ``render_report``, one per package.
+
+    Returns:
+        Markdown starting with the upsert marker.
+    """
+    return "\n".join([MARKER, "## 🧬 Mutation testing", "", *sections])
+
+
+def discord_payload(summary: dict, run_url: str, package: str) -> dict:
     """Build the Discord webhook payload for a full run.
 
     Args:
         summary: Output of ``summarize`` for a full run.
         run_url: Link to the workflow run.
+        package: One of ``PACKAGES``.
 
     Returns:
         Webhook JSON body with a single embed.
@@ -231,7 +259,7 @@ def discord_payload(summary: dict, run_url: str) -> dict:
     return {
         "embeds": [
             {
-                "title": "🧬 Weekly mutation run: scadm",
+                "title": f"🧬 Weekly mutation run: {package}",
                 "url": run_url,
                 "description": "Surviving mutants are listed in the run's job summary.",
                 "fields": [{"name": n, "value": str(v), "inline": True} for n, v in fields],
@@ -260,6 +288,43 @@ def _mutmut(*args: str, cwd: Path) -> str:
     ).stdout
 
 
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest="command", required=True)
+    pkg = argparse.ArgumentParser(add_help=False)
+    pkg.add_argument("--package", required=True, choices=PACKAGES)
+    p_scope = sub.add_parser("scope", parents=[pkg])
+    p_scope.add_argument("--base", required=True, help="Base commit of the PR")
+    p_report = sub.add_parser("report", parents=[pkg])
+    p_report.add_argument("--globs-file", type=Path, help="Scope file from `scope`; omit for a full run")
+    p_report.add_argument("--timed-out", action="store_true")
+    p_discord = sub.add_parser("discord", parents=[pkg])
+    p_discord.add_argument("--run-url", required=True)
+    p_combine = sub.add_parser("combine")
+    p_combine.add_argument("sections", nargs="+", type=Path, help="Section files from `report`")
+    p_cov = sub.add_parser("coverage-badge")
+    p_cov.add_argument("coverage_json", type=Path)
+    return parser
+
+
+def _results(args: argparse.Namespace, package_dir: Path) -> None:
+    """Print the report or Discord payload of a mutmut run."""
+    globs = None
+    if getattr(args, "globs_file", None):
+        globs = [g for g in args.globs_file.read_text(encoding="utf-8").splitlines() if g.strip()]
+    # An empty scope means mutmut never ran, so there are no results to read.
+    results = {} if globs == [] else parse_results(_mutmut("results", "--all", "true", cwd=package_dir))
+    summary = summarize(results, globs)
+    if args.command == "discord":
+        print(json.dumps(discord_payload(summary, args.run_url, args.package)))
+        return
+    listed = summary["survivors"][:MAX_LISTED_SURVIVORS]
+    diffs = {name: _mutmut("show", name, cwd=package_dir) for name in listed}
+    functions = None if globs is None else len(globs)
+    report = render_report(summary, package=args.package, functions=functions, timed_out=args.timed_out, diffs=diffs)
+    print(report, end="")
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point.
 
@@ -269,47 +334,25 @@ def main(argv: list[str] | None = None) -> int:
     Returns:
         Process exit code.
     """
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    sub = parser.add_subparsers(dest="command", required=True)
-    p_scope = sub.add_parser("scope")
-    p_scope.add_argument("--base", required=True, help="Base commit of the PR")
-    p_report = sub.add_parser("report")
-    p_report.add_argument("--globs-file", type=Path, help="Scope file from `scope`; omit for a full run")
-    p_report.add_argument("--timed-out", action="store_true")
-    p_discord = sub.add_parser("discord")
-    p_discord.add_argument("--run-url", required=True)
-    p_cov = sub.add_parser("coverage-badge")
-    p_cov.add_argument("coverage_json", type=Path)
-    args = parser.parse_args(argv)
-
+    args = _build_parser().parse_args(argv)
     repo_root = Path(__file__).resolve().parents[2]
-    scadm_dir = repo_root / SOURCE_ROOT
-    if args.command == "scope":
+    if args.command == "coverage-badge":
+        print(json.dumps(coverage_badge(json.loads(args.coverage_json.read_text(encoding="utf-8")))))
+    elif args.command == "combine":
+        print(combine([f.read_text(encoding="utf-8") for f in args.sections]), end="")
+    elif args.command == "scope":
+        root = source_root(args.package)
         diff = subprocess.run(
-            ["git", "diff", "-U0", f"{args.base}...HEAD", "--", f"{SOURCE_ROOT}/{PACKAGE}"],
+            ["git", "diff", "-U0", f"{args.base}...HEAD", "--", f"{root}/{args.package}"],
             cwd=repo_root,
             capture_output=True,
             text=True,
             encoding="utf-8",
             check=True,
         ).stdout
-        print("\n".join(scope(diff, repo_root)))
-    elif args.command == "coverage-badge":
-        print(json.dumps(coverage_badge(json.loads(args.coverage_json.read_text(encoding="utf-8")))))
+        print("\n".join(scope(diff, repo_root, args.package)))
     else:
-        globs = None
-        if getattr(args, "globs_file", None):
-            globs = [g for g in args.globs_file.read_text(encoding="utf-8").splitlines() if g.strip()]
-        # An empty scope means mutmut never ran, so there are no results to read.
-        results = {} if globs == [] else parse_results(_mutmut("results", "--all", "true", cwd=scadm_dir))
-        summary = summarize(results, globs)
-        if args.command == "discord":
-            print(json.dumps(discord_payload(summary, args.run_url)))
-        else:
-            listed = summary["survivors"][:MAX_LISTED_SURVIVORS]
-            diffs = {name: _mutmut("show", name, cwd=scadm_dir) for name in listed}
-            functions = None if globs is None else len(globs)
-            print(render_report(summary, functions=functions, timed_out=args.timed_out, diffs=diffs), end="")
+        _results(args, repo_root / source_root(args.package))
     return 0
 
 
