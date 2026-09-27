@@ -185,6 +185,7 @@ jobs:
         id: e2e-report
         if: ${{ !cancelled() }}
         env:
+          E2E_RUNS: root preview-subpath
           SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           REPORT_URL: ${{ steps.upload-report.outputs.artifact-url }}

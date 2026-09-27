@@ -46,8 +46,18 @@ function controlKeyInPage(): void {
     const label = c.getAttribute("aria-label") ?? c.textContent ?? "";
     return `${c.tagName.toLowerCase()}:${label.trim()}`;
   };
-  const w = window as unknown as { __e2e: { used: Set<string>; keyOf: typeof keyOf; selector: string } };
-  w.__e2e = { used: new Set(), keyOf, selector };
+  const w = window as unknown as { __e2e: { used: Set<string>; rendered: Set<string>; keyOf: typeof keyOf; selector: string } };
+  w.__e2e = { used: new Set(), rendered: new Set(), keyOf, selector };
+  // Controls come and go as the configurator re-renders, so record every one that ever appears.
+  const scan = () => {
+    const root = document.querySelector("#configurator");
+    if (!root) return;
+    for (const control of root.querySelectorAll(selector)) {
+      const key = keyOf(control);
+      if (key) w.__e2e.rendered.add(key);
+    }
+  };
+  new MutationObserver(scan).observe(document, { childList: true, subtree: true });
   for (const type of ["click", "input", "change", "keydown"]) {
     window.addEventListener(
       type,
@@ -111,14 +121,11 @@ export const test = base.extend<Options & { health: void; inventory: void }>({
       await use();
       const seen = await page
         .evaluate(() => {
-          const w = window as unknown as { __e2e?: { used: Set<string>; keyOf: (e: Element) => string | null; selector: string } };
-          const root = document.querySelector("#configurator");
-          if (!w.__e2e || !root) return null;
-          const rendered = [...root.querySelectorAll(w.__e2e.selector)].map((e) => w.__e2e!.keyOf(e)).filter((k): k is string => !!k);
-          return { rendered: [...new Set(rendered)], used: [...w.__e2e.used] };
+          const w = window as unknown as { __e2e?: { used: Set<string>; rendered: Set<string> } };
+          return w.__e2e ? { rendered: [...w.__e2e.rendered], used: [...w.__e2e.used] } : null;
         })
         .catch(() => null);
-      if (!seen) return;
+      if (!seen || seen.rendered.length === 0) return;
       fs.mkdirSync(INVENTORY_DIR, { recursive: true });
       fs.writeFileSync(path.join(INVENTORY_DIR, `${testInfo.testId}.json`), JSON.stringify(seen));
     },

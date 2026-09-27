@@ -1,6 +1,6 @@
 import { BoxGeometry, BufferGeometry, Group, Matrix4, Mesh, MeshStandardMaterial, Quaternion, Vector3 } from "three";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
-import { BASE_STRENGTH, BASE_UNIT, TOLERANCE } from "../engine/constants";
+import { BASE_STRENGTH, BASE_UNIT, LIMITS, TOLERANCE } from "../engine/constants";
 import { classifyConnector, connectorLabel } from "../engine/connector";
 import { connectorLabelOf, orientConnector } from "../engine/orientation";
 import { framePins, gripDir, lockpinPart } from "../engine/pins";
@@ -93,8 +93,8 @@ export async function buildRealRack(
   const group = new Group();
   const pending: Promise<void>[] = [];
   const place = (name: string, material: MeshStandardMaterial, position: Vector3, rotation: Quaternion, fallback?: Vector3) => {
-    // A support length the library does not hold (zero or over-long) is drawn as a plain block of its
-    // size. Any other missing part still fails, so an incomplete export cannot pass as a healthy rack.
+    // A support length no export holds (zero or over-long) is drawn as a plain block of its size.
+    // Any other missing part still fails, so an incomplete export cannot pass as a healthy rack.
     if (fallback && !library.has(name)) {
       const block = new Mesh(unitBoxGeometry, material);
       block.position.copy(position);
@@ -117,7 +117,10 @@ export async function buildRealRack(
     const center = cellCenter(s.from);
     const axis = AXIS_VECTOR[s.axis];
     center.addScaledVector(axis, (s.length - 1) / 2);
-    place(`support-${s.length}`, pick(`support:${s.length}`, materials.support), center, alongAxis(axis), new Vector3(1, s.length, 1));
+    // The export covers LIMITS.support; only lengths outside it fall back to a block.
+    const exported = s.length >= LIMITS.support.min && s.length <= LIMITS.support.max;
+    const fallback = exported ? undefined : new Vector3(1, s.length, 1);
+    place(`support-${s.length}`, pick(`support:${s.length}`, materials.support), center, alongAxis(axis), fallback);
   }
 
   for (const n of model.nodes) {

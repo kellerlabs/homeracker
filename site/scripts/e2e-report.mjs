@@ -1,6 +1,6 @@
 // Markdown report of the Playwright JSON results in e2e-results/, for the job summary and the PR
-// comment. Prints nothing when no results exist (the suite never ran).
-// Env: SHA, RUN_URL, REPORT_URL (all optional).
+// comment. Prints nothing when there are no results and none are expected.
+// Env: E2E_RUNS (space-separated runs that must have results), SHA, RUN_URL, REPORT_URL (all optional).
 import fs from "node:fs";
 import path from "node:path";
 
@@ -21,7 +21,12 @@ function* tests(suite, titles = []) {
 
 export function report(dir, env = {}) {
   const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith(".json")).sort() : [];
-  if (files.length === 0) return "";
+  // A run without results never finished (an earlier step failed), so it cannot count as passing.
+  const missing = (env.E2E_RUNS ?? "")
+    .split(/\s+/)
+    .filter((run) => run && !files.includes(`${run}.json`))
+    .map((run) => RUN_LABEL[run] ?? run);
+  if (files.length === 0 && missing.length === 0) return "";
 
   const runs = [];
   const failures = [];
@@ -49,14 +54,16 @@ export function report(dir, env = {}) {
     env.RUN_URL && `[workflow run](${env.RUN_URL})`,
   ].filter(Boolean);
   const out = [MARKER];
-  if (failures.length === 0) {
+  if (failures.length === 0 && missing.length === 0) {
     out.push(`✅ **E2E:** ${passed} passed (${runs.join(", ")})${sha}`);
     if (flaky > 0) out.push("", `⚠️ ${flaky} flaky: passed only on retry, see the workflow run.`);
     if (env.RUN_URL) out.push("", `[workflow run](${env.RUN_URL})`);
     return out.join("\n");
   }
 
-  out.push(`❌ **E2E:** ${failures.length} failed, ${passed} passed${sha}`, "");
+  const counts = [failures.length > 0 && `${failures.length} failed`, `${passed} passed`, missing.length > 0 && "incomplete"];
+  out.push(`❌ **E2E:** ${counts.filter(Boolean).join(", ")}${sha}`, "");
+  if (missing.length > 0) out.push(`⚠️ No results for ${missing.join(", ")}: an earlier step failed, see the workflow run.`, "");
   for (const f of failures) {
     const lines = f.error.split("\n");
     const shown = lines.slice(0, MAX_ERROR_LINES).join("\n") + (lines.length > MAX_ERROR_LINES ? "\n…" : "");

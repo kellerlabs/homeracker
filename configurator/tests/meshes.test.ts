@@ -53,6 +53,12 @@ test("a support length the library does not hold is drawn as a block instead of 
   expect(group.children.length).toBeGreaterThan(model.supports.length);
 });
 
+test("a missing support length the export should hold still fails the rack", async () => {
+  await expect(buildRealRack(zeroBeamRack(), await libraryWithout("support-0", "support-4"), createMaterials())).rejects.toThrow(
+    "part support-4 is not in the library",
+  );
+});
+
 test("any other part missing from the library still fails the rack", async () => {
   await expect(buildRealRack(zeroBeamRack(), await libraryWithout("support-0", "lockpin"), createMaterials())).rejects.toThrow(
     "part lockpin is not in the library",

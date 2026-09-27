@@ -50,3 +50,14 @@ test("a failure lists the test with its describe path, error and report link", (
   expect(body).not.toContain("\u001b[");
   expect(body).toContain("[playwright-report](https://example.test/artifact) · [workflow run](https://example.test/run)");
 });
+
+test("a run without results makes the report incomplete, not green", () => {
+  const green = { stats: { expected: 47, unexpected: 0, flaky: 0 }, suites: [] };
+  const body = report(results({ root: green }), { E2E_RUNS: "root preview-subpath" });
+  expect(body).toContain("❌ **E2E:** 47 passed, incomplete");
+  expect(body).toContain("⚠️ No results for preview subpath");
+});
+
+test("no results at all while runs are expected still reports", () => {
+  expect(report(results({}), { E2E_RUNS: "root" })).toContain("No results for site root");
+});
