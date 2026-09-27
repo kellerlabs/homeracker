@@ -36,6 +36,12 @@
 - 🧊 The canvases carry `data-render="parts"` or `"schematic"`, and a screenshot must contain HomeRacker yellow, proving WebGL drew the rack.
 - 🧭 Configurator journeys: default rack, a shared link with an exact parts list, footprint and row editing, panels (click, keyboard, shortcuts), copy link and Markdown, session restore, and error paths (unparsable input, out-of-range values, malformed links, printbed overflow, missing part meshes).
 
+**Reporting failures.**
+
+- 💬 A failing run posts one PR comment, edited in place: each failing test with its error, a link to the report artifact (screenshots, traces) and the run. It flips to ✅ when the suite passes and is never created for a PR that never failed. A separate job holds `pull-requests: write`; the build and tests keep read-only access. Fork PRs get the job summary only.
+- 🧪 The `e2e-probe-failure` label makes one probe test fail on purpose, so the report pipeline can be checked on any PR. Label changes rerun only the `site` job.
+- 🖼️ Screenshots stay in the workflow artifact (7-day retention). Inline images would need committing them to a repository, which grows its history for good.
+
 **Keeping the suite current: deterministic gates first, guidance second.**
 
 - 🔒 Control inventory ([`inventory.spec.ts`](../../site/e2e/inventory.spec.ts)): every configurator control rendered in any test must be used by at least one test, or CI fails. Exemptions are listed in the spec with a reason.

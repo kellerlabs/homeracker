@@ -3,6 +3,8 @@ name: Web
 
 on:
   pull_request:
+    # labeled/unlabeled only matter for the e2e-probe-failure label, see the site job.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
       - 'configurator/**'
       - 'site/**'
@@ -21,6 +23,7 @@ on:
 
 jobs:
   configurator:
+    if: github.event.action != 'labeled' && github.event.action != 'unlabeled'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -54,9 +57,19 @@ jobs:
         run: npm run build
 
   site:
+    # A label change reruns the site job only for the probe label, which fails one test on purpose
+    # to exercise the failure report.
+    if: >-
+      (github.event.action != 'labeled' && github.event.action != 'unlabeled')
+      || github.event.label.name == 'e2e-probe-failure'
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      e2e-report: ${{ steps.e2e-report.outputs.body }}
+      e2e-status: ${{ steps.e2e-report.outputs.status }}
+    env:
+      E2E_PROBE_FAILURE: ${{ contains(github.event.pull_request.labels.*.name, 'e2e-probe-failure') }}
     defaults:
       run:
         working-directory: site
@@ -133,10 +146,64 @@ jobs:
         run: npm run e2e
 
       - name: Upload E2E report
+        id: upload-report
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report
           path: site/playwright-report
           retention-days: 7
+
+      - name: Summarize E2E results
+        id: e2e-report
+        if: ${{ !cancelled() }}
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url }}
+        run: |
+          set -euo pipefail
+          body="$(node scripts/e2e-report.mjs)"
+          [[ -z "$body" ]] && exit 0
+          printf '%s\n' "$body" >> "$GITHUB_STEP_SUMMARY"
+          status=pass
+          grep -q '^❌' <<< "$body" && status=fail
+          {
+            echo "status=$status"
+            echo "body<<E2E_REPORT_EOF"
+            printf '%s\n' "$body"
+            echo "E2E_REPORT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+  # One comment per PR, edited in place. Created on the first failure only, so a PR that never
+  # fails stays quiet; once it exists it flips back to passing.
+  e2e-comment:
+    needs: site
+    # Fork PRs get a read-only token; their result stays in the job summary.
+    if: >-
+      !cancelled()
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && needs.site.outputs.e2e-report != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Upsert the E2E comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.number }}
+          BODY: ${{ needs.site.outputs.e2e-report }}
+          STATUS: ${{ needs.site.outputs.e2e-status }}
+        run: |
+          set -euo pipefail
+          existing="$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- e2e-report -->"))) | .id')"
+          existing="$(head -n 1 <<< "$existing")"
+          if [[ -n "$existing" ]]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -f body="$BODY" --silent
+          elif [[ "$STATUS" == "fail" ]]; then
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -f body="$BODY" --silent
+          fi
 ...

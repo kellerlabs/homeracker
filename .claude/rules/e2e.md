@@ -31,3 +31,8 @@ SITE_BASE=/preview/pr-0/ npm run build:site && SITE_BASE=/preview/pr-0/ npm run 
 ```
 
 Run the full suite before pushing. The inventory test only counts the tests that ran.
+
+## Failure Report
+
+- CI turns the JSON results into a PR comment with `scripts/e2e-report.mjs`. A change to the reporters in `playwright.config.ts` must keep writing `e2e-results/<run>.json`.
+- The `e2e-probe-failure` label makes `probe.spec.ts` fail on purpose. Use it to check the comment after changing the report pipeline.

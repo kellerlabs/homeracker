@@ -18,7 +18,9 @@ npm run build
 npm run e2e
 ```
 
-A test fails on any page error, console error or failing same-origin request. `inventory.spec.ts` fails when a configurator control is not used by any test, so a new control needs a journey. Without OpenSCAD the build has no part meshes and the tests expect the schematic fallback; CI sets `PARTS_REQUIRED=1`. On failure, CI uploads the HTML report with traces as the `playwright-report` artifact.
+A test fails on any page error, console error or failing same-origin request. `inventory.spec.ts` fails when a configurator control is not used by any test, so a new control needs a journey. Without OpenSCAD the build has no part meshes and the tests expect the schematic fallback; CI sets `PARTS_REQUIRED=1`. On failure, CI uploads the HTML report with screenshots and traces as the `playwright-report` artifact, and a PR comment lists each failing test with its error and a link to that artifact. The comment is created on the first failure and updated in place, back to ✅ once the suite passes. Fork PRs get the job summary only.
+
+To check the failure report end to end, add the `e2e-probe-failure` label to the PR: `probe.spec.ts` then fails on purpose. Remove the label to go green again.
 
 See [e2e.md](.claude/rules/e2e.md) for how to write tests and [e2e-test-site-and-configurator-with-playwright](docs/decisions/e2e-test-site-and-configurator-with-playwright.md) for why.
 

@@ -33,6 +33,7 @@ Astro caches rendered markdown in `.astro/`. After changing the rehype transform
 | `src/lib/catalog.ts` | Builds catalog cards from `models/README.md` |
 | `src/lib/hero.ts` | Home page hero: the exploded 3D3W cube (8 connectors, 12 supports, 24 lock pins) built from real part meshes, assembling and coming apart in a loop; still exploded view under reduced motion |
 | `src/lib/rack.ts` | Fallback hero when no part meshes are present: the default configurator rack as schematic boxes |
+| `scripts/e2e-report.mjs` | Turns the Playwright JSON results into the job summary and the PR comment on E2E failures |
 | `scripts/export-parts.mjs` | Exports the part library with OpenSCAD into `public/parts/` (gitignored): every connector type and pull-through variant, supports from 1 to 50 units, the lock pin, the foot, and the panel kit (support mount plates for 3 to 50 units and corner brackets, both panel types) from `scripts/scad/panel_kit.scad`. Used by the hero and by the configurator preview |
 | `src/pages/` | `index.astro` (README), `models/index.astro` (catalog), `models/[slug].astro` (model pages), `configurator.astro` (mounts the configurator app) |
 | `e2e/` | Playwright suite: page smoke tests, configurator journeys, and the control inventory. See [e2e.md](../.claude/rules/e2e.md) |
