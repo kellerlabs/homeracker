@@ -1,11 +1,15 @@
 """Tests for scadfmt.cli."""
 
+import importlib
+import importlib.metadata
 import io
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
+import scadfmt
 from scadfmt import cli
 
 UGLY = "x=1;\n"
@@ -73,6 +77,52 @@ def test_error_leaves_file_and_continues(tmp_path):
     assert cli.main(["format", str(bad), str(ugly)]) == cli.EXIT_ERROR
     assert bad.read_text(encoding="utf-8") == "x = @;\n"
     assert ugly.read_text(encoding="utf-8") == PRETTY
+
+
+def test_write_failure_keeps_original_and_continues(tmp_path, monkeypatch):
+    first, second = tmp_path / "a.scad", tmp_path / "b.scad"
+    first.write_bytes(UGLY.encode())
+    second.write_bytes(UGLY.encode())
+    real_replace = cli.os.replace
+
+    def fail_for_first(src, dst):
+        if Path(dst) == first:
+            raise OSError("disk full")
+        real_replace(src, dst)
+
+    monkeypatch.setattr(cli.os, "replace", fail_for_first)
+    assert cli.main(["format", str(first), str(second)]) == cli.EXIT_ERROR
+    assert first.read_bytes() == UGLY.encode()
+    assert second.read_bytes() == PRETTY.encode()
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["a.scad", "b.scad"]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows has no POSIX file modes")
+def test_rewrite_keeps_file_mode(tmp_path):
+    path = tmp_path / "a.scad"
+    path.write_bytes(UGLY.encode())
+    path.chmod(0o640)
+    assert cli.main(["format", str(path)]) == cli.EXIT_OK
+    assert path.stat().st_mode & 0o777 == 0o640
+    assert path.read_bytes() == PRETTY.encode()
+
+
+@pytest.mark.parametrize(("installed", "expected"), [("1.2.3", "1.2.3"), (None, "unknown")])
+def test_version_comes_from_package_metadata(monkeypatch, installed, expected):
+    def fake_version(name):
+        if installed is None:
+            raise importlib.metadata.PackageNotFoundError(name)
+        return installed
+
+    monkeypatch.setattr(importlib.metadata, "version", fake_version)
+    assert importlib.reload(scadfmt).__version__ == expected
+    importlib.reload(scadfmt)
+
+
+def test_version(capsys):
+    with pytest.raises(SystemExit):
+        cli.main(["--version"])
+    assert capsys.readouterr().out.startswith("scadfmt ")
 
 
 def test_missing_file_is_an_error(tmp_path):

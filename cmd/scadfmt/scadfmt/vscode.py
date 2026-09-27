@@ -86,7 +86,11 @@ def setup_vscode(workspace: Path) -> bool:
             return False
     if not _install_extension():
         return False
-    settings_file.parent.mkdir(parents=True, exist_ok=True)
-    settings_file.write_text(json.dumps(merge_settings(settings), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    try:
+        settings_file.parent.mkdir(parents=True, exist_ok=True)
+        settings_file.write_text(json.dumps(merge_settings(settings), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    except OSError as e:
+        logger.error("Cannot write %s: %s", settings_file, e)
+        return False
     logger.info("Updated %s, scadfmt now formats .scad files (Format Document)", settings_file)
     return True

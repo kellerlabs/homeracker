@@ -3,7 +3,10 @@
 import argparse
 import difflib
 import logging
+import os
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 from scadfmt import __version__
@@ -63,6 +66,23 @@ def _format_stdin(check: bool, diff: bool) -> int:
     return EXIT_CHANGES if check and formatted != source else EXIT_OK
 
 
+def _replace(path: Path, text: str) -> None:
+    """Write text to path atomically, so a failed write never leaves a truncated file.
+
+    Raises:
+        OSError: If the temporary file cannot be written or moved into place.
+    """
+    handle, temp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(handle, "wb") as temp:
+            temp.write(text.encode("utf-8"))
+        shutil.copymode(path, temp_name)
+        os.replace(temp_name, path)
+    except OSError:
+        Path(temp_name).unlink(missing_ok=True)
+        raise
+
+
 def _format_files(files: list[Path], check: bool, diff: bool) -> int:
     """Format files in place, or report on them with --check or --diff."""
     changed = errors = 0
@@ -82,7 +102,12 @@ def _format_files(files: list[Path], check: bool, diff: bool) -> int:
         if check or diff:
             logger.info("would reformat %s", path)
         else:
-            path.write_bytes(formatted.encode("utf-8"))
+            try:
+                _replace(path, formatted)
+            except OSError as e:
+                logger.error("%s: cannot write: %s", path, e)
+                errors += 1
+                continue
             logger.info("reformatted %s", path)
     if errors:
         return EXIT_ERROR
