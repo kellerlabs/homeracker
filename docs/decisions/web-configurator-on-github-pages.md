@@ -28,7 +28,7 @@ A configurator needs a place to live, a toolchain, a way to publish, and a previ
 - **Preview**: real part meshes exported from the OpenSCAD sources at site build time (connectors per type and pull-through axis, supports per length, lock pins, feet), placed with a rotation solver that mirrors `CONNECTOR_CONFIGS`; schematic unit boxes remain as the fallback when the mesh library is not served. Panels stay schematic. (Updated 2026-09-02; the first version drew boxes only.)
 - **Sharing**: the config is encoded in the URL hash (`#v=4&d=6&r=5:6_4:6&f=1`); no backend.
 - **Deploy**: `pages.yml` builds the site and the Vite app and deploys both with `actions/deploy-pages`; the app lands under `/configurator/`. Pages source must be set to **GitHub Actions** once. (Superseded detail: the first version kept the Jekyll README build; see [astro-site-replaces-jekyll](astro-site-replaces-jekyll.md).)
-- **CI**: the `Web` workflow (`web.yml`) lints, tests and builds on PRs touching `configurator/**`; a local pre-commit hook runs the same `npm run check`.
+- **CI**: the `Web` workflow (`web.yml`) lints, tests and builds on PRs touching `configurator/**`; a local pre-commit hook runs the same `npm run check`. The `site` job also runs the Playwright suite, see [e2e-test-site-and-configurator-with-playwright](e2e-test-site-and-configurator-with-playwright.md).
 
 ### Geometry rules encoded
 

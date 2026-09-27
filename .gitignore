@@ -43,6 +43,9 @@ node_modules/
 configurator/dist/
 site/dist/
 site/public/parts/
+site/test-results/
+site/playwright-report/
+site/e2e-results/
 _site/
 
 # Coverage / mutation testing artifacts

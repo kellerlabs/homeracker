@@ -5,8 +5,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled, closed]
 
+# A label other than deploy-preview does nothing here. It gets a group of its own, so it cannot
+# cancel a preview build that is running.
 concurrency:
-  group: preview-${{ github.event.number }}
+  group: >-
+    preview-${{ github.event.number }}${{ (github.event.action == 'labeled' || github.event.action == 'unlabeled')
+    && github.event.label.name != 'deploy-preview' && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 jobs:
@@ -18,6 +22,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
       && github.event.action != 'closed'
       && github.event.action != 'unlabeled'
+      && (github.event.action != 'labeled' || github.event.label.name == 'deploy-preview')
     runs-on: ubuntu-latest
     permissions:
       contents: read

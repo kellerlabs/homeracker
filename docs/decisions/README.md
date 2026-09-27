@@ -6,6 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [e2e-test-site-and-configurator-with-playwright](e2e-test-site-and-configurator-with-playwright.md) | 2026-09-27 | Playwright E2E suite runs against the built site in `web.yml`; control and page inventories fail CI when a feature ships without a test |
 | [gate-scadm-coverage-and-mutation-test-changed-functions](gate-scadm-coverage-and-mutation-test-changed-functions.md) | 2026-09-27 | `scadm` unit tests gate on 90% branch coverage; mutmut reports on the functions each PR changes, weekly full run to Discord |
 | [return-bracket-to-open-source-catalog](return-bracket-to-open-source-catalog.md) | 2026-09-20 | Bracket comes back into this repo as an open-source part, flexmount retired in its favor |
 | [x-hole-supports-by-default](x-hole-supports-by-default.md) | 2026-09-13 | Supports carry lock pin holes on both axes, so panels have a hole to pin to on every edge |

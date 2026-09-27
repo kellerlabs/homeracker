@@ -30,6 +30,7 @@ HomeRacker is a modular 3D-printable rack-building system. Core components are p
 - **Test-Driven Development**: NO change without a test. EVERY change MUST be tested before completion. No exceptions for "simple" changes.
   - **Unit tests**: run via pre-commit hooks, fast and mocked. The `scadm-tests` hook fires on changes under `cmd/scadm/`.
   - **Integration tests**: run in CI on ubuntu and windows (`integration-tests.yml`). Update them when adding or modifying CLI commands or the config schema. See `TESTING.md`.
+  - **E2E tests**: Playwright in `site/e2e/`, run by `web.yml`. Every user-visible change to `site/` or `configurator/` adds or updates a journey. See [e2e.md](.claude/rules/e2e.md).
 - **DRY, KISS, YAGNI**: Keep it simple, don't over-engineer.
 - **Be Brief**: Any written output (docs, ADRs, code comments, commit messages, PR bodies, GitHub comments) needs to use the [house-style skill](https://github.com/kellervater/kellervater/blob/main/.claude/skills/house-style/SKILL.md). It lives outside this repo, so fetch it before drafting: `curl -sS https://raw.githubusercontent.com/kellervater/kellervater/main/.claude/skills/house-style/SKILL.md`
 - **Documentation Policy**:
@@ -78,4 +79,5 @@ Each file below carries `paths:` frontmatter and loads automatically when you to
 - Python: [python.md](.claude/rules/python.md)
 - Shell and GitHub Actions: [shell.md](.claude/rules/shell.md)
 - Renovate: [renovate.md](.claude/rules/renovate.md)
+- E2E tests (`site/`, `configurator/`): [e2e.md](.claude/rules/e2e.md)
 - TypeScript (`configurator/`, `site/`): see the Development Guidelines in [CONTRIBUTING.md](CONTRIBUTING.md)

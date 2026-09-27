@@ -213,8 +213,10 @@ export async function mountHero(canvas: HTMLCanvasElement): Promise<void> {
     const manifest = (await response.json()) as Manifest;
     const geometries = await loadParts(manifest);
     mountExplodedCube(canvas, buildCube(geometries));
+    canvas.dataset.render = "parts";
   } catch (error) {
     console.info("hero: using schematic rack", error);
     mountHeroRack(canvas);
+    canvas.dataset.render = "schematic";
   }
 }

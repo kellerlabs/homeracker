@@ -13,6 +13,7 @@
     "build:site": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
+    "e2e": "playwright test",
     "lint": "astro check",
     "check": "npm run lint && npm run test"
   },
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@playwright/test": "1.63.0",
     "@types/hast": "3.0.5",
     "@types/node": "26.6.2",
     "@types/three": "0.186.0",

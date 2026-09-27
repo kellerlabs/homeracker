@@ -3,6 +3,8 @@ name: Web
 
 on:
   pull_request:
+    # labeled/unlabeled only matter for the e2e-probe-failure label, see the site job.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
       - 'configurator/**'
       - 'site/**'
@@ -10,6 +12,8 @@ on:
       - 'README.md'
       - 'models/**/README.md'
       - '.github/workflows/web.yml'
+      - '.github/actions/setup-openscad/**'
+      - 'scadm.json'
   push:
     branches:
       - main
@@ -18,8 +22,17 @@ on:
       - 'site/**'
       - 'models/**/*.scad'
 
+# A new push supersedes the running PR checks; pushes to main always finish. A label other than
+# e2e-probe-failure skips every job, so it gets a group of its own and cancels nothing.
+concurrency:
+  group: >-
+    web-${{ github.event.pull_request.number || github.ref }}${{ (github.event.action == 'labeled' || github.event.action == 'unlabeled')
+    && github.event.label.name != 'e2e-probe-failure' && format('-{0}', github.run_id) || '' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   configurator:
+    if: github.event.action != 'labeled' && github.event.action != 'unlabeled'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,9 +66,19 @@ jobs:
         run: npm run build
 
   site:
+    # A label change reruns the site job only for the probe label, which fails one test on purpose
+    # to exercise the failure report.
+    if: >-
+      (github.event.action != 'labeled' && github.event.action != 'unlabeled')
+      || github.event.label.name == 'e2e-probe-failure'
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      e2e-report: ${{ steps.e2e-report.outputs.body }}
+      e2e-status: ${{ steps.e2e-report.outputs.status }}
+    env:
+      E2E_PROBE_FAILURE: ${{ contains(github.event.pull_request.labels.*.name, 'e2e-probe-failure') }}
     defaults:
       run:
         working-directory: site
@@ -66,7 +89,18 @@ jobs:
         with:
           persist-credentials: false
 
+      # Same key as the build-site action, so a PR reuses the meshes its preview or main exported.
+      # A change to a .scad source, the export script or the OpenSCAD/BOSL2 pins in scadm.json
+      # misses and exports afresh.
+      - name: Restore part meshes
+        id: parts
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: site/public/parts
+          key: parts-${{ hashFiles('scadm.json', 'models/**/*.scad', 'site/scripts/scad/*.scad', 'site/scripts/export-parts.mjs') }}
+
       - name: Setup OpenSCAD
+        if: steps.parts.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-openscad
         with:
           scadm-source: cmd/scadm
@@ -87,8 +121,126 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Build
+      - name: Export part meshes
+        if: steps.parts.outputs.cache-hit != 'true'
         env:
           PARTS_REQUIRED: "1"
-        run: npm run build
+        run: npm run parts
+
+      - name: Build
+        run: npm run build:site
+
+      - name: Read Playwright version
+        id: playwright
+        run: |
+          set -euo pipefail
+          echo "version=$(node -p 'require("@playwright/test/package.json").version')" >> "$GITHUB_OUTPUT"
+
+      # Headless tests only need the headless shell, not the full Chrome build.
+      - name: Cache Playwright browser
+        id: playwright-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-shell
+
+      - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps --only-shell chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: E2E tests
+        id: e2e-root
+        env:
+          PARTS_REQUIRED: "1"
+        run: npm run e2e
+
+      # Previews are served from a subpath, where a root-relative link or asset path breaks. Runs
+      # even when the root suite failed, so the report covers both; the job still fails.
+      - name: Build for a preview subpath
+        id: build-subpath
+        if: ${{ !cancelled() && steps.e2e-root.outcome != 'skipped' }}
+        env:
+          SITE_BASE: /preview/pr-0/
+        run: npm run build:site
+
+      - name: E2E tests under a preview subpath
+        if: ${{ !cancelled() && steps.build-subpath.outcome == 'success' }}
+        env:
+          PARTS_REQUIRED: "1"
+          SITE_BASE: /preview/pr-0/
+        run: npm run e2e
+
+      - name: Upload E2E report
+        id: upload-report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: site/playwright-report
+          retention-days: 7
+
+      - name: Summarize E2E results
+        id: e2e-report
+        if: ${{ !cancelled() }}
+        env:
+          E2E_RUNS: root preview-subpath
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url }}
+        run: |
+          set -euo pipefail
+          body="$(node scripts/e2e-report.mjs)"
+          [[ -z "$body" ]] && exit 0
+          printf '%s\n' "$body" >> "$GITHUB_STEP_SUMMARY"
+          status=pass
+          grep -q '^❌' <<< "$body" && status=fail
+          {
+            echo "status=$status"
+            echo "body<<E2E_REPORT_EOF"
+            printf '%s\n' "$body"
+            echo "E2E_REPORT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+  # One comment per PR, edited in place. Created on the first failure only, so a PR that never
+  # fails stays quiet; once it exists it flips back to passing.
+  e2e-comment:
+    needs: site
+    # Fork PRs get a read-only token; their result stays in the job summary.
+    if: >-
+      !cancelled()
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && needs.site.outputs.e2e-report != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Upsert the E2E comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.number }}
+          BODY: ${{ needs.site.outputs.e2e-report }}
+          STATUS: ${{ needs.site.outputs.e2e-status }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # A run that finishes after a newer push must not overwrite the newer result.
+          head="$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)"
+          if [[ "$head" != "$SHA" ]]; then
+            echo "::notice::$SHA is no longer the PR head ($head), leaving the comment alone"
+            exit 0
+          fi
+          existing="$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- e2e-report -->"))) | .id')"
+          existing="$(head -n 1 <<< "$existing")"
+          if [[ -n "$existing" ]]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -f body="$BODY" --silent
+          elif [[ "$STATUS" == "fail" ]]; then
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -f body="$BODY" --silent
+          fi
 ...

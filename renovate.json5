@@ -94,15 +94,16 @@
       "allowedVersions": "<7 || >=7.1"
     },
     {
-      // Kept out of the npm group: three is 0.x and treats minors as breaking, and no test
-      // renders a frame, so it needs reading on its own. Its types share the version line.
+      // Kept out of the npm group: three is 0.x and treats minors as breaking, so it needs
+      // reading on its own. Its types share the version line.
       "matchPackageNames": ["three", "@types/three"],
       "groupName": "three.js",
       "groupSlug": "three-js"
     },
-    // Automerge allow-list, patches only. Minors and majors are read by hand, because no
-    // check renders a frame: a runtime dependency can break the site while eslint, tsc, the
-    // unit tests and the build all stay green. Revisit once a click-through test exists.
+    // Automerge allow-list, patches and minors. The E2E suite (site/e2e/, see
+    // docs/decisions/e2e-test-site-and-configurator-with-playwright.md) renders every page and
+    // drives the configurator, so a runtime break fails the PR instead of merging. Majors are
+    // read by hand.
     //
     // Add a package here deliberately as it is adopted. A new dependency is reviewed until
     // someone lists it. three and @types/three are absent on purpose: three is 0.x and does
@@ -112,6 +113,7 @@
         "astro",
         "@astrojs/check",
         "@astrojs/markdown-remark",
+        "@playwright/test",
         "eslint",
         "@eslint/js",
         "typescript-eslint",
@@ -125,7 +127,7 @@
         "@types/node",
         "hast-util-to-string",
         "unist-util-visit"],
-      "matchUpdateTypes": ["patch"],
+      "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     }
   ]
