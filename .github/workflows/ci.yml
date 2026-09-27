@@ -1,0 +1,136 @@
+---
+name: CI
+
+# Branch protection requires check-results (and validate-title): a PR job missing from its needs is not required.
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      integration-tests: ${{ steps.filter.outputs.integration-tests }}
+      mutation-tests: ${{ steps.filter.outputs.mutation-tests }}
+      test-setup-openscad: ${{ steps.filter.outputs.test-setup-openscad }}
+      validate-models: ${{ steps.filter.outputs.validate-models }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            ci: &ci
+              - '.github/workflows/ci.yml'
+            integration-tests:
+              - *ci
+              - 'cmd/scadm/**'
+              - 'scadm.json'
+              - '.github/workflows/integration-tests.yml'
+              - '.github/actions/setup-openscad/**'
+            mutation-tests:
+              - *ci
+              - 'cmd/scadm/scadm/**'
+              - 'cmd/scadm/pyproject.toml'
+              - 'cmd/test/mutation_report.py'
+              - 'requirements.txt'
+              - '.github/workflows/mutation-tests.yml'
+            test-setup-openscad:
+              - *ci
+              - '.github/actions/setup-openscad/**'
+              - '.github/workflows/test-setup-openscad.yml'
+            validate-models:
+              - *ci
+              - 'models/**/*.scad'
+              - 'cmd/scadm/**'
+              - 'scadm.json'
+              - 'cmd/test/test-models.sh'
+              - '.github/workflows/validate-models.yml'
+            web:
+              - *ci
+              - 'configurator/**'
+              - 'site/**'
+              - 'models/**/*.scad'
+              - 'README.md'
+              - 'models/**/README.md'
+              - 'scadm.json'
+              - '.github/actions/setup-openscad/**'
+              - '.github/workflows/web.yml'
+
+  pre-commit:
+    uses: ./.github/workflows/pre-commit.yml
+    permissions:
+      contents: read
+
+  integration-tests:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.integration-tests == 'true'
+    uses: ./.github/workflows/integration-tests.yml
+    permissions:
+      contents: read
+
+  mutation-tests:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mutation-tests == 'true'
+    uses: ./.github/workflows/mutation-tests.yml
+    # Ceiling for the skipped `full` job; the PR job itself only asks for contents: read.
+    permissions:
+      contents: write
+      pull-requests: write
+
+  test-setup-openscad:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.test-setup-openscad == 'true'
+    uses: ./.github/workflows/test-setup-openscad.yml
+    permissions:
+      contents: read
+
+  validate-models:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.validate-models == 'true'
+    uses: ./.github/workflows/validate-models.yml
+    permissions:
+      contents: read
+
+  web:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.web == 'true'
+    uses: ./.github/workflows/web.yml
+    permissions:
+      contents: read
+      pull-requests: write
+
+  check-results:
+    # Hard-coded in the branch protection rule for main; rename both together.
+    if: always()
+    needs:  # alphabetical
+      - detect-changes
+      - integration-tests
+      - mutation-tests
+      - pre-commit
+      - test-setup-openscad
+      - validate-models
+      - web
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Fail if any job failed or was cancelled
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          jq -r 'to_entries[] | "\(.value.result)\t\(.key)"' <<< "$NEEDS" | sort
+          if jq -e 'any(.[]; .result == "failure" or .result == "cancelled")' <<< "$NEEDS" > /dev/null; then
+            echo "::error::A required job failed or was cancelled, see the list above."
+            exit 1
+          fi

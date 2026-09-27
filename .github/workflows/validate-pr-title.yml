@@ -1,6 +1,7 @@
 ---
 name: Validate PR Title
 
+# Required directly next to check-results: it runs on title edits, which ci.yml does not.
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]

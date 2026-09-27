@@ -2,10 +2,7 @@
 name: Test Setup OpenSCAD Action
 
 on:
-  pull_request:
-    paths:
-      - '.github/actions/setup-openscad/**'
-      - '.github/workflows/test-setup-openscad.yml'
+  workflow_call:
 
 jobs:
   test:

@@ -5,13 +5,7 @@ on:
   schedule:
     - cron: '0 3 * * 1'  # Weekly: Monday 03:00 UTC
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'cmd/scadm/scadm/**'
-      - 'cmd/scadm/pyproject.toml'
-      - 'cmd/test/mutation_report.py'
-      - 'requirements.txt'
-      - '.github/workflows/mutation-tests.yml'
+  workflow_call:
 
 permissions: {}
 

@@ -2,9 +2,10 @@
 name: Web
 
 on:
+  workflow_call:
+  # Only for the e2e-probe-failure label, see the site job; ci.yml covers every push.
   pull_request:
-    # labeled/unlabeled only matter for the e2e-probe-failure label, see the site job.
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [labeled, unlabeled]
     paths:
       - 'configurator/**'
       - 'site/**'
