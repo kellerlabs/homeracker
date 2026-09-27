@@ -47,6 +47,7 @@ jobs:
           python ../test/mutation_report.py coverage-badge "$RUNNER_TEMP/coverage.json" > "$RUNNER_TEMP/badge.json"
 
       - name: Publish coverage badge
+        if: github.ref == 'refs/heads/main'
         uses: ./.github/actions/publish-badge
         with:
           file: ${{ runner.temp }}/badge.json
