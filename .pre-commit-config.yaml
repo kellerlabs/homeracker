@@ -11,7 +11,7 @@ repos:
     hooks:
       - id: actionlint
   # Audits GitHub Actions for security issues, e.g. unpinned action references and template
-  # injection. Some audits are switched off for now; see zizmor.yml.
+  # injection. `self-repository` is switched off; see zizmor.yml.
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: v1.30.0
     hooks:
