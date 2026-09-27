@@ -1,0 +1,44 @@
+# 📋 Gate scadm on coverage and mutation-test it weekly
+
+## 📌 Status
+
+**Accepted**: 2026-09-27
+
+## 🤔 Context
+
+- More and more of `scadm` is written with AI help. Passing tests alone don't show whether those tests exercise the code or would catch a regression.
+- Code coverage measures how much code the tests run. Mutation testing measures whether the tests notice when that code changes. High coverage with weak assertions passes one check and fails the other, so neither is enough alone.
+- Unit tests already run in the `scadm-tests` pre-commit hook, locally and in the [Pre-commit workflow](../../.github/workflows/pre-commit.yml), whenever `cmd/scadm/` changes.
+- Tracked in [#327](https://github.com/kellerlabs/homeracker/issues/327). First draft in [#343](https://github.com/kellerlabs/homeracker/pull/343).
+
+## 🔧 Decision
+
+**Coverage: `pytest-cov`, enforced by the existing `scadm-tests` hook.**
+
+- The hook runs pytest with `--cov`. Branch coverage is on.
+- `fail_under = 80` in `[tool.coverage.report]` of [`cmd/scadm/pyproject.toml`](../../cmd/scadm/pyproject.toml) is the gate.
+- Ratchet by hand: when coverage grows well past the gate, raise `fail_under` in the same PR. Never lower it.
+- Alternatives rejected:
+  - Codecov or Coveralls: an external service for a number coverage.py already computes locally.
+  - A separate coverage workflow plus a wrapper script: runs the same unit tests a second time on every PR.
+  - An automatic ratchet that writes the measured value to a tracked file after each run: CI can't commit the file back, so the ratchet never moves there. Locally it dirties the tree on every run, and any change that removes well-tested lines fails the build by a fraction of a percent.
+
+**Mutation testing: `mutmut`, weekly and report-only.**
+
+- [`mutation-tests.yml`](../../.github/workflows/mutation-tests.yml) runs Mondays at 03:00 UTC and on manual dispatch. It writes the killed and surviving counts to the job summary and never fails on survivors.
+- Config lives in `[tool.mutmut]` of `cmd/scadm/pyproject.toml`. It mutates `scadm/` only and runs the unit tests, not the integration ones.
+- Alternatives rejected:
+  - cosmic-ray: needs a session database and a separate config file.
+  - mutpy: unmaintained.
+  - Mutation testing on every PR: a full run takes minutes and runs every mutant, including ones a PR didn't touch.
+  - Failing on a mutation score: too many survivors today to make that a useful signal.
+
+## 📊 Consequences
+
+- ✅ A commit that drops `scadm` coverage below the gate fails the same hook contributors already run, with no extra CI job.
+- ✅ Surviving mutants point at specific weak assertions to fix.
+- ✅ Both tools run locally with no service accounts.
+- ❌ Contributors need `pytest-cov` installed for the hook, via `requirements.txt`.
+- ❌ The ratchet is manual, so the gate can lag behind real coverage.
+- ❌ mutmut doesn't run natively on Windows. Windows contributors use WSL or the weekly workflow.
+- ❌ Survivors don't block anything. Someone has to read the weekly report.

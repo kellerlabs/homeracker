@@ -52,12 +52,15 @@ source = ["scadm"]
 branch = true
 
 [tool.coverage.report]
+# Raise when coverage grows, never lower. See docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md
+fail_under = 80
 show_missing = true
-exclude_lines = [
-    "pragma: no cover",
-    "if __name__ == .__main__.",
+skip_covered = true
+exclude_also = [
+    "if __name__ == .__main__.:",
 ]
 
 [tool.mutmut]
-paths_to_mutate = ["scadm/"]
-tests_dir = "tests/"
+source_paths = ["scadm/"]
+pytest_add_cli_args = ["-m", "not integration"]
+pytest_add_cli_args_test_selection = ["tests/"]

@@ -48,5 +48,4 @@ _site/
 # Coverage / mutation testing artifacts
 htmlcov/
 .coverage
-coverage.xml
-.mutmut-cache/
+cmd/scadm/mutants/

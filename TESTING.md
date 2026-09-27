@@ -47,45 +47,32 @@ python -m pytest tests/test_cli_integration.py -m "integration and not slow" -v
 - Changing `scadm.json` config schema → update config-dependent tests
 - Changing installer/resolver behavior → update relevant slow tests
 
-## Code Coverage
+### Code Coverage
 
-Coverage is enforced via `pytest-cov` with a ratcheting threshold stored in `cmd/scadm/.coverage-threshold`.
-
-### Running Locally
+The `scadm-tests` hook runs the unit tests with `--cov`. It fails when branch coverage drops below `fail_under` in [`cmd/scadm/pyproject.toml`](cmd/scadm/pyproject.toml).
 
 ```bash
-# Enforce threshold (fails if coverage drops below stored value)
-./cmd/test/test-coverage.sh
-
-# Generate HTML report only (no threshold check)
-./cmd/test/test-coverage.sh --report
+cd cmd/scadm
+python -m pytest tests/ -m "not integration" --cov                        # enforce the gate
+python -m pytest tests/ -m "not integration" --cov --cov-report=html      # browse htmlcov/index.html
 ```
 
-On success the threshold file is updated to the actual coverage value — subsequent runs can only increase, never decrease.
+When your change lifts coverage well past the gate, raise `fail_under` in the same PR. Never lower it.
 
-### CI
+### Mutation Testing
 
-`.github/workflows/coverage.yml` runs on PRs and main pushes (scoped to `cmd/scadm/**`).
-
-## Mutation Testing
-
-Mutation testing uses `mutmut` to validate test quality by introducing code mutations and checking that tests catch them.
-
-### Running Locally
+`mutmut` changes `scadm/` one small edit at a time and reruns the unit tests. A **survived** mutant means no test noticed the change, so a test is missing or its assertion is too weak. Linux and macOS only (Windows: use WSL).
 
 ```bash
-# Full mutation run
-./cmd/test/test-mutmut.sh
-
-# Show results from last run
-./cmd/test/test-mutmut.sh --results
+cd cmd/scadm
+mutmut run                  # full run, ~1-2 min
+mutmut results              # list surviving mutants
+mutmut show <mutant-name>   # diff of one mutant
 ```
 
-### CI
+[`mutation-tests.yml`](.github/workflows/mutation-tests.yml) runs weekly (Monday 03:00 UTC) and on manual dispatch. It reports only and never fails on survivors.
 
-`.github/workflows/mutation-tests.yml` runs weekly (Monday 03:00 UTC) and on manual dispatch.
-
-> ⚠️ Mutation testing is CPU-intensive — expect runs to take several minutes.
+See [gate-scadm-coverage-and-mutation-test-weekly](docs/decisions/gate-scadm-coverage-and-mutation-test-weekly.md) for why.
 
 ## Renovate Configuration Testing
 

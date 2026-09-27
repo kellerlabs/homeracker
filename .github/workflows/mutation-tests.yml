@@ -14,20 +14,34 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.14'
 
       - name: Install dependencies
-        run: |
-          set -euo pipefail
-          pip install -e cmd/scadm -r requirements.txt
+        run: pip install -e cmd/scadm pytest -r requirements.txt
 
+      # Report only: surviving mutants are leads for better tests, not a failure.
       - name: Run mutation tests
-        shell: bash
+        working-directory: cmd/scadm
         run: |
           set -euo pipefail
-          ./cmd/test/test-mutmut.sh
+          mutmut run
+          mutmut export-cicd-stats
+          {
+            echo "## 🧬 Mutation testing"
+            echo
+            echo "| Killed | Survived | Timeout | No tests | Total |"
+            echo "|---|---|---|---|---|"
+            jq -r '"| \(.killed) | \(.survived) | \(.timeout) | \(.no_tests) | \(.total) |"' mutants/mutmut-cicd-stats.json
+            echo
+            echo '<details><summary>Surviving mutants</summary>'
+            echo
+            echo '```'
+            mutmut results
+            echo '```'
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
