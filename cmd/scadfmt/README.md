@@ -36,6 +36,10 @@ Exit codes: `0` clean, `1` files would change (`--check`), `2` error. On an erro
 include<BOSL2/std.scad>
 wall=2;// wall strength
 height_units=3; // rack units
+/**
+ * Bracket holding a device of the given size.
+ * center: centers the body on the origin
+ */
 module bracket(width=10,depth=20,center=false){
     size=[width,depth,wall*height_units];
     if(center){translate(-size/2)cube(size);}else{cube(size);}
@@ -54,6 +58,10 @@ include <BOSL2/std.scad>
 wall = 2;          // wall strength
 height_units = 3;  // rack units
 
+/**
+ * Bracket holding a device of the given size.
+ * center: centers the body on the origin
+ */
 module bracket(width = 10, depth = 20, center = false) {
   size = [width, depth, wall * height_units];
   if (center) {
