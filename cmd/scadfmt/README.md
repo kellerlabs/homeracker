@@ -44,7 +44,7 @@ Exit codes: `0` clean, `1` files would change (`--check`), `2` error. On an erro
 | Space after commas, none inside brackets, spaces inside one-line braces | `module m() { a(); }` |
 | Trailing comments on consecutive lines share one column, a lone one gets 2 spaces | `x = 1;  // note` |
 | At most 2 blank lines at top level, 1 inside blocks | |
-| LF line endings, no trailing whitespace, one final newline | |
+| Keeps the file's line endings (LF or CRLF, judged by the first one), no trailing whitespace, one final newline | |
 
 Line breaks and line length are never changed.
 

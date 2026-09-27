@@ -68,7 +68,7 @@ def format_source(source: str) -> str:
         source: OpenSCAD source text.
 
     Returns:
-        The formatted source, ending in exactly one newline.
+        The formatted source, ending in exactly one newline. Line endings follow the first one in source.
 
     Raises:
         FormatError: On input that cannot be tokenized, has unbalanced brackets, or would change meaning.
@@ -78,10 +78,18 @@ def format_source(source: str) -> str:
     except TokenizeError as e:
         raise FormatError(str(e)) from e
     source_lines = source.replace("\r\n", "\n").replace("\r", "\n").split("\n")
-    output = _render(_split_lines(tokens), source_lines)
+    output = _render(_split_lines(tokens), source_lines, _newline(source))
     if significant(tokenize(output)) != significant(tokens):
         raise FormatError("formatting would change the code, file left untouched (please report this as a bug)")
     return output
+
+
+def _newline(source: str) -> str:
+    """The line ending the file uses, judged by its first line break (LF if it has none)."""
+    first = next((i for i, char in enumerate(source) if char in "\r\n"), None)
+    if first is None or source[first] == "\n":
+        return "\n"
+    return "\r\n" if source.startswith("\r\n", first) else "\r"
 
 
 def _split_lines(tokens: list[Token]) -> list[tuple[list[Token], int, int]]:
@@ -105,8 +113,8 @@ def _split_lines(tokens: list[Token]) -> list[tuple[list[Token], int, int]]:
     return lines
 
 
-def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str]) -> str:
-    """Turn grouped tokens into formatted text."""
+def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], newline: str = "\n") -> str:
+    """Turn grouped tokens into formatted text joined by newline."""
     state = _State()
     out: list[_Line] = []
     blank_run = 0
@@ -139,7 +147,7 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str]) 
         out.pop(0)
     _align_comments(out)
     text = "\n".join(line.code if line.verbatim else _join(line) for line in out)
-    return text + "\n" if text else ""
+    return text.replace("\n", newline) + newline if text else ""
 
 
 def _join(line: _Line) -> str:

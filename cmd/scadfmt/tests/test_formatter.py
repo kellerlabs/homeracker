@@ -134,8 +134,21 @@ def test_block_comment_keeps_inner_lines():
     assert format_source(source) == "module m() {\n  /**\n  * Doc.\n  */\n  a();\n}\n"
 
 
-def test_crlf_input_gives_lf_output():
-    assert format_source("x=1;\r\ny=2;\r\n") == "x = 1;\ny = 2;\n"
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("x=1;\r\ny=2;\r\n", "x = 1;\r\ny = 2;\r\n"),
+        ("x=1;\ry=2;", "x = 1;\ry = 2;\r"),
+        ("x=1;\ny=2;\r\n", "x = 1;\ny = 2;\n"),
+        ("x=1;", "x = 1;\n"),
+        (
+            "/* a\r\n b */\r\n// fmt: off\r\nm=[1,  2];\r\n// fmt: on\r\n",
+            "/* a\r\n b */\r\n// fmt: off\r\nm=[1,  2];\r\n// fmt: on\r\n",
+        ),
+    ],
+)
+def test_line_endings_follow_the_first_one(source, expected):
+    assert format_source(source) == expected
 
 
 def test_empty_input():
@@ -158,6 +171,6 @@ def test_errors(source, message):
 
 
 def test_output_with_different_tokens_is_rejected(monkeypatch):
-    monkeypatch.setattr(formatter, "_render", lambda lines, source_lines: "x = 2;\n")
+    monkeypatch.setattr(formatter, "_render", lambda *args: "x = 2;\n")
     with pytest.raises(FormatError, match="would change the code"):
         format_source("x = 1;")
