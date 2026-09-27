@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true # publish-badge pushes with these
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -45,6 +47,7 @@ jobs:
           python ../test/mutation_report.py coverage-badge "$RUNNER_TEMP/coverage.json" > "$RUNNER_TEMP/badge.json"
 
       - name: Publish coverage badge
+        if: github.ref == 'refs/heads/main'
         uses: ./.github/actions/publish-badge
         with:
           file: ${{ runner.temp }}/badge.json
