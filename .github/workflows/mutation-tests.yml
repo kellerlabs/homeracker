@@ -27,8 +27,9 @@ concurrency:
 
 jobs:
   # Mutates only the functions a PR changed. A change to the run setup itself gets a full run instead.
+  # Release PRs only bump versions and changelogs; their code was mutation-tested on its own PRs.
   pr:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')
     runs-on: ubuntu-latest
     permissions:
       contents: read

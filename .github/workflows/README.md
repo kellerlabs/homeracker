@@ -31,7 +31,7 @@ Validates PR titles against Conventional Commits format to prevent broken releas
 Runs `mutmut` on `scadm`. On PRs it mutates only the changed functions and edits one PR comment with the survivors. The weekly run covers the whole codebase, posts its stats to Discord and publishes the mutation badge. See [TESTING.md](../../TESTING.md#mutation-testing).
 
 **Triggers:**
-- PRs touching `cmd/scadm/scadm/**` or the run setup
+- PRs touching `cmd/scadm/scadm/**` or the run setup (release-please PRs skip it)
 - Weekly schedule (Monday 03:00 UTC)
 - Manual workflow dispatch
 
