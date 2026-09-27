@@ -1,5 +1,6 @@
 #!/bin/bash
 # AST check: every .scad file whose change since a base commit is formatting only must give OpenSCAD the same AST.
+# Other changed files (edits to the code, generated flattened/ output) are listed as skipped: their AST may differ.
 # Usage: ast_check.sh <base-commit>. Needs scadfmt installed and `scadm install` done.
 # Override the OpenSCAD binary with OPENSCAD=/path/to/openscad.
 set -euo pipefail
@@ -23,18 +24,24 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Headless Linux (CI) needs a virtual display for the OpenSCAD AppImage.
+# Headless Linux (CI) needs a virtual display for the OpenSCAD AppImage. Its output only shows on failure.
 run_openscad() {
+  local status=0
   if command -v xvfb-run > /dev/null; then
-    xvfb-run -a "${OPENSCAD}" "$@"
+    xvfb-run -a "${OPENSCAD}" "$@" > "${work}/openscad.log" 2>&1 || status=$?
   else
-    "${OPENSCAD}" "$@"
+    "${OPENSCAD}" "$@" > "${work}/openscad.log" 2>&1 || status=$?
+  fi
+  if [[ "${status}" -ne 0 ]]; then
+    cat "${work}/openscad.log" >&2
+    return "${status}"
   fi
 }
 
 cd "${REPO_ROOT}"
 changed="$(git diff --name-only --diff-filter=M "${BASE}...HEAD" -- '*.scad')"
 checked=0
+skipped=0
 while IFS= read -r file; do
   if [[ -z "${file}" ]]; then
     continue
@@ -43,6 +50,8 @@ while IFS= read -r file; do
   # Skip files whose change is more than formatting, and base versions scadfmt cannot read.
   if ! scadfmt format - < "${work}/base.scad" > "${work}/formatted.scad" 2> /dev/null \
     || ! cmp -s "${work}/formatted.scad" "${file}"; then
+    echo "skipped, not formatting only: ${file}"
+    skipped=$((skipped + 1))
     continue
   fi
   # The base version sits next to the file, so its includes resolve the same way.
@@ -65,4 +74,4 @@ while IFS= read -r file; do
   checked=$((checked + 1))
 done <<< "${changed}"
 
-echo "AST check passed: ${checked} formatting-only file(s)"
+echo "AST check passed: ${checked} formatting-only file(s) keep their AST, ${skipped} other changed file(s) skipped"
