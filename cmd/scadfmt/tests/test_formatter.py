@@ -150,6 +150,18 @@ def test_definition_closing_a_block_gets_no_blank_line_before_the_brace():
     assert format_source(source) == "module m() {\n  function f() = 1;\n}\n"
 
 
+def test_comments_directly_above_belong_to_the_next_line():
+    source = (
+        "include <a.scad>\n// section\nx = 1;\n/**\n * Doc.\n */\nmodule m() {}\n// about n\nmodule n() {}\n"
+        "/* [Hidden] */\ny = 2;\n"
+    )
+    expected = (
+        "include <a.scad>\n\n// section\nx = 1;\n\n/**\n * Doc.\n */\nmodule m() {}\n\n// about n\n"
+        "module n() {}\n\n/* [Hidden] */\ny = 2;\n"
+    )
+    assert format_source(source) == expected
+
+
 def test_function_literal_is_not_a_definition():
     assert format_source("x = 1;\nf = function (x) x;\ny = 2;\n") == "x = 1;\nf = function (x) x;\ny = 2;\n"
 
