@@ -38,18 +38,23 @@ from scadfmt.formatter import FormatError, format_source
         ("x=[each[1,2]];", "x = [each [1, 2]];"),
         ("x=g(1)(2);", "x = g(1)(2);"),
         # Modifiers
-        ("#a();%b();*c();!d();", "#a(); %b(); *c(); !d();"),
+        ("#a();%b();*c();!d();", "#a();\n%b();\n*c();\n!d();"),
         ("translate(v) # cube();", "translate(v) #cube();"),
-        ("if(a)b();else *c();", "if (a) b(); else *c();"),
+        ("if(a)b();else *c();", "if (a) b();\nelse *c();"),
         ("x=(a)*b;", "x = (a) * b;"),
         # Braces
-        ("module m(){a();b();}", "module m() { a(); b(); }"),
-        ("if(a){b();}else{c();}", "if (a) { b(); } else { c(); }"),
+        ("module m(){a();b();}", "module m() {\n  a();\n  b();\n}"),
+        ("if(a){b();}else{c();}", "if (a) {\n  b();\n} else {\n  c();\n}"),
+        ("if(a){b();}else if(c){d();}", "if (a) {\n  b();\n} else if (c) {\n  d();\n}"),
+        ("module m(){}", "module m() {}"),
+        ("x=[for(i=0;i<3;i=i+1)i];", "x = [for (i = 0; i < 3; i = i + 1) i];"),
+        ("module m(){// note\na();}", "module m() {  // note\n  a();\n}"),
+        ("a();// one\nb();c();// two", "a();  // one\nb();\nc();  // two"),
         # Includes
         ("include<a/b.scad>", "include <a/b.scad>"),
-        ("use   <a.scad>\nx=1;", "use <a.scad>\nx = 1;"),
+        ("use   <a.scad>\nx=1;", "use <a.scad>\n\nx = 1;"),
         # Comments
-        ("/* a */x=1;/* b */", "/* a */ x = 1; /* b */"),
+        ("/* a */x=1;/* b */", "/* a */ x = 1;\n/* b */"),
         ("x=1;// c  ", "x = 1;  // c"),
     ],
 )
@@ -98,7 +103,24 @@ def test_brace_on_own_line_is_not_a_continuation():
 
 
 def test_statement_after_include_is_not_a_continuation():
-    assert format_source("include <a.scad>\nx = 1;\n") == "include <a.scad>\nx = 1;\n"
+    assert format_source("include <a.scad>\nx = 1;\n") == "include <a.scad>\n\nx = 1;\n"
+
+
+def test_imports_form_one_block_followed_by_one_blank_line():
+    source = "include <a.scad>\n\n\nuse <b.scad>\n// why c\n\ninclude <c.scad>\n\n\n\nx = 1;\n"
+    expected = "include <a.scad>\nuse <b.scad>\n// why c\ninclude <c.scad>\n\nx = 1;\n"
+    assert format_source(source) == expected
+
+
+def test_comment_after_import_block_is_separated():
+    source = "include <a.scad>\n// section\nx = 1;\n"
+    assert format_source(source) == "include <a.scad>\n\n// section\nx = 1;\n"
+
+
+def test_fmt_off_region_gets_no_added_breaks():
+    source = "// fmt: off\nmodule m() { a(); b(); }\n// fmt: on\nmodule n() { c(); }\n"
+    expected = "// fmt: off\nmodule m() { a(); b(); }\n// fmt: on\nmodule n() {\n  c();\n}\n"
+    assert format_source(source) == expected
 
 
 def test_comment_lines_follow_code_indent():

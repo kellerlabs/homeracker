@@ -78,7 +78,7 @@ def format_source(source: str) -> str:
     except TokenizeError as e:
         raise FormatError(str(e)) from e
     source_lines = source.replace("\r\n", "\n").replace("\r", "\n").split("\n")
-    output = _render(_split_lines(tokens), source_lines, _newline(source))
+    output = _render(_split_lines(_insert_breaks(tokens)), source_lines, _newline(source))
     if significant(tokenize(output)) != significant(tokens):
         raise FormatError("formatting would change the code, file left untouched (please report this as a bug)")
     return output
@@ -90,6 +90,50 @@ def _newline(source: str) -> str:
     if first is None or source[first] == "\n":
         return "\n"
     return "\r\n" if source.startswith("\r\n", first) else "\r"
+
+
+def _insert_breaks(tokens: list[Token]) -> list[Token]:
+    """Put block contents and statements on their own lines.
+
+    Adds a line break after `{`, around `}` (keeping `} else`) and after `;` outside parentheses, except in empty
+    `{}`, before a trailing comment and inside `// fmt: off` regions. Added breaks have empty text.
+    """
+    out: list[Token] = []
+    stack: list[str] = []
+    fmt_off = False
+
+    def ensure_break(after: Token) -> None:
+        if out and out[-1].kind != Kind.NEWLINE:
+            out.append(Token(Kind.NEWLINE, "", after.line, after.col))
+
+    for index, token in enumerate(tokens):
+        following = tokens[index + 1] if index + 1 < len(tokens) else None
+        if token.kind == Kind.LINE_COMMENT and token.text.strip() in (FMT_OFF, FMT_ON):
+            fmt_off = token.text.strip() == FMT_OFF
+        is_op = token.kind == Kind.OP
+        if not fmt_off and is_op and token.text == "}" and not (out and out[-1].text == "{"):
+            ensure_break(token)
+        out.append(token)
+        if is_op and token.text in OPENERS:
+            stack.append(token.text)
+        elif is_op and token.text in CLOSERS and stack:
+            stack.pop()
+        if fmt_off or not is_op or following is None:
+            continue
+        if following.kind in (Kind.NEWLINE, Kind.LINE_COMMENT):
+            continue
+        if _breaks_after(token.text, following.text, not stack or stack[-1] == "{"):
+            ensure_break(token)
+    return out
+
+
+def _breaks_after(text: str, following: str, at_statement_level: bool) -> bool:
+    """Whether a line break follows the operator text when following comes next on the same line."""
+    if text == "{":
+        return following != "}"
+    if text == "}":
+        return following not in ("else", ";")
+    return text == ";" and at_statement_level
 
 
 def _split_lines(tokens: list[Token]) -> list[tuple[list[Token], int, int]]:
@@ -105,7 +149,8 @@ def _split_lines(tokens: list[Token]) -> list[tuple[list[Token], int, int]]:
     for token in tokens:
         if token.kind == Kind.NEWLINE:
             lines.append((current, start, token.line))
-            current, start = [], token.line + 1
+            # An added break (empty text) splits a source line, so the next group starts on the same one.
+            current, start = [], token.line + 1 if token.text else token.line
         else:
             current.append(token)
     if current:
@@ -119,7 +164,9 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
     out: list[_Line] = []
     blank_run = 0
     fmt_off = False
-    for tokens, first, last in lines:
+    next_code_is_import = _next_code_is_import(lines)
+    after_import = False
+    for index, (tokens, first, last) in enumerate(lines):
         if not tokens:
             if fmt_off:
                 out.append(_Line("", "", verbatim=True))
@@ -128,10 +175,12 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
             continue
         level = _line_level(tokens[0], state)
         marker = tokens[0].text.strip() if len(tokens) == 1 and tokens[0].kind == Kind.LINE_COMMENT else None
-        if blank_run and not fmt_off:
-            top = len(state.stack) == 1 and level == 0
-            allowed = MAX_BLANK_LINES_TOP if top else MAX_BLANK_LINES_NESTED
-            out.extend(_Line("", "", blank=True) for _ in range(min(blank_run, allowed)))
+        if after_import and not fmt_off:
+            blank_run, after_import = _import_block_gap(tokens, next_code_is_import[index])
+        if not _is_comment_only(tokens):
+            after_import = _is_import(tokens)
+        if not fmt_off:
+            out.extend(_blank_lines(blank_run, top_level=len(state.stack) == 1 and level == 0))
         blank_run = 0
         code, comment = _render_tokens(tokens, level, state)
         if fmt_off and marker != FMT_ON:
@@ -148,6 +197,44 @@ def _render(lines: list[tuple[list[Token], int, int]], source_lines: list[str], 
     _align_comments(out)
     text = "\n".join(line.code if line.verbatim else _join(line) for line in out)
     return text.replace("\n", newline) + newline if text else ""
+
+
+def _blank_lines(count: int, top_level: bool) -> list[_Line]:
+    """Up to count blank lines, capped by where they sit."""
+    allowed = MAX_BLANK_LINES_TOP if top_level else MAX_BLANK_LINES_NESTED
+    return [_Line("", "", blank=True) for _ in range(min(count, allowed))]
+
+
+def _is_import(tokens: list[Token]) -> bool:
+    """True for an `include <...>` or `use <...>` line."""
+    return len(tokens) > 1 and tokens[1].kind == Kind.PATH
+
+
+def _is_comment_only(tokens: list[Token]) -> bool:
+    """True for a line holding only comments."""
+    return all(token.kind in (Kind.LINE_COMMENT, Kind.BLOCK_COMMENT) for token in tokens)
+
+
+def _import_block_gap(tokens: list[Token], next_code_is_import: bool) -> tuple[int, bool]:
+    """Blank lines before a line that follows an import: none inside the block, exactly one after it.
+
+    Returns:
+        The blank line count and whether the line still belongs to the import block.
+    """
+    inside = _is_import(tokens) or (_is_comment_only(tokens) and next_code_is_import)
+    return (0 if inside else 1), inside
+
+
+def _next_code_is_import(lines: list[tuple[list[Token], int, int]]) -> list[bool]:
+    """Per line: whether the next line with code after it is an import."""
+    result = [False] * len(lines)
+    following = False
+    for index in range(len(lines) - 1, -1, -1):
+        result[index] = following
+        tokens = lines[index][0]
+        if tokens and not _is_comment_only(tokens):
+            following = _is_import(tokens)
+    return result
 
 
 def _join(line: _Line) -> str:

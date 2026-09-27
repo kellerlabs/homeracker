@@ -2,7 +2,7 @@
 
 ## 📌 What
 
-An opinionated formatter for OpenSCAD code. It fixes indentation and spacing and leaves everything else alone: line breaks stay where you put them, and it never changes what the code does.
+An opinionated formatter for OpenSCAD code. It fixes indentation and spacing, puts blocks and statements on their own lines, and never joins lines or changes what the code does.
 
 ## 🤔 Why
 
@@ -38,9 +38,7 @@ wall=2;// wall strength
 height_units=3; // rack units
 module bracket(width=10,depth=20,center=false){
     size=[width,depth,wall*height_units];
-    if(center){translate(-size/2)cube(size);}
-    else
-    cube(size);
+    if(center){translate(-size/2)cube(size);}else{cube(size);}
     for(i=[0:2:width])
     translate([i,0,0])
     rotate([0,0,-90])
@@ -52,13 +50,16 @@ becomes
 
 ```openscad
 include <BOSL2/std.scad>
+
 wall = 2;          // wall strength
 height_units = 3;  // rack units
 module bracket(width = 10, depth = 20, center = false) {
   size = [width, depth, wall * height_units];
-  if (center) { translate(-size / 2) cube(size); }
-  else
+  if (center) {
+    translate(-size / 2) cube(size);
+  } else {
     cube(size);
+  }
   for (i = [0:2:width])
     translate([i, 0, 0])
       rotate([0, 0, -90])
@@ -77,12 +78,15 @@ module bracket(width = 10, depth = 20, center = false) {
 | Tight unary operators, modifiers, calls, indexing | `-x`, `!a`, `#cube()`, `f(a)[0]` |
 | Tight range colons, spaced ternary colons | `[0:2:10]`, `a ? b : c` |
 | `if`, `for`, `intersection_for`, `function` get a space before `(` | `for (i = [0:2])` |
-| Space after commas, none inside brackets, spaces inside one-line braces | `module m() { a(); }` |
+| Space after commas, none inside brackets | `f(a, [1, 2])` |
+| Block contents on their own lines, `}` on its own line except `} else`, empty `{}` stays | `if (a) {`↵`  b();`↵`} else {` |
+| One statement per line (`;` inside `for (...)` excepted) | `a();`↵`b();` |
+| Imports form one block without blank lines, followed by exactly one blank line | `include <a.scad>`↵`use <b.scad>`↵↵`x = 1;` |
 | Trailing comments on consecutive lines share one column, a lone one gets 2 spaces | `x = 1;  // note` |
 | At most 2 blank lines at top level, 1 inside blocks | |
 | Keeps the file's line endings (LF or CRLF, judged by the first one), no trailing whitespace, one final newline | |
 
-Line breaks and line length are never changed.
+Lines are never joined and line length is never limited.
 
 ### 🙈 Opting Out
 

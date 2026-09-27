@@ -3,7 +3,6 @@
 include <canary_missing.scad>
 use <canary_missing.scad>
 
-
 /* [Section] */
 width = 10;         // [1:100]
 depth = 20;         // aligned run
@@ -58,7 +57,11 @@ function chained(mode) =
 module box(size = [1, 1, 1], center = false) {
   cube(size, center = center);
 }
-module wrapper() { children(); children(0); echo($children); }
+module wrapper() {
+  children();
+  children(0);
+  echo($children);
+}
 module multi_line_signature(first = 1,
   second = 2) {
   echo(first, second);
@@ -69,13 +72,23 @@ translate([0, 0, width]) rotate([0, 90, 0]) box([1, 2, 3]);
 translate([width, 0, 0])
   rotate([0, 0, 45])
     box();
-if (width > 5) { box(); } else if (width > 2) { box([2, 2, 2]); } else { box([3, 3, 3]); }
+if (width > 5) {
+  box();
+} else if (width > 2) {
+  box([2, 2, 2]);
+} else {
+  box([3, 3, 3]);
+}
 if (width > 1)
   box();
 else
   sphere(1);
-for (i = [0:2]) { translate([i * 10, 0, 0]) cube(1); }
-intersection_for (i = [0:1]) { rotate([0, 0, i * 45]) cube(10, center = true); }
+for (i = [0:2]) {
+  translate([i * 10, 0, 0]) cube(1);
+}
+intersection_for (i = [0:1]) {
+  rotate([0, 0, i * 45]) cube(10, center = true);
+}
 #box();
 %box();
 *box();
@@ -85,7 +98,10 @@ difference() {
   cube(10);
   #translate([1, 1, 1]) cube(8);
 }
-wrapper() { sphere(1); cube(1); }
+wrapper() {
+  sphere(1);
+  cube(1);
+}
 let(a = 1) translate([a, 0, 0]) cube(1);
 assert(true);
 echo(str("done ", width));
