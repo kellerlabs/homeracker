@@ -26,7 +26,7 @@
 
 **Mutation testing: `mutmut`, report-only.**
 
-- 🧬 Per PR ([`mutation-tests.yml`](../../.github/workflows/mutation-tests.yml)): [`cmd/test/mutation_report.py`](../../cmd/test/mutation_report.py) maps the diff to changed top-level functions and methods, and only those get mutated. Changes to the run setup (workflow, mutmut config, pinned versions, report script) mutate the whole codebase instead. Release-please PRs are skipped: they only bump versions and changelogs. They still run the integration tests, the last check before a PyPI version that can't be re-uploaded.
+- 🧬 Per PR ([`mutation-tests.yml`](../../.github/workflows/mutation-tests.yml)): [`cmd/test/mutation_report.py`](../../cmd/test/mutation_report.py) maps the diff to changed top-level functions and methods, and only those get mutated. Changes to the run setup (workflow, mutmut config, pinned versions, report script) mutate the whole codebase instead. Release-please PRs are skipped: they only bump versions and changelogs. When `scadm` is part of the release, they still run the integration tests against the source tree.
 - ⏱️ The per-PR run stops after 5 minutes (`timeout 300`), warns, and suggests moving the run to a nightly job.
 - 💬 Results land in one PR comment that each run edits in place. Fork PRs get a read-only token, so they only get the job summary.
 - 📅 Weekly (Monday 03:00 UTC) and on dispatch: a full run posts its stats to Discord `#homeracker-ci` through the `DISCORD_CI_WEBHOOK_URL` secret and publishes the mutation badge. Survivors go to the job summary.
