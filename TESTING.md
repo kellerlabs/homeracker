@@ -63,7 +63,7 @@ When your change lifts coverage well past the gate, raise `fail_under` in the sa
 
 `mutmut` changes `scadm/` one small edit at a time and reruns the unit tests. A **survived** mutant means no test noticed the change, so a test is missing or its assertion is too weak. Linux and macOS only (Windows: use WSL).
 
-On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates only the functions the PR changed and edits one PR comment with the survivors (fork PRs: job summary only). Kill each survivor with a test, or mark a true equivalent with `# pragma: no mutate`. Log calls, argparse help text and exception messages are skipped by `do_not_mutate_patterns`. The run stops after 5 minutes and never fails the PR. A weekly full run posts its stats to Discord `#homeracker-ci`.
+On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates only the functions the PR changed and edits one PR comment with the survivors (fork PRs: job summary only). Kill each survivor with a test, or mark a true equivalent with `# pragma: no mutate`. Log calls, argparse help text and exception messages are skipped by `do_not_mutate_patterns`. The run stops after 5 minutes and never fails the PR. Release-please PRs skip it. A weekly full run posts its stats to Discord `#homeracker-ci`.
 
 ```bash
 cd cmd/scadm
