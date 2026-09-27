@@ -13,7 +13,7 @@ Playwright drives the built site in Chromium: every page, the hero canvas, and c
 
 ```bash
 cd site
-npx playwright install chromium   # once per Playwright version
+npx playwright install --only-shell chromium   # once per Playwright version
 npm run build
 npm run e2e
 ```

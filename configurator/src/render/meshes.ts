@@ -92,7 +92,18 @@ export async function buildRealRack(
   const pick = (key: string, material: MeshStandardMaterial) => (flagged.has(key) ? materials.flagged : material);
   const group = new Group();
   const pending: Promise<void>[] = [];
-  const place = (name: string, material: MeshStandardMaterial, position: Vector3, rotation: Quaternion) => {
+  const place = (name: string, material: MeshStandardMaterial, position: Vector3, rotation: Quaternion, fallback?: Vector3) => {
+    // A part the library does not hold (a zero-length or over-long support) is drawn as a plain block of its size.
+    if (!library.has(name)) {
+      if (fallback) {
+        const block = new Mesh(unitBoxGeometry, material);
+        block.position.copy(position);
+        block.quaternion.copy(rotation);
+        block.scale.copy(fallback);
+        group.add(block);
+      }
+      return;
+    }
     pending.push(
       library.geometry(name).then((geometry) => {
         const mesh = new Mesh(geometry, material);
@@ -107,7 +118,7 @@ export async function buildRealRack(
     const center = cellCenter(s.from);
     const axis = AXIS_VECTOR[s.axis];
     center.addScaledVector(axis, (s.length - 1) / 2);
-    place(`support-${s.length}`, pick(`support:${s.length}`, materials.support), center, alongAxis(axis));
+    place(`support-${s.length}`, pick(`support:${s.length}`, materials.support), center, alongAxis(axis), new Vector3(1, s.length, 1));
   }
 
   for (const n of model.nodes) {
