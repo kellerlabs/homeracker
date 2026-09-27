@@ -64,3 +64,9 @@ exclude_also = [
 source_paths = ["scadm/"]
 pytest_add_cli_args = ["-m", "not integration"]
 pytest_add_cli_args_test_selection = ["tests/"]
+# Mutants no test should pin: log output, argparse help and usage text, exception messages.
+do_not_mutate_patterns = [
+    'logger\.\w+\(',
+    '^\s*(help|description|metavar|prog)=',
+    'raise \w+\(',
+]
