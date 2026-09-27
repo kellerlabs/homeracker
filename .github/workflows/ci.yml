@@ -87,8 +87,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.mutation-tests == 'true'
     uses: ./.github/workflows/mutation-tests.yml
+    # Ceiling for the skipped `full` job; the PR job itself only asks for contents: read.
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
 
   test-setup-openscad:
