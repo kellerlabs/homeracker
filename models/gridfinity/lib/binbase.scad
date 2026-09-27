@@ -38,23 +38,19 @@ include <../lib/constants.scad>
 
 // all units in mm
 
-BB_BOTTOM_LIP_SIDE_LENGTH = 35.8; // mid part side length - bottom lip height * 2
-BB_BOTTOM_LIP_ROUNDING = 0.8; // radius
-BB_BOTTOM_LIP_HEIGHT = 0.8;
 
-BB_MID_PART_SIDE_LENGTH = 37.2; // top side length - top height * 2
-BB_MID_PART_ROUNDING = 1.6; // radius
-BB_MID_PART_HEIGHT = 1.8;
-BB_TOP_PART_SIDE_LENGTH = 41.5;
-BB_TOP_PART_ROUNDING = 3.75; // radius
-BB_TOP_PART_HEIGHT = 2.15;
+module binbase_cell(anchor=CENTER, spin=0, orient=UP) {
+  width = GRIDFINITY_BASE_UNIT;
+  depth = GRIDFINITY_BASE_UNIT;
+  height = GRIDFINITY_BB_HEIGHT;
 
-BB_HEIGHT = BB_BOTTOM_LIP_HEIGHT+BB_MID_PART_HEIGHT+BB_TOP_PART_HEIGHT;
-
-module binbase_cell() {
-  prismoid(BB_BOTTOM_LIP_SIDE_LENGTH, BB_MID_PART_SIDE_LENGTH, rounding1=BB_BOTTOM_LIP_ROUNDING, rounding2=BB_MID_PART_ROUNDING, h=BB_BOTTOM_LIP_HEIGHT)
-    attach(TOP,BOTTOM) cuboid([BB_MID_PART_SIDE_LENGTH, BB_MID_PART_SIDE_LENGTH, BB_MID_PART_HEIGHT], rounding=BB_MID_PART_ROUNDING, except=[BOTTOM,TOP])
-    attach(TOP,BOTTOM) prismoid(BB_MID_PART_SIDE_LENGTH, BB_TOP_PART_SIDE_LENGTH, rounding1=BB_MID_PART_ROUNDING, rounding2=BB_TOP_PART_ROUNDING, h=BB_TOP_PART_HEIGHT);
+  attachable(anchor, spin, orient, size=[width, depth, height]){
+    down(height/2)
+    prismoid(GRIDFINITY_BB_BOTTOM_LIP_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_SIDE_LENGTH, rounding1=GRIDFINITY_BB_BOTTOM_LIP_ROUNDING, rounding2=GRIDFINITY_BB_MID_PART_ROUNDING, h=GRIDFINITY_BB_BOTTOM_LIP_HEIGHT)
+      attach(TOP,BOTTOM) cuboid([GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_MID_PART_HEIGHT], rounding=GRIDFINITY_BB_MID_PART_ROUNDING, except=[BOTTOM,TOP])
+        attach(TOP,BOTTOM) prismoid(GRIDFINITY_BB_MID_PART_SIDE_LENGTH, GRIDFINITY_BB_TOP_PART_SIDE_LENGTH, rounding1=GRIDFINITY_BB_MID_PART_ROUNDING, rounding2=GRIDFINITY_BB_TOP_PART_ROUNDING, h=GRIDFINITY_BB_TOP_PART_HEIGHT);
+    children();
+  }
 }
 
 /** Bin Base Grid
@@ -64,14 +60,15 @@ module binbase_cell() {
   @param units_x Number of grid units in X direction (1 unit = 42mm)
   @param units_y Number of grid units in Y direction (1 unit = 42mm)
 */
-module binbase(units_x=1, units_y=1, anchor=CENTER, spin=0, orient=UP) {
+module binbase(units_x=1, units_y=1,
+  anchor=CENTER, spin=0, orient=UP
+  ) {
   assert(is_int(units_x), "units_x must be an integer");
   assert(is_int(units_y), "units_y must be an integer");
   assert(units_x >= 1, "units_x must be at least 1");
   assert(units_y >= 1, "units_y must be at least 1");
   // total height of the binbase
-  basebin_dimensions = [BB_TOP_PART_SIDE_LENGTH*units_x - BINBASE_SUBTRACTOR, BB_TOP_PART_SIDE_LENGTH*units_y - BINBASE_SUBTRACTOR, BB_HEIGHT];
-
+  basebin_dimensions = [GRIDFINITY_BB_TOP_PART_SIDE_LENGTH*units_x - GRIDFINITY_BINBASE_SUBTRACTOR, GRIDFINITY_BB_TOP_PART_SIDE_LENGTH*units_y - GRIDFINITY_BINBASE_SUBTRACTOR, GRIDFINITY_BB_HEIGHT];
 
   // Grid of cutouts, also anchored to bottom for alignment
   attachable(anchor, spin, orient, size=basebin_dimensions){
@@ -83,16 +80,16 @@ module binbase(units_x=1, units_y=1, anchor=CENTER, spin=0, orient=UP) {
 
 module binbase_with_topplate(units_x=1, units_y=1, topplate_thickness=2, anchor=CENTER, spin=0, orient=UP) {
 
-  length_x = GRIDFINITY_BASE_UNIT*units_x-BINBASE_SUBTRACTOR;
-  length_y = GRIDFINITY_BASE_UNIT*units_y-BINBASE_SUBTRACTOR;
-  height_total = BB_HEIGHT + topplate_thickness;
+  length_x = GRIDFINITY_BASE_UNIT*units_x-GRIDFINITY_BINBASE_SUBTRACTOR;
+  length_y = GRIDFINITY_BASE_UNIT*units_y-GRIDFINITY_BINBASE_SUBTRACTOR;
+  height_total = GRIDFINITY_BB_HEIGHT + topplate_thickness;
 
   attachable(anchor, spin, orient, size=[length_x, length_y, height_total]) {
-    down(height_total/2)
-    binbase(units_x, units_y) attach(TOP,BOTTOM)
-    attach(TOP,BOTTOM)
-      cuboid([length_x, length_y, topplate_thickness],
-      rounding=BB_TOP_PART_ROUNDING, except=[BOTTOM,TOP]);
+    down(topplate_thickness/2)
+    binbase(units_x, units_y) {
+      attach(TOP,BOTTOM)
+      cuboid([length_x, length_y, topplate_thickness], rounding=GRIDFINITY_BB_TOP_PART_ROUNDING, except=[BOTTOM,TOP]);
+    }
     children();
   }
 }
