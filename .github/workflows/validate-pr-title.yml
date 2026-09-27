@@ -1,11 +1,10 @@
 ---
 name: Validate PR Title
 
+# Required directly next to check-results: it runs on title edits, which ci.yml does not.
 on:
-  workflow_call:
-  # Title edits after the last push; ci.yml covers every push.
   pull_request:
-    types: [edited]
+    types: [opened, edited, synchronize, reopened]
 
 permissions:
   pull-requests: read

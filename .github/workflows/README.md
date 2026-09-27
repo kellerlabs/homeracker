@@ -2,23 +2,23 @@
 
 ## 🚦 PR Gate
 
-Every PR runs one pipeline, [`ci.yml`](ci.yml). Branch protection on `main` requires a single check, `check-results`, which fails when any job failed or was cancelled. A path-filtered job that did not run counts as passed, so it is required exactly when it applies. See [gate-prs-with-a-single-check-results-job](../../docs/decisions/gate-prs-with-a-single-check-results-job.md).
+Every PR runs one pipeline, [`ci.yml`](ci.yml). Branch protection on `main` requires `check-results`, which fails when any job failed or was cancelled, and `validate-title`. A path-filtered job that did not run counts as passed, so it is required exactly when it applies. See [gate-prs-with-a-single-check-results-job](../../docs/decisions/gate-prs-with-a-single-check-results-job.md).
 
 ```mermaid
 flowchart LR
     pr([PR push]) --> dc[detect-changes]
     pr --> pc[pre-commit]
-    pr --> title[validate-pr-title]
     dc -->|cmd/scadm, scadm.json| it[integration-tests]
     dc -->|cmd/scadm/scadm| mt[mutation-tests]
     dc -->|setup-openscad action| so[test-setup-openscad]
     dc -->|models, scadm| vm[validate-models]
     dc -->|site, configurator, models| web[web]
-    pc & title & it & mt & so & vm & web --> cr{{check-results}}
+    pc & it & mt & so & vm & web --> cr{{check-results}}
     cr -->|green| merge([merge / Renovate automerge])
+    pr2([PR push or title edit]) --> title[validate-title] -->|green| merge
 ```
 
-Each box is a workflow file called through `workflow_call`. Its path filter lives in `detect-changes`, not in the file.
+Each box inside the gate is a workflow file called through `workflow_call`. Its path filter lives in `detect-changes`, not in the file. `validate-title` stays outside: it must rerun on title edits, and rerunning the whole gate on every PR edit (Renovate rewrites PR bodies constantly) is too costly.
 
 ### ➕ Adding a PR Job
 
@@ -33,7 +33,7 @@ Each box is a workflow file called through `workflow_call`. Its path filter live
 |---|---|---|
 | [`ci.yml`](ci.yml) | PR | Runs the PR gate above |
 | [`pre-commit.yml`](pre-commit.yml) | `ci.yml`, push to `main` | All pre-commit hooks: linters, unit tests, flatten validation |
-| [`validate-pr-title.yml`](validate-pr-title.yml) | `ci.yml`, PR title edit | Conventional Commits title, since PRs are squash-merged |
+| [`validate-pr-title.yml`](validate-pr-title.yml) | PR, incl. title edits | Conventional Commits title, since PRs are squash-merged. Required directly |
 | [`integration-tests.yml`](integration-tests.yml) | `ci.yml` | `scadm` CLI integration tests on ubuntu and windows. See [TESTING.md](../../TESTING.md#integration-tests) |
 | [`mutation-tests.yml`](mutation-tests.yml) | `ci.yml`, Monday 03:00 UTC, manual | `mutmut` on changed `scadm` functions per PR with a PR comment; weekly full run to Discord and the badge. See [TESTING.md](../../TESTING.md#mutation-testing) |
 | [`test-setup-openscad.yml`](test-setup-openscad.yml) | `ci.yml` | Input matrix of the `setup-openscad` composite action |

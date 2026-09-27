@@ -216,7 +216,7 @@ Releases are automated using Camunda's GitHub actions from [infra-global-github-
 5. Push: `git push origin feature/my-feature`
 6. Create PR with description and screenshots
 
-Every PR runs [`ci.yml`](.github/workflows/ci.yml). Its `check-results` job is the only required check and passes once every job that applies to your change passed. See the [CI overview](.github/workflows/README.md).
+Every PR runs [`ci.yml`](.github/workflows/ci.yml). Its `check-results` job passes once every job that applies to your change passed. It and the PR title check are the only required checks. See the [CI overview](.github/workflows/README.md).
 
 ### 🔭 Preview Deployments
 

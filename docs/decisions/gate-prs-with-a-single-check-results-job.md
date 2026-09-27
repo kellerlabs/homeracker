@@ -18,7 +18,7 @@ One PR workflow, `ci.yml`, modeled on [camunda/camunda](https://github.com/camun
 - **`detect-changes`** computes path filters once and exposes one output per area.
 - **Every PR job** is an existing workflow switched to `workflow_call`, called from `ci.yml` behind an `if:` on its filter.
 - **`check-results`** runs with `if: always()`, needs every job, and fails on any `failure` or `cancelled`. `skipped` counts as success.
-- **Branch protection** on `main` requires `check-results` only.
+- **Branch protection** on `main` requires `check-results`, plus `validate-title`, which stays a standalone workflow: it must rerun on title edits, and rerunning the gate on every PR edit is too costly since Renovate rewrites PR bodies constantly.
 
 ### Alternatives Considered
 

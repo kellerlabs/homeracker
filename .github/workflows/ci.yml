@@ -1,7 +1,7 @@
 ---
 name: CI
 
-# Branch protection requires only check-results: a PR job missing from its needs is not required.
+# Branch protection requires check-results (and validate-title): a PR job missing from its needs is not required.
 on:
   pull_request:
 
@@ -71,11 +71,6 @@ jobs:
     permissions:
       contents: read
 
-  validate-pr-title:
-    uses: ./.github/workflows/validate-pr-title.yml
-    permissions:
-      pull-requests: read
-
   integration-tests:
     needs: detect-changes
     if: needs.detect-changes.outputs.integration-tests == 'true'
@@ -124,7 +119,6 @@ jobs:
       - pre-commit
       - test-setup-openscad
       - validate-models
-      - validate-pr-title
       - web
     runs-on: ubuntu-latest
     timeout-minutes: 5
