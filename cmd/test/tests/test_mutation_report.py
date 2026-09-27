@@ -101,6 +101,14 @@ class TestScope:
         diff = "+++ b/cmd/scadm/scadm/flatten.py\n@@ -6 +6,2 @@\n+x\n+y\n"
         assert mr.scope(diff, tmp_path) == ["scadm.flatten.x_top__mutmut_*"]
 
+    def test_deleting_last_body_line_selects_that_function(self, tmp_path):
+        # git reports a pure deletion's new-side start as the line before the removed block.
+        target = tmp_path / "cmd/scadm/scadm/m.py"
+        target.parent.mkdir(parents=True)
+        target.write_text("def a():\n    x = 1\n\n\ndef b():\n    pass\n", encoding="utf-8")
+        diff = "+++ b/cmd/scadm/scadm/m.py\n@@ -3 +2,0 @@ def a():\n-    return x\n"
+        assert mr.scope(diff, tmp_path) == ["scadm.m.x_a__mutmut_*"]
+
     def test_non_source_and_missing_files_are_skipped(self, tmp_path):
         diff = "+++ b/cmd/scadm/tests/test_x.py\n@@ -1 +1 @@\n+x\n+++ b/cmd/scadm/scadm/gone.py\n@@ -1 +1 @@\n+x\n"
         assert not mr.scope(diff, tmp_path)
