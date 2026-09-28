@@ -14,7 +14,7 @@
 
 On the Renovate OpenSCAD PR, [`scadfmt-agent.yml`](../../.github/workflows/scadfmt-agent.yml) lets a Claude agent adapt scadfmt, and a person approves the result.
 
-- **Gate:** runs only for a PR from this repo by `renovate[bot]` on `renovate/openscad-nightly`. [`grammar-diff.sh`](../../cmd/scadfmt/nightly/grammar-diff.sh) maps both nightlies to their last OpenSCAD master commit of that day and diffs `src/core/lexer.l` and `src/core/parser.y`. An empty diff, or a branch that already carries an agent commit, skips the agent.
+- **Gate:** runs only for a PR from this repo by `renovate[bot]` on `renovate/openscad-nightly`. [`grammar-diff.sh`](../../cmd/scadfmt/nightly/grammar-diff.sh) diffs `src/core/lexer.l` and `src/core/parser.y` from the start of the old nightly's date to the end of the new one's (UTC). A nightly carries only its build date, so a commit from either day may be diffed twice but is never missed. The agent is skipped when the diff is empty or the branch already carries an agent commit.
 - **Runtime:** [claude-code-action](https://github.com/anthropics/claude-code-action) with `CLAUDE_CODE_OAUTH_TOKEN` (subscription), `allowed_bots: renovate`, `claude-sonnet-5`, 30 turns, 30 minutes.
 - **Instructions:** the [`scadfmt-adapt`](../../.claude/skills/scadfmt-adapt/SKILL.md) skill, which people also use when taking over.
 - **Sources:** OpenSCAD's `src/core/` and `tests/data/scad/`, checked out by the gate script, and BOSL2 from `scadm install`, both local. `WebFetch` for `openscad.org` only.

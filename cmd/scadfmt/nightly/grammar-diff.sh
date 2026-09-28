@@ -3,7 +3,8 @@
 # Usage: grammar-diff.sh <base-commit> <out-dir>
 # Writes <out-dir>/grammar.diff, <out-dir>/grammar.log and a sparse checkout of OpenSCAD's src/core and tests at
 # <out-dir>/openscad, then prints key=value lines for $GITHUB_OUTPUT: old, new and changed (true when the diff is
-# not empty). A nightly is built from master on its date, so it maps to the last master commit of that day (UTC).
+# not empty). A nightly is built from master at some time on its date (UTC), so the range starts before the old
+# nightly's date and ends after the new one's. A grammar commit on either day may show up twice, but never gets missed.
 set -euo pipefail
 
 if [[ $# -ne 2 ]]; then
@@ -41,7 +42,7 @@ rm -rf "${clone}"
 # History from a week before the old nightly, without file contents until they are needed.
 since="$(date -u -d "${old} -7 days" +%Y-%m-%d)"
 git clone --quiet --filter=blob:none --no-checkout --shallow-since="${since}" "${UPSTREAM}" "${clone}"
-old_commit="$(git -C "${clone}" rev-list -1 --first-parent --before="${old} 23:59:59 +0000" HEAD)"
+old_commit="$(git -C "${clone}" rev-list -1 --first-parent --before="${old} 00:00:00 +0000" HEAD)"
 new_commit="$(git -C "${clone}" rev-list -1 --first-parent --before="${new} 23:59:59 +0000" HEAD)"
 
 git -C "${clone}" diff "${old_commit}" "${new_commit}" -- "${GRAMMAR[@]}" > "${OUT}/grammar.diff"
