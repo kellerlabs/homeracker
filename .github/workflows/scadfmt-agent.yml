@@ -140,13 +140,14 @@ jobs:
           set -euo pipefail
           cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$ADAPT_DIR" | tee -a "$GITHUB_OUTPUT"
 
-      # The env scrub runs the agent's subprocesses in bubblewrap. Ubuntu 24.04's AppArmor blocks the unprivileged
-      # user namespaces it needs, so this ephemeral runner allows them.
-      - name: Install bubblewrap
+      # The env scrub runs the agent's subprocesses in Claude Code's sandbox, which needs bubblewrap and socat.
+      # Ubuntu 24.04's AppArmor blocks the unprivileged user namespaces bubblewrap needs, so this ephemeral runner
+      # allows them.
+      - name: Install the sandbox
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq bubblewrap
+          sudo apt-get install -y -qq bubblewrap socat
           if [[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]]; then
             sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           fi
@@ -162,7 +163,7 @@ jobs:
           prompt: |
             Follow .claude/skills/scadfmt-adapt/SKILL.md for the OpenSCAD nightly update from ${{ steps.grammar.outputs.old }} to ${{ steps.grammar.outputs.new }}.
             ADAPT_DIR is ${{ env.ADAPT_DIR }}.
-            You run unattended in CI: nobody answers questions or reviews before you finish, and the skill replaces the repo's interactive workflow. Don't commit, push or comment. Always end by writing ADAPT_DIR/summary.md as the skill describes, also when you change nothing or get stuck.
+            You run unattended in CI: nobody answers questions or reviews before you finish, and the skill replaces the repo's interactive workflow. Don't commit, push or comment. Always end by writing ADAPT_DIR/summary.md as the skill describes, also when you change nothing or get stuck. Write "no change: <reason>" only after the tests ran green; when a tool fails or you cannot verify, line 1 is "stuck: <reason>".
           claude_args: >-
             --model claude-sonnet-5
             --max-turns 60
@@ -237,7 +238,12 @@ jobs:
           if [[ "$ADAPT_RESULT" != "success" || ! -s "$RESULT_DIR/summary.md" ]]; then
             echo "outcome=failed" >> "$GITHUB_OUTPUT"
           elif [[ ! -s "$RESULT_DIR/agent.patch" ]]; then
-            echo "outcome=unchanged" >> "$GITHUB_OUTPUT"
+            # Only a verified "no change" may automerge. A blocked agent writes "stuck: <reason>".
+            if head -n 1 "$RESULT_DIR/summary.md" | grep -q '^no change: '; then
+              echo "outcome=unchanged" >> "$GITHUB_OUTPUT"
+            else
+              echo "outcome=failed" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "outcome=changed" >> "$GITHUB_OUTPUT"
           fi
