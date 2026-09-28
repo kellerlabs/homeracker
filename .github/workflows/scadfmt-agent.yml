@@ -138,6 +138,18 @@ jobs:
           set -euo pipefail
           cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$ADAPT_DIR" | tee -a "$GITHUB_OUTPUT"
 
+      # The env scrub runs the agent's subprocesses in bubblewrap. Ubuntu 24.04's AppArmor blocks the unprivileged
+      # user namespaces it needs, so this ephemeral runner allows them.
+      - name: Install bubblewrap
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bubblewrap
+          if [[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+          bwrap --ro-bind / / --dev /dev --proc /proc true
+
       - name: Adapt scadfmt
         uses: anthropics/claude-code-action@756cc22e19660d20e8cc9496b4f242475a7f7790 # v1.0.235
         with:
