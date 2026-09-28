@@ -14,7 +14,8 @@ flowchart LR
     dc -->|setup-openscad action| so[test-setup-openscad]
     dc -->|models, scadm| vm[validate-models]
     dc -->|site, configurator, models| web[web]
-    pc & it & mt & sf & so & vm & web --> cr{{check-results}}
+    pr -->|Renovate OpenSCAD nightly| ag[scadfmt-agent]
+    pc & it & mt & sf & so & vm & web & ag --> cr{{check-results}}
     cr -->|green| merge([merge / Renovate automerge])
     pr2([PR push or title edit]) --> title[validate-title] -->|green| merge
 ```
@@ -38,6 +39,8 @@ Each box inside the gate is a workflow file called through `workflow_call`. Its 
 | [`integration-tests.yml`](integration-tests.yml) | `ci.yml` | `scadm` CLI integration tests on ubuntu and windows. See [TESTING.md](../../TESTING.md#integration-tests) |
 | [`mutation-tests.yml`](mutation-tests.yml) | `ci.yml`, Monday 03:00 UTC, manual | `mutmut` on changed `scadm` and `scadfmt` functions per PR, one PR comment with a section per package; weekly full run per package to Discord and its badge. See [TESTING.md](../../TESTING.md#mutation-testing) |
 | [`scadfmt-tests.yml`](scadfmt-tests.yml) | `ci.yml` | `scadfmt` integration tests against the pinned OpenSCAD (canary, and same AST for formatting-only `.scad` changes) and unit tests on windows; Linux unit tests run in pre-commit. See [TESTING.md](../../TESTING.md#scadfmt-tests) |
+| [`scadfmt-agent.yml`](scadfmt-agent.yml) | `ci.yml`, Renovate OpenSCAD nightly PR only | When OpenSCAD's grammar changed, a Claude agent adapts scadfmt; the workflow tests and pushes its patch, then `human-review` waits for approval. See [below](#-scadfmt-agent-setup) |
+| [`scadfmt-e2e.yml`](scadfmt-e2e.yml) | `scadfmt-e2e` label | Probes the scadfmt agent flow end to end on any PR. Not part of the gate. See [below](#-scadfmt-agent-setup) |
 | [`test-setup-openscad.yml`](test-setup-openscad.yml) | `ci.yml` | Input matrix of the `setup-openscad` composite action |
 | [`validate-models.yml`](validate-models.yml) | `ci.yml` | Renders every model with OpenSCAD |
 | [`web.yml`](web.yml) | `ci.yml`, push to `main`, `e2e-probe-failure` label | Configurator and site lint, tests, build and Playwright E2E |
@@ -63,8 +66,40 @@ Repository secrets:
 1. `RELEASES_APP_ID`: the GitHub App ID
 2. `RELEASES_APP_PRIVATE_KEY`: the GitHub App private key
 
+## 🤖 scadfmt Agent Setup
+
+[`scadfmt-agent.yml`](scadfmt-agent.yml) keeps scadfmt in step with the OpenSCAD nightly. See [agent-adapts-scadfmt-to-openscad-nightly](../../docs/decisions/agent-adapts-scadfmt-to-openscad-nightly.md).
+
+```mermaid
+flowchart LR
+    pr([Renovate nightly PR]) --> gate{grammar changed?}
+    gate -->|no| ok([automerge])
+    gate -->|yes| agent[agent, read-only] --> verify[verify, no token: allowlist, tests]
+    verify -->|no change| ok
+    verify -->|red| human([comment: take over])
+    verify -->|green| push[publish: push as scadfmt-agent] --> review[human-review environment] -->|approved| ok
+```
+
+It needs, once:
+
+1. Repository secret `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token` (Claude Pro or Max). Renew it when it expires.
+2. Environment `scadfmt-review` (Settings → Environments) with you as required reviewer. Without it, `human-review` passes on its own.
+3. A GitHub App of its own for the agent, separate from the releases app, so each credential can be rotated or revoked alone. Only an app push starts CI on the agent's commit. Install it on this repo only, with one permission: Contents: Read & Write, and no webhook. Store it as the organisation secrets `KELLERLAB_AGENT_APP_ID` (the app's client ID) and `KELLERLAB_AGENT_SECRET_KEY` (its private key), shared with this repo.
+4. Org secret `DISCORD_USER_ID_KELLERVATER` with the maintainer's Discord user ID. A failed run then pings them in the CI channel through `DISCORD_CI_WEBHOOK_URL`, next to the PR comment. Without it, the message names `@kellervater` without a ping.
+
+### 🧪 E2E Probe
+
+The agent path only runs on a Renovate PR with a grammar change. To test it on any PR from this repo, add the `scadfmt-e2e` label. [`scadfmt-e2e.yml`](scadfmt-e2e.yml) then runs the whole flow in probe mode:
+
+- **Gate:** the current nightly against itself must skip. The current one against `PROBE_OLD_NIGHTLY` must start the agent.
+- **Adapt, verify, publish:** [`probe-break.sh`](../../cmd/scadfmt/nightly/probe-break.sh) first breaks scadfmt for Unicode identifiers, which OpenSCAD added after that nightly. The agent must fix it, or the probe fails.
+- **Push:** to a throwaway `scadfmt-e2e/<run id>` branch with the agent app, deleted right after. The PR's own branch stays untouched, and `human-review` is skipped.
+
+claude-code-action runs the agent with `.claude/` from `main`, so a PR cannot change the agent's instructions, and the probe always tests the skill on `main`. Each run is one real agent run. Re-add the label to run it again. When `probe-break.sh` fails because the tokenizer changed, point it and `PROBE_OLD_NIGHTLY` at a newer grammar change.
+
 ## 📚 References
 
 - [Camunda Infrastructure Actions](https://github.com/camunda/infra-global-github-actions/tree/main/teams/infra/pull-request)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [Release Please](https://github.com/googleapis/release-please)
+- [claude-code-action](https://github.com/anthropics/claude-code-action)

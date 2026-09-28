@@ -48,7 +48,7 @@ filterwarnings = ["error::EncodingWarning"]
 
 [tool.coverage.run]
 source = ["scadfmt"]
-omit = ["scadfmt/__main__.py"]
+omit = ["*/scadfmt/__main__.py"]
 branch = true
 
 [tool.coverage.report]

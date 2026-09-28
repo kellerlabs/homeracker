@@ -96,6 +96,24 @@ jobs:
       contents: write
       pull-requests: write
 
+  # Only Renovate's weekly OpenSCAD nightly PR from this repo, never a fork. Needs no path filter: it checks
+  # the grammar itself and stays cheap when nothing changed.
+  scadfmt-agent:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.pull_request.user.login == 'renovate[bot]'
+      && github.head_ref == 'renovate/openscad-nightly'
+    uses: ./.github/workflows/scadfmt-agent.yml
+    permissions:
+      contents: read
+      pull-requests: write
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      KELLERLAB_AGENT_APP_ID: ${{ secrets.KELLERLAB_AGENT_APP_ID }}
+      KELLERLAB_AGENT_SECRET_KEY: ${{ secrets.KELLERLAB_AGENT_SECRET_KEY }}
+      DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
+      DISCORD_USER_ID_KELLERVATER: ${{ secrets.DISCORD_USER_ID_KELLERVATER }}
+
   scadfmt-tests:
     needs: detect-changes
     if: needs.detect-changes.outputs.scadfmt-tests == 'true'
@@ -133,6 +151,7 @@ jobs:
       - integration-tests
       - mutation-tests
       - pre-commit
+      - scadfmt-agent
       - scadfmt-tests
       - test-setup-openscad
       - validate-models

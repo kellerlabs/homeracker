@@ -146,6 +146,10 @@ Installs the [Custom Local Formatters](https://marketplace.visualstudio.com/item
 
 For formatting on save, add `"editor.formatOnSave": true` to the `[scad]` block.
 
+### 🔄 Keeping Up with OpenSCAD
+
+HomeRacker pins OpenSCAD nightly. When a weekly nightly bump changes OpenSCAD's grammar, a Claude agent adapts scadfmt and its canary on the Renovate PR, and a maintainer approves the result. See [agent-adapts-scadfmt-to-openscad-nightly](../../docs/decisions/agent-adapts-scadfmt-to-openscad-nightly.md). To do the same by hand, follow the [`scadfmt-adapt`](../../.claude/skills/scadfmt-adapt/SKILL.md) skill.
+
 ### 🧪 Tests
 
 See [TESTING.md](../../TESTING.md#scadfmt-tests). `tests/canary/` holds a file using every OpenSCAD construct and its expected output; `check.sh` checks both against the pinned OpenSCAD. `tests/ast_check.sh` proves that formatting-only changes in a PR keep OpenSCAD's AST.
@@ -154,4 +158,5 @@ See [TESTING.md](../../TESTING.md#scadfmt-tests). `tests/canary/` holds a file u
 
 - [#177](https://github.com/kellerlabs/homeracker/issues/177): introduce an OpenSCAD formatter
 - [build-own-openscad-formatter-scadfmt](../../docs/decisions/build-own-openscad-formatter-scadfmt.md): why scadfmt exists and how it works
+- [agent-adapts-scadfmt-to-openscad-nightly](../../docs/decisions/agent-adapts-scadfmt-to-openscad-nightly.md): how scadfmt follows new OpenSCAD nightlies
 - [OpenSCAD language reference](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language)

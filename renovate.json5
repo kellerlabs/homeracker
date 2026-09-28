@@ -15,6 +15,9 @@
   "ignorePresets": [":all"],
   // Disable platform-native automerge, let Renovate handle merges directly
   "platformAutomerge": false,
+  // The scadfmt agent commits onto the OpenSCAD nightly PR. Ignoring its commits keeps that PR
+  // Renovate's own, so it still automerges once a person approves (see scadfmt-agent.yml).
+  "gitIgnoredAuthors": ["scadfmt-agent@users.noreply.github.com"],
   // Disable hourly PR limit (default from config:recommended is 2)
   "prHourlyLimit": 0,
   // A release must be public for five days before Renovate proposes it, so a compromised

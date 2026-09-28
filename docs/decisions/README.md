@@ -6,6 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [agent-adapts-scadfmt-to-openscad-nightly](agent-adapts-scadfmt-to-openscad-nightly.md) | 2026-09-28 | On the weekly OpenSCAD nightly PR, a Claude agent adapts scadfmt when the grammar changed; the workflow tests and pushes, a person approves |
 | [build-own-openscad-formatter-scadfmt](build-own-openscad-formatter-scadfmt.md) | 2026-09-27 | Own token-based formatter `scadfmt` in `cmd/scadfmt`: keeps line breaks, never changes tokens; linting later on `openscad-parser` |
 | [gate-prs-with-a-single-check-results-job](gate-prs-with-a-single-check-results-job.md) | 2026-09-27 | One `ci.yml` PR pipeline; `check-results` (plus `validate-title`) are the required checks, so path-filtered jobs are required when they run |
 | [e2e-test-site-and-configurator-with-playwright](e2e-test-site-and-configurator-with-playwright.md) | 2026-09-27 | Playwright E2E suite runs against the built site in `web.yml`; control and page inventories fail CI when a feature ships without a test |
