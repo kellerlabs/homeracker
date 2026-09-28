@@ -417,4 +417,6 @@ jobs:
     permissions: {}
     steps:
       - name: Approved
-        run: echo "A person approved the scadfmt agent's commit."
+        run: |
+          set -euo pipefail
+          echo "A person approved the scadfmt agent's commit."
