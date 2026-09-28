@@ -8,9 +8,9 @@ on:
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN:
         required: true
-      AGENT_APP_ID:
+      KELLERLAB_AGENT_APP_ID:
         required: true
-      AGENT_APP_PRIVATE_KEY:
+      KELLERLAB_AGENT_SECRET_KEY:
         required: true
 
 permissions: {}
@@ -266,8 +266,8 @@ jobs:
         if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          client-id: ${{ secrets.AGENT_APP_ID }}
-          private-key: ${{ secrets.AGENT_APP_PRIVATE_KEY }}
+          client-id: ${{ secrets.KELLERLAB_AGENT_APP_ID }}
+          private-key: ${{ secrets.KELLERLAB_AGENT_SECRET_KEY }}
           permission-contents: write
 
       # Comment first: the push starts a new CI run, which cancels this one. Git hooks stay off.
