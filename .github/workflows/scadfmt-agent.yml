@@ -172,8 +172,10 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          git add --intent-to-add --all
-          git diff --binary > "$ADAPT_DIR/agent.patch"
+          # Only cmd/scadfmt is the agent's. claude-code-action restores .claude from main and keeps the PR's
+          # copy in .claude-pr/, and neither belongs in the patch.
+          git add --intent-to-add -- cmd/scadfmt
+          git diff --binary -- cmd/scadfmt > "$ADAPT_DIR/agent.patch"
 
       - name: Upload the result
         if: always()

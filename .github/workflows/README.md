@@ -95,7 +95,7 @@ The agent path only runs on a Renovate PR with a grammar change. To test it on a
 - **Adapt, verify, publish:** [`probe-break.sh`](../../cmd/scadfmt/nightly/probe-break.sh) first breaks scadfmt for Unicode identifiers, which OpenSCAD added after that nightly. The agent must fix it, or the probe fails.
 - **Push:** to a throwaway `scadfmt-e2e/<run id>` branch with the agent app, deleted right after. The PR's own branch stays untouched, and `human-review` is skipped.
 
-Each run is one real agent run. Re-add the label to run it again. When `probe-break.sh` fails because the tokenizer changed, point it and `PROBE_OLD_NIGHTLY` at a newer grammar change.
+claude-code-action runs the agent with `.claude/` from `main`, so a PR cannot change the agent's instructions, and the probe always tests the skill on `main`. Each run is one real agent run. Re-add the label to run it again. When `probe-break.sh` fails because the tokenizer changed, point it and `PROBE_OLD_NIGHTLY` at a newer grammar change.
 
 ## 📚 References
 
