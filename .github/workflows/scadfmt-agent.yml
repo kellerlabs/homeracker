@@ -382,10 +382,15 @@ jobs:
           DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
           DISCORD_MAINTAINER_ID: ${{ secrets.DISCORD_USER_ID_KELLERVATER }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          VERIFY_RESULT: ${{ needs.verify.result }}
         run: |
           set -euo pipefail
           {
-            echo "The scadfmt agent could not adapt scadfmt to this OpenSCAD nightly, so nothing was pushed."
+            if [[ "$VERIFY_RESULT" == "success" && "$OUTCOME" == "changed" ]]; then
+              echo "The scadfmt agent adapted scadfmt and the tests passed, but publishing failed, so nothing was pushed."
+            else
+              echo "The scadfmt agent could not adapt scadfmt to this OpenSCAD nightly, so nothing was pushed."
+            fi
             echo
             echo "See the logs of [this run]($RUN_URL) and, if the agent ran, its result and the grammar diff in the run's \`scadfmt-adapt\` artifact. Take over locally with the \`scadfmt-adapt\` skill."
           } > "$RUNNER_TEMP/handover.md"
