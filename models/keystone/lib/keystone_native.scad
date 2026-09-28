@@ -138,13 +138,13 @@ module ks_label_plate_native(plate_width, body_depth, plate_height, body_chamfer
 
   _hw = plate_width / 2;
   _hh = plate_height / 2;
-  _env_half = (body_depth + hook_depth) / 2;       // envelope half-depth in Y
-  _body_cy = -_env_half + body_depth / 2;           // body centre Y (front block)
-  _body_back = _body_cy + body_depth / 2;           // body back face (= hook front)
+  _env_half = (body_depth + hook_depth) / 2;                      // envelope half-depth in Y
+  _body_cy = -_env_half + body_depth / 2;                         // body centre Y (front block)
+  _body_back = _body_cy + body_depth / 2;                         // body back face (= hook front)
   _slot_cx = (hook_spacing - hook_slot_width - spacing_sub) / 2;  // |X| of slot centre
   _slot_hw = hook_slot_width / 2;
-  _slot_cy = _body_back + hook_depth / 2;           // slot centre Y
-  _slot_back = _slot_cy + hook_depth / 2;           // slot back face (+Y)
+  _slot_cy = _body_back + hook_depth / 2;  // slot centre Y
+  _slot_back = _slot_cy + hook_depth / 2;  // slot back face (+Y)
 
   difference() {
     union() {
@@ -182,8 +182,8 @@ module _ks_label_plate_hook(slot_cx, slot_hw, half_h, slot_cy, slot_depth, slot_
   chamfer, tab_width, tab_depth, plate_height) {
 
   _eps = 0.01;
-  _slot_in = -slot_cx + slot_hw;   // slot inner (+X) face
-  _tab_back = slot_back - chamfer; // tab back face (fwd by chamfer from slot back)
+  _slot_in = -slot_cx + slot_hw;    // slot inner (+X) face
+  _tab_back = slot_back - chamfer;  // tab back face (fwd by chamfer from slot back)
   _tab_cy = _tab_back - tab_depth / 2;
   _tab_h = plate_height / 2;
 

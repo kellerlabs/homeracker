@@ -11,16 +11,16 @@ HR_YELLOW = "#f7b600";
 $fn = 100;
 
 pusher_length =
-    BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
+  BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
 pusher_side =
-    LOCKPIN_HOLE_SIDE_LENGTH - TOLERANCE;
+  LOCKPIN_HOLE_SIDE_LENGTH - TOLERANCE;
 
 grip_width =
-    BASE_UNIT/2;
+  BASE_UNIT / 2;
 grip_mid_width =
-    grip_width - BASE_STRENGTH;
+  grip_width - BASE_STRENGTH;
 grip_depth =
-    BASE_UNIT / 2;
+  BASE_UNIT / 2;
 
 /**
  * 📐 pinpusher module
@@ -31,29 +31,29 @@ grip_depth =
  */
 module pinpusher() {
   color(HR_YELLOW)
-  xrot(90)
-  prismoid(
-    size1 = [grip_width, grip_width],
-    size2 = [grip_mid_width, grip_mid_width],
-    h = grip_depth,
-    shift = [0, -BASE_STRENGTH/2],
-    chamfer = BASE_CHAMFER
-  )
-  attach(TOP, BOTTOM)
-  prismoid(
-    size1 = [grip_mid_width, grip_mid_width],
-    size2 = [grip_width, grip_width],
-    shift = [0, BASE_STRENGTH/2],
-    h = grip_depth,
-    chamfer = BASE_CHAMFER
-  )
-  align(TOP, FRONT)
-  cuboid(
-    [pusher_side, pusher_side, pusher_length],
-    chamfer = BASE_CHAMFER,
-    edges = [LEFT,RIGHT],
-    except = [BOTTOM,TOP]
-  );
+    xrot(90)
+      prismoid(
+        size1 = [grip_width, grip_width],
+        size2 = [grip_mid_width, grip_mid_width],
+        h = grip_depth,
+        shift = [0, -BASE_STRENGTH / 2],
+        chamfer = BASE_CHAMFER
+      )
+        attach(TOP, BOTTOM)
+          prismoid(
+            size1 = [grip_mid_width, grip_mid_width],
+            size2 = [grip_width, grip_width],
+            shift = [0, BASE_STRENGTH / 2],
+            h = grip_depth,
+            chamfer = BASE_CHAMFER
+          )
+            align(TOP, FRONT)
+              cuboid(
+                [pusher_side, pusher_side, pusher_length],
+                chamfer = BASE_CHAMFER,
+                edges = [LEFT, RIGHT],
+                except = [BOTTOM, TOP]
+              );
 }
 
 pinpusher();

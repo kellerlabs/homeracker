@@ -15,7 +15,7 @@ _h = _units * STD_UNIT_HEIGHT;
 _uw = get_rackpanel_usable_width(_pw);
 _ux = get_rackpanel_usable_x(_pw);
 
-rackpanel(panel_width=_pw, panel_height_units=_units)
+rackpanel(panel_width = _pw, panel_height_units = _units)
   align(BACK)
     right(_ux)
       color([0.85, 0.1, 0.6])

@@ -54,22 +54,22 @@ HR_FOOT_PRIMARY_COLOR = HR_YELLOW;
  *   foot(debug_colors=true);
  *   foot(disable_chamfer=true);
  */
-module foot(debug_colors=false, disable_chamfer=false,
-  anchor=CENTER, spin=0, orient=UP) {
+module foot(debug_colors = false, disable_chamfer = false,
+  anchor = CENTER, spin = 0, orient = UP) {
 
-  attachable_side_length = BASE_UNIT + BASE_STRENGTH*2 + TOLERANCE;
-  spacer_height = TOLERANCE/2;
+  attachable_side_length = BASE_UNIT + BASE_STRENGTH * 2 + TOLERANCE;
+  spacer_height = TOLERANCE / 2;
   spacer_inset_addition = BASE_CHAMFER;
   attachable_height = BASE_UNIT + spacer_height + BASE_STRENGTH;
 
-  attachable(anchor=anchor, spin=spin, orient=orient, size=[attachable_side_length, attachable_side_length, attachable_height]) {
-    up(BASE_STRENGTH/2+spacer_height/2)
-    color_this(debug_colors ? HR_YELLOW : HR_FOOT_PRIMARY_COLOR)
-    support(units=1, x_holes=true, debug_colors=debug_colors, disable_chamfer=disable_chamfer, orient=FRONT){
-      attach(FRONT,TOP,shiftout=spacer_height,inside=true) color_this(debug_colors ? HR_BLUE : HR_FOOT_PRIMARY_COLOR) cuboid([BASE_UNIT, BASE_UNIT, spacer_height+spacer_inset_addition], chamfer=disable_chamfer ? 0 : BASE_CHAMFER,except=[TOP,BOTTOM]){
-        attach(TOP,TOP) color_this(debug_colors ? HR_GREEN : HR_FOOT_PRIMARY_COLOR) cuboid([attachable_side_length, attachable_side_length, BASE_STRENGTH], chamfer=disable_chamfer ? 0 : BASE_CHAMFER, except=TOP);
-      }
-    }
+  attachable(anchor = anchor, spin = spin, orient = orient, size = [attachable_side_length, attachable_side_length, attachable_height]) {
+    up(BASE_STRENGTH / 2 + spacer_height / 2)
+      color_this(debug_colors ? HR_YELLOW : HR_FOOT_PRIMARY_COLOR)
+        support(units = 1, x_holes = true, debug_colors = debug_colors, disable_chamfer = disable_chamfer, orient = FRONT) {
+          attach(FRONT, TOP, shiftout = spacer_height, inside = true) color_this(debug_colors ? HR_BLUE : HR_FOOT_PRIMARY_COLOR) cuboid([BASE_UNIT, BASE_UNIT, spacer_height + spacer_inset_addition], chamfer = disable_chamfer ? 0 : BASE_CHAMFER, except = [TOP, BOTTOM]) {
+            attach(TOP, TOP) color_this(debug_colors ? HR_GREEN : HR_FOOT_PRIMARY_COLOR) cuboid([attachable_side_length, attachable_side_length, BASE_STRENGTH], chamfer = disable_chamfer ? 0 : BASE_CHAMFER, except = TOP);
+          }
+        }
     children();
   }
 

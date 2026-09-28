@@ -17,7 +17,7 @@ _pw = STD_WIDTH_10INCH;
 _units = 1;
 
 diff("keystone")
-rackpanel(panel_width=_pw, panel_height_units=_units, panel_depth=4, brace_enabled=true)
-  align(FRONT, inside=true)
-    right(get_rackpanel_usable_x(_pw))
-      keystone_full(panel_depth=get_ks_depth_outer(), debug_colors=true);
+  rackpanel(panel_width = _pw, panel_height_units = _units, panel_depth = 4, brace_enabled = true)
+    align(FRONT, inside = true)
+      right(get_rackpanel_usable_x(_pw))
+        keystone_full(panel_depth = get_ks_depth_outer(), debug_colors = true);

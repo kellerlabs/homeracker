@@ -2,9 +2,9 @@ include <BOSL2/std.scad>
 
 /* [Parameters] */
 // x dimensions (in multiples of 42mm)
-grid_x = 1; // [1:1:10]
+grid_x = 1;  // [1:1:10]
 // y dimensions (in multiples of 42mm)
-grid_y = 2; // [1:1:10]
+grid_y = 2;  // [1:1:10]
 
 /* [Hidden] */
 // --- from constants.scad ---
@@ -31,27 +31,27 @@ $fa = $preview ? 6 : 2;
 // The Makerworld PMM cannot handle that well (only up to 6x6 which might be too little for some folks).
 // $fn = $preview ? 32 : 100;  // Fixed segments (less adaptive and friggin performance heavy)
 module baseplate_cutout() {
-  prismoid(BP_BOTTOM_LIP_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, rounding1=BP_BOTTOM_LIP_ROUNDING, rounding2=BP_MID_PART_ROUNDING, h=BP_BOTTOM_LIP_HEIGHT)
-    attach(TOP,BOTTOM) cuboid([BP_MID_PART_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, BP_MID_PART_HEIGHT], rounding=BP_MID_PART_ROUNDING, except=[BOTTOM,TOP])
-    attach(TOP,BOTTOM) prismoid(BP_MID_PART_SIDE_LENGTH, BP_TOP_PART_SIDE_LENGTH, rounding1=BP_MID_PART_ROUNDING, rounding2=BP_TOP_PART_ROUNDING, h=BP_TOP_PART_HEIGHT);
+  prismoid(BP_BOTTOM_LIP_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, rounding1 = BP_BOTTOM_LIP_ROUNDING, rounding2 = BP_MID_PART_ROUNDING, h = BP_BOTTOM_LIP_HEIGHT)
+    attach(TOP, BOTTOM) cuboid([BP_MID_PART_SIDE_LENGTH, BP_MID_PART_SIDE_LENGTH, BP_MID_PART_HEIGHT], rounding = BP_MID_PART_ROUNDING, except = [BOTTOM, TOP])
+      attach(TOP, BOTTOM) prismoid(BP_MID_PART_SIDE_LENGTH, BP_TOP_PART_SIDE_LENGTH, rounding1 = BP_MID_PART_ROUNDING, rounding2 = BP_TOP_PART_ROUNDING, h = BP_TOP_PART_HEIGHT);
 }
-module baseplate(units_x=1, units_y=1) {
+module baseplate(units_x = 1, units_y = 1) {
   assert(is_int(units_x), "units_x must be an integer");
   assert(is_int(units_y), "units_y must be an integer");
   assert(units_x >= 1, "units_x must be at least 1");
   assert(units_y >= 1, "units_y must be at least 1");
 
-  BASEPLATE_HEIGHT = BP_BOTTOM_LIP_HEIGHT+BP_MID_PART_HEIGHT+BP_TOP_PART_HEIGHT-PRINTING_LAYER_HEIGHT*3;
-  baseplate_dimensions = [BP_TOP_PART_SIDE_LENGTH*units_x, BP_TOP_PART_SIDE_LENGTH*units_y, BASEPLATE_HEIGHT];
+  BASEPLATE_HEIGHT = BP_BOTTOM_LIP_HEIGHT + BP_MID_PART_HEIGHT + BP_TOP_PART_HEIGHT - PRINTING_LAYER_HEIGHT * 3;
+  baseplate_dimensions = [BP_TOP_PART_SIDE_LENGTH * units_x, BP_TOP_PART_SIDE_LENGTH * units_y, BASEPLATE_HEIGHT];
 
   difference() {
 
-    cuboid(baseplate_dimensions, rounding=BP_TOP_PART_ROUNDING, except=[TOP,BOTTOM], anchor=BOTTOM);
+    cuboid(baseplate_dimensions, rounding = BP_TOP_PART_ROUNDING, except = [TOP, BOTTOM], anchor = BOTTOM);
 
-    grid_copies(n=[units_x, units_y], spacing=BP_TOP_PART_SIDE_LENGTH)
+    grid_copies(n = [units_x, units_y], spacing = BP_TOP_PART_SIDE_LENGTH)
       baseplate_cutout();
   }
 }
 
 color(HR_YELLOW)
-baseplate(grid_x, grid_y);
+  baseplate(grid_x, grid_y);

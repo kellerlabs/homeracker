@@ -8,19 +8,19 @@ include <../main.scad>
 /* [Parameters] */
 
 // Type of grip for the lock pin
-grip_type = 0; // [0:Standard, 1:Extended, 2:No Grip]
+grip_type = 0;  // [0:Standard, 1:Extended, 2:No Grip]
 
 // Neck extension mode
-neck_extension = 0; // [0:None, 1:Neck Side, 2:Both Sides, 3:Tail Side]
+neck_extension = 0;  // [0:None, 1:Neck Side, 2:Both Sides, 3:Tail Side]
 
 // Strength of the tension hole (affects how much material is removed for the hole, which in turn affects the flexibility and strength of the lock pin)
-strength = 0; // [0:Regular, 1:Slim]
+strength = 0;  // [0:Regular, 1:Slim]
 
 /* [Debug Parameters] */
 // Show distinct colors per section for easier debugging
-debug_colors = false; // [false,true]
+debug_colors = false;  // [false,true]
 // Enable chamfering on the insertion ends
-chamfer_enabled = true; // [false,true]
+chamfer_enabled = true;  // [false,true]
 
 /* [Hidden] */
 $fn = 100;
@@ -43,4 +43,4 @@ tension_hole_strength_multiplier = strength == 0 ? HR_CORE_LOCKPIN_TENSION_HOLE_
   strength == 1 ? HR_CORE_LOCKPIN_TENSION_HOLE_STRENGTH_SLIM :
   die(str("Invalid strength value: ", strength));
 
-lockpin(grip_type=grip_type, neck_extension=neck_extension, strength=tension_hole_strength_multiplier, chamfer_enabled=chamfer_enabled, debug_colors=debug_colors);
+lockpin(grip_type = grip_type, neck_extension = neck_extension, strength = tension_hole_strength_multiplier, chamfer_enabled = chamfer_enabled, debug_colors = debug_colors);

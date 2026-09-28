@@ -56,25 +56,25 @@ include <../../sleeve/lib/sleeve.scad>
 
 HR_RL_PRIMARY_COLOR = HR_YELLOW;
 
-module cover_plate(length, distance, debug_colors=false, disable_chamfer=false, anchor=CENTER, orient=UP, spin=0) {
+module cover_plate(length, distance, debug_colors = false, disable_chamfer = false, anchor = CENTER, orient = UP, spin = 0) {
   assert(length > 0, "Length must be greater than 0");
   assert(distance > 0, "Distance must be greater than 0");
 
-  attachable_width = distance*BASE_UNIT - BASE_STRENGTH*2 - TOLERANCE; // width of the cover plate, determined by the input distance in HomeRacker units, minus the horizontal offset of the sleeves on both sides to ensure the cover plate fits between the sleeves
+  attachable_width = distance * BASE_UNIT - BASE_STRENGTH * 2 - TOLERANCE;  // width of the cover plate, determined by the input distance in HomeRacker units, minus the horizontal offset of the sleeves on both sides to ensure the cover plate fits between the sleeves
   assert(attachable_width > 0, "Distance too small: cover_plate width becomes non-positive. Increase distance.");
-  assert(attachable_width > BASE_STRENGTH*2, "Distance too small: cover_plate inner width becomes non-positive. Increase distance.");
-  attachable_depth = BASE_STRENGTH*2;
-  attachable_height = length * BASE_UNIT + BASE_UNIT*3; // 1.5 HomeRacker units extension on top and bottom to cover half of the adjoining connector, determined by the input length in HomeRacker units
+  assert(attachable_width > BASE_STRENGTH * 2, "Distance too small: cover_plate inner width becomes non-positive. Increase distance.");
+  attachable_depth = BASE_STRENGTH * 2;
+  attachable_height = length * BASE_UNIT + BASE_UNIT * 3;  // 1.5 HomeRacker units extension on top and bottom to cover half of the adjoining connector, determined by the input length in HomeRacker units
   tag_scope("cover_plate")
-  attachable(anchor=anchor, orient=orient, spin=spin, size=[attachable_width, attachable_depth, attachable_height]){
-    color_this(debug_colors ? HR_BLUE : HR_RL_PRIMARY_COLOR)
-    diff()
-    cuboid([attachable_width, attachable_depth, attachable_height], chamfer=disable_chamfer ? 0 : BASE_CHAMFER){
-      align(BACK, inside=true) tag("remove") color_this(debug_colors ? HR_WHITE : HR_RL_PRIMARY_COLOR)
-        cuboid([attachable_width-BASE_STRENGTH*2, attachable_depth-BASE_STRENGTH, attachable_height-BASE_STRENGTH*2]);
+    attachable(anchor = anchor, orient = orient, spin = spin, size = [attachable_width, attachable_depth, attachable_height]) {
+      color_this(debug_colors ? HR_BLUE : HR_RL_PRIMARY_COLOR)
+        diff()
+          cuboid([attachable_width, attachable_depth, attachable_height], chamfer = disable_chamfer ? 0 : BASE_CHAMFER) {
+            align(BACK, inside = true) tag("remove") color_this(debug_colors ? HR_WHITE : HR_RL_PRIMARY_COLOR)
+              cuboid([attachable_width - BASE_STRENGTH * 2, attachable_depth - BASE_STRENGTH, attachable_height - BASE_STRENGTH * 2]);
+          }
+      children();
     }
-    children();
-  }
 }
 
 /**
@@ -101,8 +101,8 @@ function get_sleeve_start_offset(start, end, total_length) =
 function get_sleeve_length_units(start, end, total_length) =
   (start >= total_length) ? total_length : (start >= end ? total_length : (end > total_length ? (total_length - start) : (end - start)));
 
-module racklink(height, distance, left_start=0, left_end=0, right_start=0, right_end=0,
-  debug_colors=false, disable_chamfer=false) {
+module racklink(height, distance, left_start = 0, left_end = 0, right_start = 0, right_end = 0,
+  debug_colors = false, disable_chamfer = false) {
   assert(height > 0, "Height must be greater than 0");
   assert(distance > 0, "Distance must be greater than 0");
   assert(left_end >= 0, "left_end must not be negative");
@@ -112,18 +112,18 @@ module racklink(height, distance, left_start=0, left_end=0, right_start=0, right
   if (left_start > 0 && left_start >= left_end) echo("WARNING: left_start >= left_end, ignoring custom range — using full coverage for left sleeve.");
   if (right_start > 0 && right_start >= right_end) echo("WARNING: right_start >= right_end, ignoring custom range — using full coverage for right sleeve.");
 
-  default_offset = BASE_UNIT*1.5 + TOLERANCE/2; // default offset for the cover plate to extend beyond the sleeves
+  default_offset = BASE_UNIT * 1.5 + TOLERANCE / 2;  // default offset for the cover plate to extend beyond the sleeves
 
-  start_left = get_sleeve_start_offset(left_start, left_end, height) + default_offset; // calculate the start offset for the left sleeve, adding the default offset for the cover plate
-  start_right = get_sleeve_start_offset(right_start, right_end, height) + default_offset; // calculate the start offset for the right sleeve, adding the default offset for the cover plate
-  length_left = get_sleeve_length_units(left_start, left_end, height); // calculate the length of the left sleeve based on the start and end positions
-  length_right = get_sleeve_length_units(right_start, right_end, height); // calculate the length of the right sleeve based on the start and end positions
+  start_left = get_sleeve_start_offset(left_start, left_end, height) + default_offset;     // calculate the start offset for the left sleeve, adding the default offset for the cover plate
+  start_right = get_sleeve_start_offset(right_start, right_end, height) + default_offset;  // calculate the start offset for the right sleeve, adding the default offset for the cover plate
+  length_left = get_sleeve_length_units(left_start, left_end, height);                     // calculate the length of the left sleeve based on the start and end positions
+  length_right = get_sleeve_length_units(right_start, right_end, height);                  // calculate the length of the right sleeve based on the start and end positions
 
-  horizontal_offset = SLEEVE_WIDTH; // horizontal offset to position the sleeves on the left and right side of the racklink, ensuring they wrap around the vertical supports of the rack columns
+  horizontal_offset = SLEEVE_WIDTH;  // horizontal offset to position the sleeves on the left and right side of the racklink, ensuring they wrap around the vertical supports of the rack columns
 
-  cover_plate(length = height, distance = distance, debug_colors=debug_colors, disable_chamfer=disable_chamfer) {
-    up(start_left) left(horizontal_offset) align(FRONT,LEFT+BOTTOM,inside=true) sleeve(length = length_left, color=HR_RL_PRIMARY_COLOR, debug_colors=debug_colors, disable_chamfer=disable_chamfer);
-    up(start_right) right(horizontal_offset) align(FRONT,RIGHT+BOTTOM,inside=true) sleeve(length = length_right, color=HR_RL_PRIMARY_COLOR, debug_colors=debug_colors, disable_chamfer=disable_chamfer);
+  cover_plate(length = height, distance = distance, debug_colors = debug_colors, disable_chamfer = disable_chamfer) {
+    up(start_left) left(horizontal_offset) align(FRONT, LEFT + BOTTOM, inside = true) sleeve(length = length_left, color = HR_RL_PRIMARY_COLOR, debug_colors = debug_colors, disable_chamfer = disable_chamfer);
+    up(start_right) right(horizontal_offset) align(FRONT, RIGHT + BOTTOM, inside = true) sleeve(length = length_right, color = HR_RL_PRIMARY_COLOR, debug_colors = debug_colors, disable_chamfer = disable_chamfer);
   }
 
 }

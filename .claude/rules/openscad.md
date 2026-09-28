@@ -25,7 +25,7 @@ paths: ["**/*.scad"]
 
 ## Formatting
 
-- Format with `scadfmt format <file>` ([cmd/scadfmt/README.md](../../cmd/scadfmt/README.md)); don't hand-format against it. Use `// fmt: off` / `// fmt: on` only for hand-aligned tables.
+- The `scadfmt` pre-commit hook formats every `.scad` file except generated `flattened/` output and the deliberately unformatted canary input `cmd/scadfmt/tests/canary/canary.scad`. Run `scadfmt format <file>` before committing ([cmd/scadfmt/README.md](../../cmd/scadfmt/README.md)); don't hand-format against it. Use `// fmt: off` / `// fmt: on` only for hand-aligned tables.
 
 ## Quality Settings
 

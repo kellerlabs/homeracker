@@ -3,14 +3,14 @@ include <BOSL2/std.scad>
 /* [Parameters] */
 
 // The length (Y-axis) of the support in base units.
-units = 3; // [1:1:50]
+units = 3;  // [1:1:50]
 
 // Add x holes
 x_holes = false;
 
 /* [Debug Parameters] */
-debug_colors = false; // If true, uses bright colors to visualize different features (e.g. holes, main body) for testing purposes.
-disable_chamfer = false; // If true, disables chamfered edges for debugging and testing.
+debug_colors = false;     // If true, uses bright colors to visualize different features (e.g. holes, main body) for testing purposes.
+disable_chamfer = false;  // If true, disables chamfered edges for debugging and testing.
 
 /* [Hidden] */
 // --- from constants.scad ---
@@ -38,64 +38,64 @@ $fn = 100;
 // support(units=5, x_holes=false);
 
 // Example 3: Create a support with units and x_holes as set above
-module support(units=3, x_holes=false,
-    debug_colors=false, disable_chamfer=false,
-    anchor=CENTER, spin=0, orient=UP) {
+module support(units = 3, x_holes = false,
+  debug_colors = false, disable_chamfer = false,
+  anchor = CENTER, spin = 0, orient = UP) {
 
-    support_dimensions = [BASE_UNIT, BASE_UNIT*units, BASE_UNIT];
-    attachable(anchor=anchor, spin=spin, orient=orient, size=support_dimensions) {
-        difference() {
+  support_dimensions = [BASE_UNIT, BASE_UNIT * units, BASE_UNIT];
+  attachable(anchor = anchor, spin = spin, orient = orient, size = support_dimensions) {
+    difference() {
 
-            color(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_PRIMARY_COLOR)
-            cuboid(support_dimensions, chamfer=disable_chamfer ? 0 : BASE_CHAMFER);
+      color(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_PRIMARY_COLOR)
+        cuboid(support_dimensions, chamfer = disable_chamfer ? 0 : BASE_CHAMFER);
 
-            ycopies(spacing=BASE_UNIT, n=units) {
+      ycopies(spacing = BASE_UNIT, n = units) {
 
-                color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) lockpin_hole_support();
-            }
-            if (x_holes) {
-                ycopies(spacing=BASE_UNIT, n=units) {
+        color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) lockpin_hole_support();
+      }
+      if (x_holes) {
+        ycopies(spacing = BASE_UNIT, n = units) {
 
-                    color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) rotate([0,90,0]) lockpin_hole_support();
-                }
-            }
+          color(debug_colors ? HR_RED : HR_CORE_SUPPORT_PRIMARY_COLOR) rotate([0, 90, 0]) lockpin_hole_support();
         }
-        children();
+      }
     }
+    children();
+  }
 }
 module lockpin_hole_support(
-  disable_chamfer=false, debug_colors=false) {
-  lock_pin_center_side = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH*2;
+  disable_chamfer = false, debug_colors = false) {
+  lock_pin_center_side = LOCKPIN_HOLE_SIDE_LENGTH + PRINTING_LAYER_WIDTH * 2;
   lock_pin_center_dimension = [lock_pin_center_side, lock_pin_center_side];
 
-  lock_pin_outer_side = LOCKPIN_HOLE_SIDE_LENGTH + (disable_chamfer ? 0 : LOCKPIN_HOLE_CHAMFER*2);
+  lock_pin_outer_side = LOCKPIN_HOLE_SIDE_LENGTH + (disable_chamfer ? 0 : LOCKPIN_HOLE_CHAMFER * 2);
   lock_pin_outer_dimension = [lock_pin_outer_side, lock_pin_outer_side];
 
-  lock_pin_prismoid_inner_length = BASE_UNIT/2 - LOCKPIN_HOLE_CHAMFER;
+  lock_pin_prismoid_inner_length = BASE_UNIT / 2 - LOCKPIN_HOLE_CHAMFER;
   lock_pin_prismoid_outer_length = LOCKPIN_HOLE_CHAMFER;
 
   attachable_side_length = disable_chamfer ? lock_pin_center_side : lock_pin_outer_side;
   attachable_height_half = lock_pin_prismoid_inner_length + lock_pin_prismoid_outer_length;
 
-  module hole_half(anchor=CENTER, spin=0, orient=UP) {
-    attachable(anchor=anchor, spin=spin, orient=orient, size=[attachable_side_length, attachable_side_length, attachable_height_half]) {
-      down(attachable_height_half/2)
-      color_this(debug_colors ? HR_GREEN : HR_CORE_SUPPORT_SECONDARY_COLOR)
-      prismoid(size1=lock_pin_center_dimension, size2=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, h=lock_pin_prismoid_inner_length){
-        attach(TOP,BOTTOM) color_this(debug_colors ? HR_RED : HR_CORE_SUPPORT_SECONDARY_COLOR)
-        prismoid(size1=LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, size2=lock_pin_outer_dimension, h=lock_pin_prismoid_outer_length);
-      }
+  module hole_half(anchor = CENTER, spin = 0, orient = UP) {
+    attachable(anchor = anchor, spin = spin, orient = orient, size = [attachable_side_length, attachable_side_length, attachable_height_half]) {
+      down(attachable_height_half / 2)
+        color_this(debug_colors ? HR_GREEN : HR_CORE_SUPPORT_SECONDARY_COLOR)
+          prismoid(size1 = lock_pin_center_dimension, size2 = LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, h = lock_pin_prismoid_inner_length) {
+            attach(TOP, BOTTOM) color_this(debug_colors ? HR_RED : HR_CORE_SUPPORT_SECONDARY_COLOR)
+              prismoid(size1 = LOCKPIN_HOLE_SIDE_LENGTH_DIMENSION, size2 = lock_pin_outer_dimension, h = lock_pin_prismoid_outer_length);
+          }
       children();
     }
   }
 
-  attachable(anchor=CENTER, spin=0, orient=UP, size=[attachable_side_length, attachable_side_length, attachable_height_half*2]) {
-    up(attachable_height_half/2)
-    hole_half() {
-      attach(BOTTOM,BOTTOM) hole_half();
-    }
+  attachable(anchor = CENTER, spin = 0, orient = UP, size = [attachable_side_length, attachable_side_length, attachable_height_half * 2]) {
+    up(attachable_height_half / 2)
+      hole_half() {
+        attach(BOTTOM, BOTTOM) hole_half();
+      }
     children();
   }
 }
 
-support(units=units, x_holes=x_holes, debug_colors=debug_colors, disable_chamfer=disable_chamfer);
+support(units = units, x_holes = x_holes, debug_colors = debug_colors, disable_chamfer = disable_chamfer);

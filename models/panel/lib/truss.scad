@@ -63,8 +63,8 @@ include <../../core/lib/constants.scad>
  * rib             rib wall thickness
  * chamfer_enabled break the outer perimeter's back edge
  */
-module truss_grid(size, rows=2, rib=BASE_STRENGTH, chamfer_enabled=true,
-  debug_colors=false, anchor=CENTER, spin=0, orient=UP) {
+module truss_grid(size, rows = 2, rib = BASE_STRENGTH, chamfer_enabled = true,
+  debug_colors = false, anchor = CENTER, spin = 0, orient = UP) {
 
   assert(is_list(size) && len(size) == 3, "size must be a [width, depth, height] vector");
   assert(is_num(rows) && rows >= 1, "rows must be >= 1");
@@ -84,36 +84,36 @@ module truss_grid(size, rows=2, rib=BASE_STRENGTH, chamfer_enabled=true,
   // Square lattice (no per-piece chamfers). Attachable to its own bounding box so the
   // chamfer pass below can place edge masks on its back perimeter.
   module _lattice() {
-    attachable(size=size) {
+    attachable(size = size) {
       union() {
         // perimeter frame — left/right posts run full height (own the corners),
         // top/bottom chords span between them
-        for (x = [-(W-rib)/2, (W-rib)/2])
+        for (x = [-(W - rib) / 2, (W - rib) / 2])
           translate([x, 0, 0]) cuboid([rib, D, H]);
-        chord_w = W - 2*rib;
+        chord_w = W - 2 * rib;
         if (chord_w > 0)
-          for (z = [(H-rib)/2, -(H-rib)/2])
+          for (z = [(H - rib) / 2, -(H - rib) / 2])
             translate([0, 0, z]) cuboid([chord_w, D, rib]);
 
         // interior horizontal band dividers
         if (R > 1)
-          for (i = [1 : R-1]) translate([0, 0, -H/2 + i*row_h]) cuboid([W, D, rib]);
+          for (i = [1:R - 1]) translate([0, 0, -H / 2 + i * row_h]) cuboid([W, D, rib]);
 
         // interior vertical column dividers
         if (C > 1)
-          for (j = [1 : C-1]) translate([-W/2 + j*col_w, 0, 0]) cuboid([rib, D, H]);
+          for (j = [1:C - 1]) translate([-W / 2 + j * col_w, 0, 0]) cuboid([rib, D, H]);
 
         // one diagonal per cell, direction alternating in a checkerboard → balanced shear
         ang = atan2(row_h, col_w);
         diag_len = norm([col_w, row_h]) + rib;
-        for (i = [0 : R-1])
-          for (j = [0 : C-1]) {
-            cx = -W/2 + (j + 0.5) * col_w;
-            cz = -H/2 + (i + 0.5) * row_h;
+        for (i = [0:R - 1])
+          for (j = [0:C - 1]) {
+            cx = -W / 2 + (j + 0.5) * col_w;
+            cz = -H / 2 + (i + 0.5) * row_h;
             dir = (((i + j) % 2) == 0) ? 1 : -1;
             translate([cx, 0, cz])
               intersection() {
-                cuboid([col_w, D + 2*HR_EPSILON, row_h]);
+                cuboid([col_w, D + 2 * HR_EPSILON, row_h]);
                 yrot(dir * ang) cuboid([diag_len, D, rib]);
               }
           }
@@ -128,16 +128,16 @@ module truss_grid(size, rows=2, rib=BASE_STRENGTH, chamfer_enabled=true,
     if (chamfer_enabled)
       diff()
         _lattice() {
-          edge_mask([BACK+TOP, BACK+BOTTOM])
-            chamfer_edge_mask(l=W + 2*ch, chamfer=ch);
-          edge_mask([BACK+LEFT, BACK+RIGHT])
-            chamfer_edge_mask(l=H + 2*ch, chamfer=ch);
+          edge_mask([BACK + TOP, BACK + BOTTOM])
+            chamfer_edge_mask(l = W + 2 * ch, chamfer = ch);
+          edge_mask([BACK + LEFT, BACK + RIGHT])
+            chamfer_edge_mask(l = H + 2 * ch, chamfer = ch);
         }
     else
       _lattice();
   }
 
-  attachable(anchor, spin, orient, size=size) {
+  attachable(anchor, spin, orient, size = size) {
     if (debug_colors) color(HR_GREEN) _body();
     else _body();
     children();

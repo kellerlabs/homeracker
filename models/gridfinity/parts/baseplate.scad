@@ -7,9 +7,9 @@ include <../lib/baseplate.scad>
 
 /* [Parameters] */
 // x dimensions (in multiples of 42mm)
-grid_x = 1; // [1:1:10]
+grid_x = 1;  // [1:1:10]
 // y dimensions (in multiples of 42mm)
-grid_y = 2; // [1:1:10]
+grid_y = 2;  // [1:1:10]
 
 /* [Hidden] */
 // Optimized for 0.4mm nozzle 3D printing (allegedly according to Sonnet 4.5's research)
@@ -23,4 +23,4 @@ $fa = $preview ? 6 : 2;
 // $fn = $preview ? 32 : 100;  // Fixed segments (less adaptive and friggin performance heavy)
 
 color(HR_YELLOW)
-baseplate(grid_x, grid_y);
+  baseplate(grid_x, grid_y);

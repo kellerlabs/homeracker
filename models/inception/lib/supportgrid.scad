@@ -44,21 +44,21 @@ HR_SG_MOUNTING_AXIS_BOTH = 3;
  * @param debug_colors Enable color-coding for visual debugging
  * @param disable_chamfer Disable chamfers for easier measurement
  */
-module mount_ear(grid_depth, debug_colors=false, anchor=CENTER, spin=0, orient=UP, disable_chamfer=false) {
+module mount_ear(grid_depth, debug_colors = false, anchor = CENTER, spin = 0, orient = UP, disable_chamfer = false) {
 
   attachable_width = BASE_UNIT;
   attachable_height = BASE_UNIT + BASE_STRENGTH;
   attachable_depth = grid_depth * BASE_UNIT;
-  attachable(anchor=anchor, spin=spin, orient=orient, size=[attachable_width, attachable_depth, attachable_height]){
-    down(BASE_UNIT/2)
-    color(debug_colors ? HR_WHITE : HR_SG_PRIMARY_COLOR)
-    diff()
-    cuboid([attachable_width, attachable_depth, BASE_STRENGTH], chamfer=disable_chamfer ? 0 : BASE_CHAMFER, edges=BOTTOM, except=RIGHT){
-      attach(TOP, BOTTOM) cuboid([attachable_width, attachable_depth, BASE_UNIT],chamfer=BASE_UNIT,edges=TOP+LEFT){
-        align(CENTER) tag("remove") cuboid([attachable_width, attachable_depth - 2*BASE_STRENGTH, BASE_UNIT]);
-      }
-      align(CENTER) tag("remove") lockpin_hole(depth=BASE_STRENGTH, chamfer_top=!disable_chamfer, chamfer_bottom=false);
-    }
+  attachable(anchor = anchor, spin = spin, orient = orient, size = [attachable_width, attachable_depth, attachable_height]) {
+    down(BASE_UNIT / 2)
+      color(debug_colors ? HR_WHITE : HR_SG_PRIMARY_COLOR)
+        diff()
+          cuboid([attachable_width, attachable_depth, BASE_STRENGTH], chamfer = disable_chamfer ? 0 : BASE_CHAMFER, edges = BOTTOM, except = RIGHT) {
+            attach(TOP, BOTTOM) cuboid([attachable_width, attachable_depth, BASE_UNIT], chamfer = BASE_UNIT, edges = TOP + LEFT) {
+              align(CENTER) tag("remove") cuboid([attachable_width, attachable_depth - 2 * BASE_STRENGTH, BASE_UNIT]);
+            }
+            align(CENTER) tag("remove") lockpin_hole(depth = BASE_STRENGTH, chamfer_top = !disable_chamfer, chamfer_bottom = false);
+          }
     children();
   }
 }
@@ -78,24 +78,24 @@ module mount_ear(grid_depth, debug_colors=false, anchor=CENTER, spin=0, orient=U
  * @param disable_chamfer Disable chamfers for easier measurement
  */
 module supportgrid_frame(frame_x, frame_y, grid_x, grid_y, height, end_piece,
-  mounting_axis=HR_SG_MOUNTING_AXIS_VERTICAL,
-  debug_colors=false, anchor=CENTER, spin=0, orient=UP, disable_chamfer=false) {
+  mounting_axis = HR_SG_MOUNTING_AXIS_VERTICAL,
+  debug_colors = false, anchor = CENTER, spin = 0, orient = UP, disable_chamfer = false) {
 
-  chamfer_subract = (BASE_UNIT+BASE_STRENGTH) * 2;
+  chamfer_subract = (BASE_UNIT + BASE_STRENGTH) * 2;
   chamfer_subtract_horizontal = mounting_axis != HR_SG_MOUNTING_AXIS_VERTICAL ? chamfer_subract : 0;
   chamfer_subtract_vertical = mounting_axis != HR_SG_MOUNTING_AXIS_HORIZONTAL ? chamfer_subract : 0;
   chamfer_color = debug_colors ? HR_RED : HR_SG_PRIMARY_COLOR;
   chamfer_strength = disable_chamfer ? 0 : BASE_CHAMFER;
 
-  attachable(anchor=anchor, spin=spin, orient=orient, size=[frame_x, frame_y, height]){
+  attachable(anchor = anchor, spin = spin, orient = orient, size = [frame_x, frame_y, height]) {
     color_this(debug_colors ? HR_BLUE : HR_SG_PRIMARY_COLOR)
-    diff()
-    cuboid([frame_x, frame_y, height]){
-      tag("remove") cuboid([grid_x, grid_y, height + HR_SB_EPSILON]);
-      if(end_piece) tag("keep") color_this(debug_colors ? HR_YELLOW : HR_SG_PRIMARY_COLOR) align(BOTTOM,inside=true) cuboid([grid_x, grid_y, BASE_STRENGTH/2]);
-      color_this(chamfer_color) edge_mask([FRONT,BACK],except=[LEFT,RIGHT]) chamfer_edge_mask(l=frame_x - chamfer_subtract_horizontal, chamfer=chamfer_strength);
-      color_this(chamfer_color) edge_mask([LEFT,RIGHT],except=[FRONT,BACK]) chamfer_edge_mask(l=frame_y - chamfer_subtract_vertical, chamfer=chamfer_strength);
-    }
+      diff()
+        cuboid([frame_x, frame_y, height]) {
+          tag("remove") cuboid([grid_x, grid_y, height + HR_SB_EPSILON]);
+          if (end_piece) tag("keep") color_this(debug_colors ? HR_YELLOW : HR_SG_PRIMARY_COLOR) align(BOTTOM, inside = true) cuboid([grid_x, grid_y, BASE_STRENGTH / 2]);
+          color_this(chamfer_color) edge_mask([FRONT, BACK], except = [LEFT, RIGHT]) chamfer_edge_mask(l = frame_x - chamfer_subtract_horizontal, chamfer = chamfer_strength);
+          color_this(chamfer_color) edge_mask([LEFT, RIGHT], except = [FRONT, BACK]) chamfer_edge_mask(l = frame_y - chamfer_subtract_vertical, chamfer = chamfer_strength);
+        }
     children();
   }
 }
@@ -114,9 +114,9 @@ module supportgrid_frame(frame_x, frame_y, grid_x, grid_y, height, end_piece,
  * @param disable_chamfer Disable chamfers for easier measurement
  */
 module supportgrid(hr_width, hr_height, end_piece,
-  funnel_strength=BASE_STRENGTH,
-  grid_depth=BASE_UNIT, mounting_axis=HR_SG_MOUNTING_AXIS_VERTICAL,
-  debug_colors=false, disable_chamfer=false) {
+  funnel_strength = BASE_STRENGTH,
+  grid_depth = BASE_UNIT, mounting_axis = HR_SG_MOUNTING_AXIS_VERTICAL,
+  debug_colors = false, disable_chamfer = false) {
   supports_x = support_per_hr_unit(hr_width, funnel_strength, BASE_CHAMFER);
   supports_y = support_per_hr_unit(hr_height, funnel_strength, BASE_CHAMFER);
 
@@ -128,21 +128,20 @@ module supportgrid(hr_width, hr_height, end_piece,
   grid_x = spacing * supports_x + PRINTING_LAYER_WIDTH;
   grid_y = spacing * supports_y + PRINTING_LAYER_WIDTH;
 
-
-  supportgrid_frame(frame_x, frame_y, grid_x, grid_y, height, end_piece, mounting_axis=mounting_axis, debug_colors=debug_colors, disable_chamfer=disable_chamfer){
-    align(CENTER) full_grid(supports_x=supports_x, supports_y=supports_y, div_strength=funnel_strength,
-      height=height, rounding=0, debug_colors=debug_colors);
-    if(mounting_axis == HR_SG_MOUNTING_AXIS_VERTICAL || mounting_axis == HR_SG_MOUNTING_AXIS_BOTH){
-      align(LEFT,FRONT) mount_ear(grid_depth, debug_colors=debug_colors,spin=0,orient=BACK,disable_chamfer=disable_chamfer);
-      align(LEFT,BACK) mount_ear(grid_depth, debug_colors=debug_colors,spin=0,orient=FRONT,disable_chamfer=disable_chamfer);
-      mirror([1,0,0]) align(LEFT,FRONT) mount_ear(grid_depth, debug_colors=debug_colors,spin=0,orient=BACK,disable_chamfer=disable_chamfer);
-      mirror([1,0,0]) align(LEFT,BACK) mount_ear(grid_depth, debug_colors=debug_colors,spin=0,orient=FRONT,disable_chamfer=disable_chamfer);
+  supportgrid_frame(frame_x, frame_y, grid_x, grid_y, height, end_piece, mounting_axis = mounting_axis, debug_colors = debug_colors, disable_chamfer = disable_chamfer) {
+    align(CENTER) full_grid(supports_x = supports_x, supports_y = supports_y, div_strength = funnel_strength,
+      height = height, rounding = 0, debug_colors = debug_colors);
+    if (mounting_axis == HR_SG_MOUNTING_AXIS_VERTICAL || mounting_axis == HR_SG_MOUNTING_AXIS_BOTH) {
+      align(LEFT, FRONT) mount_ear(grid_depth, debug_colors = debug_colors, spin = 0, orient = BACK, disable_chamfer = disable_chamfer);
+      align(LEFT, BACK) mount_ear(grid_depth, debug_colors = debug_colors, spin = 0, orient = FRONT, disable_chamfer = disable_chamfer);
+      mirror([1, 0, 0]) align(LEFT, FRONT) mount_ear(grid_depth, debug_colors = debug_colors, spin = 0, orient = BACK, disable_chamfer = disable_chamfer);
+      mirror([1, 0, 0]) align(LEFT, BACK) mount_ear(grid_depth, debug_colors = debug_colors, spin = 0, orient = FRONT, disable_chamfer = disable_chamfer);
     }
-    if(mounting_axis == HR_SG_MOUNTING_AXIS_HORIZONTAL || mounting_axis == HR_SG_MOUNTING_AXIS_BOTH){
-      align(FRONT,LEFT) mount_ear(grid_depth, debug_colors=debug_colors,spin=90,orient=RIGHT,disable_chamfer=disable_chamfer);
-      align(BACK,LEFT) mount_ear(grid_depth, debug_colors=debug_colors,spin=270,orient=RIGHT,disable_chamfer=disable_chamfer);
-      mirror([1,0,0]) align(FRONT,LEFT) mount_ear(grid_depth, debug_colors=debug_colors,spin=90,orient=RIGHT,disable_chamfer=disable_chamfer);
-      mirror([1,0,0]) align(BACK,LEFT) mount_ear(grid_depth, debug_colors=debug_colors,spin=270,orient=RIGHT,disable_chamfer=disable_chamfer);
+    if (mounting_axis == HR_SG_MOUNTING_AXIS_HORIZONTAL || mounting_axis == HR_SG_MOUNTING_AXIS_BOTH) {
+      align(FRONT, LEFT) mount_ear(grid_depth, debug_colors = debug_colors, spin = 90, orient = RIGHT, disable_chamfer = disable_chamfer);
+      align(BACK, LEFT) mount_ear(grid_depth, debug_colors = debug_colors, spin = 270, orient = RIGHT, disable_chamfer = disable_chamfer);
+      mirror([1, 0, 0]) align(FRONT, LEFT) mount_ear(grid_depth, debug_colors = debug_colors, spin = 90, orient = RIGHT, disable_chamfer = disable_chamfer);
+      mirror([1, 0, 0]) align(BACK, LEFT) mount_ear(grid_depth, debug_colors = debug_colors, spin = 270, orient = RIGHT, disable_chamfer = disable_chamfer);
     }
   }
 }

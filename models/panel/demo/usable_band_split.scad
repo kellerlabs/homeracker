@@ -19,11 +19,11 @@ _ux_r = get_rackpanel_usable_x(_pw, HR_RP_SPLIT_HALF, HR_RP_VIEW_HALF_RIGHT);
 
 module band_marker(width) color([0.85, 0.1, 0.6]) cuboid([width, 1.5, _h]);
 
-rackpanel(panel_width=_pw, panel_height_units=_units,
-  split_mode=HR_RP_SPLIT_HALF, view_mode=HR_RP_VIEW_HALF_LEFT) {
+rackpanel(panel_width = _pw, panel_height_units = _units,
+  split_mode = HR_RP_SPLIT_HALF, view_mode = HR_RP_VIEW_HALF_LEFT) {
   align(BACK) right(_ux_l) band_marker(_uw);
   attach(RIGHT, LEFT)
-    rackpanel(panel_width=_pw, panel_height_units=_units,
-      split_mode=HR_RP_SPLIT_HALF, view_mode=HR_RP_VIEW_HALF_RIGHT)
+    rackpanel(panel_width = _pw, panel_height_units = _units,
+      split_mode = HR_RP_SPLIT_HALF, view_mode = HR_RP_VIEW_HALF_RIGHT)
       align(BACK) right(_ux_r) band_marker(_uw);
 }

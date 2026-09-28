@@ -32,7 +32,9 @@ jobs:
             flatten-checksums-main
 
       - name: Install test dependencies
-        run: pip install pytest -r requirements.txt
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadfmt pytest -r requirements.txt
 
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
