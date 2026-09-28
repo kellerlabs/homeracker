@@ -53,12 +53,12 @@ Each box inside the gate is a workflow file called through `workflow_call`. Its 
 
 ## 🔑 GitHub App Setup
 
-The release, automerge and scadfmt agent workflows need a GitHub App, because pushes and PRs made with the default `GITHUB_TOKEN` do not start further workflows. The app needs:
+The release and automerge workflows need a GitHub App, because pushes and PRs made with the default `GITHUB_TOKEN` do not start further workflows. The app needs:
 
 - Contents: Read & Write
 - Pull Requests: Read & Write
 
-Each workflow requests only what it uses via `permission-*` inputs: the release workflows both, the scadfmt agent Contents only. A permission added to the app later also needs its matching input in the workflows that use it.
+Both workflows request exactly these two via `permission-*` inputs. A permission added to the app later also needs its matching input in both workflows.
 
 Repository secrets:
 
@@ -83,7 +83,7 @@ It needs, once:
 
 1. Repository secret `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token` (Claude Pro or Max). Renew it when it expires.
 2. Environment `scadfmt-review` (Settings → Environments) with you as required reviewer. Without it, `human-review` passes on its own.
-3. The GitHub App below, which pushes the agent's commit.
+3. A GitHub App of its own for the agent, separate from the releases app, so each credential can be rotated or revoked alone. Only an app push starts CI on the agent's commit. Install it on this repo only, with one permission: Contents: Read & Write. Store it as the repository secrets `AGENT_APP_ID` (the app's client ID) and `AGENT_APP_PRIVATE_KEY`.
 
 ## 📚 References
 

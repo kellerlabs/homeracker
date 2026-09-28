@@ -8,9 +8,9 @@ on:
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN:
         required: true
-      RELEASES_APP_ID:
+      AGENT_APP_ID:
         required: true
-      RELEASES_APP_PRIVATE_KEY:
+      AGENT_APP_PRIVATE_KEY:
         required: true
 
 permissions: {}
@@ -266,11 +266,12 @@ jobs:
         if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          client-id: ${{ secrets.RELEASES_APP_ID }}
-          private-key: ${{ secrets.RELEASES_APP_PRIVATE_KEY }}
+          client-id: ${{ secrets.AGENT_APP_ID }}
+          private-key: ${{ secrets.AGENT_APP_PRIVATE_KEY }}
           permission-contents: write
 
       # Comment first: the push starts a new CI run, which cancels this one. Git hooks stay off.
+      # The agent app's token, not GITHUB_TOKEN: only an app push starts CI on the agent's commit.
       - name: Commit, comment and push
         if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
         env:

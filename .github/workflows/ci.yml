@@ -109,8 +109,8 @@ jobs:
       pull-requests: write
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-      RELEASES_APP_ID: ${{ secrets.RELEASES_APP_ID }}
-      RELEASES_APP_PRIVATE_KEY: ${{ secrets.RELEASES_APP_PRIVATE_KEY }}
+      AGENT_APP_ID: ${{ secrets.AGENT_APP_ID }}
+      AGENT_APP_PRIVATE_KEY: ${{ secrets.AGENT_APP_PRIVATE_KEY }}
 
   scadfmt-tests:
     needs: detect-changes
