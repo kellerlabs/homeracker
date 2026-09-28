@@ -17,6 +17,8 @@ on:
         required: true
       KELLERLAB_AGENT_SECRET_KEY:
         required: true
+      DISCORD_CI_WEBHOOK_URL:
+        required: false
 
 permissions: {}
 
@@ -354,10 +356,14 @@ jobs:
             git -c core.hooksPath=/dev/null push --no-verify "$remote" --delete "refs/heads/${HEAD_REF}"
           fi
 
+      # Also pings the maintainer in Discord: DISCORD_MAINTAINER_ID is their Discord user ID, a repository variable.
       - name: Hand over to a person
         if: failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed'
         env:
           GH_TOKEN: ${{ github.token }}
+          DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
+          DISCORD_MAINTAINER_ID: ${{ vars.DISCORD_MAINTAINER_ID }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
           set -euo pipefail
           {
@@ -366,6 +372,23 @@ jobs:
             echo "Its result and the grammar diff are in the \`scadfmt-adapt\` artifact of [this run]($RUN_URL). Take over locally with the \`scadfmt-adapt\` skill."
           } > "$RUNNER_TEMP/handover.md"
           gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/handover.md"
+          if [[ -z "${DISCORD_CI_WEBHOOK_URL}" ]]; then
+            echo "::warning::DISCORD_CI_WEBHOOK_URL is not set, skipping the Discord ping"
+          else
+            mention="@kellervater"
+            if [[ -n "${DISCORD_MAINTAINER_ID}" ]]; then
+              mention="<@${DISCORD_MAINTAINER_ID}>"
+            fi
+            label=""
+            if [[ "$PROBE" == "true" ]]; then
+              label=" (scadfmt-e2e probe)"
+            fi
+            jq -n --arg content "🔴 ${mention} the scadfmt agent needs you${label}: [PR #${PR}](<${PR_URL}>), [run](<${RUN_URL}>)" \
+              --arg id "${DISCORD_MAINTAINER_ID}" \
+              '{content: $content, allowed_mentions: {users: (if $id == "" then [] else [$id] end)}}' \
+              > "$RUNNER_TEMP/discord.json"
+            curl -fsS -H "Content-Type: application/json" -d @"$RUNNER_TEMP/discord.json" "$DISCORD_CI_WEBHOOK_URL"
+          fi
           exit 1
 
   # Blocks check-results, and with it the merge, until a person approves the agent's commit.
