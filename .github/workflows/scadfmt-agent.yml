@@ -160,6 +160,8 @@ jobs:
           # The job's read-only token, so the agent cannot push, comment or approve.
           github_token: ${{ github.token }}
           allowed_bots: renovate
+          # The probe prints the agent's conversation to the public job log, for debugging the flow. Real runs don't.
+          show_full_output: ${{ inputs.probe }}
           prompt: |
             Follow .claude/skills/scadfmt-adapt/SKILL.md for the OpenSCAD nightly update from ${{ steps.grammar.outputs.old }} to ${{ steps.grammar.outputs.new }}.
             ADAPT_DIR is ${{ env.ADAPT_DIR }}.
