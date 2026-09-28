@@ -102,6 +102,8 @@ jobs:
       PYTHONWARNDEFAULTENCODING: '1'
       # Tests the agent runs can execute any code, so they must not see the OAuth or GitHub token.
       CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
+      # The sandbox has no FUSE, so the OpenSCAD AppImage unpacks itself instead of mounting.
+      APPIMAGE_EXTRACT_AND_RUN: '1'
     steps:
       - name: Set the work directory
         run: |
@@ -171,7 +173,7 @@ jobs:
             --max-turns 100
             --add-dir ${{ env.ADAPT_DIR }}
             --allowedTools
-            "Read,Edit,Write,Glob,Grep,WebFetch(domain:openscad.org),Bash(cmd/scadfmt/tests/canary/check.sh),Bash(python -m pytest:*),Bash(scadfmt format:*),Bash(xvfb-run -a cmd/linux/openscad-wrapper.sh:*),Bash(git diff:*),Bash(git status:*)"
+            "Read,Edit,Write,Glob,Grep,WebFetch(domain:openscad.org),Bash(cmd/scadfmt/tests/canary/check.sh),Bash(bash cmd/scadfmt/tests/canary/check.sh),Bash(python -m pytest:*),Bash(scadfmt format:*),Bash(python -m scadfmt:*),Bash(xvfb-run -a cmd/linux/openscad-wrapper.sh:*),Bash(git diff:*),Bash(git status:*),Bash(mkdir:*),Bash(ls:*),Bash(cp:*),Bash(diff:*)"
             --disallowedTools "WebSearch"
 
       - name: Package the result
