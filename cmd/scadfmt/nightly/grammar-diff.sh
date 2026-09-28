@@ -1,6 +1,7 @@
 #!/bin/bash
 # Grammar diff: what changed in OpenSCAD's lexer and parser between the nightly pinned at a base commit and at HEAD.
 # Usage: grammar-diff.sh <base-commit> <out-dir>
+# OLD_NIGHTLY=YYYY.MM.DD replaces the nightly pinned at the base commit, for the e2e probe.
 # Writes <out-dir>/grammar.diff, <out-dir>/grammar.log and a sparse checkout of OpenSCAD's src/core and tests at
 # <out-dir>/openscad, then prints key=value lines for $GITHUB_OUTPUT: old, new and changed (true when the diff is
 # not empty). A nightly is built from master at some time on its date (UTC), so the range starts before the old
@@ -27,7 +28,11 @@ if openscad.get("type") == "nightly" and re.fullmatch(r"[0-9]{4}[.][0-9]{2}[.][0
 '
 }
 
-old="$(git show "${BASE}:scadm.json" | nightly_date)"
+if [[ -n "${OLD_NIGHTLY:-}" ]]; then
+  old="$(printf '{"openscad": {"type": "nightly", "version": "%s"}}' "${OLD_NIGHTLY}" | nightly_date)"
+else
+  old="$(git show "${BASE}:scadm.json" | nightly_date)"
+fi
 new="$(nightly_date < scadm.json)"
 echo "old=${old}"
 echo "new=${new}"

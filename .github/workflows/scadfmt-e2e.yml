@@ -1,0 +1,32 @@
+---
+name: scadfmt e2e
+
+# Runs the scadfmt agent flow end to end on demand: add the scadfmt-e2e label to a PR from this repo.
+# Not part of the PR gate. Re-add the label to run it again. See .github/workflows/README.md.
+on:
+  pull_request:
+    types: [labeled]
+
+permissions: {}
+
+# A label other than scadfmt-e2e does nothing here. It gets a group of its own, so it cannot cancel a running probe.
+concurrency:
+  group: >-
+    scadfmt-e2e-${{ github.event.pull_request.number }}${{ github.event.label.name != 'scadfmt-e2e'
+    && format('-{0}', github.run_id) || '' }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    # Secrets and a real agent run: never for a fork.
+    if: github.event.label.name == 'scadfmt-e2e' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/scadfmt-agent.yml
+    with:
+      probe: true
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      KELLERLAB_AGENT_APP_ID: ${{ secrets.KELLERLAB_AGENT_APP_ID }}
+      KELLERLAB_AGENT_SECRET_KEY: ${{ secrets.KELLERLAB_AGENT_SECRET_KEY }}

@@ -43,7 +43,7 @@ The canary in `cmd/scadfmt/tests/canary/` uses every OpenSCAD construct. `check.
 cmd/scadfmt/tests/canary/check.sh
 ```
 
-A new language construct goes into `canary.scad`, then regenerate the expected file with `scadfmt format - < canary.scad > canary.expected.scad` and review the diff. When a nightly bump changes OpenSCAD's grammar, the [scadfmt agent](docs/decisions/agent-adapts-scadfmt-to-openscad-nightly.md) does this on the Renovate PR.
+A new language construct goes into `canary.scad`, then regenerate the expected file with `scadfmt format - < canary.scad > canary.expected.scad` and review the diff. When a nightly bump changes OpenSCAD's grammar, the [scadfmt agent](docs/decisions/agent-adapts-scadfmt-to-openscad-nightly.md) does this on the Renovate PR. The `scadfmt-e2e` label probes that flow on any PR, see the [CI overview](.github/workflows/README.md#-e2e-probe).
 
 The same job runs `ast_check.sh` on the PR: every `.scad` file whose change is formatting only must give the pinned OpenSCAD the same `.ast` as before. That covers repo-wide reformats after a formatter or OpenSCAD change. Other PRs rely on scadfmt refusing any output whose tokens differ from its input. Locally:
 

@@ -5,6 +5,11 @@ name: scadfmt agent
 # See docs/decisions/agent-adapts-scadfmt-to-openscad-nightly.md.
 on:
   workflow_call:
+    inputs:
+      probe:
+        description: E2E probe from scadfmt-e2e.yml. Breaks scadfmt on purpose and pushes to a throwaway branch.
+        type: boolean
+        default: false
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN:
         required: true
@@ -19,6 +24,9 @@ env:
   # Commits by this author mark a branch as adapted: the agent does not run again and a person must approve.
   AGENT_NAME: scadfmt-agent
   AGENT_EMAIL: scadfmt-agent@users.noreply.github.com
+  # The probe diffs from this nightly, which predates OpenSCAD's Unicode identifiers (see probe-break.sh).
+  PROBE_OLD_NIGHTLY: '2026.08.05'
+  PROBE: ${{ inputs.probe }}
 
 jobs:
   gate:
@@ -44,20 +52,39 @@ jobs:
         run: |
           set -euo pipefail
           authors="$(git log --format=%an "$BASE_SHA..HEAD")"
-          if grep -qxF "$AGENT_NAME" <<< "$authors"; then
+          if [[ "$PROBE" != "true" ]] && grep -qxF "$AGENT_NAME" <<< "$authors"; then
             echo "adapted=true" >> "$GITHUB_OUTPUT"
           else
             echo "adapted=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: 'Probe: an unchanged nightly skips the agent'
+        if: inputs.probe
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          OLD_NIGHTLY="$(jq -r .openscad.version scadm.json)"
+          result="$(OLD_NIGHTLY="$OLD_NIGHTLY" cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$RUNNER_TEMP/unchanged")"
+          echo "$result"
+          grep -qx "changed=false" <<< "$result"
 
       - name: Diff OpenSCAD's grammar
         id: grammar
         if: steps.adapted.outputs.adapted == 'false'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          OLD_NIGHTLY: ${{ inputs.probe && env.PROBE_OLD_NIGHTLY || '' }}
         run: |
           set -euo pipefail
           cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$RUNNER_TEMP/scadfmt-adapt" | tee -a "$GITHUB_OUTPUT"
+
+      - name: 'Probe: a changed nightly starts the agent'
+        if: inputs.probe && steps.grammar.outputs.changed != 'true'
+        run: |
+          set -euo pipefail
+          echo "::error::The grammar did not change since $PROBE_OLD_NIGHTLY, so the probe cannot start the agent."
+          exit 1
 
   # The agent gets read-only permissions: the publish job below applies, tests and pushes its patch.
   adapt:
@@ -84,6 +111,12 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      - name: 'Probe: break scadfmt'
+        if: inputs.probe
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/nightly/probe-break.sh
+
       - name: Setup OpenSCAD
         uses: ./.github/actions/setup-openscad
         with:
@@ -98,6 +131,7 @@ jobs:
         id: grammar
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          OLD_NIGHTLY: ${{ inputs.probe && env.PROBE_OLD_NIGHTLY || '' }}
         run: |
           set -euo pipefail
           cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$ADAPT_DIR" | tee -a "$GITHUB_OUTPUT"
@@ -162,6 +196,12 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Probe: break scadfmt'
+        if: inputs.probe
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/nightly/probe-break.sh
 
       - name: Download the result
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -238,6 +278,12 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: 'Probe: break scadfmt'
+        if: needs.verify.result == 'success' && inputs.probe
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/nightly/probe-break.sh
+
       - name: Download the result
         if: needs.verify.result == 'success'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -252,6 +298,13 @@ jobs:
         run: |
           set -euo pipefail
           gh pr comment "$PR" --repo "$REPO" --body-file "$RESULT_DIR/summary.md"
+
+      - name: 'Probe: the agent must fix scadfmt'
+        if: needs.verify.result == 'success' && inputs.probe && env.OUTCOME != 'changed'
+        run: |
+          set -euo pipefail
+          echo "::error::The probe broke scadfmt, but the agent's result is '$OUTCOME' instead of a fix."
+          exit 1
 
       - name: Apply and guard the patch
         if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
@@ -272,24 +325,34 @@ jobs:
 
       # Comment first: the push starts a new CI run, which cancels this one. Git hooks stay off.
       # The agent app's token, not GITHUB_TOKEN: only an app push starts CI on the agent's commit.
+      # The probe pushes to a throwaway branch instead, which starts no workflow, and deletes it again.
       - name: Commit, comment and push
         if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
         env:
           GH_TOKEN: ${{ github.token }}
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
-          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REF: ${{ inputs.probe && format('scadfmt-e2e/{0}', github.run_id) || github.head_ref }}
         run: |
           set -euo pipefail
           subject="$(head -n 1 "$RESULT_DIR/summary.md")"
           if [[ ! "$subject" =~ ^feat\(scadfmt\):\ .+ ]]; then
             subject="feat(scadfmt): support OpenSCAD nightly grammar changes"
           fi
-          tail -n +2 "$RESULT_DIR/summary.md" > "$RUNNER_TEMP/comment.md"
+          {
+            if [[ "$PROBE" == "true" ]]; then
+              echo "🧪 **scadfmt-e2e probe:** pushed to \`$HEAD_REF\` and deleted again. [Run]($RUN_URL)"
+              echo
+            fi
+            tail -n +2 "$RESULT_DIR/summary.md"
+          } > "$RUNNER_TEMP/comment.md"
           git -c core.hooksPath=/dev/null -c user.name="$AGENT_NAME" -c user.email="$AGENT_EMAIL" \
             commit --quiet --no-verify -m "$subject"
           gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/comment.md"
-          git -c core.hooksPath=/dev/null push --no-verify \
-            "https://x-access-token:${APP_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${HEAD_REF}"
+          remote="https://x-access-token:${APP_TOKEN}@github.com/${REPO}.git"
+          git -c core.hooksPath=/dev/null push --no-verify "$remote" "HEAD:refs/heads/${HEAD_REF}"
+          if [[ "$PROBE" == "true" ]]; then
+            git -c core.hooksPath=/dev/null push --no-verify "$remote" --delete "refs/heads/${HEAD_REF}"
+          fi
 
       - name: Hand over to a person
         if: failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed'
@@ -308,7 +371,7 @@ jobs:
   # Blocks check-results, and with it the merge, until a person approves the agent's commit.
   human-review:
     needs: gate
-    if: needs.gate.outputs.adapted == 'true'
+    if: needs.gate.outputs.adapted == 'true' && !inputs.probe
     runs-on: ubuntu-latest
     timeout-minutes: 5
     environment: scadfmt-review
