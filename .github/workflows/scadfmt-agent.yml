@@ -240,17 +240,18 @@ jobs:
           ADAPT_RESULT: ${{ needs.adapt.result }}
         run: |
           set -euo pipefail
-          if [[ "$ADAPT_RESULT" != "success" || ! -s "$RESULT_DIR/summary.md" ]]; then
-            echo "outcome=failed" >> "$GITHUB_OUTPUT"
-          elif [[ ! -s "$RESULT_DIR/agent.patch" ]]; then
-            # Only a verified "no change" may automerge. A blocked agent writes "stuck: <reason>".
-            if head -n 1 "$RESULT_DIR/summary.md" | grep -q '^no change: '; then
-              echo "outcome=unchanged" >> "$GITHUB_OUTPUT"
-            else
-              echo "outcome=failed" >> "$GITHUB_OUTPUT"
-            fi
-          else
+          # The summary's first line and the patch must agree: a fix with "feat(scadfmt):", a verified
+          # "no change:" without one. Anything else, such as "stuck:" with a partial patch, hands over.
+          subject=""
+          if [[ "$ADAPT_RESULT" == "success" && -s "$RESULT_DIR/summary.md" ]]; then
+            subject="$(head -n 1 "$RESULT_DIR/summary.md")"
+          fi
+          if [[ -s "$RESULT_DIR/agent.patch" && "$subject" =~ ^feat\(scadfmt\):\ .+ ]]; then
             echo "outcome=changed" >> "$GITHUB_OUTPUT"
+          elif [[ ! -s "$RESULT_DIR/agent.patch" && "$subject" =~ ^no\ change:\ .+ ]]; then
+            echo "outcome=unchanged" >> "$GITHUB_OUTPUT"
+          else
+            echo "outcome=failed" >> "$GITHUB_OUTPUT"
           fi
 
       # The guard and the list of existing tests are taken before the patch can change anything.
