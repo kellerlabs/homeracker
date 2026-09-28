@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.18.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.17.0...homeracker-v3.18.0) (2026-09-28)
+
+
+### ✨ Features
+
+* **scadfmt:** adapt scadfmt to new OpenSCAD nightlies with an agent ([#526](https://github.com/kellerlabs/homeracker/issues/526)) ([b1935c0](https://github.com/kellerlabs/homeracker/commit/b1935c050fb564dd223d5e3fd582e056fd5ff8d8))
+* **scadfmt:** add coverage and mutation testing with badges ([#521](https://github.com/kellerlabs/homeracker/issues/521)) ([f81e176](https://github.com/kellerlabs/homeracker/commit/f81e176b2ba7ac3f1c064a170dbdb700e5f4c110))
+* **scadfmt:** format all .scad files and enforce it in pre-commit ([#524](https://github.com/kellerlabs/homeracker/issues/524)) ([3e80080](https://github.com/kellerlabs/homeracker/commit/3e80080a2936ac4e83547dde47b9f503a3f236bc))
+
+
+### 🐛 Bug Fixes
+
+* **scadfmt:** keep existing tests read-only for the agent ([#529](https://github.com/kellerlabs/homeracker/issues/529)) ([a1cd300](https://github.com/kellerlabs/homeracker/commit/a1cd3000fec42a74e88424d1f3bd2e5d26196208))
+* **scadfmt:** let the agent finish unattended ([#527](https://github.com/kellerlabs/homeracker/issues/527)) ([fb63e67](https://github.com/kellerlabs/homeracker/commit/fb63e67817d0784f66f67737e9411d5b4896e45c))
+
+
+### 📦 Dependencies
+
+* update dependency astro to v7.3.4 ([#522](https://github.com/kellerlabs/homeracker/issues/522)) ([1260e61](https://github.com/kellerlabs/homeracker/commit/1260e610365ed08dba3d5252eafb6ba2d6f1a962))
+
+
+### 🔧 Miscellaneous
+
+* skip the scadfmt reformat in git blame ([#525](https://github.com/kellerlabs/homeracker/issues/525)) ([aebd26d](https://github.com/kellerlabs/homeracker/commit/aebd26d02e64a79dc1bf05490cd73f859205da5f))
+
 ## [3.17.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.16.0...homeracker-v3.17.0) (2026-09-27)
 
 
