@@ -168,6 +168,7 @@ jobs:
             Follow .claude/skills/scadfmt-adapt/SKILL.md for the OpenSCAD nightly update from ${{ steps.grammar.outputs.old }} to ${{ steps.grammar.outputs.new }}.
             ADAPT_DIR is ${{ env.ADAPT_DIR }}.
             You run unattended in CI: nobody answers questions or reviews before you finish, and the skill replaces the repo's interactive workflow. Don't commit, push or comment. Write ADAPT_DIR/summary.md first, with line 1 "stuck: in progress", and update it after every step, so it shows how far you got if you run out of turns or time. End with its final form as the skill describes, also when you change nothing or get stuck. Write "no change: <reason>" only after the tests ran green; when a tool fails or you cannot verify, line 1 is "stuck: <reason>".
+            Bash allows only these commands, run from the repo root with relative paths, one per call, without cd, env prefixes, pipes, redirects, ";" or "&&": cmd/scadfmt/tests/canary/check.sh, python -m pytest, scadfmt format, python -m scadfmt, xvfb-run -a cmd/linux/openscad-wrapper.sh, git diff, git status, mkdir, ls, cp, diff. Anything else is denied and wastes a turn. A non-zero exit shows in the tool result, so you need no "echo $?".
           claude_args: >-
             --model claude-sonnet-5
             --max-turns 100
