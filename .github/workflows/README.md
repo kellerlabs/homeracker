@@ -85,7 +85,7 @@ It needs, once:
 1. Repository secret `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token` (Claude Pro or Max). Renew it when it expires.
 2. Environment `scadfmt-review` (Settings → Environments) with you as required reviewer. Without it, `human-review` passes on its own.
 3. A GitHub App of its own for the agent, separate from the releases app, so each credential can be rotated or revoked alone. Only an app push starts CI on the agent's commit. Install it on this repo only, with one permission: Contents: Read & Write, and no webhook. Store it as the organisation secrets `KELLERLAB_AGENT_APP_ID` (the app's client ID) and `KELLERLAB_AGENT_SECRET_KEY` (its private key), shared with this repo.
-4. Optional: repository variable `DISCORD_MAINTAINER_ID` with your Discord user ID. A failed run then pings you in the CI channel through `DISCORD_CI_WEBHOOK_URL`, next to the PR comment. Without it, the message names `@kellervater` without a ping.
+4. Org secret `DISCORD_USER_ID_KELLERVATER` with the maintainer's Discord user ID. A failed run then pings them in the CI channel through `DISCORD_CI_WEBHOOK_URL`, next to the PR comment. Without it, the message names `@kellervater` without a ping.
 
 ### 🧪 E2E Probe
 

@@ -112,6 +112,7 @@ jobs:
       KELLERLAB_AGENT_APP_ID: ${{ secrets.KELLERLAB_AGENT_APP_ID }}
       KELLERLAB_AGENT_SECRET_KEY: ${{ secrets.KELLERLAB_AGENT_SECRET_KEY }}
       DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
+      DISCORD_USER_ID_KELLERVATER: ${{ secrets.DISCORD_USER_ID_KELLERVATER }}
 
   scadfmt-tests:
     needs: detect-changes

@@ -19,6 +19,8 @@ on:
         required: true
       DISCORD_CI_WEBHOOK_URL:
         required: false
+      DISCORD_USER_ID_KELLERVATER:
+        required: false
 
 permissions: {}
 
@@ -370,13 +372,13 @@ jobs:
             git -c core.hooksPath=/dev/null push --no-verify "$remote" --delete "refs/heads/${HEAD_REF}"
           fi
 
-      # Also pings the maintainer in Discord: DISCORD_MAINTAINER_ID is their Discord user ID, a repository variable.
+      # Also pings the maintainer in the Discord CI channel, by their Discord user ID.
       - name: Hand over to a person
         if: failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed'
         env:
           GH_TOKEN: ${{ github.token }}
           DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
-          DISCORD_MAINTAINER_ID: ${{ vars.DISCORD_MAINTAINER_ID }}
+          DISCORD_MAINTAINER_ID: ${{ secrets.DISCORD_USER_ID_KELLERVATER }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
           set -euo pipefail
