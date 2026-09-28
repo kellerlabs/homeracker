@@ -1,0 +1,269 @@
+---
+name: scadfmt agent
+
+# Adapts scadfmt to a new OpenSCAD nightly on the Renovate PR, then waits for a person to approve.
+# See docs/decisions/agent-adapts-scadfmt-to-openscad-nightly.md.
+on:
+  workflow_call:
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        required: true
+      RELEASES_APP_ID:
+        required: true
+      RELEASES_APP_PRIVATE_KEY:
+        required: true
+
+permissions: {}
+
+env:
+  # Commits by this author mark a branch as adapted: the agent does not run again and a person must approve.
+  AGENT_NAME: scadfmt-agent
+  AGENT_EMAIL: scadfmt-agent@users.noreply.github.com
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      adapted: ${{ steps.adapted.outputs.adapted }}
+      changed: ${{ steps.grammar.outputs.changed }}
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Check for an agent commit
+        id: adapted
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          authors="$(git log --format=%an "$BASE_SHA..HEAD")"
+          if grep -qxF "$AGENT_NAME" <<< "$authors"; then
+            echo "adapted=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "adapted=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Diff OpenSCAD's grammar
+        id: grammar
+        if: steps.adapted.outputs.adapted == 'false'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$RUNNER_TEMP/scadfmt-adapt" | tee -a "$GITHUB_OUTPUT"
+
+  # The agent gets read-only permissions: the publish job below applies, tests and pushes its patch.
+  adapt:
+    needs: gate
+    if: needs.gate.outputs.adapted == 'false' && needs.gate.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      PYTHONWARNDEFAULTENCODING: '1'
+      # Tests the agent runs can execute any code, so they must not see the OAuth or GitHub token.
+      CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
+    steps:
+      - name: Set the work directory
+        run: |
+          set -euo pipefail
+          echo "ADAPT_DIR=$RUNNER_TEMP/scadfmt-adapt" >> "$GITHUB_ENV"
+
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Setup OpenSCAD
+        uses: ./.github/actions/setup-openscad
+        with:
+          scadm-source: cmd/scadm
+
+      - name: Install scadfmt
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadfmt pytest pytest-cov
+
+      - name: Diff OpenSCAD's grammar
+        id: grammar
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$ADAPT_DIR" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Adapt scadfmt
+        uses: anthropics/claude-code-action@756cc22e19660d20e8cc9496b4f242475a7f7790 # v1.0.235
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The job's read-only token, so the agent cannot push, comment or approve.
+          github_token: ${{ github.token }}
+          allowed_bots: renovate
+          prompt: |
+            Follow .claude/skills/scadfmt-adapt/SKILL.md for the OpenSCAD nightly update from ${{ steps.grammar.outputs.old }} to ${{ steps.grammar.outputs.new }}.
+            ADAPT_DIR is ${{ env.ADAPT_DIR }}.
+          claude_args: >-
+            --model claude-sonnet-5
+            --max-turns 30
+            --add-dir ${{ env.ADAPT_DIR }}
+            --allowedTools
+            "Read,Edit,Write,Glob,Grep,WebFetch(domain:openscad.org),Bash(cmd/scadfmt/tests/canary/check.sh),Bash(python -m pytest:*),Bash(scadfmt format:*),Bash(xvfb-run -a cmd/linux/openscad-wrapper.sh:*),Bash(git diff:*),Bash(git status:*)"
+            --disallowedTools "WebSearch"
+
+      - name: Package the result
+        if: always()
+        run: |
+          set -euo pipefail
+          git add --intent-to-add --all
+          git diff --binary > "$ADAPT_DIR/agent.patch"
+
+      - name: Upload the result
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: scadfmt-adapt
+          path: |
+            ${{ env.ADAPT_DIR }}/summary.md
+            ${{ env.ADAPT_DIR }}/agent.patch
+            ${{ env.ADAPT_DIR }}/grammar.diff
+            ${{ env.ADAPT_DIR }}/grammar.log
+          if-no-files-found: warn
+
+  publish:
+    needs: adapt
+    if: always() && needs.adapt.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write # the outcome comment; the push uses the app token
+    env:
+      PYTHONWARNDEFAULTENCODING: '1'
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Set the work directory
+        run: |
+          set -euo pipefail
+          echo "RESULT_DIR=$RUNNER_TEMP/scadfmt-adapt" >> "$GITHUB_ENV"
+
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Download the result
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: scadfmt-adapt
+          path: ${{ env.RESULT_DIR }}
+
+      - name: Decide the outcome
+        id: outcome
+        env:
+          ADAPT_RESULT: ${{ needs.adapt.result }}
+        run: |
+          set -euo pipefail
+          if [[ "$ADAPT_RESULT" != "success" || ! -s "$RESULT_DIR/summary.md" ]]; then
+            echo "outcome=failed" >> "$GITHUB_OUTPUT"
+          elif [[ ! -s "$RESULT_DIR/agent.patch" ]]; then
+            echo "outcome=unchanged" >> "$GITHUB_OUTPUT"
+          else
+            echo "outcome=changed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Comment that nothing needed changing
+        if: steps.outcome.outputs.outcome == 'unchanged'
+        run: |
+          set -euo pipefail
+          gh pr comment "$PR" --repo "$REPO" --body-file "$RESULT_DIR/summary.md"
+
+      - name: Apply the patch
+        if: steps.outcome.outputs.outcome == 'changed'
+        run: |
+          set -euo pipefail
+          git apply --index "$RESULT_DIR/agent.patch"
+          outside="$(git diff --cached --name-only --no-renames | grep -v '^cmd/scadfmt/' || true)"
+          if [[ -n "$outside" ]]; then
+            echo "::error::The agent changed files outside cmd/scadfmt/:"
+            echo "$outside"
+            exit 1
+          fi
+
+      - name: Setup OpenSCAD
+        if: steps.outcome.outputs.outcome == 'changed'
+        uses: ./.github/actions/setup-openscad
+        with:
+          scadm-source: cmd/scadm
+
+      # The same checks the agent had to pass, run again before anything is pushed.
+      - name: Test the patch
+        if: steps.outcome.outputs.outcome == 'changed'
+        run: |
+          set -euo pipefail
+          pip install -e cmd/scadfmt pytest pytest-cov
+          python -m pytest -c cmd/scadfmt/pyproject.toml cmd/scadfmt/tests -q --cov --cov-config=cmd/scadfmt/pyproject.toml
+          cmd/scadfmt/tests/canary/check.sh
+
+      - name: Generate GitHub App Token
+        id: app-token
+        if: steps.outcome.outputs.outcome == 'changed'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.RELEASES_APP_ID }}
+          private-key: ${{ secrets.RELEASES_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      # Comment first: the push starts a new CI run, which cancels this one.
+      - name: Commit, comment and push
+        if: steps.outcome.outputs.outcome == 'changed'
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          subject="$(head -n 1 "$RESULT_DIR/summary.md")"
+          if [[ ! "$subject" =~ ^feat\(scadfmt\):\ .+ ]]; then
+            subject="feat(scadfmt): support OpenSCAD nightly grammar changes"
+          fi
+          tail -n +2 "$RESULT_DIR/summary.md" > "$RUNNER_TEMP/comment.md"
+          git -c user.name="$AGENT_NAME" -c user.email="$AGENT_EMAIL" commit --quiet -m "$subject"
+          gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/comment.md"
+          git push "https://x-access-token:${APP_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${HEAD_REF}"
+
+      - name: Hand over to a person
+        if: failure() || steps.outcome.outputs.outcome == 'failed'
+        run: |
+          set -euo pipefail
+          {
+            echo "The scadfmt agent could not adapt scadfmt to this OpenSCAD nightly, so nothing was pushed."
+            echo
+            echo "Its result and the grammar diff are in the \`scadfmt-adapt\` artifact of [this run]($RUN_URL). Take over locally with the \`scadfmt-adapt\` skill."
+          } > "$RUNNER_TEMP/handover.md"
+          gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/handover.md"
+          exit 1
+
+  # Blocks check-results, and with it the merge, until a person approves the agent's commit.
+  human-review:
+    needs: gate
+    if: needs.gate.outputs.adapted == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: scadfmt-review
+    permissions: {}
+    steps:
+      - name: Approved
+        run: echo "A person approved the scadfmt agent's commit."
