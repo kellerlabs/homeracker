@@ -165,7 +165,7 @@ jobs:
             You run unattended in CI: nobody answers questions or reviews before you finish, and the skill replaces the repo's interactive workflow. Don't commit, push or comment. Always end by writing ADAPT_DIR/summary.md as the skill describes, also when you change nothing or get stuck.
           claude_args: >-
             --model claude-sonnet-5
-            --max-turns 30
+            --max-turns 60
             --add-dir ${{ env.ADAPT_DIR }}
             --allowedTools
             "Read,Edit,Write,Glob,Grep,WebFetch(domain:openscad.org),Bash(cmd/scadfmt/tests/canary/check.sh),Bash(python -m pytest:*),Bash(scadfmt format:*),Bash(xvfb-run -a cmd/linux/openscad-wrapper.sh:*),Bash(git diff:*),Bash(git status:*)"
