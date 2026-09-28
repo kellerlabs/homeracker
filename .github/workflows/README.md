@@ -73,10 +73,10 @@ Repository secrets:
 flowchart LR
     pr([Renovate nightly PR]) --> gate{grammar changed?}
     gate -->|no| ok([automerge])
-    gate -->|yes| agent[agent, read-only] --> publish[publish: path check, tests]
-    publish -->|no change| ok
-    publish -->|red| human([comment: take over])
-    publish -->|green| push[push as scadfmt-agent] --> review[human-review environment] -->|approved| ok
+    gate -->|yes| agent[agent, read-only] --> verify[verify, no token: allowlist, tests]
+    verify -->|no change| ok
+    verify -->|red| human([comment: take over])
+    verify -->|green| push[publish: push as scadfmt-agent] --> review[human-review environment] -->|approved| ok
 ```
 
 It needs, once:

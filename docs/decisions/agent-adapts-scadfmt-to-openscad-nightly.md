@@ -19,7 +19,8 @@ On the Renovate OpenSCAD PR, [`scadfmt-agent.yml`](../../.github/workflows/scadf
 - **Instructions:** the [`scadfmt-adapt`](../../.claude/skills/scadfmt-adapt/SKILL.md) skill, which people also use when taking over.
 - **Sources:** OpenSCAD's `src/core/` and `tests/data/scad/`, checked out by the gate script, and BOSL2 from `scadm install`, both local. `WebFetch` for `openscad.org` only.
 - **Isolation:** the agent job has `contents: read` only and passes its read-only token to the action. Tools are file tools and a Bash allowlist (`check.sh`, `pytest`, `scadfmt format`, OpenSCAD, `git diff`/`status`). No push, no `gh`, no WebSearch. Subprocesses run without the OAuth and GitHub tokens (`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`).
-- **Publish:** a separate job applies the agent's patch, rejects it if it touches anything outside `cmd/scadfmt/`, re-runs the unit tests with the coverage gate and the canary, then commits as `scadfmt-agent` and pushes with the releases app token, so CI runs on the commit.
+- **Verify:** a job without any token applies the agent's patch and rejects it unless it only changes formatter sources, the two canary files and new test files ([`check-patch.sh`](../../cmd/scadfmt/nightly/check-patch.sh)). Existing tests, `check.sh` and the coverage config stay as reviewed, so the patch cannot weaken its own checks. The existing tests run on their own, then all tests with the coverage gate, then the canary.
+- **Publish:** a separate job never runs the agent's code. It applies the verified patch again, commits as `scadfmt-agent` with git hooks off and pushes with the releases app token, so CI runs on the commit.
 - **Review:** on a branch with an agent commit, the `human-review` job targets the `scadfmt-review` environment, which requires a reviewer. `check-results` waits for the approval. Renovate ignores the agent's commits (`gitIgnoredAuthors`), so it automerges once approved.
 
 | Outcome | Result |

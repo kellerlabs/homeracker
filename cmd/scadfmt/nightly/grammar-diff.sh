@@ -15,13 +15,14 @@ readonly OUT="$2"
 readonly UPSTREAM="https://github.com/openscad/openscad"
 readonly GRAMMAR=(src/core/lexer.l src/core/parser.y)
 
-# Prints the pinned nightly as YYYY-MM-DD, or nothing when OpenSCAD is not pinned to a nightly.
+# Prints the pinned nightly as YYYY-MM-DD, or nothing unless OpenSCAD is pinned to a dated nightly ("latest" is not).
 nightly_date() {
   python3 -c '
-import json, sys
+import json, re, sys
 openscad = json.load(sys.stdin).get("openscad", {})
-if openscad.get("type") == "nightly":
-    print(openscad["version"].replace(".", "-"))
+version = str(openscad.get("version", ""))
+if openscad.get("type") == "nightly" and re.fullmatch(r"[0-9]{4}[.][0-9]{2}[.][0-9]{2}", version):
+    print(version.replace(".", "-"))
 '
 }
 
