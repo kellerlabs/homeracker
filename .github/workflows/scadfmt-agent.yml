@@ -163,7 +163,7 @@ jobs:
           prompt: |
             Follow .claude/skills/scadfmt-adapt/SKILL.md for the OpenSCAD nightly update from ${{ steps.grammar.outputs.old }} to ${{ steps.grammar.outputs.new }}.
             ADAPT_DIR is ${{ env.ADAPT_DIR }}.
-            You run unattended in CI: nobody answers questions or reviews before you finish, and the skill replaces the repo's interactive workflow. Don't commit, push or comment. Always end by writing ADAPT_DIR/summary.md as the skill describes, also when you change nothing or get stuck. Write "no change: <reason>" only after the tests ran green; when a tool fails or you cannot verify, line 1 is "stuck: <reason>".
+            You run unattended in CI: nobody answers questions or reviews before you finish, and the skill replaces the repo's interactive workflow. Don't commit, push or comment. Write ADAPT_DIR/summary.md first, with line 1 "stuck: in progress", and update it after every step, so it shows how far you got if you run out of turns or time. End with its final form as the skill describes, also when you change nothing or get stuck. Write "no change: <reason>" only after the tests ran green; when a tool fails or you cannot verify, line 1 is "stuck: <reason>".
           claude_args: >-
             --model claude-sonnet-5
             --max-turns 60
@@ -399,6 +399,12 @@ jobs:
             fi
             echo
             echo "See the logs of [this run]($RUN_URL) and, if the agent ran, its result and the grammar diff in the run's \`scadfmt-adapt\` artifact. Take over locally with the \`scadfmt-adapt\` skill."
+            if [[ -s "$RESULT_DIR/summary.md" ]]; then
+              echo
+              echo "The agent's last status:"
+              echo
+              sed 's/^/> /' "$RESULT_DIR/summary.md"
+            fi
           } > "$RUNNER_TEMP/handover.md"
           gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/handover.md"
           if [[ -z "${DISCORD_CI_WEBHOOK_URL}" ]]; then
