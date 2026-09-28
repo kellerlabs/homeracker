@@ -63,6 +63,9 @@ scadm render models/wallmount/parts/wallmount.scad
 
 # Install the git hooks
 pre-commit install --install-hooks -t commit-msg -t pre-commit
+
+# Let git blame skip bulk formatting commits (GitHub does this already)
+git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
 Now pre-commit will automatically run on `git commit`. To manually run hooks on all files:
