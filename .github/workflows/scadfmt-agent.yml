@@ -270,9 +270,10 @@ jobs:
           cmd/scadfmt/tests/canary/check.sh
 
   # Never runs the agent's code: it only applies the verified patch, comments and pushes.
+  # Also runs when the gate failed, so the handover reports that too.
   publish:
-    needs: [adapt, verify]
-    if: always() && needs.adapt.result != 'skipped'
+    needs: [gate, adapt, verify]
+    if: always() && (needs.gate.result == 'failure' || needs.adapt.result != 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -385,7 +386,7 @@ jobs:
           {
             echo "The scadfmt agent could not adapt scadfmt to this OpenSCAD nightly, so nothing was pushed."
             echo
-            echo "Its result and the grammar diff are in the \`scadfmt-adapt\` artifact of [this run]($RUN_URL). Take over locally with the \`scadfmt-adapt\` skill."
+            echo "See the logs of [this run]($RUN_URL) and, if the agent ran, its result and the grammar diff in the run's \`scadfmt-adapt\` artifact. Take over locally with the \`scadfmt-adapt\` skill."
           } > "$RUNNER_TEMP/handover.md"
           gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/handover.md"
           if [[ -z "${DISCORD_CI_WEBHOOK_URL}" ]]; then
