@@ -37,7 +37,7 @@ python -m pytest tests/ -q --cov
 
 ### Integration Tests (Canary)
 
-The canary in `cmd/scadfmt/tests/canary/` uses every OpenSCAD construct. `check.sh` asserts that the pinned OpenSCAD parses it, that scadfmt turns it into `canary.expected.scad` and leaves that file unchanged, and that OpenSCAD's `.ast` output is identical before and after formatting. The `integration tests (OpenSCAD)` job runs it when `cmd/scadfmt/`, a `.scad` file or the OpenSCAD pin in `scadm.json` changes. Locally it needs `scadm install` first:
+The canary in `cmd/scadfmt/tests/canary/` uses every OpenSCAD construct. `check.sh` asserts that the pinned OpenSCAD parses it, that scadfmt turns it into `canary.expected.scad` and leaves that file unchanged, and that OpenSCAD's `.ast` output is identical before and after formatting. The `integration tests (OpenSCAD)` job runs it when `cmd/scadfmt/` or the OpenSCAD pin in `scadm.json` changes. Locally it needs `scadm install` first:
 
 ```bash
 cmd/scadfmt/tests/canary/check.sh
@@ -45,7 +45,7 @@ cmd/scadfmt/tests/canary/check.sh
 
 A new language construct goes into `canary.scad`, then regenerate the expected file with `scadfmt format - < canary.scad > canary.expected.scad` and review the diff.
 
-The same job runs `ast_check.sh` on the PR: every `.scad` file whose change is formatting only must give the pinned OpenSCAD the same `.ast` as before. That covers repo-wide reformats. Locally:
+The same job runs `ast_check.sh` on the PR: every `.scad` file whose change is formatting only must give the pinned OpenSCAD the same `.ast` as before. That covers repo-wide reformats after a formatter or OpenSCAD change. Other PRs rely on scadfmt refusing any output whose tokens differ from its input. Locally:
 
 ```bash
 cmd/scadfmt/tests/ast_check.sh origin/main

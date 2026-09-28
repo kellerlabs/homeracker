@@ -10,7 +10,7 @@ flowchart LR
     pr --> pc[pre-commit]
     dc -->|cmd/scadm, scadm.json| it[integration-tests]
     dc -->|scadm, scadfmt sources| mt[mutation-tests]
-    dc -->|cmd/scadfmt, *.scad, scadm.json| sf[scadfmt-tests]
+    dc -->|cmd/scadfmt, scadm.json| sf[scadfmt-tests]
     dc -->|setup-openscad action| so[test-setup-openscad]
     dc -->|models, scadm| vm[validate-models]
     dc -->|site, configurator, models| web[web]

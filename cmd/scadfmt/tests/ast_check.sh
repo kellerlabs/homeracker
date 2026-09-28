@@ -1,6 +1,7 @@
 #!/bin/bash
 # AST check: every .scad file whose change since a base commit is formatting only must give OpenSCAD the same AST.
 # Other changed files (edits to the code, generated flattened/ output) are listed as skipped: their AST may differ.
+# Only files modified in place are compared; added and renamed files have no base version at the same path.
 # Usage: ast_check.sh <base-commit>. Needs scadfmt installed and `scadm install` done.
 # Override the OpenSCAD binary with OPENSCAD=/path/to/openscad.
 set -euo pipefail

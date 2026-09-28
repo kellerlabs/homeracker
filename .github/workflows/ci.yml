@@ -50,7 +50,6 @@ jobs:
             scadfmt-tests:
               - *ci
               - 'cmd/scadfmt/**'
-              - '**/*.scad'
               - 'scadm.json'
               - '.github/actions/setup-openscad/**'
               - '.github/workflows/scadfmt-tests.yml'
