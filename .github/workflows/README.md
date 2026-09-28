@@ -97,6 +97,27 @@ The agent path only runs on a Renovate PR with a grammar change. To test it on a
 
 claude-code-action runs the agent with `.claude/` from `main`, so a PR cannot change the agent's instructions, and the probe always tests the skill on `main`. Each run is one real agent run. Re-add the label to run it again. When `probe-break.sh` fails because the tokenizer changed, point it and `PROBE_OLD_NIGHTLY` at a newer grammar change.
 
+### 🐞 Debugging the Agent
+
+The agent's conversation never goes to the job log or an artifact: this repo is public, and tool results can hold the job's token. Debug in this order:
+
+1. **Handover comment:** it quotes the agent's `summary.md`, which the agent keeps current as a progress log, so it shows how far the agent got.
+2. **`adapt` job log:** the result block at the end shows `num_turns`, `duration_ms`, cost and `permission_denials_count`. Turns close to `--max-turns` or many denials point at the prompt or the Bash allowlist.
+3. **Full conversation, locally:** replay the run on Linux or WSL with your own Claude Code login, so the transcript stays on your machine:
+
+   ```bash
+   git worktree add /tmp/scadfmt-debug origin/main && cd /tmp/scadfmt-debug
+   scadm install
+   pip install -e cmd/scadfmt pytest pytest-cov
+   cmd/scadfmt/nightly/probe-break.sh      # probe only: break scadfmt like the probe does
+   OLD_NIGHTLY=2026.08.05 cmd/scadfmt/nightly/grammar-diff.sh HEAD /tmp/scadfmt-adapt
+   APPIMAGE_EXTRACT_AND_RUN=1 claude -p "$(cat prompt.txt)" --model claude-sonnet-5 --max-turns 100 \
+     --add-dir /tmp/scadfmt-adapt --allowedTools "<the list from scadfmt-agent.yml>" \
+     --output-format stream-json --verbose > /tmp/scadfmt-debug.jsonl
+   ```
+
+   `prompt.txt` holds the `prompt` of the `Adapt scadfmt` step with its expressions filled in. Without `probe-break.sh` and `OLD_NIGHTLY`, run `grammar-diff.sh` on the Renovate branch against `origin/main` to replay a real run. Each line of the `.jsonl` is one message or tool result, including the denied commands.
+
 ## 📚 References
 
 - [Camunda Infrastructure Actions](https://github.com/camunda/infra-global-github-actions/tree/main/teams/infra/pull-request)

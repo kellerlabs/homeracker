@@ -102,6 +102,8 @@ jobs:
       PYTHONWARNDEFAULTENCODING: '1'
       # Tests the agent runs can execute any code, so they must not see the OAuth or GitHub token.
       CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
+      # The sandbox has no FUSE, so the OpenSCAD AppImage unpacks itself instead of mounting.
+      APPIMAGE_EXTRACT_AND_RUN: '1'
     steps:
       - name: Set the work directory
         run: |
@@ -140,13 +142,14 @@ jobs:
           set -euo pipefail
           cmd/scadfmt/nightly/grammar-diff.sh "$BASE_SHA" "$ADAPT_DIR" | tee -a "$GITHUB_OUTPUT"
 
-      # The env scrub runs the agent's subprocesses in bubblewrap. Ubuntu 24.04's AppArmor blocks the unprivileged
-      # user namespaces it needs, so this ephemeral runner allows them.
-      - name: Install bubblewrap
+      # The env scrub runs the agent's subprocesses in Claude Code's sandbox, which needs bubblewrap and socat.
+      # Ubuntu 24.04's AppArmor blocks the unprivileged user namespaces bubblewrap needs, so this ephemeral runner
+      # allows them.
+      - name: Install the sandbox
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq bubblewrap
+          sudo apt-get install -y -qq bubblewrap socat
           if [[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]]; then
             sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           fi
@@ -162,12 +165,14 @@ jobs:
           prompt: |
             Follow .claude/skills/scadfmt-adapt/SKILL.md for the OpenSCAD nightly update from ${{ steps.grammar.outputs.old }} to ${{ steps.grammar.outputs.new }}.
             ADAPT_DIR is ${{ env.ADAPT_DIR }}.
+            You run unattended in CI: nobody answers questions or reviews before you finish, and the skill replaces the repo's interactive workflow. Don't commit, push or comment. Write ADAPT_DIR/summary.md first, with line 1 "stuck: in progress", and update it after every step, so it shows how far you got if you run out of turns or time. End with its final form as the skill describes, also when you change nothing or get stuck. Write "no change: <reason>" only after the tests ran green; when a tool fails or you cannot verify, line 1 is "stuck: <reason>".
+            Bash allows only these commands, run from the repo root with relative paths, one per call, without cd, env prefixes, pipes, redirects, ";" or "&&": cmd/scadfmt/tests/canary/check.sh, python -m pytest, scadfmt format, python -m scadfmt, xvfb-run -a cmd/linux/openscad-wrapper.sh, git diff, git status, mkdir, ls, cp, diff. Anything else is denied and wastes a turn. A non-zero exit shows in the tool result, so you need no "echo $?".
           claude_args: >-
             --model claude-sonnet-5
-            --max-turns 30
+            --max-turns 100
             --add-dir ${{ env.ADAPT_DIR }}
             --allowedTools
-            "Read,Edit,Write,Glob,Grep,WebFetch(domain:openscad.org),Bash(cmd/scadfmt/tests/canary/check.sh),Bash(python -m pytest:*),Bash(scadfmt format:*),Bash(xvfb-run -a cmd/linux/openscad-wrapper.sh:*),Bash(git diff:*),Bash(git status:*)"
+            "Read,Edit,Write,Glob,Grep,WebFetch(domain:openscad.org),Bash(cmd/scadfmt/tests/canary/check.sh),Bash(bash cmd/scadfmt/tests/canary/check.sh),Bash(python -m pytest:*),Bash(scadfmt format:*),Bash(python -m scadfmt:*),Bash(xvfb-run -a cmd/linux/openscad-wrapper.sh:*),Bash(git diff:*),Bash(git status:*),Bash(mkdir:*),Bash(ls:*),Bash(cp:*),Bash(diff:*)"
             --disallowedTools "WebSearch"
 
       - name: Package the result
@@ -233,12 +238,18 @@ jobs:
           ADAPT_RESULT: ${{ needs.adapt.result }}
         run: |
           set -euo pipefail
-          if [[ "$ADAPT_RESULT" != "success" || ! -s "$RESULT_DIR/summary.md" ]]; then
-            echo "outcome=failed" >> "$GITHUB_OUTPUT"
-          elif [[ ! -s "$RESULT_DIR/agent.patch" ]]; then
+          # The summary's first line and the patch must agree: a fix with "feat(scadfmt):", a verified
+          # "no change:" without one. Anything else, such as "stuck:" with a partial patch, hands over.
+          subject=""
+          if [[ "$ADAPT_RESULT" == "success" && -s "$RESULT_DIR/summary.md" ]]; then
+            subject="$(head -n 1 "$RESULT_DIR/summary.md")"
+          fi
+          if [[ -s "$RESULT_DIR/agent.patch" && "$subject" =~ ^feat\(scadfmt\):\ .+ ]]; then
+            echo "outcome=changed" >> "$GITHUB_OUTPUT"
+          elif [[ ! -s "$RESULT_DIR/agent.patch" && "$subject" =~ ^no\ change:\ .+ ]]; then
             echo "outcome=unchanged" >> "$GITHUB_OUTPUT"
           else
-            echo "outcome=changed" >> "$GITHUB_OUTPUT"
+            echo "outcome=failed" >> "$GITHUB_OUTPUT"
           fi
 
       # The guard and the list of existing tests are taken before the patch can change anything.
@@ -381,12 +392,23 @@ jobs:
           DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
           DISCORD_MAINTAINER_ID: ${{ secrets.DISCORD_USER_ID_KELLERVATER }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          VERIFY_RESULT: ${{ needs.verify.result }}
         run: |
           set -euo pipefail
           {
-            echo "The scadfmt agent could not adapt scadfmt to this OpenSCAD nightly, so nothing was pushed."
+            if [[ "$VERIFY_RESULT" == "success" && "$OUTCOME" == "changed" ]]; then
+              echo "The scadfmt agent adapted scadfmt and the tests passed, but publishing failed, so nothing was pushed."
+            else
+              echo "The scadfmt agent could not adapt scadfmt to this OpenSCAD nightly, so nothing was pushed."
+            fi
             echo
             echo "See the logs of [this run]($RUN_URL) and, if the agent ran, its result and the grammar diff in the run's \`scadfmt-adapt\` artifact. Take over locally with the \`scadfmt-adapt\` skill."
+            if [[ -s "$RESULT_DIR/summary.md" ]]; then
+              echo
+              echo "The agent's last status:"
+              echo
+              sed 's/^/> /' "$RESULT_DIR/summary.md"
+            fi
           } > "$RUNNER_TEMP/handover.md"
           gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/handover.md"
           if [[ -z "${DISCORD_CI_WEBHOOK_URL}" ]]; then
