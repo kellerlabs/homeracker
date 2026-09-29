@@ -3,6 +3,7 @@
 import json
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -46,8 +47,8 @@ def test_setup_creates_settings(tmp_path, fake_code):
     assert vscode.setup_vscode(workspace)
     assert fake_code == [["code", "--install-extension", vscode.EXTENSION, "--force"]]
     expected = {
-        "[scad]": {"editor.defaultFormatter": vscode.EXTENSION},
         "customLocalFormatters.formatters": [{"command": vscode.formatter_command(), "languages": ["scad"]}],
+        "[scad]": {"editor.defaultFormatter": vscode.EXTENSION},
     }
     text = (workspace / ".vscode" / "settings.json").read_text(encoding="utf-8")
     assert text == json.dumps(expected, indent=2) + "\n"
@@ -124,3 +125,106 @@ def test_setup_when_install_fails(tmp_path, monkeypatch):
     monkeypatch.setattr(vscode.subprocess, "run", fail)
     assert not vscode.setup_vscode(tmp_path)
     assert not (tmp_path / ".vscode").exists()
+
+
+def test_find_workspace_file_prefers_nearest_folder(tmp_path):
+    (tmp_path / "outer.code-workspace").write_text("{}", encoding="utf-8")
+    inner = tmp_path / "repo" / "sub"
+    inner.mkdir(parents=True)
+    assert vscode.find_workspace_file(inner) == tmp_path / "outer.code-workspace"
+    (inner / "b.code-workspace").write_text("{}", encoding="utf-8")
+    (inner / "a.code-workspace").write_text("{}", encoding="utf-8")
+    assert vscode.find_workspace_file(inner) == inner / "a.code-workspace"
+
+
+def test_find_workspace_file_without_one(tmp_path, monkeypatch):
+    monkeypatch.setattr(vscode.Path, "glob", lambda self, pattern: iter([]))
+    assert vscode.find_workspace_file(tmp_path) is None
+
+
+def _asker(answers):
+    prompts = []
+
+    def ask(prompt):
+        prompts.append(prompt)
+        return answers.pop(0)
+
+    return ask, prompts
+
+
+def test_choose_workspace_asks_for_path_when_none_found(tmp_path, monkeypatch):
+    monkeypatch.setattr(vscode, "find_workspace_file", lambda start: None)
+    # Starts and ends with X, so stripping more than quotes shows.
+    ask, prompts = _asker(['"X:/racks/X" '])
+    assert vscode.choose_workspace(tmp_path, ask) == Path("X:/racks/X")
+    assert prompts == ["Workspace file or folder: "]
+
+
+@pytest.mark.parametrize("answer", ["", "y", " YES "])
+def test_choose_workspace_accepts_found_file(tmp_path, answer):
+    found = tmp_path / "w.code-workspace"
+    found.write_text("{}", encoding="utf-8")
+    ask, prompts = _asker([answer])
+    assert vscode.choose_workspace(tmp_path, ask) == found
+    assert prompts == [f"Use workspace file {found}? [Y/n] "]
+
+
+@pytest.mark.parametrize(("typed", "expected"), [("other.code-workspace", Path("other.code-workspace")), ("", None)])
+def test_choose_workspace_asks_for_another_file(tmp_path, typed, expected):
+    (tmp_path / "w.code-workspace").write_text("{}", encoding="utf-8")
+    ask, prompts = _asker(["n", typed])
+    assert vscode.choose_workspace(tmp_path, ask) == expected
+    assert prompts[1] == "Workspace file or folder: "
+
+
+def test_setup_updates_workspace_file(tmp_path, fake_code):
+    workspace_file = tmp_path / "w.code-workspace"
+    workspace_file.write_text(
+        '{\n\t"folders": [{"path": "repo"}],\n\t"settings": {"z": "Pötz", "a": 1}\n}', encoding="utf-8"
+    )
+    assert vscode.setup_vscode(workspace_file)
+    assert fake_code
+    expected = {
+        "folders": [{"path": "repo"}],
+        "settings": {
+            "z": "Pötz",
+            "a": 1,
+            "customLocalFormatters.formatters": [{"command": vscode.formatter_command(), "languages": ["scad"]}],
+            "[scad]": {"editor.defaultFormatter": vscode.EXTENSION},
+        },
+    }
+    text = workspace_file.read_text(encoding="utf-8")
+    assert text == json.dumps(expected, indent="\t", ensure_ascii=False) + "\n"
+    assert not (tmp_path / ".vscode").exists()
+
+
+def test_setup_adds_settings_block_to_workspace_file(tmp_path, fake_code):
+    workspace_file = tmp_path / "w.code-workspace"
+    workspace_file.write_text('{"folders": []}', encoding="utf-8")
+    assert vscode.setup_vscode(workspace_file)
+    data = json.loads(workspace_file.read_text(encoding="utf-8"))
+    assert data["settings"] == vscode.merge_settings({})
+
+
+def test_setup_refuses_missing_workspace_file(tmp_path, fake_code):
+    assert not vscode.setup_vscode(tmp_path / "missing.code-workspace")
+    assert not fake_code
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    ("name", "content"),
+    [
+        ("w.code-workspace", '{"settings": null}'),
+        ("w.code-workspace", "[]"),
+        (".vscode/settings.json", "[]"),
+    ],
+)
+def test_setup_refuses_settings_that_are_not_an_object(tmp_path, fake_code, name, content):
+    settings_file = tmp_path / name
+    settings_file.parent.mkdir(exist_ok=True)
+    settings_file.write_text(content, encoding="utf-8")
+    target = settings_file if name.endswith(".code-workspace") else tmp_path
+    assert not vscode.setup_vscode(target)
+    assert settings_file.read_text(encoding="utf-8") == content
+    assert not fake_code

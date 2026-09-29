@@ -239,6 +239,8 @@ class RenderFileTests(unittest.TestCase):
         self.install_dir = self.root / "bin" / "openscad"
         (self.install_dir / "libraries").mkdir(parents=True)
         (self.install_dir / "openscad").write_text("", encoding="utf-8")
+        # find_openscad_exe picks the binary name by host OS; pin it so the fixture binary is found on Windows too.
+        self.enterContext(patch("scadm.installer.get_system_platform", return_value="linux"))
         self.scad = self.root / "part.scad"
         self.scad.write_text("cube(1);\n", encoding="utf-8")
 

@@ -4,6 +4,7 @@
 Subcommands:
     scope           Print mutmut name globs for a package's functions changed since a base commit.
     report          Render one package's section of the markdown report (PR comment and job summary).
+    gate            Fail when a mutant survives in a package's functions changed by the PR.
     combine         Join package sections into the PR comment.
     discord         Print a Discord webhook payload for a full run.
     coverage-badge  Convert coverage.py JSON into a shields.io endpoint badge.
@@ -212,7 +213,7 @@ def render_report(summary: dict, *, package: str, functions: int | None, timed_o
         return "\n".join(out) + "\n"
     out += [
         "Each survivor is a change to the code that no test noticed. Add or tighten a test until it fails,"
-        " or mark a true equivalent with `# pragma: no mutate`.",
+        " or mark a true equivalent with `# pragma: no mutate`. Survivors in functions a PR changes fail its check.",
         "",
     ]
     for name in survivors[:MAX_LISTED_SURVIVORS]:
@@ -298,6 +299,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_report = sub.add_parser("report", parents=[pkg])
     p_report.add_argument("--globs-file", type=Path, help="Scope file from `scope`; omit for a full run")
     p_report.add_argument("--timed-out", action="store_true")
+    p_gate = sub.add_parser("gate", parents=[pkg])
+    p_gate.add_argument("--globs-file", type=Path, required=True, help="Scope file from `scope`")
     p_discord = sub.add_parser("discord", parents=[pkg])
     p_discord.add_argument("--run-url", required=True)
     p_combine = sub.add_parser("combine")
@@ -307,14 +310,27 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _results(args: argparse.Namespace, package_dir: Path) -> None:
-    """Print the report or Discord payload of a mutmut run."""
+def _summary(globs_file: Path | None, package_dir: Path) -> tuple[dict, list[str] | None]:
+    """Summarize a mutmut run, scoped to the globs in globs_file if given."""
     globs = None
-    if getattr(args, "globs_file", None):
-        globs = [g for g in args.globs_file.read_text(encoding="utf-8").splitlines() if g.strip()]
+    if globs_file:
+        globs = [g for g in globs_file.read_text(encoding="utf-8").splitlines() if g.strip()]
     # An empty scope means mutmut never ran, so there are no results to read.
     results = {} if globs == [] else parse_results(_mutmut("results", "--all", "true", cwd=package_dir))
-    summary = summarize(results, globs)
+    return summarize(results, globs), globs
+
+
+def _gate(args: argparse.Namespace, package_dir: Path) -> int:
+    """Fail on survivors in the changed functions, even when the run mutated the whole package."""
+    survivors = _summary(args.globs_file, package_dir)[0]["survivors"]
+    for name in survivors:
+        print(f"::error title=Surviving mutant ({args.package})::{name}")
+    return 1 if survivors else 0
+
+
+def _results(args: argparse.Namespace, package_dir: Path) -> None:
+    """Print the report or Discord payload of a mutmut run."""
+    summary, globs = _summary(getattr(args, "globs_file", None), package_dir)
     if args.command == "discord":
         print(json.dumps(discord_payload(summary, args.run_url, args.package)))
         return
@@ -351,6 +367,8 @@ def main(argv: list[str] | None = None) -> int:
             check=True,
         ).stdout
         print("\n".join(scope(diff, repo_root, args.package)))
+    elif args.command == "gate":
+        return _gate(args, repo_root / source_root(args.package))
     else:
         _results(args, repo_root / source_root(args.package))
     return 0

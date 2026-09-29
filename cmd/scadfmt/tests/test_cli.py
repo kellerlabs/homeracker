@@ -198,12 +198,35 @@ def test_stdin_mixed_with_paths_is_rejected(tmp_path, caplog):
 
 def test_vscode_subcommand(monkeypatch, tmp_path):
     calls = []
-    monkeypatch.setattr(cli, "setup_vscode", lambda workspace: calls.append(workspace) or True)
+    monkeypatch.setattr(cli, "setup_vscode", lambda target: calls.append(target) or True)
+    monkeypatch.setattr(cli, "choose_workspace", lambda start: pytest.fail("must not ask"))
     assert cli.main(["vscode", "--workspace", str(tmp_path)]) == cli.EXIT_OK
-    assert calls == [tmp_path]
-    monkeypatch.setattr(cli, "setup_vscode", lambda workspace: calls.append(workspace) and False)
+    assert cli.main(["vscode", "--workspace", "w.code-workspace"]) == cli.EXIT_OK
+    assert calls == [tmp_path, Path("w.code-workspace")]
+    monkeypatch.setattr(cli, "setup_vscode", lambda target: calls.append(target) and False)
     assert cli.main(["vscode"]) == cli.EXIT_ERROR
     assert calls[-1] == Path(".")
+
+
+def test_vscode_workspace_without_path_asks(monkeypatch, tmp_path):
+    calls = []
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(cli, "choose_workspace", lambda start: calls.append(start) or start / "w.code-workspace")
+    monkeypatch.setattr(cli, "setup_vscode", lambda target: calls.append(target) or True)
+    assert cli.main(["vscode", "--workspace"]) == cli.EXIT_OK
+    assert calls == [tmp_path, tmp_path / "w.code-workspace"]
+
+
+def _closed_stdin(start):
+    raise EOFError
+
+
+@pytest.mark.parametrize("chooser", [lambda start: None, _closed_stdin])
+def test_vscode_workspace_without_answer(monkeypatch, caplog, chooser):
+    monkeypatch.setattr(cli, "choose_workspace", chooser)
+    monkeypatch.setattr(cli, "setup_vscode", lambda target: pytest.fail("must not set up"))
+    assert cli.main(["vscode", "--workspace"]) == cli.EXIT_ERROR
+    assert "--workspace <path>" in caplog.text
 
 
 def test_module_entry_point(tmp_path):
