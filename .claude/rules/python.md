@@ -41,7 +41,7 @@ Example: See `cmd/scadm/scadm/flatten.py` for reference.
 
 ### Unit vs Integration Tests
 
-- **Unit tests** (`test_*.py` without markers): fast, no network, mocked dependencies. The `scadm-tests` pre-commit hook runs them only when a commit touches `cmd/scadm/`, and fails if branch coverage drops below `fail_under` in `cmd/scadm/pyproject.toml`. Mutation tests (`mutmut`) flag weak assertions in the functions a PR changes.
+- **Unit tests** (`test_*.py` without markers): fast, no network, mocked dependencies. The `scadm-tests` pre-commit hook runs them only when a commit touches `cmd/scadm/`, and fails if branch coverage drops below `fail_under` in `cmd/scadm/pyproject.toml`. Mutation tests (`mutmut`) fail a PR when a mutant survives in a function it changes.
 - **Integration tests** (`test_cli_integration.py`, marked `@pytest.mark.integration`): exercise real CLI commands against temp workspaces. Run via CI workflow (`.github/workflows/integration-tests.yml`) on ubuntu + windows matrix.
   - **Slow tests** (`@pytest.mark.slow`): download binaries from the network. Subset of integration tests.
   - Non-`slow` integration tests may still make lightweight network calls (e.g., version resolution) but avoid large downloads.

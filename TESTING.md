@@ -107,7 +107,7 @@ When your change lifts coverage well past the gate, raise `fail_under` in the sa
 
 `mutmut` changes the `scadm` and `scadfmt` sources one small edit at a time and reruns the unit tests. A **survived** mutant means no test noticed the change, so a test is missing or its assertion is too weak. Linux and macOS only (Windows: use WSL).
 
-On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates only the functions the PR changed, per package, and edits one PR comment with a section per package listing the survivors (fork PRs: job summary only). Kill each survivor with a test, or mark a true equivalent with `# pragma: no mutate`. Log calls, argparse help text and exception messages are skipped by `do_not_mutate_patterns`. The run stops after 5 minutes and never fails the PR. Release-please PRs skip it. A weekly full run per package posts its stats to Discord `#homeracker-ci` and refreshes that package's badge.
+On a PR, [`mutation-tests.yml`](.github/workflows/mutation-tests.yml) mutates only the functions the PR changed, per package, and edits one PR comment with a section per package listing the survivors (fork PRs: job summary only). Kill each survivor with a test, or mark a true equivalent with `# pragma: no mutate`. Log calls, argparse help text and exception messages are skipped by `do_not_mutate_patterns`. A survivor in a changed function fails the job, also when a setup change mutated the whole package. The run stops after 5 minutes and the gate judges the results it has. Release-please PRs skip it. A weekly full run per package posts its stats to Discord `#homeracker-ci` and refreshes that package's badge.
 
 ```bash
 cd cmd/scadm   # or cmd/scadfmt
@@ -119,9 +119,9 @@ mutmut results                                    # list surviving mutants
 mutmut show <mutant-name>                         # diff of one mutant
 ```
 
-Known equivalents that survive: `encoding="UTF-8"` for `"utf-8"`, dropping `open()`'s default `"r"` mode, `None` in place of `False`.
+Known equivalents: `encoding="UTF-8"` for `"utf-8"`, dropping `open()`'s default `"r"` mode, `None` in place of `False`. The pragma only takes effect on a statement's first line.
 
-See [gate-scadm-coverage-and-mutation-test-changed-functions](docs/decisions/gate-scadm-coverage-and-mutation-test-changed-functions.md) for why.
+See [gate-coverage-and-surviving-mutants-in-changed-functions](docs/decisions/gate-coverage-and-surviving-mutants-in-changed-functions.md) for why.
 
 ## Renovate Configuration Testing
 

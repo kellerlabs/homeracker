@@ -28,7 +28,7 @@
 - **Rules:** 2-space indent, one level per line that opens brackets; one statement per line and block contents on their own lines; imports as one block followed by one blank line; exactly one blank line around each `module` and `function` definition; a continued module call nests one level per line, a continued expression stays one level in; spaces around every binary operator and every `=` (`cube(size = 10)`); space after commas; tight unary operators, modifiers and range colons; consecutive trailing comments aligned to one column (a lone one gets 2 spaces); max 2 blank lines at top level and 1 inside blocks; the file's own line endings and one final newline. Full list in the [scadfmt README](../../cmd/scadfmt/README.md#-rules).
 - **CLI conventions:** `format`, `--check`, `--diff`, stdin, exit codes 0/1/2, `// fmt: off` / `// fmt: on`.
 - **Linting later** (`scadfmt lint`, naming rules) builds on BelfrySCAD's [openscad-parser](https://github.com/belfryscad/openscad_parser) (by the BOSL2 author, already parses the nightly's bitwise operators). The formatter never depends on it.
-- **Tested like scadm:** a branch coverage gate and per-PR mutation testing, see [gate-scadm-coverage-and-mutation-test-changed-functions](gate-scadm-coverage-and-mutation-test-changed-functions.md).
+- **Tested like scadm:** a branch coverage gate and per-PR mutation testing, see [gate-coverage-and-surviving-mutants-in-changed-functions](gate-coverage-and-surviving-mutants-in-changed-functions.md).
 - **Separate from scadm:** scadm manages OpenSCAD and libraries, scadfmt manages style. Released to PyPI on its own (`scadfmt-v*`). `scadfmt vscode` registers it as the VS Code formatter via Custom Local Formatters.
 
 ### Alternatives Considered

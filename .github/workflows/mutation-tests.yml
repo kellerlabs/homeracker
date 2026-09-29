@@ -102,6 +102,16 @@ jobs:
             gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@"$RUNNER_TEMP/report.md" --silent
           fi
 
+      # After the comment, so the survivors are listed there. Only changed functions count, also on a full run.
+      - name: Fail on surviving mutants
+        run: |
+          set -euo pipefail
+          rc=0
+          for package in scadm scadfmt; do
+            python cmd/test/mutation_report.py gate --package "$package" --globs-file "$RUNNER_TEMP/$package-globs.txt" || rc=1
+          done
+          exit "$rc"
+
   # Whole package, to keep overall test debt visible: report to Discord, refresh the package's mutation badge.
   full:
     if: github.event_name != 'pull_request'

@@ -254,6 +254,29 @@ class TestMain:
         mutmut.assert_not_called()
         assert "No `scadm` functions changed" in capsys.readouterr().out
 
+    def test_gate_fails_on_survivors_in_scope_only(self, tmp_path, capsys):
+        globs = tmp_path / "globs.txt"
+        globs.write_text("scadm.flatten.x_top__mutmut_*\n", encoding="utf-8")
+        with patch.object(mr, "_mutmut", return_value=RESULTS) as mutmut:
+            assert mr.main(["gate", "--package", "scadm", "--globs-file", str(globs)]) == 1
+        assert mutmut.call_args.args == ("results", "--all", "true")
+        assert mutmut.call_args.kwargs["cwd"].parts[-2:] == ("cmd", "scadm")
+        assert capsys.readouterr().out == "::error title=Surviving mutant (scadm)::scadm.flatten.x_top__mutmut_2\n"
+
+    def test_gate_passes_without_survivors_in_scope(self, tmp_path, capsys):
+        globs = tmp_path / "globs.txt"
+        globs.write_text("scadm.other.x_f__mutmut_*\n", encoding="utf-8")
+        with patch.object(mr, "_mutmut", return_value=RESULTS):
+            assert mr.main(["gate", "--package", "scadm", "--globs-file", str(globs)]) == 0
+        assert capsys.readouterr().out == ""
+
+    def test_gate_empty_scope_skips_mutmut(self, tmp_path):
+        globs = tmp_path / "globs.txt"
+        globs.write_text("\n", encoding="utf-8")
+        with patch.object(mr, "_mutmut") as mutmut:
+            assert mr.main(["gate", "--package", "scadfmt", "--globs-file", str(globs)]) == 0
+        mutmut.assert_not_called()
+
     def test_discord_command_full_run(self, capsys):
         with patch.object(mr, "_mutmut", return_value=RESULTS) as mutmut:
             assert mr.main(["discord", "--package", "scadfmt", "--run-url", "https://example.test/r"]) == 0

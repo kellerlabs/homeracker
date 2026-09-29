@@ -54,7 +54,7 @@ source = ["scadm"]
 branch = true
 
 [tool.coverage.report]
-# Raise when coverage grows, never lower. See docs/decisions/gate-scadm-coverage-and-mutation-test-changed-functions.md
+# Raise when coverage grows, never lower. See docs/decisions/gate-coverage-and-surviving-mutants-in-changed-functions.md
 fail_under = 90
 show_missing = true
 skip_covered = true
