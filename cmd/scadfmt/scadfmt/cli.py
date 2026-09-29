@@ -162,7 +162,6 @@ def build_parser() -> argparse.ArgumentParser:
         "--workspace",
         nargs="?",
         default=".",
-        const="",
         help="Workspace folder (its .vscode/settings.json) or .code-workspace file to update (default: .);"
         " without a path, asks about the nearest .code-workspace file",
     )

@@ -112,6 +112,23 @@ def _indent(text: str) -> str:
     return match.group(1) if match else "  "
 
 
+def _read_json(path: Path) -> tuple[str, object] | None:
+    """Read a JSON file, logging why it cannot be used.
+
+    Returns:
+        The text and the parsed content, an empty object for a missing file, or None on error.
+    """
+    try:
+        text = path.read_text(encoding=ENCODING) if path.exists() else "{}"
+        return text, json.loads(text)
+    except json.JSONDecodeError as e:
+        # Comments or trailing commas: refuse rather than overwrite hand-written settings.
+        logger.error("%s is not plain JSON (%s). Add the settings from the scadfmt README by hand.", path, e)
+    except (OSError, UnicodeDecodeError) as e:
+        logger.error("Cannot read %s: %s", path, e)
+    return None
+
+
 def setup_vscode(target: Path) -> bool:
     """Install the extension and point it at scadfmt in the workspace settings.
 
@@ -127,27 +144,24 @@ def setup_vscode(target: Path) -> bool:
     if workspace_file and not settings_file.is_file():
         logger.error("Workspace file %s not found.", settings_file)
         return False
-    text = ""
-    data = {}
-    if settings_file.exists():
-        try:
-            text = settings_file.read_text(encoding=ENCODING)
-            data = json.loads(text)
-        except json.JSONDecodeError as e:
-            # Comments or trailing commas: refuse rather than overwrite hand-written settings.
-            logger.error(
-                "%s is not plain JSON (%s). Add the settings from the scadfmt README by hand.", settings_file, e
-            )
-            return False
-        except (OSError, UnicodeDecodeError) as e:
-            logger.error("Cannot read %s: %s", settings_file, e)
-            return False
+    loaded = _read_json(settings_file)
+    if loaded is None:
+        return False
+    text, data = loaded
+    settings = data.setdefault("settings", {}) if workspace_file and isinstance(data, dict) else data
+    if not isinstance(settings, dict):
+        logger.error(
+            "%s: expected a JSON object for the settings. Add them from the scadfmt README by hand.", settings_file
+        )
+        return False
     if not _install_extension():
         return False
-    merge_settings(data.setdefault("settings", {}) if workspace_file else data)
+    merge_settings(settings)
     try:
         settings_file.parent.mkdir(parents=True, exist_ok=True)
-        write_atomically(settings_file, json.dumps(data, indent=_indent(text), ensure_ascii=False) + "\n")
+        # No mutation: ensure_ascii=None dumps the same. test_setup_updates_workspace_file pins the rest.
+        content = json.dumps(data, indent=_indent(text), ensure_ascii=False)  # pragma: no mutate
+        write_atomically(settings_file, content + "\n")
     except OSError as e:
         logger.error("Cannot write %s: %s", settings_file, e)
         return False

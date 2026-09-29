@@ -154,8 +154,9 @@ def _asker(answers):
 
 def test_choose_workspace_asks_for_path_when_none_found(tmp_path, monkeypatch):
     monkeypatch.setattr(vscode, "find_workspace_file", lambda start: None)
-    ask, prompts = _asker(['"C:/x/other.code-workspace" '])
-    assert vscode.choose_workspace(tmp_path, ask) == Path("C:/x/other.code-workspace")
+    # Starts and ends with X, so stripping more than quotes shows.
+    ask, prompts = _asker(['"X:/racks/X" '])
+    assert vscode.choose_workspace(tmp_path, ask) == Path("X:/racks/X")
     assert prompts == ["Workspace file or folder: "]
 
 
@@ -209,3 +210,21 @@ def test_setup_refuses_missing_workspace_file(tmp_path, fake_code):
     assert not vscode.setup_vscode(tmp_path / "missing.code-workspace")
     assert not fake_code
     assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    ("name", "content"),
+    [
+        ("w.code-workspace", '{"settings": null}'),
+        ("w.code-workspace", "[]"),
+        (".vscode/settings.json", "[]"),
+    ],
+)
+def test_setup_refuses_settings_that_are_not_an_object(tmp_path, fake_code, name, content):
+    settings_file = tmp_path / name
+    settings_file.parent.mkdir(exist_ok=True)
+    settings_file.write_text(content, encoding="utf-8")
+    target = settings_file if name.endswith(".code-workspace") else tmp_path
+    assert not vscode.setup_vscode(target)
+    assert settings_file.read_text(encoding="utf-8") == content
+    assert not fake_code
