@@ -9,7 +9,7 @@ from pathlib import Path
 from scadfmt import __version__
 from scadfmt.fileio import ENCODING, write_atomically
 from scadfmt.formatter import FormatError, format_source
-from scadfmt.vscode import setup_vscode
+from scadfmt.vscode import choose_workspace, setup_vscode
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +105,21 @@ def _handle_format(args: argparse.Namespace) -> int:
     return _format_files(_collect(args.paths), args.check, args.diff)
 
 
+def _handle_vscode(args: argparse.Namespace) -> int:
+    """Run the vscode subcommand, asking for the workspace when --workspace has no path."""
+    if args.workspace:
+        target = Path(args.workspace)
+    else:
+        try:
+            target = choose_workspace(Path.cwd())
+        except EOFError:
+            target = None
+        if target is None:
+            logger.error("No workspace given. Pass it as --workspace <path>.")
+            return EXIT_ERROR
+    return EXIT_OK if setup_vscode(target) else EXIT_ERROR
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the argument parser.
 
@@ -145,8 +160,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     vscode_parser.add_argument(
         "--workspace",
+        nargs="?",
         default=".",
-        help="Workspace folder whose .vscode/settings.json is updated (default: .)",
+        const="",
+        help="Workspace folder (its .vscode/settings.json) or .code-workspace file to update (default: .);"
+        " without a path, asks about the nearest .code-workspace file",
     )
     return parser
 
@@ -164,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")  # pragma: no mutate
     args = build_parser().parse_args(argv)
     if args.command == "vscode":
-        return EXIT_OK if setup_vscode(Path(args.workspace)) else EXIT_ERROR
+        return _handle_vscode(args)
     return _handle_format(args)
 
 

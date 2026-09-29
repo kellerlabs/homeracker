@@ -137,7 +137,18 @@ In another repository, install scadfmt from PyPI through a local hook:
 scadfmt vscode
 ```
 
-Installs the [Custom Local Formatters](https://marketplace.visualstudio.com/items?itemName=jkillian.custom-local-formatters) extension and makes scadfmt the default formatter for `.scad` files in `.vscode/settings.json`, so **Format Document** (`Shift+Alt+F`) runs it. It refuses to touch a `settings.json` with comments; add the settings by hand then:
+Installs the [Custom Local Formatters](https://marketplace.visualstudio.com/items?itemName=jkillian.custom-local-formatters) extension and makes scadfmt the default formatter for `.scad` files in `.vscode/settings.json` (of `--workspace <folder>`, default `.`), so **Format Document** (`Shift+Alt+F`) runs it.
+
+⚠️ In a multi-root workspace, VS Code ignores the formatter list in a folder's `.vscode/settings.json`. Pass the `.code-workspace` file to `--workspace` there, so the settings go into it instead:
+
+```bash
+scadfmt vscode --workspace                        # asks about the nearest .code-workspace file in . or above
+scadfmt vscode --workspace ../my.code-workspace   # no prompt
+```
+
+Declining the offered file, or having none, asks for a workspace file or folder.
+
+It refuses to touch a settings file with comments; add the settings by hand then (in a `.code-workspace` file, inside its `"settings"` block):
 
 ```jsonc
 "customLocalFormatters.formatters": [{ "command": "\"/path/to/python\" -m scadfmt format -", "languages": ["scad"] }],
