@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/kellerlabs/homeracker/compare/scadfmt-v0.2.0...scadfmt-v0.3.0) (2026-10-04)
+
+
+### ✨ Features
+
+* **scadfmt:** write VS Code settings into a .code-workspace file; fail PRs on surviving mutants ([#531](https://github.com/kellerlabs/homeracker/issues/531)) ([942938e](https://github.com/kellerlabs/homeracker/commit/942938e911508123dd11ee481c4f3281266c2cd3))
+
 ## [0.2.0](https://github.com/kellerlabs/homeracker/compare/scadfmt-v0.1.0...scadfmt-v0.2.0) (2026-09-28)
 
 
