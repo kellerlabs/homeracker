@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.19.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.18.0...homeracker-v3.19.0) (2026-10-05)
+
+
+### ✨ Features
+
+* **scadfmt:** write VS Code settings into a .code-workspace file; fail PRs on surviving mutants ([#531](https://github.com/kellerlabs/homeracker/issues/531)) ([942938e](https://github.com/kellerlabs/homeracker/commit/942938e911508123dd11ee481c4f3281266c2cd3))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.762 ([#534](https://github.com/kellerlabs/homeracker/issues/534)) ([ba2905f](https://github.com/kellerlabs/homeracker/commit/ba2905f369d4d78e697092bc017a1b9e92274a80))
+* update dependency kellerlab-pre-commit-hooks to v0.3.12 ([#539](https://github.com/kellerlabs/homeracker/issues/539)) ([a44b375](https://github.com/kellerlabs/homeracker/commit/a44b375f6c93df2d06381096cb54ed000c25c62e))
+* update dependency markdown to v3.11 ([#537](https://github.com/kellerlabs/homeracker/issues/537)) ([fda2ce2](https://github.com/kellerlabs/homeracker/commit/fda2ce2abdf609257c82ae8b8e7a6fa8af98e14b))
+* update dependency openscad to v2026.10.02 ([#538](https://github.com/kellerlabs/homeracker/issues/538)) ([bfb7069](https://github.com/kellerlabs/homeracker/commit/bfb706944b56dff02e79a2f135ef802377aaea24))
+* update dependency typescript-eslint to v8.71.0 ([#541](https://github.com/kellerlabs/homeracker/issues/541)) ([8a6fb3d](https://github.com/kellerlabs/homeracker/commit/8a6fb3d8797a60fad2bc6433e1a1114a04eb9b9e))
+* update npm dependencies ([#536](https://github.com/kellerlabs/homeracker/issues/536)) ([13b67af](https://github.com/kellerlabs/homeracker/commit/13b67af20d7957aaa98473a7c47bb74e619e44a9))
+* update pre-commit hooks ([#533](https://github.com/kellerlabs/homeracker/issues/533)) ([e4f6b25](https://github.com/kellerlabs/homeracker/commit/e4f6b258843c29616e4f4a6dff542c1383826c15))
+
 ## [3.18.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.17.0...homeracker-v3.18.0) (2026-09-28)
 
 
