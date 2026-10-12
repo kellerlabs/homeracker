@@ -1,5 +1,5 @@
 {
-  ".": "3.19.0",
+  ".": "3.19.1",
   "cmd/scadm": "0.12.0",
   "cmd/scadfmt": "0.3.0",
   ".github/actions/setup-openscad": "2.2.2",
