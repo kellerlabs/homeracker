@@ -20,20 +20,20 @@
   "dependencies": {
     "@astrojs/markdown-remark": "7.3.2",
     "@fontsource/orbitron": "5.3.0",
-    "@fontsource/source-code-pro": "5.3.0",
-    "astro": "7.3.6",
+    "@fontsource/source-code-pro": "5.3.1",
+    "astro": "7.3.8",
     "sharp": "0.35.5",
     "three": "0.186.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.0",
     "@types/hast": "3.0.5",
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/three": "0.186.0",
     "hast-util-to-string": "3.0.1",
     "typescript": "6.0.3",
     "unist-util-visit": "5.1.0",
-    "vitest": "5.0.3"
+    "vitest": "5.0.4"
   }
 }
