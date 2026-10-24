@@ -1,4 +1,4 @@
 kellerlab-pre-commit-hooks==0.3.15
-markdown==3.11.1
+markdown==3.11.2
 mutmut==3.8.0
 pytest-cov==7.1.0
