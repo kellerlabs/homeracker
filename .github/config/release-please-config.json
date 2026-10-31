@@ -34,7 +34,8 @@
     "cmd/scadfmt": {
       "release-type": "python",
       "package-name": "scadfmt",
-      "component": "scadfmt"
+      "component": "scadfmt",
+      "exclude-paths": ["cmd/scadfmt/tests"]
     },
     ".github/actions/setup-openscad": {
       "release-type": "simple",

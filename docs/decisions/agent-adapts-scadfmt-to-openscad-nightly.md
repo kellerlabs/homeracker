@@ -28,7 +28,7 @@ On the Renovate OpenSCAD PR, [`scadfmt-agent.yml`](../../.github/workflows/scadf
 |---|---|
 | Grammar unchanged | Agent skipped, automerge as usual |
 | No change needed | PR comment with the reason, automerge |
-| Adapted, tests green | Push, summary comment, waits for approval. The commit is `feat(scadfmt):` when the patch touches `cmd/scadfmt/scadfmt/` and releases scadfmt, `test(scadfmt):` otherwise |
+| Adapted, tests green | Push, summary comment, waits for approval. Renovate squash-merges the PR as `deps:`, which releases scadfmt only when the patch touches more than `cmd/scadfmt/tests/` |
 | Agent failed or tests red | No push, result as artifact, comment asks a person to take over; `check-results` stays red |
 | Run cancelled, or re-run on a moved PR head | No push, no comment, no ping; `check-results` stays red |
 
