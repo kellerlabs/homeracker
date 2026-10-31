@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.1](https://github.com/kellerlabs/homeracker/compare/scadfmt-v0.3.0...scadfmt-v0.3.1) (2026-10-31)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** keep cancelled and stale scadfmt agent runs silent ([#573](https://github.com/kellerlabs/homeracker/issues/573)) ([06d79fb](https://github.com/kellerlabs/homeracker/commit/06d79fbd9ed74ad5009d80f37d999972ee4108cc))
+
+
+### 📦 Dependencies
+
+* update dependency openscad to v2026.10.31 ([#568](https://github.com/kellerlabs/homeracker/issues/568)) ([8f31271](https://github.com/kellerlabs/homeracker/commit/8f31271e5520fefaf1948a943f053987e7868f87))
+
 ## [0.3.0](https://github.com/kellerlabs/homeracker/compare/scadfmt-v0.2.0...scadfmt-v0.3.0) (2026-10-05)
 
 
