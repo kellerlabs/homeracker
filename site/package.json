@@ -18,22 +18,22 @@
     "check": "npm run lint && npm run test"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.3.3",
+    "@astrojs/markdown-remark": "7.3.4",
     "@fontsource/orbitron": "5.3.0",
     "@fontsource/source-code-pro": "5.3.1",
-    "astro": "7.4.1",
+    "astro": "7.4.2",
     "sharp": "0.35.5",
     "three": "0.186.1"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.11",
+    "@astrojs/check": "0.9.12",
     "@playwright/test": "1.64.1",
     "@types/hast": "3.0.5",
     "@types/node": "26.6.5",
     "@types/three": "0.186.0",
     "hast-util-to-string": "3.0.1",
     "typescript": "6.0.3",
-    "unist-util-visit": "5.1.0",
+    "unist-util-visit": "5.2.0",
     "vitest": "5.0.5"
   }
 }
