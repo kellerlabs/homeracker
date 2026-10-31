@@ -43,7 +43,14 @@ jobs:
       adapted: ${{ steps.adapted.outputs.adapted }}
       changed: ${{ steps.grammar.outputs.changed }}
     steps:
-      # A re-run replays its old event, so it only works on the current PR head.
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      # Every re-run replays its old event, so it only works on the current PR head.
       - name: Check the PR head is current
         id: current
         if: '!inputs.probe'
@@ -52,21 +59,7 @@ jobs:
           REPO: ${{ github.repository }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_REF: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-          remote_sha="$(gh api "repos/$REPO/git/ref/heads/$HEAD_REF" --jq .object.sha)"
-          if [[ "$remote_sha" != "$HEAD_SHA" ]]; then
-            echo "stale=true" >> "$GITHUB_OUTPUT"
-            echo "::error::$HEAD_REF moved from $HEAD_SHA to $remote_sha. Re-run the latest run instead."
-            exit 1
-          fi
-
-      - name: Checkout PR head
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
+        run: cmd/scadfmt/nightly/head-current.sh
 
       - name: Check for an agent commit
         id: adapted
@@ -321,11 +314,20 @@ jobs:
           echo "RESULT_DIR=$RUNNER_TEMP/scadfmt-adapt" >> "$GITHUB_ENV"
 
       - name: Checkout PR head
-        if: needs.verify.result == 'success'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
+
+      # A re-run of failed jobs keeps the gate's earlier pass, so check again before any side effect.
+      - name: Check the PR head is current
+        id: current
+        if: '!inputs.probe'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: cmd/scadfmt/nightly/head-current.sh
 
       - name: 'Probe: break scadfmt'
         if: needs.verify.result == 'success' && inputs.probe
@@ -407,7 +409,7 @@ jobs:
 
       # Also pings the maintainer in the Discord CI channel, by their Discord user ID.
       - name: Hand over to a person
-        if: failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed'
+        if: steps.current.outputs.stale != 'true' && (failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed')
         env:
           GH_TOKEN: ${{ github.token }}
           DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
