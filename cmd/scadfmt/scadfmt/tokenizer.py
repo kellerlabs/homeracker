@@ -82,7 +82,7 @@ _PATTERNS = [
     (Kind.BLOCK_COMMENT, re.compile(r"/\*.*?\*/", re.S)),
     (Kind.STRING, re.compile(r'"(?:\\.|[^"\\])*"', re.S)),
     (Kind.NUMBER, re.compile(r"0[xX][0-9A-Fa-f]+|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")),
-    # `$`, `$1` and Unicode letters (behind --enable=unicode-identifiers) are valid OpenSCAD identifiers too.
+    # `$`, `$1` and Unicode letters are valid OpenSCAD identifiers too.
     (Kind.IDENT, re.compile(r"\$\w*|[^\W\d]\w*")),
     (Kind.OP, re.compile("|".join(re.escape(op) for op in OPERATORS))),
 ]
