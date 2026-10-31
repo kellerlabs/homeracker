@@ -39,6 +39,7 @@ jobs:
     permissions:
       contents: read
     outputs:
+      stale: ${{ steps.current.outputs.stale }}
       adapted: ${{ steps.adapted.outputs.adapted }}
       changed: ${{ steps.grammar.outputs.changed }}
     steps:
@@ -48,6 +49,17 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+
+      # Every re-run replays its old event, so it only works on the current PR head.
+      - name: Check the PR head is current
+        id: current
+        if: '!inputs.probe'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: cmd/scadfmt/nightly/head-current.sh
 
       - name: Check for an agent commit
         id: adapted
@@ -199,7 +211,7 @@ jobs:
   # Runs the agent's code, so it holds no token and no write permission.
   verify:
     needs: adapt
-    if: always() && needs.adapt.result != 'skipped'
+    if: ${{ !cancelled() && needs.adapt.result != 'skipped' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -281,10 +293,10 @@ jobs:
           cmd/scadfmt/tests/canary/check.sh
 
   # Never runs the agent's code: it only applies the verified patch, comments and pushes.
-  # Also runs when the gate failed, so the handover reports that too.
+  # Also runs when the gate failed, so the handover reports that too. A stale or cancelled run stays silent.
   publish:
     needs: [gate, adapt, verify]
-    if: always() && (needs.gate.result == 'failure' || needs.adapt.result != 'skipped')
+    if: ${{ !cancelled() && needs.gate.outputs.stale != 'true' && (needs.gate.result == 'failure' || needs.adapt.result != 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -302,11 +314,20 @@ jobs:
           echo "RESULT_DIR=$RUNNER_TEMP/scadfmt-adapt" >> "$GITHUB_ENV"
 
       - name: Checkout PR head
-        if: needs.verify.result == 'success'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
+
+      # A re-run of failed jobs keeps the gate's earlier pass, so check again before any side effect.
+      - name: Check the PR head is current
+        id: current
+        if: '!inputs.probe'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: cmd/scadfmt/nightly/head-current.sh
 
       - name: 'Probe: break scadfmt'
         if: needs.verify.result == 'success' && inputs.probe
@@ -388,7 +409,7 @@ jobs:
 
       # Also pings the maintainer in the Discord CI channel, by their Discord user ID.
       - name: Hand over to a person
-        if: failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed'
+        if: steps.current.outputs.stale != 'true' && (failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed')
         env:
           GH_TOKEN: ${{ github.token }}
           DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}
