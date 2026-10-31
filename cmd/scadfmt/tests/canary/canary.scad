@@ -23,6 +23,8 @@ compare=[1<2,1>2,1<=2,1>=2,1==2,1!=2];
 logic=!true&&false||!(false);
 bitwise=[5&3,5|3,~5,1<<4,16>>2];
 hex=[0xFF,0x0a];
+größe=5;
+café=größe*2;
 unary_after_header=[let(a=1)-a,for(i=[1:2])-i];
 fn_negate=function(x)-x;
 unary=[-width,+width,- - width];
