@@ -24,5 +24,5 @@
 
 - The agent's commit survives merges to `main`, so it runs once per nightly and is approved once.
 - Fewer CI runs and less Renovate churn on every PR.
-- A green check may have run against an older `main`. Two PRs that each pass alone can break `main` together. The PR checks are path-filtered and do not run on `main`, so a break shows only once a later PR runs the affected check.
+- A green check may have run against an older `main`. Two PRs that each pass alone can break `main` together. Only `pre-commit` and `web` run on `main`; any other break shows once a later PR runs the affected path-filtered check.
 - Human PRs no longer need "Update branch" before merging, with the same risk.
