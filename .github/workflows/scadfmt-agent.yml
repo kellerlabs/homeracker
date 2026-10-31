@@ -250,13 +250,13 @@ jobs:
           ADAPT_RESULT: ${{ needs.adapt.result }}
         run: |
           set -euo pipefail
-          # The summary's first line and the patch must agree: a fix with "feat(scadfmt):", a verified
-          # "no change:" without one. Anything else, such as "stuck:" with a partial patch, hands over.
+          # The summary's first line and the patch must agree: a patch with "feat(scadfmt):" or "test(scadfmt):",
+          # a verified "no change:" without one. Anything else, such as "stuck:" with a partial patch, hands over.
           subject=""
           if [[ "$ADAPT_RESULT" == "success" && -s "$RESULT_DIR/summary.md" ]]; then
             subject="$(head -n 1 "$RESULT_DIR/summary.md")"
           fi
-          if [[ -s "$RESULT_DIR/agent.patch" && "$subject" =~ ^feat\(scadfmt\):\ .+ ]]; then
+          if [[ -s "$RESULT_DIR/agent.patch" && "$subject" =~ ^(feat|test)\(scadfmt\):\ .+ ]]; then
             echo "outcome=changed" >> "$GITHUB_OUTPUT"
           elif [[ ! -s "$RESULT_DIR/agent.patch" && "$subject" =~ ^no\ change:\ .+ ]]; then
             echo "outcome=unchanged" >> "$GITHUB_OUTPUT"
@@ -387,9 +387,17 @@ jobs:
           HEAD_REF: ${{ inputs.probe && format('scadfmt-e2e/{0}', github.run_id) || github.head_ref }}
         run: |
           set -euo pipefail
+          # The patch's paths pick the type: a formatter change releases scadfmt, a test-only change does not.
+          staged="$(git diff --cached --name-only)"
+          type="test"
+          if grep -q '^cmd/scadfmt/scadfmt/' <<< "$staged"; then
+            type="feat"
+          fi
           subject="$(head -n 1 "$RESULT_DIR/summary.md")"
-          if [[ ! "$subject" =~ ^feat\(scadfmt\):\ .+ ]]; then
-            subject="feat(scadfmt): support OpenSCAD nightly grammar changes"
+          if [[ "$subject" =~ ^(feat|test)\(scadfmt\):\ (.+)$ ]]; then
+            subject="${type}(scadfmt): ${BASH_REMATCH[2]}"
+          else
+            subject="${type}(scadfmt): support OpenSCAD nightly grammar changes"
           fi
           {
             if [[ "$PROBE" == "true" ]]; then
