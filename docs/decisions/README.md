@@ -6,6 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [rebase-renovate-branches-only-on-conflict](rebase-renovate-branches-only-on-conflict.md) | 2026-10-31 | Renovate rebases only on conflict and `main` no longer requires up to date branches, so the scadfmt agent's commit survives merges to `main` |
 | [gate-coverage-and-surviving-mutants-in-changed-functions](gate-coverage-and-surviving-mutants-in-changed-functions.md) | 2026-09-29 | `scadm` unit tests gate on 90% branch coverage; a mutant surviving in a function the PR changed fails it; weekly full run to Discord |
 | [agent-adapts-scadfmt-to-openscad-nightly](agent-adapts-scadfmt-to-openscad-nightly.md) | 2026-09-28 | On the weekly OpenSCAD nightly PR, a Claude agent adapts scadfmt when the grammar changed; the workflow tests and pushes, a person approves |
 | [build-own-openscad-formatter-scadfmt](build-own-openscad-formatter-scadfmt.md) | 2026-09-27 | Own token-based formatter `scadfmt` in `cmd/scadfmt`: keeps line breaks, never changes tokens; linting later on `openscad-parser` |

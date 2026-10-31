@@ -2,7 +2,7 @@
 
 ## 🚦 PR Gate
 
-Every PR runs one pipeline, [`ci.yml`](ci.yml). Branch protection on `main` requires `check-results`, which fails when any job failed or was cancelled, and `validate-title`. A path-filtered job that did not run counts as passed, so it is required exactly when it applies. See [gate-prs-with-a-single-check-results-job](../../docs/decisions/gate-prs-with-a-single-check-results-job.md).
+Every PR runs one pipeline, [`ci.yml`](ci.yml). Branch protection on `main` requires `check-results`, which fails when any job failed or was cancelled, and `validate-title`. A path-filtered job that did not run counts as passed, so it is required exactly when it applies. See [gate-prs-with-a-single-check-results-job](../../docs/decisions/gate-prs-with-a-single-check-results-job.md). A PR may merge while behind `main`, and Renovate rebases only on conflict, see [rebase-renovate-branches-only-on-conflict](../../docs/decisions/rebase-renovate-branches-only-on-conflict.md).
 
 ```mermaid
 flowchart LR

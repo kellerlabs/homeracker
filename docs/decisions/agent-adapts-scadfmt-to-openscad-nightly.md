@@ -22,13 +22,13 @@ On the Renovate OpenSCAD PR, [`scadfmt-agent.yml`](../../.github/workflows/scadf
 - **Verify:** a job without any token applies the agent's patch and rejects it unless it only changes formatter sources, the two canary files and new test files ([`check-patch.sh`](../../cmd/scadfmt/nightly/check-patch.sh)). Existing tests, `check.sh` and the coverage config stay as reviewed, so the patch cannot weaken its own checks. The existing tests run on their own, then all tests with the coverage gate, then the canary.
 - **Publish:** a separate job never runs the agent's code. It applies the verified patch again, commits as `scadfmt-agent` with git hooks off and pushes with the token of a dedicated agent GitHub App (Contents write only, separate from the releases app), so CI runs on the commit.
 - **E2E probe:** the `scadfmt-e2e` label runs the flow on any PR. It fakes an older nightly pin, breaks scadfmt for a construct from that grammar diff, and pushes the agent's fix to a throwaway branch. See the [CI overview](../../.github/workflows/README.md#-e2e-probe).
-- **Review:** on a branch with an agent commit, the `human-review` job targets the `scadfmt-review` environment, which requires a reviewer. `check-results` waits for the approval. Renovate ignores the agent's commits (`gitIgnoredAuthors`), so it automerges once approved.
+- **Review:** on a branch with an agent commit, the `human-review` job targets the `scadfmt-review` environment, which requires a reviewer. `check-results` waits for the approval. Renovate ignores the agent's commits (`gitIgnoredAuthors`), so it automerges once approved. It rebases only on conflict, so a merge to `main` keeps the agent's commit ([rebase-renovate-branches-only-on-conflict](rebase-renovate-branches-only-on-conflict.md)).
 
 | Outcome | Result |
 |---|---|
 | Grammar unchanged | Agent skipped, automerge as usual |
 | No change needed | PR comment with the reason, automerge |
-| Adapted, tests green | Push, summary comment, waits for approval |
+| Adapted, tests green | Push, summary comment, waits for approval. Renovate squash-merges the PR as `deps:`, which releases scadfmt only when the patch touches more than `cmd/scadfmt/tests/` |
 | Agent failed or tests red | No push, result as artifact, comment asks a person to take over; `check-results` stays red |
 | Run cancelled, or re-run on a moved PR head | No push, no comment, no ping; `check-results` stays red |
 
