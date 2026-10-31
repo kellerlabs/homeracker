@@ -39,9 +39,28 @@ jobs:
     permissions:
       contents: read
     outputs:
+      stale: ${{ steps.current.outputs.stale }}
       adapted: ${{ steps.adapted.outputs.adapted }}
       changed: ${{ steps.grammar.outputs.changed }}
     steps:
+      # A re-run replays its old event, so it only works on the current PR head.
+      - name: Check the PR head is current
+        id: current
+        if: '!inputs.probe'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          remote_sha="$(gh api "repos/$REPO/git/ref/heads/$HEAD_REF" --jq .object.sha)"
+          if [[ "$remote_sha" != "$HEAD_SHA" ]]; then
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+            echo "::error::$HEAD_REF moved from $HEAD_SHA to $remote_sha. Re-run the latest run instead."
+            exit 1
+          fi
+
       - name: Checkout PR head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -199,7 +218,7 @@ jobs:
   # Runs the agent's code, so it holds no token and no write permission.
   verify:
     needs: adapt
-    if: always() && needs.adapt.result != 'skipped'
+    if: ${{ !cancelled() && needs.adapt.result != 'skipped' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -281,10 +300,10 @@ jobs:
           cmd/scadfmt/tests/canary/check.sh
 
   # Never runs the agent's code: it only applies the verified patch, comments and pushes.
-  # Also runs when the gate failed, so the handover reports that too.
+  # Also runs when the gate failed, so the handover reports that too. A stale or cancelled run stays silent.
   publish:
     needs: [gate, adapt, verify]
-    if: always() && (needs.gate.result == 'failure' || needs.adapt.result != 'skipped')
+    if: ${{ !cancelled() && needs.gate.outputs.stale != 'true' && (needs.gate.result == 'failure' || needs.adapt.result != 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -300,21 +319,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "RESULT_DIR=$RUNNER_TEMP/scadfmt-adapt" >> "$GITHUB_ENV"
-
-      # A re-run replays the old event: once the branch moved, the newer run publishes or hands over.
-      - name: Check the PR head is current
-        if: '!inputs.probe'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-          remote_sha="$(gh api "repos/$REPO/git/ref/heads/$HEAD_REF" --jq .object.sha)"
-          if [[ "$remote_sha" != "$HEAD_SHA" ]]; then
-            echo "::notice::$HEAD_REF moved from $HEAD_SHA to $remote_sha, the newer run publishes."
-            echo "STALE=true" >> "$GITHUB_ENV"
-          fi
 
       - name: Checkout PR head
         if: needs.verify.result == 'success'
@@ -339,7 +343,7 @@ jobs:
           path: ${{ env.RESULT_DIR }}
 
       - name: Comment that nothing needed changing
-        if: needs.verify.result == 'success' && env.OUTCOME == 'unchanged' && env.STALE != 'true'
+        if: needs.verify.result == 'success' && env.OUTCOME == 'unchanged'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -354,7 +358,7 @@ jobs:
           exit 1
 
       - name: Apply and guard the patch
-        if: needs.verify.result == 'success' && env.OUTCOME == 'changed' && env.STALE != 'true'
+        if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
         run: |
           set -euo pipefail
           cp cmd/scadfmt/nightly/check-patch.sh "$RUNNER_TEMP/check-patch.sh"
@@ -363,7 +367,7 @@ jobs:
 
       - name: Generate GitHub App Token
         id: app-token
-        if: needs.verify.result == 'success' && env.OUTCOME == 'changed' && env.STALE != 'true'
+        if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ secrets.KELLERLAB_AGENT_APP_ID }}
@@ -374,7 +378,7 @@ jobs:
       # The agent app's token, not GITHUB_TOKEN: only an app push starts CI on the agent's commit.
       # The probe pushes to a throwaway branch instead, which starts no workflow, and deletes it again.
       - name: Commit, comment and push
-        if: needs.verify.result == 'success' && env.OUTCOME == 'changed' && env.STALE != 'true'
+        if: needs.verify.result == 'success' && env.OUTCOME == 'changed'
         env:
           GH_TOKEN: ${{ github.token }}
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -403,7 +407,7 @@ jobs:
 
       # Also pings the maintainer in the Discord CI channel, by their Discord user ID.
       - name: Hand over to a person
-        if: env.STALE != 'true' && (failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed')
+        if: failure() || needs.verify.result != 'success' || env.OUTCOME == 'failed'
         env:
           GH_TOKEN: ${{ github.token }}
           DISCORD_CI_WEBHOOK_URL: ${{ secrets.DISCORD_CI_WEBHOOK_URL }}

@@ -14,13 +14,13 @@
 
 On the Renovate OpenSCAD PR, [`scadfmt-agent.yml`](../../.github/workflows/scadfmt-agent.yml) lets a Claude agent adapt scadfmt, and a person approves the result.
 
-- **Gate:** runs only for a PR from this repo by `renovate[bot]` on `renovate/openscad-nightly`. [`grammar-diff.sh`](../../cmd/scadfmt/nightly/grammar-diff.sh) diffs `src/core/lexer.l` and `src/core/parser.y` from the start of the old nightly's date to the end of the new one's (UTC). A nightly carries only its build date, so a commit from either day may be diffed twice but is never missed. The agent is skipped when the diff is empty or the branch already carries an agent commit.
+- **Gate:** runs only for a PR from this repo by `renovate[bot]` on `renovate/openscad-nightly`. [`grammar-diff.sh`](../../cmd/scadfmt/nightly/grammar-diff.sh) diffs `src/core/lexer.l` and `src/core/parser.y` from the start of the old nightly's date to the end of the new one's (UTC). A nightly carries only its build date, so a commit from either day may be diffed twice but is never missed. The agent is skipped when the diff is empty or the branch already carries an agent commit. A re-run replays its old event, so the gate fails without a handover when the PR head has moved since: re-run the latest run instead.
 - **Runtime:** [claude-code-action](https://github.com/anthropics/claude-code-action) with `CLAUDE_CODE_OAUTH_TOKEN` (subscription), `allowed_bots: renovate`, `claude-sonnet-5`, 100 turns (probes took 40 to over 60), 30 minutes.
 - **Instructions:** the [`scadfmt-adapt`](../../.claude/skills/scadfmt-adapt/SKILL.md) skill, which people also use when taking over.
 - **Sources:** OpenSCAD's `src/core/` and `tests/data/scad/`, checked out by the gate script, and BOSL2 from `scadm install`, both local. `WebFetch` for `openscad.org` only.
 - **Isolation:** the agent job has `contents: read` only and passes its read-only token to the action. Tools are file tools and a Bash allowlist (`check.sh`, `pytest`, `scadfmt format`, OpenSCAD, `git diff`/`status`). No push, no `gh`, no WebSearch. Subprocesses run without the OAuth and GitHub tokens (`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`).
 - **Verify:** a job without any token applies the agent's patch and rejects it unless it only changes formatter sources, the two canary files and new test files ([`check-patch.sh`](../../cmd/scadfmt/nightly/check-patch.sh)). Existing tests, `check.sh` and the coverage config stay as reviewed, so the patch cannot weaken its own checks. The existing tests run on their own, then all tests with the coverage gate, then the canary.
-- **Publish:** a separate job never runs the agent's code. It applies the verified patch again, commits as `scadfmt-agent` with git hooks off and pushes with the token of a dedicated agent GitHub App (Contents write only, separate from the releases app), so CI runs on the commit. A run whose PR head has moved since its event (a re-run replays the old one) publishes nothing and hands nothing over: the run on the new head does.
+- **Publish:** a separate job never runs the agent's code. It applies the verified patch again, commits as `scadfmt-agent` with git hooks off and pushes with the token of a dedicated agent GitHub App (Contents write only, separate from the releases app), so CI runs on the commit.
 - **E2E probe:** the `scadfmt-e2e` label runs the flow on any PR. It fakes an older nightly pin, breaks scadfmt for a construct from that grammar diff, and pushes the agent's fix to a throwaway branch. See the [CI overview](../../.github/workflows/README.md#-e2e-probe).
 - **Review:** on a branch with an agent commit, the `human-review` job targets the `scadfmt-review` environment, which requires a reviewer. `check-results` waits for the approval. Renovate ignores the agent's commits (`gitIgnoredAuthors`), so it automerges once approved.
 
@@ -30,6 +30,7 @@ On the Renovate OpenSCAD PR, [`scadfmt-agent.yml`](../../.github/workflows/scadf
 | No change needed | PR comment with the reason, automerge |
 | Adapted, tests green | Push, summary comment, waits for approval |
 | Agent failed or tests red | No push, result as artifact, comment asks a person to take over; `check-results` stays red |
+| Run cancelled, or re-run on a moved PR head | No push, no comment, no ping; `check-results` stays red |
 
 ### Alternatives Considered
 
