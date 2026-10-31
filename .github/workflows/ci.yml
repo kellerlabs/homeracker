@@ -36,6 +36,7 @@ jobs:
               - *ci
               - 'cmd/scadm/**'
               - 'scadm.json'
+              - 'requirements.txt'
               - '.github/workflows/integration-tests.yml'
               - '.github/actions/setup-openscad/**'
             mutation-tests:
@@ -51,6 +52,7 @@ jobs:
               - *ci
               - 'cmd/scadfmt/**'
               - 'scadm.json'
+              - 'requirements.txt'
               - '.github/actions/setup-openscad/**'
               - '.github/workflows/scadfmt-tests.yml'
             test-setup-openscad:

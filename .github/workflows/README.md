@@ -108,7 +108,7 @@ The agent's conversation never goes to the job log or an artifact: this repo is 
    ```bash
    git worktree add /tmp/scadfmt-debug origin/main && cd /tmp/scadfmt-debug
    scadm install
-   pip install -e cmd/scadfmt pytest pytest-cov
+   pip install -e cmd/scadfmt -r requirements.txt
    cmd/scadfmt/nightly/probe-break.sh      # probe only: break scadfmt like the probe does
    OLD_NIGHTLY=2026.08.05 cmd/scadfmt/nightly/grammar-diff.sh HEAD /tmp/scadfmt-adapt
    APPIMAGE_EXTRACT_AND_RUN=1 claude -p "$(cat prompt.txt)" --model claude-sonnet-5 --max-turns 100 \

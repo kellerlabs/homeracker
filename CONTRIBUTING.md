@@ -50,7 +50,7 @@ scadm vscode --python     # Install and configure Python extension
 scadfmt vscode            # Format .scad files with scadfmt (Format Document)
 
 # Install pre-commit and the test tooling its hooks use
-pip install pre-commit pytest -r requirements.txt
+pip install pre-commit -r requirements.txt
 
 # Additional dependencies for OpensCAD and pre-commit (Ubuntu / Debian)
 sudo apt install libopengl0 shellcheck

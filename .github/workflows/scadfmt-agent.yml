@@ -143,7 +143,7 @@ jobs:
       - name: Install scadfmt
         run: |
           set -euo pipefail
-          pip install -e cmd/scadfmt pytest pytest-cov
+          pip install -e cmd/scadfmt -r requirements.txt
 
       - name: Diff OpenSCAD's grammar
         id: grammar
@@ -285,7 +285,7 @@ jobs:
         if: steps.outcome.outputs.outcome == 'changed'
         run: |
           set -euo pipefail
-          pip install -e cmd/scadfmt pytest pytest-cov
+          pip install -e cmd/scadfmt -r requirements.txt
           existing="$(cat "$RUNNER_TEMP/existing-tests.txt")"
           mapfile -t tests <<< "$existing"
           python -m pytest -c cmd/scadfmt/pyproject.toml "${tests[@]}" -q -p no:cacheprovider

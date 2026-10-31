@@ -79,6 +79,12 @@
       "automerge": true
     },
     {
+      // mutmut hooks into pytest internals, so a pytest release can break it until mutmut catches up.
+      "matchPackageNames": ["pytest", "pytest-cov", "pytest-timeout", "mutmut"],
+      "groupName": "pytest and mutmut",
+      "groupSlug": "pytest"
+    },
+    {
       "matchManagers": ["pre-commit"],
       "groupName": "pre-commit hooks",
       "groupSlug": "pre-commit-hooks",
