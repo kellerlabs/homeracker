@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.4](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.2.3...setup-openscad-v2.2.4) (2026-10-31)
+
+
+### 📦 Dependencies
+
+* update github actions ([#570](https://github.com/kellerlabs/homeracker/issues/570)) ([d1845cb](https://github.com/kellerlabs/homeracker/commit/d1845cbdc43c4af674158a0cf98b87c7c5575ebb))
+
 ## [2.2.3](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.2.2...setup-openscad-v2.2.3) (2026-10-18)
 
 

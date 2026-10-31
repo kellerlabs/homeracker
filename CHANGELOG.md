@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.19.4](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.19.3...homeracker-v3.19.4) (2026-10-31)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** install test tools only from pinned requirements ([#575](https://github.com/kellerlabs/homeracker/issues/575)) ([dfce3ea](https://github.com/kellerlabs/homeracker/commit/dfce3ea11f7987d2f329308a76961f4c5e9e4fe2))
+* **ci:** keep cancelled and stale scadfmt agent runs silent ([#573](https://github.com/kellerlabs/homeracker/issues/573)) ([06d79fb](https://github.com/kellerlabs/homeracker/commit/06d79fbd9ed74ad5009d80f37d999972ee4108cc))
+* **ci:** stop Renovate rebases from dropping scadfmt agent commits ([#574](https://github.com/kellerlabs/homeracker/issues/574)) ([a77e340](https://github.com/kellerlabs/homeracker/commit/a77e340871a17d813573a384e17679bf3ee8becd))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.779 ([#567](https://github.com/kellerlabs/homeracker/issues/567)) ([382898c](https://github.com/kellerlabs/homeracker/commit/382898cfa155baedcdf80dab1b014aa44b1eea74))
+* update dependency node to v26 ([#571](https://github.com/kellerlabs/homeracker/issues/571)) ([af56ed2](https://github.com/kellerlabs/homeracker/commit/af56ed2107bbecf67922eff9904619a5af6ae7b2))
+* update dependency openscad to v2026.10.31 ([#568](https://github.com/kellerlabs/homeracker/issues/568)) ([8f31271](https://github.com/kellerlabs/homeracker/commit/8f31271e5520fefaf1948a943f053987e7868f87))
+* update npm dependencies ([#569](https://github.com/kellerlabs/homeracker/issues/569)) ([3dc1b44](https://github.com/kellerlabs/homeracker/commit/3dc1b44590987f2a27e967ae6eb3d367d9589e9a))
+
 ## [3.19.3](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.19.2...homeracker-v3.19.3) (2026-10-26)
 
 
