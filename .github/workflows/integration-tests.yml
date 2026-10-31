@@ -26,7 +26,7 @@ jobs:
           python-version: '3.15'
 
       - name: Install scadm from source
-        run: pip install -e cmd/scadm pytest pytest-timeout
+        run: pip install -e cmd/scadm -r requirements.txt
 
       - name: Install OpenSCAD AppImage dependencies (Linux)
         if: runner.os == 'Linux'

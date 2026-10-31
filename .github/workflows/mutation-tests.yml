@@ -43,7 +43,7 @@ jobs:
       - name: Install dependencies
         run: |
           set -euo pipefail
-          pip install -e cmd/scadm -e cmd/scadfmt pytest -r requirements.txt
+          pip install -e cmd/scadm -e cmd/scadfmt -r requirements.txt
 
       # Per package: pick the scope, run mutmut capped at 5 minutes so a growing suite can't stall PRs
       # (results collected before the cap are kept), then render its section of the PR comment.
@@ -143,7 +143,7 @@ jobs:
       - name: Install dependencies
         run: |
           set -euo pipefail
-          pip install -e "cmd/$PACKAGE" pytest -r requirements.txt
+          pip install -e "cmd/$PACKAGE" -r requirements.txt
 
       - name: Run mutation tests
         working-directory: cmd/${{ matrix.package }}

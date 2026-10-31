@@ -47,7 +47,7 @@ jobs:
           PACKAGE: ${{ matrix.package }}
         run: |
           set -euo pipefail
-          pip install -e "cmd/$PACKAGE" pytest -r requirements.txt
+          pip install -e "cmd/$PACKAGE" -r requirements.txt
 
       - name: Measure coverage
         working-directory: cmd/${{ matrix.package }}
