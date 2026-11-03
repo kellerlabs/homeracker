@@ -67,6 +67,11 @@ hr_rackmount_cage_nut_hole_mid_depth = 0.6;   // in mm
 hr_rackmount_cage_nut_hole_back_radius = 1.5;  // in mm
 hr_rackmount_cage_nut_hole_back_width = 12.5;  // in mm
 
+// Mount Bridge
+// The incline to broaden the bridge to match up with the homeracker sleeve width
+mount_bridge_incline = BASE_STRENGTH + TOLERANCE / 2;
+mount_bridge_width = BASE_UNIT + mount_bridge_incline;
+
 /**
  * Returns the difference in height between HomeRacker units (multiple of 3 BASE_UNITs)
  * and standard height units for a given number of standard height units.
@@ -233,6 +238,24 @@ module rackmount_cage_nut(height_units, debug_colors = false,
 }
 
 /**
+ * Connector Cover Module
+ * Prolongs the mount_bridge to cover HomeRacker connectors at top and bottom.
+ */
+module connector_cover(debug_colors = false,
+  anchor = CENTER, orient = UP, spin = 0) {
+  attachable_width = mount_bridge_width;
+  attachable_depth = BASE_UNIT - BASE_STRENGTH - TOLERANCE;
+  attachable_height = BASE_UNIT + TOLERANCE / 2;  // adding tolerance to compensate for the sleeve deviation
+
+  attachable(
+    size = [attachable_width, attachable_depth, attachable_height],
+    anchor = anchor, orient = orient, spin = spin) {
+    cuboid([attachable_width, attachable_depth, attachable_height]);
+    children();
+  }
+}
+
+/**
  * Rackmount Adapter Module
  * Represents an adapter between standard rackmounts and the HomeRacker system
  * produces only one adapter for the left side of the rack.
@@ -246,10 +269,8 @@ module rackmount_adapter(rackwidth, height_units,
 
   gapfill_width = get_adapter_gapfill(rackwidth) / 2;
   gapfill_depth = get_rackmount_cage_nut_hole_depth();
+  gapfill_height = height_units * STD_UNIT_HEIGHT;
 
-  mount_bridge_incline = BASE_STRENGTH + TOLERANCE / 2;
-
-  mount_bridge_width = BASE_UNIT + mount_bridge_incline;
   // Warning: this assumes the cage_nut_hole_depth is smaller than a BASE_UNIT (which as of now it is)
   mount_bridge_depth = BASE_UNIT;
   // Due to connectors above and below each rackmount, we need to subract 2 units from the height
@@ -272,14 +293,17 @@ module rackmount_adapter(rackwidth, height_units,
           corner_mask(corners = [BACK + TOP + LEFT, BACK + BOTTOM + LEFT])
             chamfer_corner_mask(chamfer = BASE_CHAMFER);
 
+          align([TOP, BOTTOM], FRONT) connector_cover();
+
           // the gapfill in the middle at the front.
-          align(RIGHT, FRONT) color_this(debug_colors ? HR_CHARCOAL : hr_rackmount_primary_color)
-            cuboid([gapfill_width, gapfill_depth, mount_bridge_height]) {
-              // lastly the rackmount to the right side
-              // needs to be shifted down 1 hr-unit.
-              down(BASE_UNIT)
-                align(RIGHT, BOTTOM) rackmount_cage_nut(height_units = height_units, debug_colors = debug_colors);
-            }
+          down(BASE_UNIT)
+            align(RIGHT, FRONT + BOTTOM) color_this(debug_colors ? HR_CHARCOAL : hr_rackmount_primary_color)
+              cuboid([gapfill_width, gapfill_depth, gapfill_height]) {
+                // lastly the rackmount to the right side
+                // needs to be shifted down 1 hr-unit.
+
+                align(RIGHT) rackmount_cage_nut(height_units = height_units, debug_colors = debug_colors);
+              }
           // an inclined wedge to broaden to fit a homeracker sleeve
           // needs to be shifted by half a BASE_STRENGTH to account
           // for the sleeve overlap
