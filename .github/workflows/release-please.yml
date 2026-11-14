@@ -22,6 +22,6 @@ jobs:
           permission-pull-requests: write
 
       - name: Handle Release Creation
-        uses: camunda/infra-global-github-actions/teams/infra/pull-request/release@7fe5cca167f7826bedbc078ae36ff2e974cc8cb5 # pull-request-1.1.1
+        uses: camunda/infra-global-github-actions/teams/infra/pull-request/release@e6af3c4650d44677f5eb0210d9e7c128200741cd # pull-request-1.1.2
         with:
           github-token: ${{ steps.app-token.outputs.token }}
