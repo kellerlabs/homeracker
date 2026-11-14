@@ -22,6 +22,15 @@ flowchart LR
 
 Each box inside the gate is a workflow file called through `workflow_call`. Its path filter lives in `detect-changes`, not in the file. `validate-title` stays outside: it must rerun on title edits, and rerunning the whole gate on every PR edit (Renovate rewrites PR bodies constantly) is too costly.
 
+### 🌐 Network Resilience
+
+A mirror or DNS outage on the runner fails every job that downloads at that moment. Two measures narrow that:
+
+- `setup-openscad` installs its system packages from cached `.deb` files, see [System package cache](../actions/setup-openscad/README.md#system-package-cache).
+- Every other apt call retries a failed download five times (`Acquire::Retries`). That covers Playwright's system dependencies in `web.yml`, which Playwright installs through apt itself.
+
+Runner images are pinned (`ubuntu-26.04`, `windows-2025`) and Renovate proposes the next release. GitHub still refreshes a pinned image about weekly; the pin fixes the OS release only. The `os` matrix in [`integration-tests.yml`](integration-tests.yml) is outside Renovate's reach and is bumped by hand.
+
 ### ➕ Adding a PR Job
 
 1. Give the workflow an `on: workflow_call` trigger, no `pull_request` paths of its own.
@@ -41,7 +50,7 @@ Each box inside the gate is a workflow file called through `workflow_call`. Its 
 | [`scadfmt-tests.yml`](scadfmt-tests.yml) | `ci.yml` | `scadfmt` integration tests against the pinned OpenSCAD (canary, and same AST for formatting-only `.scad` changes) and unit tests on windows; Linux unit tests run in pre-commit. See [TESTING.md](../../TESTING.md#scadfmt-tests) |
 | [`scadfmt-agent.yml`](scadfmt-agent.yml) | `ci.yml`, Renovate OpenSCAD nightly PR only | When OpenSCAD's grammar changed, a Claude agent adapts scadfmt; the workflow tests and pushes its patch, then `human-review` waits for approval. See [below](#-scadfmt-agent-setup) |
 | [`scadfmt-e2e.yml`](scadfmt-e2e.yml) | `scadfmt-e2e` label | Probes the scadfmt agent flow end to end on any PR. Not part of the gate. See [below](#-scadfmt-agent-setup) |
-| [`test-setup-openscad.yml`](test-setup-openscad.yml) | `ci.yml` | Input matrix of the `setup-openscad` composite action |
+| [`test-setup-openscad.yml`](test-setup-openscad.yml) | `ci.yml` | Input matrix of the `setup-openscad` composite action and its [system package cache](../actions/setup-openscad/README.md#system-package-cache) |
 | [`validate-models.yml`](validate-models.yml) | `ci.yml` | Renders every model with OpenSCAD |
 | [`web.yml`](web.yml) | `ci.yml`, push to `main`, `e2e-probe-failure` label | Configurator and site lint, tests, build and Playwright E2E |
 | [`preview.yml`](preview.yml) | PR, `deploy-preview` label | Publishes a site preview at `/preview/pr-<number>/`. Not part of the gate |

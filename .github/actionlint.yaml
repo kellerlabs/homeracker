@@ -1,0 +1,5 @@
+---
+# actionlint 1.7.12 has no entry for the ubuntu-26.04 hosted runner. Delete this file once a release knows the label.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04

@@ -1,7 +1,7 @@
 ---
 name: Setup OpenSCAD
 description: >
-  Install system dependencies, OpenSCAD, and libraries with caching.
+  Install system dependencies, OpenSCAD, and libraries, all cached.
   Requires ubuntu runners.
 
 inputs:
@@ -29,12 +29,41 @@ runs:
       with:
         python-version: '3.15'
 
-    - name: Install system dependencies
+    - name: Identify runner image
+      id: image
       shell: bash
       run: |
         set -euo pipefail
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends xvfb libglu1-mesa libfuse2 libegl1 libxcb-cursor0
+        . /etc/os-release
+        echo "id=$ID-$VERSION_ID-$(dpkg --print-architecture)" >> "$GITHUB_OUTPUT"
+
+    # The key never matches, so restore-keys picks the newest package set saved for this image.
+    - name: Restore system packages
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ${{ runner.temp }}/setup-openscad-debs/*.deb
+          ${{ runner.temp }}/setup-openscad-debs/packages.txt
+        key: setup-openscad-debs-${{ steps.image.outputs.id }}-
+        restore-keys: setup-openscad-debs-${{ steps.image.outputs.id }}-
+
+    - name: Install system dependencies
+      id: system-deps
+      shell: bash
+      env:
+        DEB_DIR: ${{ runner.temp }}/setup-openscad-debs
+      run: |
+        set -euo pipefail
+        "$GITHUB_ACTION_PATH/install-system-deps.sh" "$DEB_DIR"
+
+    - name: Save system packages
+      if: steps.system-deps.outputs.hash != ''
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ${{ runner.temp }}/setup-openscad-debs/*.deb
+          ${{ runner.temp }}/setup-openscad-debs/packages.txt
+        key: setup-openscad-debs-${{ steps.image.outputs.id }}-${{ steps.system-deps.outputs.hash }}
 
     - name: Resolve scadm version
       id: resolve-scadm

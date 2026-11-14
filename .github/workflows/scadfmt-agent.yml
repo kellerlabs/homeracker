@@ -34,7 +34,7 @@ env:
 
 jobs:
   gate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -106,7 +106,7 @@ jobs:
   adapt:
     needs: gate
     if: needs.gate.outputs.adapted == 'false' && needs.gate.outputs.changed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -160,8 +160,8 @@ jobs:
       - name: Install the sandbox
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq bubblewrap socat
+          sudo apt-get update -qq -o Acquire::Retries=5
+          sudo apt-get install -y -qq -o Acquire::Retries=5 bubblewrap socat
           if [[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]]; then
             sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           fi
@@ -212,7 +212,7 @@ jobs:
   verify:
     needs: adapt
     if: ${{ !cancelled() && needs.adapt.result != 'skipped' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -297,7 +297,7 @@ jobs:
   publish:
     needs: [gate, adapt, verify]
     if: ${{ !cancelled() && needs.gate.outputs.stale != 'true' && (needs.gate.result == 'failure' || needs.adapt.result != 'skipped') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -457,7 +457,7 @@ jobs:
   human-review:
     needs: gate
     if: needs.gate.outputs.adapted == 'true' && !inputs.probe
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     environment: scadfmt-review
     permissions: {}

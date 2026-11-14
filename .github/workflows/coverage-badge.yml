@@ -28,7 +28,7 @@ jobs:
             badge: coverage.json
           - package: scadfmt
             badge: scadfmt-coverage.json
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
     steps:

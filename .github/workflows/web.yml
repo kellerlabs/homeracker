@@ -34,7 +34,7 @@ concurrency:
 jobs:
   configurator:
     if: github.event.action != 'labeled' && github.event.action != 'unlabeled'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     defaults:
@@ -72,7 +72,7 @@ jobs:
     if: >-
       (github.event.action != 'labeled' && github.event.action != 'unlabeled')
       || github.event.label.name == 'e2e-probe-failure'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     outputs:
@@ -145,6 +145,12 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-shell
 
+      # Playwright installs its system dependencies through apt.
+      - name: Retry apt downloads
+        run: |
+          set -euo pipefail
+          echo 'Acquire::Retries "5";' | sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null
+
       - name: Install Playwright browser
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps --only-shell chromium
@@ -216,7 +222,7 @@ jobs:
       && github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
       && needs.site.outputs.e2e-report != ''
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       pull-requests: write
     steps:
