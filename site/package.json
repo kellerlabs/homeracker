@@ -21,7 +21,7 @@
     "@astrojs/markdown-remark": "7.3.6",
     "@fontsource/orbitron": "5.3.0",
     "@fontsource/source-code-pro": "5.3.1",
-    "astro": "7.4.7",
+    "astro": "7.4.8",
     "sharp": "0.35.5",
     "three": "0.187.0"
   },
