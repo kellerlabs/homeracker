@@ -62,10 +62,11 @@ The `.deb` files are cached per runner image (distribution, release, architectur
 - no entry exists for the runner image, or the branch cannot read it (a PR reads the entries of its own branch and of the default branch)
 - the package list in the script changed
 - the cached packages no longer fit the image, for example after an image refresh updated a library they depend on
+- a required package is neither on the image nor in the cache, for example after an image refresh dropped one the cache never held
 
 A cached package set stays in use for as long as it installs, so it can trail the mirrors by a few versions.
 
-[`test-install-system-deps.sh`](test-install-system-deps.sh) tests all three paths against a real apt. It removes system packages, so run it on a disposable machine only.
+[`test-install-system-deps.sh`](test-install-system-deps.sh) tests these paths against a real apt. It removes system packages, so run it on a disposable machine only.
 
 ## Versioning
 

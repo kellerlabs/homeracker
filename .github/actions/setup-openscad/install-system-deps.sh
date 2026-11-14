@@ -22,7 +22,8 @@ install_from_cache() {
   [[ -f "$MANIFEST" && "$(<"$MANIFEST")" == "${PACKAGES[*]}" ]] || return 1
   local debs=("$DEB_DIR"/*.deb)
   [[ -e "${debs[0]}" ]] || return 1
-  sudo apt-get install "${APT_OPTIONS[@]}" --no-download "${debs[@]}"
+  # Naming PACKAGES makes apt fail, and so fall back to the mirrors, when one is neither installed nor cached.
+  sudo apt-get install "${APT_OPTIONS[@]}" --no-download "${debs[@]}" "${PACKAGES[@]}"
 }
 
 install_from_network() {
