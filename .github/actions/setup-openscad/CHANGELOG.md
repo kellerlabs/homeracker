@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.2.4...setup-openscad-v2.3.0) (2026-11-14)
+
+
+### ✨ Features
+
+* **ci:** cache apt packages and pin runner images ([#598](https://github.com/kellerlabs/homeracker/issues/598)) ([2fb71cc](https://github.com/kellerlabs/homeracker/commit/2fb71cc1bfdc14b351fe050557b8f349ec0841c1))
+
 ## [2.2.4](https://github.com/kellerlabs/homeracker/compare/setup-openscad-v2.2.3...setup-openscad-v2.2.4) (2026-11-02)
 
 

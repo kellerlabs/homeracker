@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.20.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.19.5...homeracker-v3.20.0) (2026-11-14)
+
+
+### ✨ Features
+
+* **ci:** cache apt packages and pin runner images ([#598](https://github.com/kellerlabs/homeracker/issues/598)) ([2fb71cc](https://github.com/kellerlabs/homeracker/commit/2fb71cc1bfdc14b351fe050557b8f349ec0841c1))
+
+
+### 📦 Dependencies
+
+* automerge the pytest and mutmut group ([#596](https://github.com/kellerlabs/homeracker/issues/596)) ([397669d](https://github.com/kellerlabs/homeracker/commit/397669dd713d056d11754c20683ae193da0f9902))
+* update dependency astro to v7.4.7 [security] ([#594](https://github.com/kellerlabs/homeracker/issues/594)) ([0b19850](https://github.com/kellerlabs/homeracker/commit/0b19850c44245a6f97cd1cab40dad10c3b9efd49))
+* update dependency belfryscad/bosl2 to v2.0.785 ([#590](https://github.com/kellerlabs/homeracker/issues/590)) ([4aef6b2](https://github.com/kellerlabs/homeracker/commit/4aef6b251463fc8648874873d5fb7a128c2978c9))
+* update dependency markdown to v3.11.3 ([#591](https://github.com/kellerlabs/homeracker/issues/591)) ([f45bdb1](https://github.com/kellerlabs/homeracker/commit/f45bdb1cdee585379fcf182c3c5ec569bc7c964b))
+* update dependency openscad to v2026.11.14 ([#592](https://github.com/kellerlabs/homeracker/issues/592)) ([5523aaa](https://github.com/kellerlabs/homeracker/commit/5523aaa8d176e644f24b04fd1ee6937f968a1660))
+* update npm dependencies ([#593](https://github.com/kellerlabs/homeracker/issues/593)) ([13bf4db](https://github.com/kellerlabs/homeracker/commit/13bf4dbb4c826c1fb629b2ade27ab50aaf71a704))
+* update three.js to v0.187.0 ([#585](https://github.com/kellerlabs/homeracker/issues/585)) ([68e0451](https://github.com/kellerlabs/homeracker/commit/68e0451f6af36276e0fea83ea700d5885568990a))
+
 ## [3.19.5](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.19.4...homeracker-v3.19.5) (2026-11-08)
 
 
