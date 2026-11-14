@@ -9,7 +9,7 @@ permissions: {}
 jobs:
   integration-tests:
     name: integration tests (OpenSCAD)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
       contents: read
@@ -45,7 +45,7 @@ jobs:
   # The pre-commit hook runs them on Linux; stdin/stdout byte handling and paths also need Windows.
   unit-tests:
     name: unit tests (windows)
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     permissions:
       contents: read

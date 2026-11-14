@@ -23,7 +23,7 @@ jobs:
       && github.event.action != 'closed'
       && github.event.action != 'unlabeled'
       && (github.event.action != 'labeled' || github.event.label.name == 'deploy-preview')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: read
@@ -48,7 +48,7 @@ jobs:
   build:
     needs: gate
     if: needs.gate.outputs.build == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       actions: write
@@ -93,7 +93,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
       && ((github.event.action == 'closed' && !github.event.pull_request.merged)
       || (github.event.action == 'unlabeled' && github.event.label.name == 'deploy-preview'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
     steps:

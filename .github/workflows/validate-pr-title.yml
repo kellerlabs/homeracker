@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   validate-title:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Validate PR title
         uses: camunda/infra-global-github-actions/teams/infra/pull-request/validate-title@e6af3c4650d44677f5eb0210d9e7c128200741cd # pull-request-1.1.2

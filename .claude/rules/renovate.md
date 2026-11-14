@@ -9,7 +9,7 @@ paths: ["renovate.json5", "renovate-dependencies.json"]
 - **MANDATORY** for all dependencies, Renovate manages updates.
 - Pin exact versions, never use version ranges or `latest`.
 - Research Renovate docs first when introducing new pinning patterns to ensure proper tracking.
-- Examples: Docker tags, Python packages, GitHub Actions, OpenSCAD versions.
+- Examples: Docker tags, Python packages, GitHub Actions, runner images (`runs-on: ubuntu-26.04`), OpenSCAD versions.
 
 ## Configuration
 

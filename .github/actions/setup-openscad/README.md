@@ -49,11 +49,24 @@ steps:
 ## What it does
 
 1. Sets up Python 3.x
-2. Installs system dependencies (`xvfb`, `libglu1-mesa`, `libfuse2`, `libegl1`, `libxcb-cursor0`)
+2. Installs system dependencies (`xvfb`, `libglu1-mesa`, `libfuse2`, `libegl1`, `libxcb-cursor0`) from cached `.deb` files, see [System package cache](#system-package-cache)
 3. Resolves scadm version from inputs (source > explicit version > requirements file)
 4. Caches `bin/openscad/` keyed on runner OS, resolved scadm version, `scadm.json`, and `**/constants.py` under `scadm-source` (when set)
 5. Installs [scadm](../../../cmd/scadm/README.md), pinned from PyPI, or from a local path if `scadm-source` is set
 6. Runs `scadm install` to download OpenSCAD and libraries
+
+## System package cache
+
+The `.deb` files are cached per runner image (distribution, release, architecture) and installed offline, so a run with a warm cache does not depend on the Ubuntu mirrors. [`install-system-deps.sh`](install-system-deps.sh) downloads from the mirrors and saves a new cache entry when:
+
+- no entry exists for the runner image, or the branch cannot read it (a PR reads the entries of its own branch and of the default branch)
+- the package list in the script changed
+- the cached packages no longer fit the image, for example after an image refresh updated a library they depend on
+- a required package is neither on the image nor in the cache, for example after an image refresh dropped one the cache never held
+
+A cached package set stays in use for as long as it installs, so it can trail the mirrors by a few versions.
+
+[`test-install-system-deps.sh`](test-install-system-deps.sh) tests these paths against a real apt. It removes system packages, so run it on a disposable machine only.
 
 ## Versioning
 

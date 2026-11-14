@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   auto-merge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Generate GitHub App Token
         id: app-token

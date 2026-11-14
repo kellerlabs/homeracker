@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-26.04, windows-2025]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -32,8 +32,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libfuse2 libegl1 libopengl0 libgl1 libglx0
+          sudo apt-get update -o Acquire::Retries=5
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=5 libfuse2 libegl1 libopengl0 libgl1 libglx0
 
       - name: Install Mesa3D (Windows software OpenGL)
         if: runner.os == 'Windows'
