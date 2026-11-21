@@ -58,7 +58,6 @@ $fn = 100;
 
 // Colors
 hr_rackmount_primary_color = HR_YELLOW;
-hr_rackmount_secondary_color = HR_CHARCOAL;
 
 // Cage Nut Hole constants (taken from the original Fusion360 design)
 hr_rackmount_cage_nut_hole_height = 9.5;  // in mm
@@ -154,7 +153,7 @@ module rackmount_cage_nut_hole(debug_colors = false,
   module rackmount_cage_nut_hole_front(anchor = CENTER, orient = UP, spin = 0) {
     depth = hr_rackmount_cage_nut_hole_front_depth + HR_EPSILON;
     attachable(size = [hr_rackmount_cage_nut_hole_front_width, depth, hr_rackmount_cage_nut_hole_front_height], anchor = anchor, orient = orient, spin = spin) {
-      color(debug_colors ? HR_YELLOW : hr_rackmount_secondary_color)
+      color(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
         cuboid(
           [hr_rackmount_cage_nut_hole_front_width, depth, hr_rackmount_cage_nut_hole_front_height],
           rounding = hr_rackmount_cage_nut_hole_front_rounding, except = [FRONT, BACK]
@@ -166,7 +165,7 @@ module rackmount_cage_nut_hole(debug_colors = false,
   module rackmount_cage_nut_hole_mid(anchor = CENTER, orient = UP, spin = 0) {
     depth = hr_rackmount_cage_nut_hole_mid_depth + HR_EPSILON;
     attachable(size = [hr_rackmount_cage_nut_hole_mid_width, depth, hr_rackmount_cage_nut_hole_height], anchor = anchor, orient = orient, spin = spin) {
-      color(debug_colors ? HR_GREEN : hr_rackmount_secondary_color)
+      color(debug_colors ? HR_GREEN : hr_rackmount_primary_color)
         cuboid([hr_rackmount_cage_nut_hole_mid_width, depth, hr_rackmount_cage_nut_hole_height]);
       children();
     }
@@ -175,11 +174,11 @@ module rackmount_cage_nut_hole(debug_colors = false,
   module rackmount_cage_nut_hole_back(anchor = CENTER, orient = UP, spin = 0) {
     depth = hr_rackmount_cage_nut_hole_back_radius * 2 + HR_EPSILON;
     attachable(size = [hr_rackmount_cage_nut_hole_back_width, depth, hr_rackmount_cage_nut_hole_height], anchor = anchor, orient = orient, spin = spin) {
-      color_this(debug_colors ? HR_BLUE : hr_rackmount_secondary_color)
+      color_this(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
         diff()
           cuboid([hr_rackmount_cage_nut_hole_back_width, depth, hr_rackmount_cage_nut_hole_height]) {
             align([LEFT, RIGHT], inside = true, overlap = hr_rackmount_cage_nut_hole_back_radius)
-              color(debug_colors ? HR_RED : hr_rackmount_secondary_color) tag("remove")
+              color(debug_colors ? HR_RED : hr_rackmount_primary_color) tag("remove")
                 cylinder(r = hr_rackmount_cage_nut_hole_back_radius, h = hr_rackmount_cage_nut_hole_height + HR_EPSILON);
           }
       children();
@@ -347,6 +346,7 @@ module rackmount_adapter(rackwidth, height_units,
                 // needs to be shifted down 1 hr-unit.
                 align(RIGHT) rackmount_cage_nut(height_units = height_units, debug_colors = debug_colors);
               }
+
           // an inclined wedge to broaden to fit a homeracker sleeve
           // needs to be shifted by half a BASE_STRENGTH to account
           // for the sleeve overlap
