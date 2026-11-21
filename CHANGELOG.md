@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.21.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.20.0...homeracker-v3.21.0) (2026-11-21)
+
+
+### ✨ Features
+
+* **core:** add print bed fit library ([#608](https://github.com/kellerlabs/homeracker/issues/608)) ([c004001](https://github.com/kellerlabs/homeracker/commit/c0040011720535f7e3ff2c301fdda4fb07537808))
+
+
+### 🐛 Bug Fixes
+
+* **scadfmt:** let the agent run pytest on Renovate's PR ([#607](https://github.com/kellerlabs/homeracker/issues/607)) ([2980623](https://github.com/kellerlabs/homeracker/commit/2980623c2aa1ada6610936b87f005fb7273c8f21))
+
+
+### 📦 Dependencies
+
+* lock file maintenance ([#610](https://github.com/kellerlabs/homeracker/issues/610)) ([ae222ad](https://github.com/kellerlabs/homeracker/commit/ae222adb304e38845ca83141823876f955ba22fb))
+* update dependency belfryscad/bosl2 to v2.0.787 ([#603](https://github.com/kellerlabs/homeracker/issues/603)) ([2a4bf2f](https://github.com/kellerlabs/homeracker/commit/2a4bf2f9269930389316c1fcb44875a28a2a6491))
+* update dependency openscad to v2026.11.21 ([#605](https://github.com/kellerlabs/homeracker/issues/605)) ([76c74ba](https://github.com/kellerlabs/homeracker/commit/76c74ba66181d8d2a40fee36e0a1f699eff4db8c))
+* update npm dependencies ([#606](https://github.com/kellerlabs/homeracker/issues/606)) ([cdea2b1](https://github.com/kellerlabs/homeracker/commit/cdea2b17ae687dfd7d4470bd326c85a11227a7f2))
+
+
+### 🔧 Miscellaneous
+
+* **renovate:** refresh lock files weekly and update on Saturday only ([#609](https://github.com/kellerlabs/homeracker/issues/609)) ([acd9b20](https://github.com/kellerlabs/homeracker/commit/acd9b20933530d91b098fe6aa06ca4c473b9edfa))
+
 ## [3.20.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.19.5...homeracker-v3.20.0) (2026-11-15)
 
 
