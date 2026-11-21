@@ -6,6 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [refresh-lock-files-weekly](refresh-lock-files-weekly.md) | 2026-11-21 | Renovate regenerates the lock files every Saturday, so fixed transitive versions land within the five-day cooldown; weekly updates run on Saturday only |
 | [print-bed-fit-library](print-bed-fit-library.md) | 2026-11-21 | Generic `print_bed.scad` in core returns the longest part per bed width, diagonal included; printer presets from OrcaSlicer profiles |
 | [rebase-renovate-branches-only-on-conflict](rebase-renovate-branches-only-on-conflict.md) | 2026-10-31 | Renovate rebases only on conflict and `main` no longer requires up to date branches, so the scadfmt agent's commit survives merges to `main` |
 | [gate-coverage-and-surviving-mutants-in-changed-functions](gate-coverage-and-surviving-mutants-in-changed-functions.md) | 2026-09-29 | `scadm` unit tests gate on 90% branch coverage; a mutant surviving in a function the PR changed fails it; weekly full run to Discord |
