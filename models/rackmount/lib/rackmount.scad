@@ -251,22 +251,35 @@ module rackmount_cage_nut(height_units, debug_colors = false,
 /**
  * Connector Cover Module
  * Prolongs the mount_bridge to cover HomeRacker connectors at top and bottom.
+ * Extends exactly into half the height of the adjoining connector,
+ * plus BASE_STRENGTH that overlaps into the mount bridge so its chamfers blend into the bridge's.
  */
-module connector_cover(debug_colors = false,
+module connector_cover(debug_colors = false, disable_chamfer = false,
   anchor = CENTER, orient = UP, spin = 0) {
   attachable_width = mount_bridge_width;
-  attachable_depth = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2;  // leave a bit of room between the cover and the connectors
-  attachable_height = BASE_UNIT + TOLERANCE / 2;                 // adding tolerance to compensate for the sleeve deviation
+  attachable_depth = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2;                   // leave a bit of room between the cover and the connectors
+  attachable_height = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 2 + BASE_STRENGTH;  // adding tolerance to compensate for the sleeve deviation
 
   cutout_depth = attachable_depth - get_rackmount_cage_nut_hole_depth();
 
-  attachable(
-    size = [attachable_width, attachable_depth, attachable_height],
-    anchor = anchor, orient = orient, spin = spin) {
-    color_this(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
-      cuboid([attachable_width, attachable_depth, attachable_height]);
-    children();
-  }
+  tag_scope("connector_cover")
+    attachable(
+      size = [attachable_width, attachable_depth, attachable_height],
+      anchor = anchor, orient = orient, spin = spin) {
+      diff()
+        color_this(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
+          cuboid([attachable_width, attachable_depth, attachable_height]) {
+            if (!disable_chamfer) {
+              color_this(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
+                tag("remove") edge_mask(edges = [LEFT, TOP + FRONT, BOTTOM + FRONT])
+                  chamfer_edge_mask(chamfer = BASE_CHAMFER);
+              color_this(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
+                tag("remove") corner_mask(corners = [LEFT + TOP + FRONT, LEFT + BOTTOM + FRONT])
+                  chamfer_corner_mask(chamfer = BASE_CHAMFER);
+            }
+          }
+      children();
+    }
 }
 
 /**
@@ -279,7 +292,7 @@ module connector_cover(debug_colors = false,
  *
  */
 module rackmount_adapter(rackwidth, height_units,
-  debug_colors = false, disable_chamfers = false,
+  debug_colors = false, disable_chamfer = false,
   anchor = CENTER, orient = UP, spin = 0) {
 
   gapfill_width = get_adapter_gapfill(rackwidth) / 2;
@@ -297,18 +310,29 @@ module rackmount_adapter(rackwidth, height_units,
   attachable_depth = mount_bridge_depth;
   attachable_height = mount_bridge_height;
 
+  chamfer_color = debug_colors ? HR_WHITE : hr_rackmount_primary_color;
+
   attachable(
     size = [attachable_width, attachable_depth, attachable_height],
     anchor = anchor, orient = orient, spin = spin) {
     // start at the left side with the mounting bridge
     diff()
       color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
+        // The Mounting Bridge is the (debug colors) yellow center piece that connects the rackmount to the HomeRacker system.
         cuboid([mount_bridge_width, mount_bridge_depth, mount_bridge_height]) {
           // proper chamfers
-          corner_mask(corners = [BACK + TOP + LEFT, BACK + BOTTOM + LEFT])
-            chamfer_corner_mask(chamfer = BASE_CHAMFER);
+          if (!disable_chamfer) {
+            color_this(chamfer_color)
+              edge_mask(edges = LEFT, except = BACK)
+                chamfer_edge_mask(chamfer = BASE_CHAMFER);
+          }
 
-          align([TOP, BOTTOM], FRONT) connector_cover(debug_colors = debug_colors);
+          // Connector Covers at top and bottom of the mounting bridge.
+          // They chamfer themselves, kept from the bridge's masks.
+          // That's why we use the overlap.
+          tag("keep")
+            align([TOP, BOTTOM], FRONT, overlap = BASE_STRENGTH)
+              connector_cover(debug_colors = debug_colors, disable_chamfer = disable_chamfer);
 
           // the gapfill in the middle at the front.
           // The Gapfill is essential to account for differently sized racks.
@@ -331,10 +355,12 @@ module rackmount_adapter(rackwidth, height_units,
               cuboid(
                 [mount_bridge_incline, mount_bridge_incline, mount_bridge_height]
               ) {
-                edge_mask(edges = [FRONT + RIGHT])
-                  chamfer_edge_mask(chamfer = mount_bridge_incline);
-                edge_mask(edges = [RIGHT + TOP, RIGHT + BOTTOM])
-                  chamfer_edge_mask(chamfer = BASE_CHAMFER);
+                if (!disable_chamfer) {
+                  edge_mask(edges = [FRONT + RIGHT])
+                    chamfer_edge_mask(chamfer = mount_bridge_incline);
+                  edge_mask(edges = [RIGHT + TOP, RIGHT + BOTTOM])
+                    chamfer_edge_mask(chamfer = BASE_CHAMFER);
+                }
               }
           // at the back we attach a sleeve for mounting to the HomeRacker system.
           tag("keep")
