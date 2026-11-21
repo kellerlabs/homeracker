@@ -14,7 +14,10 @@ paths: ["**/*.scad"]
 
 - **Position with anchors, not offsets.** Prefer `attach`/`align`/`position` + `left`/`right`/`fwd`/`back` over raw `translate`/`rotate` with hand-computed centre math. `union()` is for merging separate solids, never for positioning.
 - **`diff()` is tag-based.** Kept (untagged) geometry and `remove`-tagged cutters coexist in one `diff()`; cutters only subtract where they overlap. A part welded on after the bores belongs *inside* the same `diff()` as an untagged child, do **not** wrap it in `union()` to "shield" it.
-- **Isolate a child's own `diff()`/`edge_mask` with `tag_scope()`.** A nested chamfer (edge_mask applies a `remove` tag) leaks into an enclosing `diff()` and gets cancelled. Wrap the inner part in `tag_scope()` at the call site to contain its tags.
+- **Isolate a child's own `diff()`/`edge_mask` with `tag_scope()`.** A nested chamfer (edge_mask applies a `remove` tag) leaks into an enclosing `diff()` and gets cancelled. Wrap the module's `attachable()` in `tag_scope()`, as `sleeve()` does.
+- **Tag masks explicitly under a tagged parent.** `edge_mask`/`corner_mask` only default to `remove` when no tag is inherited, so under `tag("keep")` they turn into solid geometry. Write `tag("remove") edge_mask(...)`.
+- **`keep` parts are added after all cuts.** A `remove` mask can't cut a `keep`-tagged part in the same `diff()`. Give that part its own `tag_scope()` + `diff()`, or use the shape's own `chamfer`/`rounding` + `edges` arguments.
+- **BOSL2 directions are vectors.** `-TOP` is `BOTTOM`, `TOP + LEFT` names an edge, so `-side + LEFT` picks the opposite edge without a ternary.
 - **Edge breaks in one pass.** Chamfer/fillet an assembly's outer edge with `edge_mask` on the bounding-box edges, not per-member, per-piece chamfers leave nubs at junctions.
 - **Keep sub-parts ignorant of the parent.** A reusable part (e.g. a back brace) should take its own size and attach to a face; splitting/clipping belongs in the parent, not duplicated inside the part.
 

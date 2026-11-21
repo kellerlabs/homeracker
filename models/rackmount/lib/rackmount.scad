@@ -206,7 +206,7 @@ module rackmount_cage_nut_hole(debug_colors = false,
  * Represents single standard unit rackmount using cage nut holes as mounting points.
  */
 module rackmount_cage_nut_single(
-  debug_colors = false,
+  debug_colors = false, disable_chamfer = false,
   anchor = CENTER, orient = UP, spin = 0) {
 
   attachable_width = STD_MOUNT_SURFACE_WIDTH;
@@ -218,7 +218,7 @@ module rackmount_cage_nut_single(
     tag_scope("rackmount_cage_nut")
       diff()
         color_this(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
-          cuboid([STD_MOUNT_SURFACE_WIDTH, attachable_depth, attachable_height]) {
+          cuboid([STD_MOUNT_SURFACE_WIDTH, attachable_depth, attachable_height], chamfer = disable_chamfer ? 0 : BASE_CHAMFER, edges = FRONT + RIGHT) {
             tag("remove")
               zcopies(spacing = STD_RACK_BORE_DISTANCE_Z, n = 3)
                 rackmount_cage_nut_hole(debug_colors = debug_colors);
@@ -231,7 +231,7 @@ module rackmount_cage_nut_single(
  * Rackmount Cage Nut Module (Multiple Units)
  * Represents a stack of standard unit rackmounts using cage nut holes as mounting points.
  */
-module rackmount_cage_nut(height_units, debug_colors = false,
+module rackmount_cage_nut(height_units, debug_colors = false, disable_chamfer = false,
   anchor = CENTER, orient = UP, spin = 0) {
 
   attachable_width = STD_MOUNT_SURFACE_WIDTH;
@@ -242,10 +242,16 @@ module rackmount_cage_nut(height_units, debug_colors = false,
     anchor = anchor, orient = orient, spin = spin) {
 
     zcopies(spacing = STD_UNIT_HEIGHT, n = height_units)
-      rackmount_cage_nut_single(debug_colors = debug_colors);
+      rackmount_cage_nut_single(debug_colors = debug_colors, disable_chamfer = disable_chamfer);
     children();
   }
 }
+
+/**
+ * Returns the depth of the connector cover.
+ * Leaves a bit of room between the cover and the connectors.
+ */
+function get_connector_cover_depth() = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2;
 
 /**
  * Connector Cover Module
@@ -256,7 +262,7 @@ module rackmount_cage_nut(height_units, debug_colors = false,
 module connector_cover(debug_colors = false, disable_chamfer = false,
   anchor = CENTER, orient = UP, spin = 0) {
   attachable_width = mount_bridge_width;
-  attachable_depth = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2;                   // leave a bit of room between the cover and the connectors
+  attachable_depth = get_connector_cover_depth();
   attachable_height = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 2 + BASE_STRENGTH;  // adding tolerance to compensate for the sleeve deviation
 
   cutout_depth = attachable_depth - get_rackmount_cage_nut_hole_depth();
@@ -276,6 +282,52 @@ module connector_cover(debug_colors = false, disable_chamfer = false,
                 tag("remove") corner_mask(corners = [LEFT + TOP + FRONT, LEFT + BOTTOM + FRONT])
                   chamfer_corner_mask(chamfer = BASE_CHAMFER);
             }
+          }
+      children();
+    }
+}
+
+/**
+ * End Cover Dock Module
+ * Represents the docking point for the end cover of the rackmount.
+ * An end cover is used to cover top or bottom ends of the rackmount for a clean finish.
+ * The dock is the insert point where the end cover attaches to the rackmounts on each end.
+ * @param width The width of the end cover dock.
+ */
+END_COVER_TOP = 0;
+END_COVER_BOTTOM = 1;
+
+module end_cover_dock(type = END_COVER_TOP, width, debug_colors = false, disable_chamfer = false) {
+
+  attachable_width = width;
+  attachable_depth = get_connector_cover_depth();
+  attachable_height = BASE_UNIT / 2;
+
+  move_down = (BASE_STRENGTH + HR_EPSILON) / 2 * (type == END_COVER_TOP ? 1 : -1);
+  top_or_bottom = type == END_COVER_TOP ? TOP : BOTTOM;
+  chamfer_edges = [top_or_bottom + FRONT, top_or_bottom + RIGHT, FRONT + RIGHT];
+
+  tag_scope("end_cover_dock")
+    attachable(
+      size = [attachable_width, attachable_depth, attachable_height],
+      anchor = CENTER, orient = UP, spin = 0) {
+      diff()
+        color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
+          cuboid([attachable_width, attachable_depth, attachable_height],
+            chamfer = disable_chamfer ? 0 : BASE_CHAMFER, edges = chamfer_edges) {
+            // cutout for the end cover dock
+            cutout_depth = attachable_depth - BASE_STRENGTH + HR_EPSILON;
+            tag("remove")
+              down(move_down) back(BASE_STRENGTH / 2 + HR_EPSILON / 2)
+                color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
+                  cuboid([attachable_width + HR_EPSILON, cutout_depth, attachable_height - BASE_STRENGTH + HR_EPSILON]) {
+                    // End Cover Hook
+                    hook_strength = 3;
+                    tag("keep") left(BASE_STRENGTH) align(top_or_bottom, RIGHT, inside = true)
+                      color_this(debug_colors ? HR_GREEN : hr_rackmount_primary_color)
+                        cuboid([hook_strength, cutout_depth, hook_strength],
+                          rounding = BASE_CHAMFER, edges = [-top_or_bottom + LEFT, -top_or_bottom + RIGHT]);
+                  }
           }
       children();
     }
@@ -339,12 +391,28 @@ module rackmount_adapter(rackwidth, height_units,
           // It needs to be aligned downwards to center the gapfill vertically.
           // Additionally to account for the sleeve's smaller size (a sleeve deducts a TOLERANCE to fit between connectors),
           // we shift the gapfill down by half the TOLERANCE to center it vertically.
+
           down(BASE_UNIT + TOLERANCE / 2)
             align(RIGHT, FRONT + BOTTOM) color_this(debug_colors ? HR_CHARCOAL : hr_rackmount_primary_color)
               cuboid([gapfill_width, gapfill_depth, gapfill_height]) {
+                mount_width_total = gapfill_width + STD_MOUNT_SURFACE_WIDTH;
                 // lastly the rackmount to the right side
                 // needs to be shifted down 1 hr-unit.
-                align(RIGHT) rackmount_cage_nut(height_units = height_units, debug_colors = debug_colors);
+                align(RIGHT) rackmount_cage_nut(height_units = height_units, debug_colors = debug_colors, disable_chamfer = disable_chamfer) {
+                  align(BOTTOM, RIGHT + FRONT)
+                    end_cover_dock(type = END_COVER_BOTTOM, width = mount_width_total, debug_colors = debug_colors, disable_chamfer = disable_chamfer);
+                }
+
+                // the gapfill at the top of the rackmount to fill the space up to a full homeracker unit
+                gapfill_top_depth = BASE_STRENGTH;
+                gapfill_top_height = (BASE_UNIT * 3 - STD_UNIT_HEIGHT) * height_units;
+                align(TOP, LEFT + FRONT) color_this(debug_colors ? HR_RED : hr_rackmount_primary_color)
+                  cuboid([mount_width_total, gapfill_top_depth, gapfill_top_height],
+                    chamfer = disable_chamfer ? 0 : BASE_CHAMFER, edges = [RIGHT + FRONT]) {
+                    // attach end cover dock at the top of the gapfill
+                    align(TOP, LEFT + FRONT)
+                      end_cover_dock(type = END_COVER_TOP, width = mount_width_total, debug_colors = debug_colors, disable_chamfer = disable_chamfer);
+                  }
               }
 
           // an inclined wedge to broaden to fit a homeracker sleeve
