@@ -27,6 +27,17 @@
 
 // This piece of code is (so far) purely HI-generated. No AI involved yet.
 
+// TODOs
+// - proper chamferings
+// - debug color and disable chamfer integration for all components
+// - Top and bottom closing mechanisms
+// - markings: This side up, inch indicator, height units
+
+// Known Limitations (out of scope for now)
+// Things I haven't had the motivation or time to implement yet
+// - split end covers. Those are not planned yet. They would help print e.g. 19" end covers without the need for extremely large print beds
+
+
 include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
 include <../../sleeve/lib/sleeve.scad>
@@ -244,13 +255,16 @@ module rackmount_cage_nut(height_units, debug_colors = false,
 module connector_cover(debug_colors = false,
   anchor = CENTER, orient = UP, spin = 0) {
   attachable_width = mount_bridge_width;
-  attachable_depth = BASE_UNIT - BASE_STRENGTH - TOLERANCE;
-  attachable_height = BASE_UNIT + TOLERANCE / 2;  // adding tolerance to compensate for the sleeve deviation
+  attachable_depth = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2;  // leave a bit of room between the cover and the connectors
+  attachable_height = BASE_UNIT + TOLERANCE / 2;                 // adding tolerance to compensate for the sleeve deviation
+
+  cutout_depth = attachable_depth - get_rackmount_cage_nut_hole_depth();
 
   attachable(
     size = [attachable_width, attachable_depth, attachable_height],
     anchor = anchor, orient = orient, spin = spin) {
-    cuboid([attachable_width, attachable_depth, attachable_height]);
+    color_this(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
+      cuboid([attachable_width, attachable_depth, attachable_height]);
     children();
   }
 }
@@ -259,12 +273,13 @@ module connector_cover(debug_colors = false,
  * Rackmount Adapter Module
  * Represents an adapter between standard rackmounts and the HomeRacker system
  * produces only one adapter for the left side of the rack.
- * If you need an adapter for the right side, you will need to mirror this module.
+ * If you need an adapter for the right side, mirror this module.
  * @param rackwidth The width of the rack in inches.
  * @param height_units The height of the adapter in standard rack units (1U = 44.45 mm).
  *
  */
 module rackmount_adapter(rackwidth, height_units,
+  debug_colors = false, disable_chamfers = false,
   anchor = CENTER, orient = UP, spin = 0) {
 
   gapfill_width = get_adapter_gapfill(rackwidth) / 2;
@@ -293,15 +308,19 @@ module rackmount_adapter(rackwidth, height_units,
           corner_mask(corners = [BACK + TOP + LEFT, BACK + BOTTOM + LEFT])
             chamfer_corner_mask(chamfer = BASE_CHAMFER);
 
-          align([TOP, BOTTOM], FRONT) connector_cover();
+          align([TOP, BOTTOM], FRONT) connector_cover(debug_colors = debug_colors);
 
           // the gapfill in the middle at the front.
-          down(BASE_UNIT)
+          // The Gapfill is essential to account for differently sized racks.
+          // It fills the space between the mounting bridge (HomeRacker standard) and the rackmount itself to ensure "standard" rack alignment.
+          // It needs to be aligned downwards to center the gapfill vertically.
+          // Additionally to account for the sleeve's smaller size (a sleeve deducts a TOLERANCE to fit between connectors),
+          // we shift the gapfill down by half the TOLERANCE to center it vertically.
+          down(BASE_UNIT + TOLERANCE / 2)
             align(RIGHT, FRONT + BOTTOM) color_this(debug_colors ? HR_CHARCOAL : hr_rackmount_primary_color)
               cuboid([gapfill_width, gapfill_depth, gapfill_height]) {
                 // lastly the rackmount to the right side
                 // needs to be shifted down 1 hr-unit.
-
                 align(RIGHT) rackmount_cage_nut(height_units = height_units, debug_colors = debug_colors);
               }
           // an inclined wedge to broaden to fit a homeracker sleeve
@@ -309,7 +328,6 @@ module rackmount_adapter(rackwidth, height_units,
           // for the sleeve overlap
           fwd(BASE_STRENGTH / 2)
             align(RIGHT, BACK) color(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
-
               cuboid(
                 [mount_bridge_incline, mount_bridge_incline, mount_bridge_height]
               ) {
@@ -328,7 +346,9 @@ module rackmount_adapter(rackwidth, height_units,
   }
 }
 
-rackmount_adapter(rackwidth = inches, height_units = height_units)
+rackmount_adapter(rackwidth = inches, height_units = height_units,
+  debug_colors = debug_colors, disable_chamfer = disable_chamfer
+)
   // show_anchors()
   ;
 
