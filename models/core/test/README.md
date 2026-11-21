@@ -13,6 +13,7 @@ Test files in this directory are automatically discovered and validated by the t
 
 - **`connector.scad`**: Tests the connector module with default parameters
 - **`support.scad`**: Tests the support module with default parameters
+- **`print_bed.scad`**: Asserts `print_fit` against closed-form cases and renders the fitted part on its bed
 
 ## Adding Tests
 
