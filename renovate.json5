@@ -34,7 +34,7 @@
   "internalChecksFilter": "strict",
   // npm resolves lock files with --before, so transitive versions also serve the five days.
   "minimumReleaseAgePackageManagerSync": true,
-  // One update day a week, so a dependency releasing on both weekend days gets one PR.
+  // One update day a week, so a dependency releasing on both weekend days gets one PR. Pre-commit hooks stay monthly.
   "schedule": ["* * * * 6"],
   // Regenerates the lock files, which pulls in fixed transitive versions Renovate cannot bump directly.
   // See docs/decisions/refresh-lock-files-weekly.md.

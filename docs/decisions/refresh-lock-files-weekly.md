@@ -13,7 +13,7 @@
 
 - [`renovate.json5`](../../renovate.json5) enables `lockFileMaintenance` on Saturdays before 04:00 UTC, with automerge on a green `check-results`.
 - `minimumReleaseAgePackageManagerSync` makes npm resolve with `--before`, so transitive versions also serve the five-day `minimumReleaseAge`.
-- All Renovate updates run on Saturday only, so a dependency releasing on both weekend days gets one PR.
+- Weekly Renovate updates run on Saturday only, so a dependency releasing on both weekend days gets one PR. Pre-commit hooks keep their monthly window.
 
 Alternatives rejected:
 
