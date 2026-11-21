@@ -40,7 +40,7 @@ lockpin_hole_support(disable_chamfer=false);
 [`lib/print_bed.scad`](lib/print_bed.scad) returns the longest part of a given width that fits a print bed, placed straight or diagonally. Use it to decide whether a part needs a split.
 
 ```scad
-include <core/lib/print_bed.scad>
+include <homeracker/models/core/lib/print_bed.scad>
 
 // A 15 mm wide part on an X1C bed
 fit = print_fit(bed = bed_size("bambu_x1c"), width = 15);           // [347.04, 45]: length in mm, angle from the bed's X axis

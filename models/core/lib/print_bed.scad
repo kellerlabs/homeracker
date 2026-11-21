@@ -106,14 +106,19 @@ function bed_size(printer) =
  */
 function print_fit(bed, width) =
   let(
+    _lo = width > bed[1] ? acos(bed[1] / width) : 0,
+    _hi = width > bed[0] ? asin(bed[0] / width) : 90
+  )
+  _lo > _hi ? [0, undef]
+  : let(
     _steps = 360,
-    _step = 90 / _steps,
-    _samples = [for (i = [0:_steps])[_fit_length(bed, width, i * _step), i * _step]],
+    _step = (_hi - _lo) / _steps,
+    _samples = [for (i = [0:_steps])[_fit_length(bed, width, _lo + i * _step), _lo + i * _step]],
     _best = _max_by_length(_samples)
   )
   _best[0] <= 0 ? [0, undef]
   : let(
-    _refined = _refine_angle(bed, width, max(0, _best[1] - _step), min(90, _best[1] + _step), 60),
+    _refined = _refine_angle(bed, width, max(_lo, _best[1] - _step), min(_hi, _best[1] + _step), 60),
     _candidate = [_fit_length(bed, width, _refined), _refined]
   )
   _candidate[0] > _best[0] ? _candidate : _best;
@@ -146,8 +151,8 @@ function _fit_length(bed, width, angle) =
     _room_x = bed[0] - width * _s,
     _room_y = bed[1] - width * _c
   )
-  _room_x < 0 || _room_y < 0 ? -1
-  : min(_c > 1e-9 ? _room_x / _c : 1e9, _s > 1e-9 ? _room_y / _s : 1e9);
+  _room_x < -1e-9 || _room_y < -1e-9 ? -1
+  : min(_c > 1e-9 ? max(0, _room_x) / _c : 1e9, _s > 1e-9 ? max(0, _room_y) / _s : 1e9);
 
 function _max_by_length(samples, i = 0, best = [-1, undef]) =
   i >= len(samples) ? best

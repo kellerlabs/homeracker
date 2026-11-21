@@ -15,6 +15,9 @@ assert(_approx(print_fit([256, 256], 15)[1], 45), "square bed diagonal angle");
 // A part wider than the bed's sides still fits diagonally while it is short enough
 assert(_approx(max_print_length([256, 256], 300), 256 * sqrt(2) - 300), "wide part fits diagonally");
 
+// A width just below the bed diagonal fits within a narrow angle range only
+assert(max_print_length([200, 300], 360) > 0.3, "narrow feasible angle range");
+
 // Straight placement wins when the part is wide relative to the bed
 assert(print_fit([100, 300], 150) == [100, 0], "straight placement along X");
 
