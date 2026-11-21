@@ -18,6 +18,9 @@ assert(_approx(max_print_length([256, 256], 300), 256 * sqrt(2) - 300), "wide pa
 // A width just below the bed diagonal fits within a narrow angle range only
 assert(max_print_length([200, 300], 360) > 0.3, "narrow feasible angle range");
 
+// The diagonal peak beats straight placement along Y by a fraction of a millimetre
+assert(_approx(print_angle([200, 300], 71.61, 300.1), 63, 0.1), "interior peak next to the 90 degree end");
+
 // Straight placement wins when the part is wide relative to the bed
 assert(print_fit([100, 300], 150) == [100, 0], "straight placement along X");
 

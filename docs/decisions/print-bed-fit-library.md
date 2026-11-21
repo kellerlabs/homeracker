@@ -16,7 +16,7 @@
 - **Pure usable bed:** presets hold the slicer's printable area. Full-length edge strips are subtracted, corner exclusions are not.
 - **Dual nozzle:** the default key holds the area both nozzles reach, which is guaranteed for every print; `*_single` keys hold the left nozzle's larger area.
 - **Source:** every size comes from the printer's OrcaSlicer profile (`printable_area`, `bed_exclude_area`, `extruder_printable_area`).
-- **Solver:** limits the angle to the range where the width fits, samples it in 360 steps and refines the best one, which covers parts wider than the bed's short side.
+- **Solver:** limits the angle to the range where the width fits, and takes the best of its ends and the angles where the X and Y limits cross (found by sampling plus bisection), which covers parts wider than the bed's short side.
 
 Alternatives rejected:
 

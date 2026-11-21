@@ -112,16 +112,13 @@ function print_fit(bed, width) =
   _lo > _hi ? [0, undef]
   : let(
     _steps = 360,
-    _step = (_hi - _lo) / _steps,
-    _samples = [for (i = [0:_steps])[_fit_length(bed, width, _lo + i * _step), _lo + i * _step]],
-    _best = _max_by_length(_samples)
+    _angles = [for (i = [0:_steps]) _lo + i * (_hi - _lo) / _steps],
+    _crossings = [
+      for (i = [0:_steps - 1]) if (_gap(bed, width, _angles[i]) * _gap(bed, width, _angles[i + 1]) <= 0) _bisect_crossing(bed, width, _angles[i], _angles[i + 1], 60),
+    ],
+    _best = _max_by_length([for (a = concat([_lo, _hi], _crossings))[_fit_length(bed, width, a), a]])
   )
-  _best[0] <= 0 ? [0, undef]
-  : let(
-    _refined = _refine_angle(bed, width, max(_lo, _best[1] - _step), min(_hi, _best[1] + _step), 60),
-    _candidate = [_fit_length(bed, width, _refined), _refined]
-  )
-  _candidate[0] > _best[0] ? _candidate : _best;
+  _best[0] <= 0 ? [0, undef] : _best;
 
 /**
  * Returns the length of the longest part of the given width that fits on the bed.
@@ -145,26 +142,32 @@ function print_angle(bed, width, length) =
 
 // Longest part at a fixed angle: its bounding box must stay within the bed. -1 if the width alone overflows.
 function _fit_length(bed, width, angle) =
+  let(_limits = _axis_limits(bed, width, angle))
+  _limits[0] < 0 || _limits[1] < 0 ? -1 : min(_limits);
+
+// Length limits [x, y] the bed's X and Y edges impose at a fixed angle; negative if the width alone overflows.
+function _axis_limits(bed, width, angle) =
   let(
     _c = cos(angle),
     _s = sin(angle),
     _room_x = bed[0] - width * _s,
     _room_y = bed[1] - width * _c
   )
-  _room_x < -1e-9 || _room_y < -1e-9 ? -1
-  : min(_c > 1e-9 ? max(0, _room_x) / _c : 1e9, _s > 1e-9 ? max(0, _room_y) / _s : 1e9);
+  [
+    _room_x < -1e-9 ? -1 : _c > 1e-9 ? max(0, _room_x) / _c : 1e9,
+    _room_y < -1e-9 ? -1 : _s > 1e-9 ? max(0, _room_y) / _s : 1e9,
+  ];
+
+// The fit length peaks at the range ends or where the X and Y limits cross, i.e. where this gap changes sign.
+function _gap(bed, width, angle) = let(_limits = _axis_limits(bed, width, angle)) _limits[0] - _limits[1];
+
+function _bisect_crossing(bed, width, lo, hi, iterations) =
+  iterations <= 0 ? (lo + hi) / 2
+  : let(_mid = (lo + hi) / 2)
+  _gap(bed, width, lo) * _gap(bed, width, _mid) <= 0
+  ? _bisect_crossing(bed, width, lo, _mid, iterations - 1)
+  : _bisect_crossing(bed, width, _mid, hi, iterations - 1);
 
 function _max_by_length(samples, i = 0, best = [-1, undef]) =
   i >= len(samples) ? best
   : _max_by_length(samples, i + 1, samples[i][0] > best[0] ? samples[i] : best);
-
-// Ternary search for the best angle within [lo, hi], where the fit length is unimodal.
-function _refine_angle(bed, width, lo, hi, iterations) =
-  iterations <= 0 ? (lo + hi) / 2
-  : let(
-    _m1 = lo + (hi - lo) / 3,
-    _m2 = hi - (hi - lo) / 3
-  )
-  _fit_length(bed, width, _m1) < _fit_length(bed, width, _m2)
-  ? _refine_angle(bed, width, _m1, hi, iterations - 1)
-  : _refine_angle(bed, width, lo, _m2, iterations - 1);
