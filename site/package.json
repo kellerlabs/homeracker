@@ -18,16 +18,16 @@
     "check": "npm run lint && npm run test"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.3.6",
+    "@astrojs/markdown-remark": "7.3.9",
     "@fontsource/orbitron": "5.3.0",
     "@fontsource/source-code-pro": "5.3.1",
-    "astro": "7.4.8",
+    "astro": "7.4.12",
     "sharp": "0.35.5",
     "three": "0.187.0"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
-    "@playwright/test": "1.65.0",
+    "@playwright/test": "1.65.1",
     "@types/hast": "3.0.5",
     "@types/node": "26.6.6",
     "@types/three": "0.187.0",
