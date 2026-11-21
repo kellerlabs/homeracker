@@ -32,7 +32,17 @@
   "minimumReleaseAgeBehaviour": "timestamp-optional",
   // Without this, an update that has not served its five days still gets a branch and a PR.
   "internalChecksFilter": "strict",
-  "schedule": ["* * * * 0,6"],
+  // npm resolves lock files with --before, so transitive versions also serve the five days.
+  "minimumReleaseAgePackageManagerSync": true,
+  // One update day a week, so a dependency releasing on both weekend days gets one PR.
+  "schedule": ["* * * * 6"],
+  // Regenerates the lock files, which pulls in fixed transitive versions Renovate cannot bump directly.
+  // See docs/decisions/refresh-lock-files-weekly.md.
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* 0-3 * * 6"],
+    "automerge": true
+  },
   // Use "deps" as commit type instead of "chore(deps)"
   "semanticCommits": "enabled",
   "semanticCommitType": "deps",
@@ -50,7 +60,6 @@
       "groupName": "OpenSCAD nightly",
       "groupSlug": "openscad-nightly",
       "separateMajorMinor": false,
-      "schedule": ["* * * * 6"],
       "automerge": true
     },
     {
@@ -68,7 +77,6 @@
         "kellerlab-pre-commit-hooks",
         "markdown"
       ],
-      "schedule": ["* * * * 6"],
       "automerge": true
     },
     {
