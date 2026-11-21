@@ -35,6 +35,44 @@ lockpin(grip_type="standard");
 lockpin_hole_support(disable_chamfer=false);
 ```
 
+### 📏 Print Bed Fit
+
+[`lib/print_bed.scad`](lib/print_bed.scad) returns the longest part of a given width that fits a print bed, placed straight or diagonally. Use it to decide whether a part needs a split.
+
+```scad
+include <homeracker/models/core/lib/print_bed.scad>
+
+// A 15 mm wide part on an X1C bed
+fit = print_fit(bed = bed_size("bambu_x1c"), width = 15);           // [347.04, 45]: length in mm, angle from the bed's X axis
+length = max_print_length(bed = bed_size("bambu_x1c"), width = 15); // 347.04
+length = max_print_length(bed = [256, 256], width = 15);            // own bed size [x, y]
+
+// Does a 15 x 340 mm part fit an X1C bed, and at which angle?
+angle = print_angle(bed = bed_size("bambu_x1c"), width = 15, length = 340); // 45; 0 or 90 when it fits straight, undef when it doesn't fit
+```
+
+<details>
+<summary>When does diagonal placement pay off?</summary>
+
+On a square bed of side `s`, the diagonal fits `s·√2 − width`, which beats the straight `s` only while `width < s·(√2 − 1) ≈ 0.414·s`. Wider parts get the straight fit at 0°.
+
+| Bed | Diagonal stops helping at width |
+|---|---|
+| 180 mm (e.g. A1 mini) | ~75 mm |
+| 256 mm (e.g. X1C) | ~106 mm |
+| 350 mm (e.g. K2 Plus) | ~145 mm |
+
+On rectangular beds the crossover shifts; `print_fit` finds it either way.
+
+</details>
+
+- ⚠️ Results use the pure usable bed with no margin. Leave room for brims and skirts yourself.
+- `bed_size` keys (e.g. `bambu_h2c`, `prusa_core_one`) are listed in `PRINT_BEDS`, with sizes taken from the printers' OrcaSlicer profiles.
+- Dual-nozzle printers list the area both nozzles reach; `*_single` keys hold the larger left-nozzle area for single-material prints.
+- Corner exclusion zones (e.g. 18×28 mm front-left on the X1/P1 series) are ignored. On a square bed, print along the diagonal that avoids them.
+- `print_fit` returns `[0, undef]` when nothing fits.
+- Nothing here is HomeRacker-specific; the library may move to its own repository. See [the decision record](../../docs/decisions/print-bed-fit-library.md).
+
 ### Customizing Parts
 
 Open any file in `parts/` with OpenSCAD and use the **Customizer** panel to adjust parameters:
