@@ -14,7 +14,7 @@ From the HomeRacker side to the rack side, each adapter has:
 - **Rack rail**: square cage nut holes for M6 cage nuts, three per rack unit, placed per EIA-310 (see [rack standards](rack-standards.md)).
 - **End cover docks**: pockets at the top and bottom for end covers that close off the adapter.
 
-Two **end covers** close the rack's top and bottom between the left and right adapter. Each has a tongue at both ends that slides into the docks; the top cover is taller by the gap fill above the top rack unit.
+Two **end covers** close the rack's top and bottom between the left and right adapter. Each has a tongue at both ends that slides into the docks; the top cover is taller by the gap fill above the top rack unit. An engraved `TOP` or `BOTTOM` on the outer face tells them apart.
 
 It succeeds the [10"](https://makerworld.com/en/models/1353730-modular-10-server-rack#profileId-1396918) and [19"](https://makerworld.com/en/models/1503491-modular-19-server-rack#profileId-1573137) adapters on MakerWorld.
 
@@ -48,15 +48,14 @@ Open `parts/rackmount_adapter.scad` in OpenSCAD and use the **Customizer** panel
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
-| `part` | assembly | assembly, adapter, end cover top, end cover bottom | The assembled rack front, or a single part to print |
+| `part` | assembly | assembly, adapters, end covers | The assembled rack front, or a print plate: both adapters front face down, or both end covers inner face down |
 | `inches` | 10 | 2-20 | Rack width in full inches |
 | `height_units` | 1 | 1-10 | Height in rack units |
-| `side` | left | left, right | Rack side of a single adapter |
 | `debug_colors` | false | bool | Color-code geometry for debugging |
 | `disable_chamfer` | false | bool | Remove chamfers |
 | `debug_anchors` | false | bool | Show the BOSL2 anchors |
 
-- ⚠️ Print the right side with `side = right`. Mirroring the part in the slicer mirrors the engraved markings too.
+- ⚠️ The adapters plate holds a left and a right adapter. Don't mirror an adapter in the slicer: that mirrors the engraved markings too.
 - The markings sit on the side that faces the connectors: an up arrow on the top cover, the inch width and rack units on the bottom cover.
 - 🔩 Insert the cage nuts before the adapter goes onto the rack. The gap fill next to the rack rail is narrowest on 10" racks (0.5 mm per side, with 7" and 20" close behind), which leaves little room to reach a cage nut once mounted. Any adapter comes off on its own, without taking the rack apart.
 - 🔩 Tested with [deleyCON M6 cage nuts](https://www.amazon.de/s?k=deleyCON+M6+K%C3%A4figmuttern) (relaxed hook span 13.58 mm). Cage nuts aren't standardized beyond the 9.5 mm square hole: pick M6 nuts rated for about 2 mm panel thickness. Nuts made for thin panels (under about 1.8 mm, like [RS type N](https://uk.rs-online.com/web/p/cage-nuts/2662268)) may not seat.
@@ -93,11 +92,15 @@ Both modules are [BOSL2 attachables](https://github.com/BelfrySCAD/BOSL2/wiki/Tu
 | Part | Preview |
 |------|---------|
 | Assembly: two adapters with top and bottom end covers | ![Rackmount Adapter](parts/renders/rackmount_adapter.png) |
+| Print plate: both adapters | ![Adapters print plate](parts/renders/rackmount_adapter_adapters.png) |
+| Print plate: both end covers | ![End covers print plate](parts/renders/rackmount_adapter_end_covers.png) |
 
 To generate or refresh previews:
 
 ```sh
 scadm export-png models/rackmount_adapter/parts/rackmount_adapter.scad
+scadm export-png models/rackmount_adapter/parts/rackmount_adapter.scad -D 'part="adapters"' --output models/rackmount_adapter/parts/renders/rackmount_adapter_adapters.png
+scadm export-png models/rackmount_adapter/parts/rackmount_adapter.scad -D 'part="end covers"' --output models/rackmount_adapter/parts/renders/rackmount_adapter_end_covers.png
 ```
 
 ## 📚 References

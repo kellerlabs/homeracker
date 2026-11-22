@@ -38,6 +38,7 @@ hr_rackmount_end_cover_primary_color = hr_rackmount_primary_color;
  * with a tongue at each end that slides into an adapter's end cover dock.
  * A neck with the tongue's cross-section joins both tongues through the body.
  * The body keeps TOLERANCE / 2 of clearance toward each dock and toward the rack unit on the inside.
+ * Its outer face carries an engraved TOP or BOTTOM.
  * It's printed upright: its front vertical edges and the tongues' free ends are rounded, its outer face chamfers all around,
  * and its inner face chamfers along the front, both ends and the back.
  * The top cover's tongues and neck reach down through the gap fill above the top rack unit, so the cover rests on it.
@@ -87,14 +88,19 @@ module end_cover(rackwidth, height_units, type = END_COVER_TOP,
     // the body keeps TOLERANCE / 2 of clearance toward each dock and toward the rack unit on the inside;
     // printed upright: the front vertical edges round, the back ones stay square so the body covers the neck behind them;
     // the outer face chamfers all around, the inner face from its front edge on, plus the back edge
-    up(hook_side.z * TOLERANCE / 4)
+    up(hook_side.z * TOLERANCE / 4) diff()
       color_this(debug_colors ? HR_BLUE : hr_rackmount_end_cover_primary_color)
         kl_cuboid([box_size.x - TOLERANCE, box_size.y, box_size.z - TOLERANCE / 2],
           rounding = BASE_STRENGTH, rounding_edges = [FRONT + LEFT, FRONT + RIGHT],
           chamfer = disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [hook_side, FRONT - hook_side, BACK - hook_side]) {
+          // engraved into the outer face, which faces up when printed, so the two covers can't be mixed up
+          tag("remove") attach(hook_side)
+            color(debug_colors ? HR_WHITE : hr_rackmount_end_cover_primary_color)
+              connector_cover_marking(lines = [type == END_COVER_TOP ? "TOP" : "BOTTOM"], arrow = false);
           // the neck joins both tongues, flush with the body's back and BASE_CHAMFER inside its inner face,
           // so no chamfer exposes it; its outer face lines up with the tongues'
-          align(-hook_side, BACK, inside = true, overlap = -BASE_CHAMFER, $align_msg = false)
+          // align(inside = true) defaults its child to the remove tag; keep makes the neck solid inside the engraving's diff()
+          tag("keep") align(-hook_side, BACK, inside = true, overlap = -BASE_CHAMFER, $align_msg = false)
             color_this(debug_colors ? HR_CHARCOAL : hr_rackmount_end_cover_primary_color)
               cuboid([opening, pocket.y, tongue_height - TOLERANCE - BASE_CHAMFER]) {
                 // the tongues continue the neck into the docks

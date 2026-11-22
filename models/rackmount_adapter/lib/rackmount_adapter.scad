@@ -270,7 +270,7 @@ function get_connector_cover_height() = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 
 /**
  * Connector Cover Marking Module
  *
- * Internal, called by connector_cover.
+ * Internal, called by connector_cover and end_cover.
  * Builds the body of an engraved marking: an optional arrow pointing to +Y above centered text lines.
  * The body reaches from z = -hr_rackmount_marking_depth up to just above z = 0, so it cuts cleanly through a face at z = 0.
  *
