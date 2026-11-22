@@ -29,8 +29,6 @@
 // The entire geometry is still fully my work.
 
 // TODOs
-// - proper chamferings
-// - debug color and disable chamfer integration for all components
 // - Top and bottom closing mechanisms
 
 // Known Limitations (out of scope for now)
@@ -78,7 +76,11 @@ hr_rackmount_marking_font = "Liberation Sans:style=Bold";  // ships with OpenSCA
 hr_rackmount_marking_em = 1.389 * hr_rackmount_marking_size;  // em size OpenSCAD renders for this text size
 hr_rackmount_marking_digit_advance = 0.556 * hr_rackmount_marking_em;
 hr_rackmount_marking_unit_advance = 0.722 * hr_rackmount_marking_em;  // widest unit glyph, U
-hr_rackmount_marking_cap_height = 0.688 * hr_rackmount_marking_em;    // digits and capitals share it  // widest unit glyph, U
+hr_rackmount_marking_cap_height = 0.688 * hr_rackmount_marking_em;    // digits and capitals share it
+
+// End cover hook in the end cover dock
+hr_rackmount_end_cover_hook_height = 3;      // in mm
+hr_rackmount_end_cover_hook_rounding = 1.5;  // in mm
 
 // Mount Bridge
 // The incline to broaden the bridge to match up with the homeracker sleeve width
@@ -325,8 +327,6 @@ module connector_cover(marking = [], marking_arrow = false, bridge_side = BOTTOM
   attachable_depth = get_connector_cover_depth();
   attachable_height = get_connector_cover_height();
 
-  cutout_depth = attachable_depth - get_rackmount_cage_nut_hole_depth();
-
   tag_scope("connector_cover")
     attachable(
       size = [attachable_width, attachable_depth, attachable_height],
@@ -347,11 +347,7 @@ module connector_cover(marking = [], marking_arrow = false, bridge_side = BOTTOM
     }
 }
 
-function get_end_cover_hook_height() = 3;
-
 function get_end_cover_hook_strength() = BASE_STRENGTH * 2;
-
-function get_endcover_hook_rounding() = 1.5;
 
 /**
  * End Cover Dock Module
@@ -389,11 +385,11 @@ module end_cover_dock(type = END_COVER_TOP, width, debug_colors = false, disable
             cuboid([attachable_width + HR_EPSILON, cutout_depth, attachable_height - BASE_STRENGTH + HR_EPSILON]) {
               // End Cover Hook
               hook_strength = get_end_cover_hook_strength();
-              hook_height = get_end_cover_hook_height();
+              hook_height = hr_rackmount_end_cover_hook_height;
               tag("keep") left(BASE_STRENGTH) align(top_or_bottom, RIGHT, inside = true)
                 color_this(debug_colors ? HR_GREEN : hr_rackmount_primary_color)
                   kl_cuboid([hook_strength, cutout_depth, hook_height],
-                    rounding = get_endcover_hook_rounding(), rounding_edges = [LEFT - top_or_bottom, RIGHT - top_or_bottom],
+                    rounding = hr_rackmount_end_cover_hook_rounding, rounding_edges = [LEFT - top_or_bottom, RIGHT - top_or_bottom],
                     chamfer = disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [BACK + LEFT, BACK + RIGHT]);
             }
       }
@@ -425,6 +421,7 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
   gapfill_width = get_gapfill_width(rackwidth);
   gapfill_depth = get_rackmount_cage_nut_hole_depth();
   gapfill_height = height_units * STD_UNIT_HEIGHT;
+  mount_width_total = get_mount_width_total(rackwidth);
 
   // Warning: this assumes the cage_nut_hole_depth is smaller than a BASE_UNIT (which as of now it is)
   mount_bridge_depth = BASE_UNIT;
@@ -433,7 +430,7 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
   // we'll subtract a TOLERANCE to flush fit the sleeve
   mount_bridge_height = hr_height_units * BASE_UNIT - TOLERANCE;
 
-  attachable_width = STD_MOUNT_SURFACE_WIDTH + mount_bridge_width + gapfill_width;
+  attachable_width = mount_bridge_width + mount_width_total;
   // the sleeve overlaps BASE_STRENGTH into the bridge, the connector covers stick out above and below it
   attachable_depth = mount_bridge_depth + HR_SLEEVE_DEPTH - BASE_STRENGTH;
   attachable_height = mount_bridge_height + 2 * (get_connector_cover_height() - BASE_STRENGTH);
@@ -442,13 +439,12 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
 
   // the end cover docks span the mount width next to the bridge, their pockets open to the back behind a BASE_STRENGTH front wall
   end_cover_dock_wall = [
-    (mount_bridge_width + gapfill_width + STD_MOUNT_SURFACE_WIDTH) / 2 - bridge_offset.x,
+    (mount_bridge_width + mount_width_total) / 2 - bridge_offset.x,
     BASE_STRENGTH - mount_bridge_depth / 2 - bridge_offset.y,
     // pocket center below the dock's BASE_STRENGTH roof; docks end flush with the box's top and bottom
     attachable_height / 2 - BASE_STRENGTH / 2 - BASE_UNIT / 4,
   ];
 
-  chamfer_color = debug_colors ? HR_WHITE : hr_rackmount_primary_color;
   assert(side == LEFT || side == RIGHT, "rackmount_adapter: side must be LEFT or RIGHT");
   mirrored = side == RIGHT;
   end_cover_dock_x = end_cover_dock_wall.x * (mirrored ? -1 : 1);
@@ -467,7 +463,7 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
         cuboid([mount_bridge_width, mount_bridge_depth, mount_bridge_height]) {
           // proper chamfers
           if (!disable_chamfer) {
-            color_this(chamfer_color)
+            color_this(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
               edge_mask(edges = LEFT, except = BACK)
                 chamfer_edge_mask(chamfer = BASE_CHAMFER);
           }
@@ -494,18 +490,19 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
           down(BASE_UNIT + TOLERANCE / 2)
             align(RIGHT, FRONT + BOTTOM) color_this(debug_colors ? HR_CHARCOAL : hr_rackmount_primary_color)
               cuboid([gapfill_width, gapfill_depth, gapfill_height]) {
-                mount_width_total = get_mount_width_total(rackwidth);
-                color_this(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
-                  edge_mask(edges = [BACK + TOP, BACK + BOTTOM])
-                    chamfer_edge_mask(chamfer = BASE_CHAMFER);
+                if (!disable_chamfer)
+                  color_this(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
+                    edge_mask(edges = [BACK + TOP, BACK + BOTTOM])
+                      chamfer_edge_mask(chamfer = BASE_CHAMFER);
                 // lastly the rackmount to the right side
                 // needs to be shifted down 1 hr-unit.
                 align(RIGHT) rackmount_cage_nut(height_units = height_units, debug_colors = debug_colors, disable_chamfer = disable_chamfer) {
                   align(BOTTOM, RIGHT + FRONT)
                     end_cover_dock(type = END_COVER_BOTTOM, width = mount_width_total, debug_colors = debug_colors, disable_chamfer = disable_chamfer);
-                  color_this(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
-                    edge_mask(edges = [BACK + TOP, BACK + BOTTOM])
-                      chamfer_edge_mask(chamfer = BASE_CHAMFER);
+                  if (!disable_chamfer)
+                    color_this(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
+                      edge_mask(edges = [BACK + TOP, BACK + BOTTOM])
+                        chamfer_edge_mask(chamfer = BASE_CHAMFER);
                 }
 
                 // the gapfill at the top of the rackmount to fill the space up to a full homeracker unit
