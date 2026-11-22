@@ -20,7 +20,7 @@ See [core/README.md](core/README.md) for details.
 
 Generic utilities used across all models:
 
-- **Cuboid**: Rounded vertical edges with chamfers that follow them, the base shape for new parts
+- **Cuboid**: Rounded edges along one axis with chamfers that follow them, the base shape for new parts
 - **Print Bed Fit**: Longest part of a given width that fits a print bed, diagonal included
 
 ![Cuboid](./essentials/parts/renders/kl_cuboid.png)

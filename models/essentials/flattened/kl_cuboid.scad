@@ -70,38 +70,55 @@ function _kl_cuboid_outline(size, rounding, rounded, chamfered, grow) =
     [(_grow[1] - _grow[3]) / 2, (_grow[2] - _grow[0]) / 2],
     rect([size.x + _grow[1] + _grow[3], size.y + _grow[0] + _grow[2]], rounding = _corner_rounding)
   );
-module kl_cuboid(size, rounding = 0, rounding_edges = KL_CUBOID_VERTICAL_EDGES,
-  chamfer = 0, chamfer_edges = [TOP, BOTTOM],
+function kl_cuboid_axis(rounding_edges, chamfer_edges) =
+  let(
+    _rounding_axes = [for (edge = default(rounding_edges, []))[for (c = edge) c == 0 ? 1 : 0]],
+    _face_axes = [for (edge = default(chamfer_edges, [])) if (len([for (c = edge) if (c != 0) c]) == 1)[for (c = edge) abs(c)]]
+  )
+  len(_rounding_axes) > 0 ? _rounding_axes[0]
+  : len(_face_axes) > 0 ? _face_axes[0]
+  : UP;
+function _kl_cuboid_to_axis_frame(direction, axis) = [for (c = rot(from = axis, to = UP, p = direction)) round(c * 1e6) / 1e6];
+module kl_cuboid(size, rounding = 0, rounding_edges, chamfer = 0, chamfer_edges,
   anchor = CENTER, spin = 0, orient = UP) {
   _size = scalar_vec3(size);
-  for (edge = rounding_edges)
-    assert(in_list(edge, KL_CUBOID_VERTICAL_EDGES), str("kl_cuboid: rounding_edges takes vertical edges only, got ", edge));
-  for (edge = chamfer_edges)
-    assert(in_list(edge, KL_CUBOID_CHAMFER_EDGES), str("kl_cuboid: chamfer_edges takes top or bottom edges or faces only, got ", edge));
-  assert(rounding >= 0 && 2 * rounding <= min(_size.x, _size.y), "kl_cuboid: rounding must fit the footprint");
-  assert(chamfer >= 0 && 2 * chamfer <= _size.z, "kl_cuboid: chamfer must fit the height");
+  _axis = kl_cuboid_axis(rounding_edges, chamfer_edges);
+  for (edge = default(rounding_edges, []))
+    assert(
+      len([for (c = edge) if (abs(c) == 1) c]) == 2 && [for (c = edge) c == 0 ? 1 : 0] == _axis,
+      str("kl_cuboid: rounding_edges must all run along one axis, got ", edge)
+    );
 
-  _rounding_edges = rounding > 0 ? rounding_edges : [];
+  _axis_size = [for (c = _kl_cuboid_to_axis_frame(_size, _axis)) abs(c)];
+  _axis_rounding_edges = is_undef(rounding_edges) ? KL_CUBOID_VERTICAL_EDGES : [for (edge = rounding_edges) _kl_cuboid_to_axis_frame(edge, _axis)];
+  _axis_chamfer_edges = is_undef(chamfer_edges) ? [TOP, BOTTOM] : [for (edge = chamfer_edges) _kl_cuboid_to_axis_frame(edge, _axis)];
+  for (i = idx(_axis_chamfer_edges))
+    assert(in_list(_axis_chamfer_edges[i], KL_CUBOID_CHAMFER_EDGES), str("kl_cuboid: chamfer_edges must lie on a face across the rounding axis, got ", chamfer_edges[i]));
+  assert(rounding >= 0 && 2 * rounding <= min(_axis_size.x, _axis_size.y), "kl_cuboid: rounding must fit the cross-section");
+  assert(chamfer >= 0 && 2 * chamfer <= _axis_size.z, "kl_cuboid: chamfer must fit the length along the axis");
+
+  _rounding_edges = rounding > 0 ? _axis_rounding_edges : [];
   _rounded = [for (edge = KL_CUBOID_VERTICAL_EDGES) in_list(edge, _rounding_edges)];
-  _bottom_sides = kl_cuboid_chamfered_sides(BOTTOM, _rounding_edges, chamfer_edges);
-  _top_sides = kl_cuboid_chamfered_sides(TOP, _rounding_edges, chamfer_edges);
+  _bottom_sides = kl_cuboid_chamfered_sides(BOTTOM, _rounding_edges, _axis_chamfer_edges);
+  _top_sides = kl_cuboid_chamfered_sides(TOP, _rounding_edges, _axis_chamfer_edges);
   _grow = 2 * chamfer + 1;
 
   attachable(anchor = anchor, spin = spin, orient = orient, size = _size) {
-    intersection() {
-      linear_sweep(_kl_cuboid_outline(_size, rounding, _rounded, [true, true, true, true], 0), height = _size.z, center = true);
+    rot(from = UP, to = _axis)
+      intersection() {
+        linear_sweep(_kl_cuboid_outline(_axis_size, rounding, _rounded, [true, true, true, true], 0), height = _axis_size.z, center = true);
 
-      offset_sweep(
-        _kl_cuboid_outline(_size, rounding, _rounded, _bottom_sides, _grow), height = _size.z,
-        bottom = chamfer > 0 && any(_bottom_sides) ? os_chamfer(width = chamfer) : undef,
-        anchor = "origin"
-      );
-      offset_sweep(
-        _kl_cuboid_outline(_size, rounding, _rounded, _top_sides, _grow), height = _size.z,
-        top = chamfer > 0 && any(_top_sides) ? os_chamfer(width = chamfer) : undef,
-        anchor = "origin"
-      );
-    }
+        offset_sweep(
+          _kl_cuboid_outline(_axis_size, rounding, _rounded, _bottom_sides, _grow), height = _axis_size.z,
+          bottom = chamfer > 0 && any(_bottom_sides) ? os_chamfer(width = chamfer) : undef,
+          anchor = "origin"
+        );
+        offset_sweep(
+          _kl_cuboid_outline(_axis_size, rounding, _rounded, _top_sides, _grow), height = _axis_size.z,
+          top = chamfer > 0 && any(_top_sides) ? os_chamfer(width = chamfer) : undef,
+          anchor = "origin"
+        );
+      }
     children();
   }
 }

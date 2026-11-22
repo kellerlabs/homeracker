@@ -8,7 +8,7 @@ paths: ["**/*.scad"]
 
 - Use [BOSL2](https://github.com/BelfrySCAD/BOSL2/wiki) for complex geometry operations (prefer attach/align over OpenSCAD's translate/rotate).
 - Consult the BOSL2 wiki for available modules before writing custom geometry.
-- Build cuboids with [`kl_cuboid`](../../models/essentials/lib/kl_cuboid.scad): roundings on vertical edges, chamfers on top and bottom edges. See [print-optimized-kl-cuboid](../../docs/decisions/print-optimized-kl-cuboid.md).
+- Build cuboids with [`kl_cuboid`](../../models/essentials/lib/kl_cuboid.scad): roundings on the edges along one axis, chamfers on the faces across it; point that axis up on the print bed. See [print-optimized-kl-cuboid](../../docs/decisions/print-optimized-kl-cuboid.md).
 
 ## Composing Geometry (attach/align vs union/diff)
 
