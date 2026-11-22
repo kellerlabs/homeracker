@@ -263,6 +263,12 @@ module rackmount_cage_nut(height_units, debug_colors = false, disable_chamfer = 
 function get_connector_cover_depth() = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2;
 
 /**
+ * Returns the height of the connector cover, including the BASE_STRENGTH that overlaps into the mount bridge.
+ * Adds a tolerance to compensate for the sleeve deviation.
+ */
+function get_connector_cover_height() = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 2 + BASE_STRENGTH;
+
+/**
  * Connector Cover Marking Module
  *
  * Internal, called by connector_cover.
@@ -310,7 +316,7 @@ module connector_cover(marking = [], marking_arrow = false, bridge_side = BOTTOM
   anchor = CENTER, orient = UP, spin = 0) {
   attachable_width = mount_bridge_width;
   attachable_depth = get_connector_cover_depth();
-  attachable_height = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 2 + BASE_STRENGTH;  // adding tolerance to compensate for the sleeve deviation
+  attachable_height = get_connector_cover_height();
 
   cutout_depth = attachable_depth - get_rackmount_cage_nut_hole_depth();
 
@@ -331,7 +337,7 @@ module connector_cover(marking = [], marking_arrow = false, bridge_side = BOTTOM
             }
             if (marking != [] || marking_arrow)
               tag("remove") attach(BACK) back(-bridge_side.z * BASE_STRENGTH / 2)
-                connector_cover_marking(lines = marking, arrow = marking_arrow, mirrored = mirrored);
+                color(debug_colors ? HR_WHITE : hr_rackmount_primary_color) connector_cover_marking(lines = marking, arrow = marking_arrow, mirrored = mirrored);
           }
       children();
     }
@@ -409,8 +415,11 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
   mount_bridge_height = hr_height_units * BASE_UNIT - TOLERANCE;
 
   attachable_width = STD_MOUNT_SURFACE_WIDTH + mount_bridge_width + gapfill_width;
-  attachable_depth = mount_bridge_depth;
-  attachable_height = mount_bridge_height;
+  // the sleeve overlaps BASE_STRENGTH into the bridge, the connector covers stick out above and below it
+  attachable_depth = mount_bridge_depth + HR_SLEEVE_DEPTH - BASE_STRENGTH;
+  attachable_height = mount_bridge_height + 2 * (get_connector_cover_height() - BASE_STRENGTH);
+  // the geometry is built around the mount bridge center; this moves it to the center of the attachment box
+  bridge_offset = [(attachable_width - mount_bridge_width) / 2, (attachable_depth - mount_bridge_depth) / 2, 0];
 
   chamfer_color = debug_colors ? HR_WHITE : hr_rackmount_primary_color;
   assert(side == LEFT || side == RIGHT, "rackmount_adapter: side must be LEFT or RIGHT");
@@ -420,7 +429,7 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
     size = [attachable_width, attachable_depth, attachable_height],
     anchor = anchor, orient = orient, spin = spin) {
     // the left side adapter, mirrored for the right side
-    xscale(mirrored ? -1 : 1) diff()
+    xscale(mirrored ? -1 : 1) move(-bridge_offset) diff()
       color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
         // The Mounting Bridge is the (debug colors) yellow center piece that connects the rackmount to the HomeRacker system.
         cuboid([mount_bridge_width, mount_bridge_depth, mount_bridge_height]) {

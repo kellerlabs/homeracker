@@ -35,7 +35,12 @@ include <../../core/lib/lockpin.scad>
 
 // Hidden constants for sleeve library (no Customizer section marker)
 HR_SLEEVE_PRIMARY_COLOR = HR_YELLOW;
-SLEEVE_WIDTH = BASE_UNIT + 2 * BASE_STRENGTH + TOLERANCE;
+HR_SLEEVE_WIDTH = BASE_UNIT + 2 * BASE_STRENGTH + TOLERANCE;
+HR_SLEEVE_DEPTH = BASE_UNIT + BASE_STRENGTH + TOLERANCE / 2;
+
+// DEPRECATED: Unprefixed constants (will be removed in future versions)
+// Use the HR_ constants above instead
+SLEEVE_WIDTH = HR_SLEEVE_WIDTH;
 
 module sleeve(
   length, color = HR_SLEEVE_PRIMARY_COLOR,
@@ -43,8 +48,8 @@ module sleeve(
   anchor = CENTER, orient = UP, spin = 0) {
   assert(is_int(length) && length > 0, "Length must be a positive integer");
 
-  attachable_width = SLEEVE_WIDTH;
-  attachable_depth = BASE_UNIT + BASE_STRENGTH + TOLERANCE / 2;
+  attachable_width = HR_SLEEVE_WIDTH;
+  attachable_depth = HR_SLEEVE_DEPTH;
   attachable_height = length * BASE_UNIT - TOLERANCE;
   inner_back_y = -attachable_depth / 2 + BASE_STRENGTH;
   // override BACK anchor to align with inner back of sleeve for better attachment to supports
