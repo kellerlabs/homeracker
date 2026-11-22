@@ -17,7 +17,7 @@ Combining roundings and chamfers on one BOSL2 `cuboid` doesn't work: it refuses 
 The clean result (right) takes an `offset_sweep`, plus a grow-and-clip step whenever only some sides get chamfered:
 
 ```scad
-// Rounded front corners, top chamfer on the front only
+// Rounded front corners join front, left and right into one chain; the top chamfer covers it
 outline = rect([30, 20], rounding = [0, 0, 3, 3]);
 grown = back(1.5, rect([30, 23], rounding = [0, 0, 3, 3]));  // back side grown, so its chamfer lands outside
 intersection() {
@@ -80,7 +80,7 @@ To generate or refresh previews:
 
 ```bash
 scadm export-png models/essentials/parts/kl_cuboid.scad
-scadm export-png models/essentials/parts/kl_cuboid.scad -D round_back_left=false -D round_back_right=false -D chamfer_top_front=false -D chamfer_top_right=false -D chamfer_top_back=false -D chamfer_bottom_front=false -D chamfer_bottom_right=false -D chamfer_bottom_left=false --output models/essentials/parts/renders/kl_cuboid_chain.png
+scadm export-png models/essentials/parts/kl_cuboid.scad -D round_back_left=false -D round_back_right=false -D chamfer_top_front=false -D chamfer_top_right=false -D chamfer_top_back=false -D chamfer_bottom_front=false -D chamfer_bottom_right=false -D chamfer_bottom_back=false -D chamfer_bottom_left=false --output models/essentials/parts/renders/kl_cuboid_chain.png
 scadm export-png models/essentials/test/kl_cuboid_comparison.scad
 ```
 
