@@ -58,7 +58,7 @@ hr_rackmount_cage_nut_hole_front_depth = 2;     // in mm
 hr_rackmount_cage_nut_hole_front_rounding = 3;  // in mm - radius of a M6 screw thread
 
 // the part where the hooks of the cage nut engage
-hr_rackmount_cage_nut_hole_mid_width = 13.4;  // in mm - hooks of a cage nut are 14mm
+hr_rackmount_cage_nut_hole_mid_width = 12.6;  // in mm - relaxed cage nut hooks span about 13.6 mm; 12.6 leaves two perimeters to the rail edge
 hr_rackmount_cage_nut_hole_mid_depth = 0.6;   // in mm
 
 // the rackside hook part of the cage nut hole
@@ -221,7 +221,8 @@ module rackmount_cage_nut_single(
       diff()
         color_this(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
           cuboid([STD_MOUNT_SURFACE_WIDTH, attachable_depth, attachable_height], chamfer = disable_chamfer ? 0 : BASE_CHAMFER, edges = FRONT + RIGHT) {
-            tag("remove")
+            // EIA-310 sets the holes in from the panel edge (LEFT), off the center of the mount surface
+            tag("remove") right(STD_RACK_BORE_EDGE_DISTANCE_X - STD_MOUNT_SURFACE_WIDTH / 2)
               zcopies(spacing = STD_RACK_BORE_DISTANCE_Z, n = 3)
                 rackmount_cage_nut_hole(debug_colors = debug_colors);
           }

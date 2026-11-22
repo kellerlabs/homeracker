@@ -73,8 +73,9 @@ STD_WIDTH_10INCH = 254;            // 10" width in mm
 STD_WIDTH_19INCH = 482.6;          // 19" width in mm
 STD_MOUNT_SURFACE_WIDTH = 15.875;  // Mounting surface width in mm
 
-STD_RACK_BORE_DISTANCE_Z = 15.875;       // Vertical distance between mounting holes in mm
-STD_RACK_BORE_DISTANCE_MARGIN_Z = 6.35;  // Top/bottom margin to first/last mounting hole in mm
+STD_RACK_BORE_DISTANCE_Z = 15.875;                         // Vertical distance between mounting holes in mm
+STD_RACK_BORE_DISTANCE_MARGIN_Z = 6.35;                    // Top/bottom margin to first/last mounting hole in mm
+STD_RACK_BORE_EDGE_DISTANCE_X = (19 - 18.312) / 2 * 25.4;  // Panel edge to mounting hole center in mm (EIA-310: 19" panel, 18.312" hole spacing)
 
 // DEPRECATED: Legacy lowercase constants (will be removed in future versions)
 // Use uppercase constants above instead

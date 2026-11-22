@@ -6,6 +6,7 @@ Lightweight records capturing the **why** behind architecture, tooling, and work
 
 | Decision | Date | Summary |
 |---|---|---|
+| [space-rackmount-adapter-holes-per-eia-310](space-rackmount-adapter-holes-per-eia-310.md) | 2026-11-22 | Rackmount adapter holes sit 0.344" in from the panel edge (EIA-310 465.1 mm spacing on 19"), and every width scales the 19" geometry; 23" Western Electric and ETSI aren't supported |
 | [print-optimized-kl-cuboid](print-optimized-kl-cuboid.md) | 2026-11-21 | `kl_cuboid` in essentials is the preferred cuboid: roundings on vertical edges, chamfers on top and bottom edges, a chamfer covers every side joined by roundings |
 | [refresh-lock-files-weekly](refresh-lock-files-weekly.md) | 2026-11-21 | Renovate regenerates the lock files every Saturday, so fixed transitive versions land within the five-day cooldown; weekly updates run on Saturday only |
 | [print-bed-fit-library](print-bed-fit-library.md) | 2026-11-21 | Generic `print_bed.scad` in essentials returns the longest part per bed width, diagonal included; printer presets from OrcaSlicer profiles |
