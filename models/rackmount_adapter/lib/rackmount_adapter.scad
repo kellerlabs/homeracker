@@ -73,6 +73,11 @@ hr_rackmount_marking_line_pitch = 7;                       // in mm
 hr_rackmount_marking_arrow_length = 9;                     // in mm
 hr_rackmount_marking_arrow_width = 1.2;                    // in mm - shaft width, at least 3 nozzle widths to engrave cleanly
 hr_rackmount_marking_font = "Liberation Sans:style=Bold";  // ships with OpenSCAD
+// Liberation Sans advance widths, in em; all digits share one width, so numbers right-align into a column
+hr_rackmount_marking_em = 1.389 * hr_rackmount_marking_size;  // em size OpenSCAD renders for this text size
+hr_rackmount_marking_digit_advance = 0.556 * hr_rackmount_marking_em;
+hr_rackmount_marking_unit_advance = 0.722 * hr_rackmount_marking_em;  // widest unit glyph, U
+hr_rackmount_marking_cap_height = 0.688 * hr_rackmount_marking_em;    // digits and capitals share it  // widest unit glyph, U
 
 // Mount Bridge
 // The incline to broaden the bridge to match up with the homeracker sleeve width
@@ -264,7 +269,8 @@ function get_connector_cover_height() = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 
  * The body reaches from z = -hr_rackmount_marking_depth up to just above z = 0, so it cuts cleanly through a face at z = 0.
  *
  * Parameters:
- *   lines (list): Text lines, top to bottom.
+ *   lines (list): Lines, top to bottom. A string is centered; a [number, unit] pair is set in two columns,
+ *     numbers right-aligned and units left-aligned, with the block centered.
  *   arrow (bool): Adds an arrow above the lines.
  *   mirrored (bool): Mirrors the marking along X, to cancel out a mirrored parent so the text still reads correctly.
  */
@@ -275,6 +281,9 @@ module connector_cover_marking(lines, arrow, mirrored = false) {
   );
   total_height = sum(heights);
   row_centers = [for (i = idx(heights)) total_height / 2 - cumsum(heights)[i] + heights[i] / 2];
+  number_digits = max(concat([0], [for (line = lines) if (is_list(line)) len(line[0])]));
+  // the boundary between the number and unit columns, placed so the widest row is centered
+  column_x = (number_digits * hr_rackmount_marking_digit_advance - hr_rackmount_marking_unit_advance) / 2;
 
   xscale(mirrored ? -1 : 1) down(hr_rackmount_marking_depth)
     linear_extrude(hr_rackmount_marking_depth + HR_EPSILON) {
@@ -284,7 +293,15 @@ module connector_cover_marking(lines, arrow, mirrored = false) {
             width = hr_rackmount_marking_arrow_width, endcap2 = "arrow2");
       for (i = idx(lines))
         back(row_centers[i + (arrow ? 1 : 0)])
-          text(lines[i], size = hr_rackmount_marking_size, font = hr_rackmount_marking_font, halign = "center", valign = "center");
+          if (is_list(lines[i])) {
+            // a shared baseline keeps short glyphs like " at their natural height
+            move([column_x, -hr_rackmount_marking_cap_height / 2]) {
+              text(lines[i][0], size = hr_rackmount_marking_size, font = hr_rackmount_marking_font, halign = "right", valign = "baseline");
+              text(lines[i][1], size = hr_rackmount_marking_size, font = hr_rackmount_marking_font, halign = "left", valign = "baseline");
+            }
+          } else {
+            text(lines[i], size = hr_rackmount_marking_size, font = hr_rackmount_marking_font, halign = "center", valign = "center");
+          }
     }
 }
 
@@ -294,7 +311,7 @@ module connector_cover_marking(lines, arrow, mirrored = false) {
  * Extends exactly into half the height of the adjoining connector,
  * plus BASE_STRENGTH that overlaps into the mount bridge so its chamfers blend into the bridge's.
  * Markings are engraved into the connector-facing side, so the visible side stays clean and the connector still sits flush.
- * @param marking Text lines to engrave, top to bottom.
+ * @param marking Lines to engrave, top to bottom: strings, or [number, unit] pairs set in aligned columns.
  * @param marking_arrow Adds an up arrow above the marking lines.
  * @param bridge_side TOP or BOTTOM: the end that overlaps into the mount bridge. Markings center on the rest.
  * @param mirrored Set when a parent mirrors the cover, so the markings still read correctly.
@@ -452,7 +469,7 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
               connector_cover(marking = ["UP"], marking_arrow = true, bridge_side = BOTTOM, mirrored = mirrored,
                 debug_colors = debug_colors, disable_chamfer = disable_chamfer);
             align(BOTTOM, FRONT, overlap = BASE_STRENGTH)
-              connector_cover(marking = [str(rackwidth, "\""), str(height_units, "U")], bridge_side = TOP, mirrored = mirrored,
+              connector_cover(marking = [[str(rackwidth), "\""], [str(height_units), "U"]], bridge_side = TOP, mirrored = mirrored,
                 debug_colors = debug_colors, disable_chamfer = disable_chamfer);
           }
 
