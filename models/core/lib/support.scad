@@ -25,6 +25,7 @@
 
 include <BOSL2/std.scad>
 include <constants.scad>
+include <../../essentials/lib/kl_cuboid.scad>
 
 HR_CORE_SUPPORT_PRIMARY_COLOR = HR_CHARCOAL;
 HR_CORE_SUPPORT_SECONDARY_COLOR = HR_YELLOW;
@@ -56,7 +57,7 @@ module support(units = 3, x_holes = false,
     difference() {
       // Single support block
       color(debug_colors ? HR_YELLOW : HR_CORE_SUPPORT_PRIMARY_COLOR)
-        cuboid(support_dimensions, chamfer = disable_chamfer ? 0 : BASE_CHAMFER);
+        kl_cuboid(support_dimensions, chamfer = disable_chamfer ? 0 : BASE_CHAMFER, rounding = BASE_STRENGTH);
 
       // Create a lock pin hole for each unit of length
       ycopies(spacing = BASE_UNIT, n = units) {

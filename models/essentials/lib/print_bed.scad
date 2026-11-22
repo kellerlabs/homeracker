@@ -1,4 +1,4 @@
-// HomeRacker - Print Bed Fit
+// KellerLab Essentials - Print Bed Fit
 //
 // Calculates the longest part of a given width that fits on a print bed, including diagonal placement.
 // Generic: nothing here is HomeRacker-specific, and the library may move to its own repository.
@@ -92,7 +92,16 @@ PRINT_BEDS = [
 ];
 
 /**
- * Returns the usable bed area [x, y] in mm of a printer key from PRINT_BEDS.
+ * 🖨️ bed_size
+ *
+ * Public, for consumers.
+ * Looks up a printer's usable bed area; fails an assertion on unknown keys.
+ *
+ * Parameters:
+ *   printer (string): Key from PRINT_BEDS, e.g. "bambu_x1c".
+ *
+ * Returns:
+ *   [x, y] in mm.
  */
 function bed_size(printer) =
   let(_idx = search([printer], PRINT_BEDS)[0])
@@ -100,9 +109,18 @@ function bed_size(printer) =
   PRINT_BEDS[_idx][1];
 
 /**
- * Returns [length, angle] of the longest part of the given width that fits on the bed.
- * The angle is the part's long axis in degrees from the bed's X axis (0 = along X, 90 = along Y).
- * Returns [0, undef] when no orientation fits.
+ * 📏 print_fit
+ *
+ * Public, for consumers.
+ * Finds the longest part of the given width that fits on the bed, placed straight or diagonally.
+ *
+ * Parameters:
+ *   bed (vector): Usable bed area [x, y] in mm, e.g. bed_size("bambu_x1c").
+ *   width (number): Part width in mm.
+ *
+ * Returns:
+ *   [length, angle]: length in mm, angle of the part's long axis in degrees from the bed's X axis (0 = along X, 90 = along Y).
+ *   [0, undef] when no orientation fits.
  */
 function print_fit(bed, width) =
   let(
@@ -121,13 +139,32 @@ function print_fit(bed, width) =
   _best[0] <= 0 ? [0, undef] : _best;
 
 /**
- * Returns the length of the longest part of the given width that fits on the bed.
+ * 📏 max_print_length
+ *
+ * Public, for consumers. Shorthand for print_fit(bed, width)[0].
+ *
+ * Parameters:
+ *   bed (vector): Usable bed area [x, y] in mm.
+ *   width (number): Part width in mm.
+ *
+ * Returns:
+ *   Length in mm of the longest part that fits; 0 when nothing fits.
  */
 function max_print_length(bed, width) = print_fit(bed, width)[0];
 
 /**
- * Returns the angle in degrees at which a part of the given width and length fits on the bed, or undef if it does not.
- * Prefers straight placement: 0 along X, then 90 along Y, then the diagonal angle of print_fit.
+ * 🧭 print_angle
+ *
+ * Public, for consumers.
+ * Checks whether a part fits on the bed and at which angle, preferring straight placement: 0 along X, then 90 along Y, then the diagonal angle of print_fit.
+ *
+ * Parameters:
+ *   bed (vector): Usable bed area [x, y] in mm.
+ *   width (number): Part width in mm.
+ *   length (number): Part length in mm; width and length may be given in either order.
+ *
+ * Returns:
+ *   Angle in degrees from the bed's X axis, or undef when the part does not fit.
  */
 function print_angle(bed, width, length) =
   let(
@@ -140,12 +177,38 @@ function print_angle(bed, width, length) =
   : _long <= _fit[0] ? _fit[1]
   : undef;
 
-// Longest part at a fixed angle: its bounding box must stay within the bed. -1 if the width alone overflows.
+/**
+ * _fit_length
+ *
+ * Internal, called by print_fit.
+ * Longest part at a fixed angle whose bounding box stays within the bed.
+ *
+ * Parameters:
+ *   bed (vector): Usable bed area [x, y] in mm.
+ *   width (number): Part width in mm.
+ *   angle (number): Long axis angle in degrees from the bed's X axis.
+ *
+ * Returns:
+ *   Length in mm, or -1 when the width alone overflows the bed.
+ */
 function _fit_length(bed, width, angle) =
   let(_limits = _axis_limits(bed, width, angle))
   _limits[0] < 0 || _limits[1] < 0 ? -1 : min(_limits);
 
-// Length limits [x, y] the bed's X and Y edges impose at a fixed angle; negative if the width alone overflows.
+/**
+ * _axis_limits
+ *
+ * Internal, called by _fit_length and _gap.
+ * Length limits the bed's X and Y edges impose on a part at a fixed angle.
+ *
+ * Parameters:
+ *   bed (vector): Usable bed area [x, y] in mm.
+ *   width (number): Part width in mm.
+ *   angle (number): Long axis angle in degrees from the bed's X axis.
+ *
+ * Returns:
+ *   [x_limit, y_limit] in mm; -1 on an axis the width alone overflows, 1e9 on an axis that imposes no limit.
+ */
 function _axis_limits(bed, width, angle) =
   let(
     _c = cos(angle),
@@ -158,9 +221,37 @@ function _axis_limits(bed, width, angle) =
     _room_y < -1e-9 ? -1 : _s > 1e-9 ? max(0, _room_y) / _s : 1e9,
   ];
 
-// The fit length peaks at the range ends or where the X and Y limits cross, i.e. where this gap changes sign.
+/**
+ * _gap
+ *
+ * Internal, called by print_fit and _bisect_crossing.
+ * Difference between the X and Y length limits; the fit length peaks where it changes sign.
+ *
+ * Parameters:
+ *   bed (vector): Usable bed area [x, y] in mm.
+ *   width (number): Part width in mm.
+ *   angle (number): Long axis angle in degrees from the bed's X axis.
+ *
+ * Returns:
+ *   x_limit - y_limit in mm.
+ */
 function _gap(bed, width, angle) = let(_limits = _axis_limits(bed, width, angle)) _limits[0] - _limits[1];
 
+/**
+ * _bisect_crossing
+ *
+ * Internal, called by print_fit.
+ * Bisects an angle range that contains a sign change of _gap.
+ *
+ * Parameters:
+ *   bed (vector): Usable bed area [x, y] in mm.
+ *   width (number): Part width in mm.
+ *   lo, hi (number): Angle range in degrees, with _gap changing sign inside.
+ *   iterations (int): Remaining bisection steps.
+ *
+ * Returns:
+ *   The angle in degrees where _gap crosses zero.
+ */
 function _bisect_crossing(bed, width, lo, hi, iterations) =
   iterations <= 0 ? (lo + hi) / 2
   : let(_mid = (lo + hi) / 2)
@@ -168,6 +259,20 @@ function _bisect_crossing(bed, width, lo, hi, iterations) =
   ? _bisect_crossing(bed, width, lo, _mid, iterations - 1)
   : _bisect_crossing(bed, width, _mid, hi, iterations - 1);
 
+/**
+ * _max_by_length
+ *
+ * Internal, called by print_fit.
+ * Picks the sample with the greatest length.
+ *
+ * Parameters:
+ *   samples (list): [length, angle] pairs.
+ *   i (int, default=0): Recursion index.
+ *   best (list, default=[-1, undef]): Best pair so far.
+ *
+ * Returns:
+ *   The [length, angle] pair with the greatest length.
+ */
 function _max_by_length(samples, i = 0, best = [-1, undef]) =
   i >= len(samples) ? best
   : _max_by_length(samples, i + 1, samples[i][0] > best[0] ? samples[i] : best);

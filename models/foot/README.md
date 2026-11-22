@@ -17,18 +17,17 @@ Open `parts/foot.scad` in OpenSCAD and use the **Customizer** panel.
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `debug_colors` | `false` | Show distinct colors per section for visualization |
-| `disable_chamfer` | `false` | Remove chamfers from all sections |
+| `disable_chamfer` | `false` | Remove chamfers from all sections; roundings stay |
 | `anchor` | `CENTER` | BOSL2 anchor point for positioning |
 | `spin` | `0` | BOSL2 spin rotation (degrees) |
 | `orient` | `UP` | BOSL2 orientation vector |
 
 ### Geometry
 
-Three stacked parts (top → bottom, using BOSL2 `attach()`):
+Two stacked [`kl_cuboid`](../essentials/README.md#-cuboid) parts (top → bottom, using BOSL2 `attach()`), both with rounded vertical edges in print orientation:
 
-1. **Support section** (15×15×15mm): A 1-unit `support()` with `x_holes=true`, oriented downward. Plugs into the connector arm with lock pin holes in both perpendicular directions.
-2. **Spacer** (15×15×1.1mm): Inset shim at the arm entry, `TOLERANCE/2` shift-out plus `BASE_CHAMFER` inset for a flush transition. Chamfered on side edges.
-3. **Base plate** (19.2×19.2×2mm): Wider platform for load distribution and grip. Chamfered on all edges except the top face.
+1. **Plug** (15×15×15.1mm): 2mm roundings like a support, chamfered on top. Plugs into the connector arm with lock pin holes in both perpendicular directions; the extra `TOLERANCE/2` below the holes keeps the plate clear of the arm end.
+2. **Base plate** (19.2×19.2×2mm): Wider platform for load distribution and grip. Its 4.1mm rounding runs concentric with the plug's; chamfered on the bottom edges.
 
 ### Usage
 

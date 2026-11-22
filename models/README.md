@@ -16,6 +16,17 @@ The fundamental HomeRacker building system with modular components:
 
 See [core/README.md](core/README.md) for details.
 
+### 🧰 Essentials
+
+Generic utilities used across all models:
+
+- **Cuboid**: Rounded vertical edges with chamfers that follow them, the base shape for new parts
+- **Print Bed Fit**: Longest part of a given width that fits a print bed, diagonal included
+
+![Cuboid](./essentials/parts/renders/kl_cuboid.png)
+
+See [essentials/README.md](essentials/README.md) for details.
+
 ### 📐 Gridfinity
 
 Gridfinity-compatible components for modular storage integration:
