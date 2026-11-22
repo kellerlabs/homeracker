@@ -88,11 +88,17 @@ module kl_cuboid(size, rounding = 0, rounding_edges, chamfer = 0, chamfer_edges,
   _axis_chamfer_edges = is_undef(chamfer_edges) ? [TOP, BOTTOM] : [for (edge = chamfer_edges) _kl_cuboid_to_axis_frame(edge, _axis)];
   for (i = idx(_axis_chamfer_edges))
     assert(in_list(_axis_chamfer_edges[i], KL_CUBOID_CHAMFER_EDGES), str("kl_cuboid: chamfer_edges must lie on a face across the rounding axis, got ", chamfer_edges[i]));
-  assert(rounding >= 0 && 2 * rounding <= min(_axis_size.x, _axis_size.y), "kl_cuboid: rounding must fit the cross-section");
   assert(chamfer >= 0 && 2 * chamfer <= _axis_size.z, "kl_cuboid: chamfer must fit the length along the axis");
 
   _rounding_edges = rounding > 0 ? _axis_rounding_edges : [];
   _rounded = [for (edge = KL_CUBOID_VERTICAL_EDGES) in_list(edge, _rounding_edges)];
+
+  _side_lengths = [_axis_size.x, _axis_size.y, _axis_size.x, _axis_size.y];
+  for (i = [0:3])
+    assert(
+      rounding >= 0 && rounding * ((_rounded[(i + 3) % 4] ? 1 : 0) + (_rounded[i] ? 1 : 0)) <= _side_lengths[i],
+      "kl_cuboid: rounding must fit the cross-section"
+    );
   _bottom_sides = kl_cuboid_chamfered_sides(BOTTOM, _rounding_edges, _axis_chamfer_edges);
   _top_sides = kl_cuboid_chamfered_sides(TOP, _rounding_edges, _axis_chamfer_edges);
   _grow = 2 * chamfer + 1;

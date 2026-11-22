@@ -26,7 +26,8 @@
 // SOFTWARE.
 
 // AI assisted me in closing certain gaps in this model (like creating proper BOSL2 anchors), which are just tedious.
-// The entire geometry is still fully my work.
+// Claude also implemented the end_cover_hook extraction and the end cover (end_cover.scad) to my specs.
+// The rest of the geometry is fully my work.
 
 // TODOs
 // - Top and bottom closing mechanisms
@@ -81,6 +82,7 @@ hr_rackmount_marking_cap_height = 0.688 * hr_rackmount_marking_em;    // digits 
 // End cover hook in the end cover dock
 hr_rackmount_end_cover_hook_height = 3;      // in mm
 hr_rackmount_end_cover_hook_rounding = 1.5;  // in mm
+hr_rackmount_end_cover_tongue_reach = 4;     // in mm - how far the end cover's tongue reaches past the hook
 
 // Mount Bridge
 // The incline to broaden the bridge to match up with the homeracker sleeve width
@@ -331,23 +333,107 @@ module connector_cover(marking = [], marking_arrow = false, bridge_side = BOTTOM
     attachable(
       size = [attachable_width, attachable_depth, attachable_height],
       anchor = anchor, orient = orient, spin = spin) {
-      diff() {
-        // rounds along Y, the print direction (front face on the bed)
+      // rounds along Y, the print direction (front face on the bed)
+      diff()
         color_this(debug_colors ? HR_BLUE : hr_rackmount_primary_color)
           kl_cuboid([attachable_width, attachable_depth, attachable_height],
             rounding = BASE_STRENGTH, rounding_edges = [LEFT - bridge_side],
-            chamfer = disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [FRONT + TOP, FRONT + BOTTOM, FRONT + LEFT, BACK + LEFT]);
-        // the connector-facing side, text upright and readable from outside
-        if (marking != [] || marking_arrow)
-          tag("remove") back(attachable_depth / 2) frame_map(x = LEFT, y = UP, z = BACK) back(-bridge_side.z * BASE_STRENGTH / 2)
-            color(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
-              connector_cover_marking(lines = marking, arrow = marking_arrow, mirrored = mirrored);
-      }
+            chamfer = disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [FRONT + TOP, FRONT + BOTTOM, FRONT + LEFT, BACK + LEFT]) {
+            // engraved into the connector-facing side, centered on the part outside the bridge
+            if (marking != [] || marking_arrow)
+              tag("remove") attach(BACK) back(-bridge_side.z * BASE_STRENGTH / 2)
+                color(debug_colors ? HR_WHITE : hr_rackmount_primary_color)
+                  connector_cover_marking(lines = marking, arrow = marking_arrow, mirrored = mirrored);
+          }
       children();
     }
 }
 
 function get_end_cover_hook_strength() = BASE_STRENGTH * 2;
+
+/**
+ * Returns the height of an end cover dock. The dock's pocket sits below (top dock) or above (bottom dock) a BASE_STRENGTH roof.
+ */
+function get_end_cover_dock_height() = BASE_UNIT / 2;
+
+/**
+ * Returns the end cover dock's pocket size [width, depth, height] in mm, which the end cover's tongues fill.
+ * @param rackwidth The width of the rack in inches.
+ */
+function get_end_cover_pocket_size(rackwidth) =
+  [get_mount_width_total(rackwidth), get_connector_cover_depth() - BASE_STRENGTH, get_end_cover_dock_height() - BASE_STRENGTH];
+
+/**
+ * Returns the height of the gap fill above the top rack unit, which closes the gap up to a full HomeRacker unit.
+ * @param height_units The height in standard rack units.
+ */
+function get_gapfill_top_height(height_units) = (BASE_UNIT * 3 - STD_UNIT_HEIGHT) * height_units;
+
+/**
+ * End Cover Hook Module
+ *
+ * Public, the shared mating shape of the end cover dock and the end cover. BOSL2 attachable.
+ * Builds the tongue that fills a dock's pocket: a block with the hook's groove cut through it from front to back.
+ * The dock subtracts it as its pocket; the end cover adds it with clearance on every touching face.
+ *
+ * Parameters:
+ *   width (number): Pocket width in mm, along X.
+ *   height (number): Tongue height in mm, along Z; the hook hangs from its hook_side face. The dock passes the pocket height;
+ *     an end cover passes more when its tongue reaches past the pocket's open side.
+ *   depth (number): Pocket depth in mm, along Y.
+ *   hook_side (vector, default=TOP): TOP or BOTTOM, the side of the pocket the hook hangs from.
+ *   cover (bool, default=false): True builds the end cover's tongue: it reaches only
+ *     hr_rackmount_end_cover_tongue_reach past the hook, its height shrinks by TOLERANCE and the groove grows by TOLERANCE,
+ *     both in total. Its ends are free, so its width needs no clearance. The hook's entry chamfer stays on the dock only.
+ *   mirrored (bool, default=false): Moves the hook to the left end, matching a right side adapter (side = RIGHT).
+ *   color (color, default=hr_rackmount_primary_color): Color of the tongue.
+ *   debug_colors (bool, default=false): Colors the tongue and the groove for debugging; the dock's and the cover's differ.
+ *   disable_chamfer (bool, default=false): Removes the hook's entry chamfers.
+ *   anchor, spin, orient: BOSL2 attachment, see https://github.com/BelfrySCAD/BOSL2/wiki/attachments.scad
+ *
+ * Named anchors:
+ *   "end_cover_hook": center of the pocket's front face, pointing FRONT.
+ *   Pairs with the adapter's "end_cover_top" and "end_cover_bottom": attach("end_cover_top", "end_cover_hook").
+ *   A right side adapter needs mirrored = true.
+ *
+ * Produces:
+ *   The tongue as a solid, its attachment box the tongue itself: the full pocket for the dock, the short clearance tongue for the cover.
+ */
+module end_cover_hook(width, height, depth, hook_side = TOP, cover = false, mirrored = false,
+  color = hr_rackmount_primary_color, debug_colors = false, disable_chamfer = false,
+  anchor = CENTER, spin = 0, orient = UP) {
+  clearance = cover ? TOLERANCE : 0;
+  hook_strength = get_end_cover_hook_strength();
+  hook_height = hr_rackmount_end_cover_hook_height;
+  // the hook sits BASE_STRENGTH in from the pocket's end toward the rack opening
+  hook_end = mirrored ? LEFT : RIGHT;
+  // the dock's pocket spans the full width; the cover's tongue runs from the hook end to just past the hook
+  tongue_width = cover ? BASE_STRENGTH + hook_strength + hr_rackmount_end_cover_tongue_reach : width;
+  tongue_size = [tongue_width, depth, height - clearance];
+  // spin keeps the tongue upright when attached against the adapter's BACK-pointing anchors
+  anchors = [named_anchor("end_cover_hook", [-hook_end.x * (width - tongue_width) / 2, -depth / 2, 0], FRONT, spin = 180)];
+
+  tag_scope("end_cover_hook")
+    attachable(size = tongue_size, anchor = anchor, spin = spin, orient = orient, anchors = anchors) {
+      // the cover's tongue is printed upright: its free end rounds along Z, its inner face chamfers all around,
+      // the end toward the cover's body included; the dock's pocket stays sharp
+      diff("groove")
+        color_this(debug_colors ? (cover ? HR_WHITE : HR_YELLOW) : color)
+          kl_cuboid(tongue_size, rounding = cover ? BASE_STRENGTH : 0, rounding_edges = [FRONT - hook_end, BACK - hook_end],
+            chamfer = cover && !disable_chamfer ? BASE_CHAMFER : 0, chamfer_edges = [-hook_side]) {
+            // the groove runs through from the back; flush with the tongue's hook side face, it leaves TOLERANCE / 2 below the hook
+            // the epsilons let it poke through the back, the front and the hook side face
+            tag("groove") align(hook_side + hook_end + BACK, inside = true)
+              move((hook_side + BACK) * HR_EPSILON - hook_end * (BASE_STRENGTH - clearance / 2))
+                color_this(debug_colors ? (cover ? HR_RED : HR_GREEN) : color)
+                  kl_cuboid([hook_strength + clearance, depth + 2 * HR_EPSILON, hook_height + HR_EPSILON],
+                    rounding = hr_rackmount_end_cover_hook_rounding + clearance / 2, rounding_edges = [LEFT - hook_side, RIGHT - hook_side],
+                    // the dock's hook keeps its back chamfer, which guides the cover in
+                    chamfer = cover || disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [BACK + LEFT, BACK + RIGHT]);
+          }
+      children();
+    }
+}
 
 /**
  * End Cover Dock Module
@@ -363,36 +449,27 @@ module end_cover_dock(type = END_COVER_TOP, width, debug_colors = false, disable
 
   attachable_width = width;
   attachable_depth = get_connector_cover_depth();
-  attachable_height = BASE_UNIT / 2;
+  attachable_height = get_end_cover_dock_height();
 
-  move_down = (BASE_STRENGTH + HR_EPSILON) / 2 * (type == END_COVER_TOP ? 1 : -1);
   top_or_bottom = type == END_COVER_TOP ? TOP : BOTTOM;
-  cutout_depth = attachable_depth - BASE_STRENGTH + HR_EPSILON;
 
   tag_scope("end_cover_dock")
     attachable(
       size = [attachable_width, attachable_depth, attachable_height],
       anchor = CENTER, orient = UP, spin = 0) {
-      diff() {
-        // rounds along Y like the connector cover; the back chamfer at the free end continues the cover's
+      // rounds along Y like the connector cover; the back chamfer at the free end continues the cover's
+      diff()
         color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
           kl_cuboid([attachable_width, attachable_depth, attachable_height],
             rounding = BASE_STRENGTH, rounding_edges = [RIGHT + top_or_bottom],
-            chamfer = disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [FRONT + top_or_bottom, FRONT + RIGHT, BACK + top_or_bottom]);
-        // cutout for the end cover dock
-        tag("remove") down(move_down) back(BASE_STRENGTH / 2 + HR_EPSILON / 2)
-          color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
-            cuboid([attachable_width + HR_EPSILON, cutout_depth, attachable_height - BASE_STRENGTH + HR_EPSILON]) {
-              // End Cover Hook
-              hook_strength = get_end_cover_hook_strength();
-              hook_height = hr_rackmount_end_cover_hook_height;
-              tag("keep") left(BASE_STRENGTH) align(top_or_bottom, RIGHT, inside = true)
-                color_this(debug_colors ? HR_GREEN : hr_rackmount_primary_color)
-                  kl_cuboid([hook_strength, cutout_depth, hook_height],
-                    rounding = hr_rackmount_end_cover_hook_rounding, rounding_edges = [LEFT - top_or_bottom, RIGHT - top_or_bottom],
-                    chamfer = disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [BACK + LEFT, BACK + RIGHT]);
-            }
-      }
+            chamfer = disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [FRONT + top_or_bottom, FRONT + RIGHT, BACK + top_or_bottom]) {
+            // the pocket the end cover's tongue slides into, open to the back and the inside, behind a BASE_STRENGTH front wall
+            // and under a BASE_STRENGTH roof; the hook stays as the groove's negative
+            // the epsilons let it poke through the back, the inside and both ends
+            tag("remove") align(BACK - top_or_bottom, inside = true) move((BACK - top_or_bottom) * HR_EPSILON)
+              end_cover_hook(width = attachable_width + 2 * HR_EPSILON, height = attachable_height - BASE_STRENGTH + HR_EPSILON,
+                depth = attachable_depth - BASE_STRENGTH + HR_EPSILON, hook_side = top_or_bottom, debug_colors = debug_colors, disable_chamfer = disable_chamfer);
+          }
       children();
     }
 }
@@ -507,7 +584,7 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
 
                 // the gapfill at the top of the rackmount to fill the space up to a full homeracker unit
                 gapfill_top_depth = BASE_STRENGTH;
-                gapfill_top_height = (BASE_UNIT * 3 - STD_UNIT_HEIGHT) * height_units;
+                gapfill_top_height = get_gapfill_top_height(height_units);
                 align(TOP, LEFT + FRONT) color_this(debug_colors ? HR_RED : hr_rackmount_primary_color)
                   cuboid([mount_width_total, gapfill_top_depth, gapfill_top_height],
                     chamfer = disable_chamfer ? 0 : BASE_CHAMFER, edges = [RIGHT + FRONT]) {

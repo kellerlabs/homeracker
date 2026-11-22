@@ -58,4 +58,6 @@ xdistribute(spacing = 40) {
   kl_cuboid(SIZE, rounding = 3, rounding_edges = [LEFT + TOP], chamfer = 1, chamfer_edges = [FRONT + TOP]);
   // rounds along X: every X edge rounded, both side faces chamfered
   kl_cuboid(SIZE, rounding = 3, chamfer = 1, chamfer_edges = [LEFT, RIGHT], rounding_edges = [FRONT + TOP, TOP + BACK, BACK + BOTTOM, BOTTOM + FRONT]);
+  // two corners on one side: the rounding only needs to fit that side once per corner
+  kl_cuboid([12, 5, 10], rounding = 3, rounding_edges = [FRONT + LEFT, FRONT + RIGHT]);
 }

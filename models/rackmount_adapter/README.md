@@ -14,6 +14,8 @@ From the HomeRacker side to the rack side, each adapter has:
 - **Rack rail**: square cage nut holes for M6 cage nuts, three per rack unit, placed per EIA-310 (see [rack standards](rack-standards.md)).
 - **End cover docks**: pockets at the top and bottom for end covers that close off the adapter.
 
+Two **end covers** close the rack's top and bottom between the left and right adapter. Each has a tongue at both ends that slides into the docks; the top cover is taller by the gap fill above the top rack unit.
+
 It succeeds the [10"](https://makerworld.com/en/models/1353730-modular-10-server-rack#profileId-1396918) and [19"](https://makerworld.com/en/models/1503491-modular-19-server-rack#profileId-1573137) adapters on MakerWorld.
 
 ## 🤔 Why
@@ -46,9 +48,10 @@ Open `parts/rackmount_adapter.scad` in OpenSCAD and use the **Customizer** panel
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
+| `part` | assembly | assembly, adapter, end cover top, end cover bottom | The assembled rack front, or a single part to print |
 | `inches` | 10 | 2-20 | Rack width in full inches |
 | `height_units` | 1 | 1-10 | Height in rack units |
-| `side` | left | left, right | Rack side the adapter mounts on |
+| `side` | left | left, right | Rack side of a single adapter |
 | `debug_colors` | false | bool | Color-code geometry for debugging |
 | `disable_chamfer` | false | bool | Remove chamfers |
 | `debug_anchors` | false | bool | Show the BOSL2 anchors |
@@ -58,22 +61,38 @@ Open `parts/rackmount_adapter.scad` in OpenSCAD and use the **Customizer** panel
 - 🔩 Insert the cage nuts before the adapter goes onto the rack. The gap fill next to the rack rail is narrowest on 10" racks (0.5 mm per side, with 7" and 20" close behind), which leaves little room to reach a cage nut once mounted. Any adapter comes off on its own, without taking the rack apart.
 - 🔩 Tested with [deleyCON M6 cage nuts](https://www.amazon.de/s?k=deleyCON+M6+K%C3%A4figmuttern) (relaxed hook span 13.58 mm). Cage nuts aren't standardized beyond the 9.5 mm square hole: pick M6 nuts rated for about 2 mm panel thickness. Nuts made for thin panels (under about 1.8 mm, like [RS type N](https://uk.rs-online.com/web/p/cage-nuts/2662268)) may not seat.
 
+**Frame width**: the front horizontal supports need this many HomeRacker units for each rack width (`get_hr_units_by_inches()`):
+
+| Rack | Units | Rack | Units | Rack | Units |
+|---|---|---|---|---|---|
+| 2" | 4 | 9" | 16 | 16" | 28 |
+| 3" | 6 | 10" | 17 | 17" | 29 |
+| 4" | 7 | 11" | 19 | 18" | 31 |
+| 5" | 9 | 12" | 21 | 19" | 33 |
+| 6" | 11 | 13" | 23 | 20" | 34 |
+| 7" | 12 | 14" | 24 | | |
+| 8" | 14 | 15" | 26 | | |
+
 **Library usage**, include in your own model:
 
 ```scad
-include <../rackmount_adapter/lib/rackmount_adapter.scad>
+include <../rackmount_adapter/lib/end_cover.scad>
 
-rackmount_adapter(rackwidth = 10, height_units = 2, side = RIGHT)
-  attach("end_cover_top", FRONT) my_end_cover();
+// left adapter, both end covers, the right adapter on the top cover's other end
+rackmount_adapter(rackwidth = 10, height_units = 2) {
+  attach("end_cover_top", "end_cover_left") end_cover(rackwidth = 10, height_units = 2, type = END_COVER_TOP)
+    attach("end_cover_right", "end_cover_top") rackmount_adapter(rackwidth = 10, height_units = 2, side = RIGHT);
+  attach("end_cover_bottom", "end_cover_left") end_cover(rackwidth = 10, height_units = 2, type = END_COVER_BOTTOM);
+}
 ```
 
-Implemented as a [BOSL2 attachable](https://github.com/BelfrySCAD/BOSL2/wiki/Tutorial-Attachments) sized to the whole adapter. The named anchors `"end_cover_top"` and `"end_cover_bottom"` sit on each dock's front wall and point back through the pocket.
+Both modules are [BOSL2 attachables](https://github.com/BelfrySCAD/BOSL2/wiki/Tutorial-Attachments). The adapter's `"end_cover_top"` and `"end_cover_bottom"` anchors sit on each dock's front wall; the cover's `"end_cover_left"` and `"end_cover_right"` sit on the matching spot of its tongues. `end_cover_hook` builds the shared tongue shape: the dock subtracts it, the cover adds it with clearance.
 
 ## 📸 Catalog
 
 | Part | Preview |
 |------|---------|
-| Rackmount Adapter | ![Rackmount Adapter](parts/renders/rackmount_adapter.png) |
+| Assembly: two adapters with top and bottom end covers | ![Rackmount Adapter](parts/renders/rackmount_adapter.png) |
 
 To generate or refresh previews:
 
