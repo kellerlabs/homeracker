@@ -29,6 +29,7 @@
 include <rackmount_adapter.scad>
 
 hr_rackmount_end_cover_primary_color = hr_rackmount_primary_color;
+hr_rackmount_end_cover_label_min_size = 3;  // in mm - below this the label spells TOP and BOTTOM as T and B
 
 /**
  * 🧢 end_cover
@@ -38,7 +39,8 @@ hr_rackmount_end_cover_primary_color = hr_rackmount_primary_color;
  * with a tongue at each end that slides into an adapter's end cover dock.
  * A neck with the tongue's cross-section joins both tongues through the body.
  * The body keeps TOLERANCE / 2 of clearance toward each dock and toward the rack unit on the inside.
- * Its outer face carries an engraved TOP or BOTTOM.
+ * Its outer face carries an engraved label: 10" 1U - TOP on the top cover, 10" - BOTTOM on the bottom cover, which fits every height.
+ * On narrow racks the label shrinks to fit and spells the position T or B once the full word would get smaller than 3 mm.
  * It's printed upright: its front vertical edges and the tongues' free ends are rounded, its outer face chamfers all around,
  * and its inner face chamfers along the front, both ends and the back.
  * The top cover's tongues and neck reach down through the gap fill above the top rack unit, so the cover rests on it.
@@ -75,6 +77,18 @@ module end_cover(rackwidth, height_units, type = END_COVER_TOP,
   pocket_center_x = opening / 2 + pocket.x / 2;
   pocket_center_z = hook_side.z * (box_size.z / 2 - dock_height / 2 - BASE_STRENGTH / 2);
   anchor_y = BASE_STRENGTH - box_size.y / 2;
+  // the label names the rack width, the top cover also its height (the bottom cover fits every height), and the position;
+  // it shrinks to fit the face between the rounded front corners, and spells the position T or B where the full word would get too small
+  label_room = opening - TOLERANCE - 2 * (BASE_STRENGTH + BASE_CHAMFER);
+
+  function label(position) = str(rackwidth, "\" ", type == END_COVER_TOP ? str(height_units, "U ") : "", "- ", position);
+
+  function label_size(text) = min(hr_rackmount_marking_size, label_room / get_marking_width(text, 1));
+
+  full_label = label(type == END_COVER_TOP ? "TOP" : "BOTTOM");
+  short_label = label(type == END_COVER_TOP ? "T" : "B");
+  marking = label_size(full_label) >= hr_rackmount_end_cover_label_min_size ? full_label : short_label;
+
   // tongues and neck fill the pocket and the gap fill below it, so the cover rests on the rack unit
   tongue_height = pocket.z + gapfill_height;
 
@@ -96,7 +110,7 @@ module end_cover(rackwidth, height_units, type = END_COVER_TOP,
           // engraved into the outer face, which faces up when printed, so the two covers can't be mixed up
           tag("remove") attach(hook_side)
             color(debug_colors ? HR_WHITE : hr_rackmount_end_cover_primary_color)
-              connector_cover_marking(lines = [type == END_COVER_TOP ? "TOP" : "BOTTOM"], arrow = false);
+              connector_cover_marking(lines = [marking], arrow = false, size = label_size(marking));
           // the neck joins both tongues, flush with the body's back and BASE_CHAMFER inside its inner face,
           // so no chamfer exposes it; its outer face lines up with the tongues'
           // align(inside = true) defaults its child to the remove tag; keep makes the neck solid inside the engraving's diff()

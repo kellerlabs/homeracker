@@ -78,6 +78,8 @@ hr_rackmount_marking_em = 1.389 * hr_rackmount_marking_size;  // em size OpenSCA
 hr_rackmount_marking_digit_advance = 0.556 * hr_rackmount_marking_em;
 hr_rackmount_marking_unit_advance = 0.722 * hr_rackmount_marking_em;  // widest unit glyph, U
 hr_rackmount_marking_cap_height = 0.688 * hr_rackmount_marking_em;    // digits and capitals share it
+// Liberation Sans Bold advances in em for the marking characters; digits 0.556, anything else falls back to the wide 0.722
+hr_rackmount_marking_advances = [["\"", 0.474], [" ", 0.278], ["-", 0.333], ["B", 0.722], ["M", 0.833], ["O", 0.778], ["P", 0.667], ["T", 0.611], ["U", 0.722]];
 
 // End cover hook in the end cover dock
 hr_rackmount_end_cover_hook_height = 3;      // in mm
@@ -268,6 +270,17 @@ function get_connector_cover_depth() = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2
 function get_connector_cover_height() = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 2 + BASE_STRENGTH;
 
 /**
+ * Returns the width in mm of a marking text at the given text size, from the font's character advances.
+ * It errs slightly wide, so a text sized to fit a width never overflows it.
+ * @param text The marking text.
+ * @param size The text height in mm.
+ */
+function get_marking_width(text, size) =
+  let(_advances = [for (c = text) let(_hit = search([c], hr_rackmount_marking_advances)[0])
+    _hit != [] ? hr_rackmount_marking_advances[_hit][1] : (ord(c) >= 48 && ord(c) <= 57 ? 0.556 : 0.722)])
+  sum(_advances) * 1.389 * size;
+
+/**
  * Connector Cover Marking Module
  *
  * Internal, called by connector_cover and end_cover.
@@ -278,9 +291,10 @@ function get_connector_cover_height() = BASE_UNIT + BASE_UNIT / 2 + TOLERANCE / 
  *   lines (list): Lines, top to bottom. A string is centered; a [number, unit] pair is set in two columns,
  *     numbers right-aligned and units left-aligned, with the block centered.
  *   arrow (bool): Adds an arrow above the lines.
+ *   size (number, default=hr_rackmount_marking_size): Text height of the centered string lines.
  *   mirrored (bool): Mirrors the marking along X, to cancel out a mirrored parent so the text still reads correctly.
  */
-module connector_cover_marking(lines, arrow, mirrored = false) {
+module connector_cover_marking(lines, arrow, mirrored = false, size = hr_rackmount_marking_size) {
   heights = concat(
     arrow ? [hr_rackmount_marking_arrow_length + hr_rackmount_marking_line_pitch - hr_rackmount_marking_size] : [],
     [for (line = lines) hr_rackmount_marking_line_pitch]
@@ -306,7 +320,7 @@ module connector_cover_marking(lines, arrow, mirrored = false) {
               text(lines[i][1], size = hr_rackmount_marking_size, font = hr_rackmount_marking_font, halign = "left", valign = "baseline");
             }
           } else {
-            text(lines[i], size = hr_rackmount_marking_size, font = hr_rackmount_marking_font, halign = "center", valign = "center");
+            text(lines[i], size = size, font = hr_rackmount_marking_font, halign = "center", valign = "center");
           }
     }
 }

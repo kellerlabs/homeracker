@@ -14,7 +14,7 @@ From the HomeRacker side to the rack side, each adapter has:
 - **Rack rail**: square cage nut holes for M6 cage nuts, three per rack unit, placed per EIA-310 (see [rack standards](rack-standards.md)).
 - **End cover docks**: pockets at the top and bottom for end covers that close off the adapter.
 
-Two **end covers** close the rack's top and bottom between the left and right adapter. Each has a tongue at both ends that slides into the docks; the top cover is taller by the gap fill above the top rack unit. An engraved `TOP` or `BOTTOM` on the outer face tells them apart.
+Two **end covers** close the rack's top and bottom between the left and right adapter. Each has a tongue at both ends that slides into the docks; the top cover is taller by the gap fill above the top rack unit. An engraved label on the outer face tells them apart: `10" 1U - TOP` on the top cover, `10" - BOTTOM` on the bottom cover, which fits every height. On narrow racks it shrinks to fit, and on 2" racks it shortens to `T` and `B`.
 
 It succeeds the [10"](https://makerworld.com/en/models/1353730-modular-10-server-rack#profileId-1396918) and [19"](https://makerworld.com/en/models/1503491-modular-19-server-rack#profileId-1573137) adapters on MakerWorld.
 
