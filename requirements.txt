@@ -1,4 +1,4 @@
-kellerlab-pre-commit-hooks==0.3.15
+kellerlab-pre-commit-hooks==0.3.17
 markdown==3.11.3
 mutmut==3.8.1
 pytest==9.2.0
