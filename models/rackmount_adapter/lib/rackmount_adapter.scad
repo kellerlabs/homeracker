@@ -424,6 +424,8 @@ module end_cover_hook(width, height, depth, hook_side = TOP, cover = false, mirr
   // the dock's pocket spans the full width; the cover's tongue runs from the hook end to just past the hook
   tongue_width = cover ? BASE_STRENGTH + hook_strength + hr_rackmount_end_cover_tongue_reach : width;
   tongue_size = [tongue_width, depth, height - clearance];
+  groove_rounding = hr_rackmount_end_cover_hook_rounding + clearance / 2;
+  funnel_inset = 0.1;  // in mm
   // spin keeps the tongue upright when attached against the adapter's BACK-pointing anchors
   anchors = [named_anchor("end_cover_hook", [-hook_end.x * (width - tongue_width) / 2, -depth / 2, 0], FRONT, spin = 180)];
 
@@ -441,9 +443,25 @@ module end_cover_hook(width, height, depth, hook_side = TOP, cover = false, mirr
               move((hook_side + BACK) * HR_EPSILON - hook_end * (BASE_STRENGTH - clearance / 2))
                 color_this(debug_colors ? (cover ? HR_RED : HR_GREEN) : color)
                   kl_cuboid([hook_strength + clearance, depth + 2 * HR_EPSILON, hook_height + HR_EPSILON],
-                    rounding = hr_rackmount_end_cover_hook_rounding + clearance / 2, rounding_edges = [LEFT - hook_side, RIGHT - hook_side],
+                    rounding = groove_rounding, rounding_edges = [LEFT - hook_side, RIGHT - hook_side],
                     // the dock's hook keeps its back chamfer, which guides the cover in
-                    chamfer = cover || disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [BACK + LEFT, BACK + RIGHT]);
+                    chamfer = cover || disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [BACK + LEFT, BACK + RIGHT]) {
+                    // the cover's groove widens by BASE_CHAMFER toward the front face, so its edge doesn't bulge there;
+                    // the funnel starts funnel_inset inside the groove's sides and bottom, so it blends into the groove wall
+                    // without a step; on the open hook side it reaches BASE_CHAMFER past the surface, so no corner sliver stays
+                    if (cover && !disable_chamfer)
+                      attach(FRONT, BOTTOM, overlap = BASE_CHAMFER + funnel_inset)
+                        color_this(debug_colors ? HR_GREEN : color)
+                          offset_sweep(
+                            back(hook_side.z * (BASE_CHAMFER + funnel_inset) / 2,
+                              p = rect([hook_strength + clearance - 2 * funnel_inset, hook_height + HR_EPSILON + BASE_CHAMFER - funnel_inset],
+                                rounding = (groove_rounding - funnel_inset) * (hook_side.z > 0 ? [0, 0, 1, 1] : [1, 1, 0, 0]))),
+                            height = BASE_CHAMFER + funnel_inset + HR_EPSILON,
+                            top = os_chamfer(height = BASE_CHAMFER + funnel_inset, width = -(BASE_CHAMFER + funnel_inset)),
+                            // anchors relative to the path origin, so the profile's shift toward the open side holds when attached
+                            cp = [0, 0, 0]
+                          );
+                  }
           }
       children();
     }
