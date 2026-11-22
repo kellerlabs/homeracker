@@ -1,10 +1,12 @@
-// HomeRacker - Print Bed Fit Test
+// KellerLab Essentials - Print Bed Fit Test
 //
 // Asserts print_fit against closed-form cases and renders the fitted part on its bed.
 
 include <BOSL2/std.scad>
-include <../lib/constants.scad>
 include <../lib/print_bed.scad>
+
+// HomeRacker support width and unit length in mm
+SUPPORT_WIDTH = 15;
 
 function _approx(a, b, eps = 0.001) = abs(a - b) < eps;
 
@@ -45,12 +47,12 @@ assert(print_angle([256, 256], 250, 15) == 0, "width and length are interchangea
 
 // Presets and HomeRacker support lengths in base units
 assert(bed_size("bambu_x1c") == [256, 256], "preset lookup");
-assert(floor(max_print_length(bed_size("bambu_x1c"), BASE_UNIT) / BASE_UNIT) == 23, "X1C fits a 23 unit support");
-assert(floor(max_print_length(bed_size("bambu_h2c"), BASE_UNIT) / BASE_UNIT) == 28, "H2C fits a 28 unit support");
-assert(floor(max_print_length(bed_size("bambu_h2c_single"), BASE_UNIT) / BASE_UNIT) == 29, "H2C left nozzle fits a 29 unit support");
+assert(floor(max_print_length(bed_size("bambu_x1c"), SUPPORT_WIDTH) / SUPPORT_WIDTH) == 23, "X1C fits a 23 unit support");
+assert(floor(max_print_length(bed_size("bambu_h2c"), SUPPORT_WIDTH) / SUPPORT_WIDTH) == 28, "H2C fits a 28 unit support");
+assert(floor(max_print_length(bed_size("bambu_h2c_single"), SUPPORT_WIDTH) / SUPPORT_WIDTH) == 29, "H2C left nozzle fits a 29 unit support");
 
 // Visual: the longest support on the H2C's left nozzle area
 _bed = bed_size("bambu_h2c_single");
-_part = print_fit(_bed, BASE_UNIT);
+_part = print_fit(_bed, SUPPORT_WIDTH);
 color("gray") cube([_bed[0], _bed[1], 1]);
-color("gold") up(1) right(BASE_UNIT * sin(_part[1])) zrot(_part[1]) cube([_part[0], BASE_UNIT, BASE_UNIT]);
+color("gold") up(1) right(SUPPORT_WIDTH * sin(_part[1])) zrot(_part[1]) cube([_part[0], SUPPORT_WIDTH, SUPPORT_WIDTH]);

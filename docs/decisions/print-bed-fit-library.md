@@ -1,4 +1,4 @@
-# 📋 Calculate the longest printable part per print bed in a generic core library
+# 📋 Calculate the longest printable part per print bed in the generic essentials library
 
 ## 📌 Status
 
@@ -11,8 +11,8 @@
 
 ## 🔧 Decision
 
-- [`models/core/lib/print_bed.scad`](../../models/core/lib/print_bed.scad) provides `print_fit(bed, width)` returning `[length, angle]`, `max_print_length(bed, width)`, `print_angle(bed, width, length)` returning the angle a given part fits at (straight preferred) or `undef`, and `bed_size(printer)` over a `PRINT_BEDS` preset table.
-- **Generic and unprefixed:** nothing is HomeRacker-specific, so names carry no `hr_` prefix and the library can move to its own repository without renames.
+- [`models/essentials/lib/print_bed.scad`](../../models/essentials/lib/print_bed.scad) provides `print_fit(bed, width)` returning `[length, angle]`, `max_print_length(bed, width)`, `print_angle(bed, width, length)` returning the angle a given part fits at (straight preferred) or `undef`, and `bed_size(printer)` over a `PRINT_BEDS` preset table.
+- **Generic and unprefixed:** nothing is HomeRacker-specific, so it lives in [essentials](../../models/essentials/README.md), names carry no prefix and the library can move to its own repository without renames.
 - **Pure usable bed:** presets hold the slicer's printable area. Full-length edge strips are subtracted, corner exclusions are not.
 - **Dual nozzle:** the default key holds the area both nozzles reach, which is guaranteed for every print; `*_single` keys hold the left nozzle's larger area.
 - **Source:** every size comes from the printer's OrcaSlicer profile (`printable_area`, `bed_exclude_area`, `extruder_printable_area`).
@@ -24,14 +24,14 @@ Alternatives rejected:
 |---|---|
 | `margin` parameter | YAGNI; callers subtract their own safety margin |
 | Corner exclusion zones as polygons | Turns a rectangle-in-rectangle fit into rectangle-in-polygon; the opposite diagonal avoids single-corner zones |
-| `models/util/` folder | `models/` is the part catalog; a part-less folder breaks its README conventions |
+| `models/core/lib/` | Core holds the HomeRacker building system; generic utilities live in essentials |
 | Separate library repository | Release and versioning overhead for one function; possible later |
 | Raw bed sizes only, or printer names only | Names feed Customizer dropdowns, raw sizes cover unlisted printers; both are needed |
 | Closed-form diagonal solve | Fails for parts wider than the bed's short side |
 
 ## 📊 Consequences
 
-- ✅ Split decisions become one call, testable with plain asserts in [`models/core/test/print_bed.scad`](../../models/core/test/print_bed.scad).
+- ✅ Split decisions become one call, testable with plain asserts in [`models/essentials/test/print_bed.scad`](../../models/essentials/test/print_bed.scad).
 - ✅ Adding a printer is one line in `PRINT_BEDS`.
 - ⚠️ Results touch the bed edges; a brim or skirt needs its own margin.
 - ⚠️ Preset sizes go stale when vendors change profiles.
