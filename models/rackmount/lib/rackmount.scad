@@ -31,7 +31,6 @@
 // - proper chamferings
 // - debug color and disable chamfer integration for all components
 // - Top and bottom closing mechanisms
-// - markings: This side up, inch indicator, height units
 
 // Known Limitations (out of scope for now)
 // Things I haven't had the motivation or time to implement yet
@@ -46,6 +45,8 @@ include <../../sleeve/lib/sleeve.scad>
 // Width of the rack in full inches
 inches = 10;       // [2:1:20]
 height_units = 1;  // [1:1:10]
+// Rack side the adapter mounts on
+side = "left";  // [left, right]
 
 /* [Debug] */
 debug_colors = false;
@@ -76,6 +77,14 @@ hr_rackmount_cage_nut_hole_mid_depth = 0.6;   // in mm
 // formed as cylinders left and right at the back of the hole
 hr_rackmount_cage_nut_hole_back_radius = 1.5;  // in mm
 hr_rackmount_cage_nut_hole_back_width = 12.5;  // in mm
+
+// Markings engraved into the connector-facing side of the connector covers
+hr_rackmount_marking_depth = 1;                            // in mm
+hr_rackmount_marking_size = 5;                             // in mm - text height
+hr_rackmount_marking_line_pitch = 7;                       // in mm
+hr_rackmount_marking_arrow_length = 9;                     // in mm
+hr_rackmount_marking_arrow_width = 1.2;                    // in mm - shaft width, at least 3 nozzle widths to engrave cleanly
+hr_rackmount_marking_font = "Liberation Sans:style=Bold";  // ships with OpenSCAD
 
 // Mount Bridge
 // The incline to broaden the bridge to match up with the homeracker sleeve width
@@ -254,12 +263,50 @@ module rackmount_cage_nut(height_units, debug_colors = false, disable_chamfer = 
 function get_connector_cover_depth() = BASE_UNIT - BASE_STRENGTH - TOLERANCE / 2;
 
 /**
+ * Connector Cover Marking Module
+ *
+ * Internal, called by connector_cover.
+ * Builds the body of an engraved marking: an optional arrow pointing to +Y above centered text lines.
+ * The body reaches from z = -hr_rackmount_marking_depth up to just above z = 0, so it cuts cleanly through a face at z = 0.
+ *
+ * Parameters:
+ *   lines (list): Text lines, top to bottom.
+ *   arrow (bool): Adds an arrow above the lines.
+ *   mirrored (bool): Mirrors the marking along X, to cancel out a mirrored parent so the text still reads correctly.
+ */
+module connector_cover_marking(lines, arrow, mirrored = false) {
+  heights = concat(
+    arrow ? [hr_rackmount_marking_arrow_length + hr_rackmount_marking_line_pitch - hr_rackmount_marking_size] : [],
+    [for (line = lines) hr_rackmount_marking_line_pitch]
+  );
+  total_height = sum(heights);
+  row_centers = [for (i = idx(heights)) total_height / 2 - cumsum(heights)[i] + heights[i] / 2];
+
+  xscale(mirrored ? -1 : 1) down(hr_rackmount_marking_depth)
+    linear_extrude(hr_rackmount_marking_depth + HR_EPSILON) {
+      if (arrow)
+        back(row_centers[0])
+          stroke([[0, -hr_rackmount_marking_arrow_length / 2], [0, hr_rackmount_marking_arrow_length / 2]],
+            width = hr_rackmount_marking_arrow_width, endcap2 = "arrow2");
+      for (i = idx(lines))
+        back(row_centers[i + (arrow ? 1 : 0)])
+          text(lines[i], size = hr_rackmount_marking_size, font = hr_rackmount_marking_font, halign = "center", valign = "center");
+    }
+}
+
+/**
  * Connector Cover Module
  * Prolongs the mount_bridge to cover HomeRacker connectors at top and bottom.
  * Extends exactly into half the height of the adjoining connector,
  * plus BASE_STRENGTH that overlaps into the mount bridge so its chamfers blend into the bridge's.
+ * Markings are engraved into the connector-facing side, so the visible side stays clean and the connector still sits flush.
+ * @param marking Text lines to engrave, top to bottom.
+ * @param marking_arrow Adds an up arrow above the marking lines.
+ * @param bridge_side TOP or BOTTOM: the end that overlaps into the mount bridge. Markings center on the rest.
+ * @param mirrored Set when a parent mirrors the cover, so the markings still read correctly.
  */
-module connector_cover(debug_colors = false, disable_chamfer = false,
+module connector_cover(marking = [], marking_arrow = false, bridge_side = BOTTOM, mirrored = false,
+  debug_colors = false, disable_chamfer = false,
   anchor = CENTER, orient = UP, spin = 0) {
   attachable_width = mount_bridge_width;
   attachable_depth = get_connector_cover_depth();
@@ -282,6 +329,9 @@ module connector_cover(debug_colors = false, disable_chamfer = false,
                 tag("remove") corner_mask(corners = [LEFT + TOP + FRONT, LEFT + BOTTOM + FRONT])
                   chamfer_corner_mask(chamfer = BASE_CHAMFER);
             }
+            if (marking != [] || marking_arrow)
+              tag("remove") attach(BACK) back(-bridge_side.z * BASE_STRENGTH / 2)
+                connector_cover_marking(lines = marking, arrow = marking_arrow, mirrored = mirrored);
           }
       children();
     }
@@ -336,13 +386,14 @@ module end_cover_dock(type = END_COVER_TOP, width, debug_colors = false, disable
 /**
  * Rackmount Adapter Module
  * Represents an adapter between standard rackmounts and the HomeRacker system
- * produces only one adapter for the left side of the rack.
- * If you need an adapter for the right side, mirror this module.
+ * for one side of the rack. The right side is the mirrored left side with readable markings.
+ * Use side = RIGHT instead of mirroring the module or the exported part, which would mirror the markings too.
  * @param rackwidth The width of the rack in inches.
  * @param height_units The height of the adapter in standard rack units (1U = 44.45 mm).
+ * @param side LEFT or RIGHT: the rack side the adapter mounts on.
  *
  */
-module rackmount_adapter(rackwidth, height_units,
+module rackmount_adapter(rackwidth, height_units, side = LEFT,
   debug_colors = false, disable_chamfer = false,
   anchor = CENTER, orient = UP, spin = 0) {
 
@@ -362,12 +413,14 @@ module rackmount_adapter(rackwidth, height_units,
   attachable_height = mount_bridge_height;
 
   chamfer_color = debug_colors ? HR_WHITE : hr_rackmount_primary_color;
+  assert(side == LEFT || side == RIGHT, "rackmount_adapter: side must be LEFT or RIGHT");
+  mirrored = side == RIGHT;
 
   attachable(
     size = [attachable_width, attachable_depth, attachable_height],
     anchor = anchor, orient = orient, spin = spin) {
-    // start at the left side with the mounting bridge
-    diff()
+    // the left side adapter, mirrored for the right side
+    xscale(mirrored ? -1 : 1) diff()
       color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
         // The Mounting Bridge is the (debug colors) yellow center piece that connects the rackmount to the HomeRacker system.
         cuboid([mount_bridge_width, mount_bridge_depth, mount_bridge_height]) {
@@ -381,9 +434,14 @@ module rackmount_adapter(rackwidth, height_units,
           // Connector Covers at top and bottom of the mounting bridge.
           // They chamfer themselves, kept from the bridge's masks.
           // That's why we use the overlap.
-          tag("keep")
-            align([TOP, BOTTOM], FRONT, overlap = BASE_STRENGTH)
-              connector_cover(debug_colors = debug_colors, disable_chamfer = disable_chamfer);
+          tag("keep") {
+            align(TOP, FRONT, overlap = BASE_STRENGTH)
+              connector_cover(marking = ["UP"], marking_arrow = true, bridge_side = BOTTOM, mirrored = mirrored,
+                debug_colors = debug_colors, disable_chamfer = disable_chamfer);
+            align(BOTTOM, FRONT, overlap = BASE_STRENGTH)
+              connector_cover(marking = [str(rackwidth, "\""), str(height_units, "U")], bridge_side = TOP, mirrored = mirrored,
+                debug_colors = debug_colors, disable_chamfer = disable_chamfer);
+          }
 
           // the gapfill in the middle at the front.
           // The Gapfill is essential to account for differently sized racks.
@@ -440,11 +498,11 @@ module rackmount_adapter(rackwidth, height_units,
   }
 }
 
-rackmount_adapter(rackwidth = inches, height_units = height_units,
+rackmount_adapter(rackwidth = inches, height_units = height_units, side = side == "right" ? RIGHT : LEFT,
   debug_colors = debug_colors, disable_chamfer = disable_chamfer
 )
-  // show_anchors()
-  ;
+  show_anchors()
+    ;
 
 echo("inches: ", inches);
 echo("mm: ", inches * 25.4);
