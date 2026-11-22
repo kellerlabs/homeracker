@@ -29,6 +29,7 @@ chamfer_bottom_left = true;
 // --- from kl_cuboid.scad ---
 KL_CUBOID_SIDES = [FRONT, RIGHT, BACK, LEFT];
 KL_CUBOID_VERTICAL_EDGES = [FRONT + RIGHT, RIGHT + BACK, BACK + LEFT, LEFT + FRONT];
+KL_CUBOID_CHAMFER_EDGES = [for (face = [TOP, BOTTOM]) each concat([face], [for (side = KL_CUBOID_SIDES) face + side])];
 $fn = 100;
 
 _rounding_edges = [
@@ -76,10 +77,7 @@ module kl_cuboid(size, rounding = 0, rounding_edges = KL_CUBOID_VERTICAL_EDGES,
   for (edge = rounding_edges)
     assert(in_list(edge, KL_CUBOID_VERTICAL_EDGES), str("kl_cuboid: rounding_edges takes vertical edges only, got ", edge));
   for (edge = chamfer_edges)
-    assert(
-      abs(edge.z) == 1 && norm([edge.x, edge.y]) <= 1 && edge.x * edge.y == 0,
-      str("kl_cuboid: chamfer_edges takes top or bottom edges or faces only, got ", edge)
-    );
+    assert(in_list(edge, KL_CUBOID_CHAMFER_EDGES), str("kl_cuboid: chamfer_edges takes top or bottom edges or faces only, got ", edge));
   assert(rounding >= 0 && 2 * rounding <= min(_size.x, _size.y), "kl_cuboid: rounding must fit the footprint");
   assert(chamfer >= 0 && 2 * chamfer <= _size.z, "kl_cuboid: chamfer must fit the height");
 
