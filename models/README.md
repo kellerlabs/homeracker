@@ -46,6 +46,14 @@ Fully customizable rackmount ears for standard 10" and 19" rack mounting.
 
 See [rackmount_ears/README.md](rackmount_ears/README.md) for details.
 
+### 🗄️ Rackmount Adapter
+
+Connects the vertical HomeRacker front supports to a standard rack rail of any inch width, one adapter per rack side. Work in progress.
+
+![Rackmount Adapter](./rackmount_adapter/parts/renders/rackmount_adapter.png)
+
+See [rackmount_adapter/README.md](rackmount_adapter/README.md) for details.
+
 ### 🧲 Wall Mount
 
 Wall-mountable bracket for attaching HomeRacker supports to vertical surfaces.

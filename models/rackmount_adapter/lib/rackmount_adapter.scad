@@ -25,7 +25,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// This piece of code is (so far) purely HI-generated. No AI involved yet.
+// AI assisted me in closing certain gaps in this model (like creating proper BOSL2 anchors), which are just tedious.
+// The entire geometry is still fully my work.
 
 // TODOs
 // - proper chamferings
@@ -41,19 +42,6 @@ include <BOSL2/std.scad>
 include <../../core/lib/constants.scad>
 include <../../sleeve/lib/sleeve.scad>
 
-/* [General] */
-// Width of the rack in full inches
-inches = 10;       // [2:1:20]
-height_units = 1;  // [1:1:10]
-// Rack side the adapter mounts on
-side = "left";  // [left, right]
-
-/* [Debug] */
-debug_colors = false;
-disable_chamfer = false;
-
-/* [Hidden] */
-$fn = 100;
 // rackmount constants
 // FYI: this first iteration just assumes M6 cage nuts and bolts.
 
@@ -398,6 +386,9 @@ module end_cover_dock(type = END_COVER_TOP, width, debug_colors = false, disable
  * @param height_units The height of the adapter in standard rack units (1U = 44.45 mm).
  * @param side LEFT or RIGHT: the rack side the adapter mounts on.
  *
+ * Named anchors:
+ *   "end_cover_top", "end_cover_bottom": inner face of each end cover dock's front wall, centered on its pocket,
+ *   pointing BACK through the pocket. Attach an end cover with attach("end_cover_top", FRONT).
  */
 module rackmount_adapter(rackwidth, height_units, side = LEFT,
   debug_colors = false, disable_chamfer = false,
@@ -421,13 +412,26 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
   // the geometry is built around the mount bridge center; this moves it to the center of the attachment box
   bridge_offset = [(attachable_width - mount_bridge_width) / 2, (attachable_depth - mount_bridge_depth) / 2, 0];
 
+  // the end cover docks span the mount width next to the bridge, their pockets open to the back behind a BASE_STRENGTH front wall
+  end_cover_dock_wall = [
+    (mount_bridge_width + gapfill_width + STD_MOUNT_SURFACE_WIDTH) / 2 - bridge_offset.x,
+    BASE_STRENGTH - mount_bridge_depth / 2 - bridge_offset.y,
+    // pocket center below the dock's BASE_STRENGTH roof; docks end flush with the box's top and bottom
+    attachable_height / 2 - BASE_STRENGTH / 2 - BASE_UNIT / 4,
+  ];
+
   chamfer_color = debug_colors ? HR_WHITE : hr_rackmount_primary_color;
   assert(side == LEFT || side == RIGHT, "rackmount_adapter: side must be LEFT or RIGHT");
   mirrored = side == RIGHT;
+  end_cover_dock_x = end_cover_dock_wall.x * (mirrored ? -1 : 1);
+  anchors = [
+    named_anchor("end_cover_top", [end_cover_dock_x, end_cover_dock_wall.y, end_cover_dock_wall.z], BACK),
+    named_anchor("end_cover_bottom", [end_cover_dock_x, end_cover_dock_wall.y, -end_cover_dock_wall.z], BACK),
+  ];
 
   attachable(
     size = [attachable_width, attachable_depth, attachable_height],
-    anchor = anchor, orient = orient, spin = spin) {
+    anchor = anchor, orient = orient, spin = spin, anchors = anchors) {
     // the left side adapter, mirrored for the right side
     xscale(mirrored ? -1 : 1) move(-bridge_offset) diff()
       color_this(debug_colors ? HR_YELLOW : hr_rackmount_primary_color)
@@ -506,21 +510,3 @@ module rackmount_adapter(rackwidth, height_units, side = LEFT,
     children();
   }
 }
-
-rackmount_adapter(rackwidth = inches, height_units = height_units, side = side == "right" ? RIGHT : LEFT,
-  debug_colors = debug_colors, disable_chamfer = disable_chamfer
-)
-  show_anchors()
-    ;
-
-echo("inches: ", inches);
-echo("mm: ", inches * 25.4);
-
-echo("hr units: ", get_hr_units_by_inches(inches));
-echo("gapfill: ", get_adapter_gapfill(inches));
-echo("hr to std height diff: ", get_hr_to_std_height_diff(height_units));
-
-
-// if (!disable_chamfer)
-//   color_this(debug_colors ? HR_CHARCOAL : hr_rackmount_primary_color)
-//     edge_mask(edges = [FRONT, RIGHT], except = LEFT) chamfer_edge_mask(chamfer = BASE_CHAMFER)
