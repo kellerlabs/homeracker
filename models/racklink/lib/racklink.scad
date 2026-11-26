@@ -119,7 +119,7 @@ module racklink(height, distance, left_start = 0, left_end = 0, right_start = 0,
   length_left = get_sleeve_length_units(left_start, left_end, height);                     // calculate the length of the left sleeve based on the start and end positions
   length_right = get_sleeve_length_units(right_start, right_end, height);                  // calculate the length of the right sleeve based on the start and end positions
 
-  horizontal_offset = SLEEVE_WIDTH;  // horizontal offset to position the sleeves on the left and right side of the racklink, ensuring they wrap around the vertical supports of the rack columns
+  horizontal_offset = HR_SLEEVE_WIDTH;  // horizontal offset to position the sleeves on the left and right side of the racklink, ensuring they wrap around the vertical supports of the rack columns
 
   cover_plate(length = height, distance = distance, debug_colors = debug_colors, disable_chamfer = disable_chamfer) {
     up(start_left) left(horizontal_offset) align(FRONT, LEFT + BOTTOM, inside = true) sleeve(length = length_left, color = HR_RL_PRIMARY_COLOR, debug_colors = debug_colors, disable_chamfer = disable_chamfer);

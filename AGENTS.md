@@ -78,7 +78,7 @@ Before terminal operations, consider these steps (use best judgement):
 Each file below carries `paths:` frontmatter and loads automatically when you touch a matching file.
 
 - Documentation: stick to the house-style skill
-- OpenSCAD: [openscad.md](.claude/rules/openscad.md)
+- OpenSCAD: [openscad.md](.claude/rules/openscad.md). Compose parts as BOSL2 parent/child attachments with `diff()` tags; no `union()`/`difference()` wrappers or computed `move()` coordinates.
 - Python: [python.md](.claude/rules/python.md)
 - Shell and GitHub Actions: [shell.md](.claude/rules/shell.md)
 - Renovate: [renovate.md](.claude/rules/renovate.md)

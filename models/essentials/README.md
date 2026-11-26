@@ -6,7 +6,7 @@ Generic OpenSCAD utilities KellerLab uses in every model. Nothing here is HomeRa
 
 ### 📌 What
 
-[`lib/kl_cuboid.scad`](lib/kl_cuboid.scad) provides `kl_cuboid`, a cuboid with rounded vertical edges and chamfered top and bottom edges on one body.
+[`lib/kl_cuboid.scad`](lib/kl_cuboid.scad) provides `kl_cuboid`, a cuboid that rounds the edges along one axis and chamfers the edges of the two faces across it, on one body.
 
 ### 🤔 Why
 
@@ -26,7 +26,7 @@ intersection() {
 }
 ```
 
-`kl_cuboid` does this in one call and stays opinionated about where each edge break goes:
+`kl_cuboid` does this in one call. Its rule: roundings on the edges along one axis, chamfers on the faces across it. With that axis pointing up on the print bed, every part gets print-optimized edges:
 
 - **Roundings on vertical edges** remove the corner bulge a sharp corner leaves, where the toolhead slows while the nozzle keeps extruding.
 - **Chamfers on top and bottom edges**, because a rounding on a horizontal edge prints as visible layer steps.
@@ -59,15 +59,21 @@ kl_cuboid([45, 30, 15], rounding = 3, chamfer = 1);
 // Front corners rounded; chamfering the top left edge chamfers left, front and right
 kl_cuboid([45, 30, 15], rounding = 3, rounding_edges = [FRONT + LEFT, FRONT + RIGHT],
   chamfer = 1, chamfer_edges = [TOP + LEFT]);
+
+// A part printed front face down: rounds along Y, chamfers the front and back faces
+kl_cuboid([20, 10, 30], rounding = 2, rounding_edges = [LEFT + TOP],
+  chamfer = 1, chamfer_edges = [FRONT + TOP, BACK + LEFT]);
 ```
 
-- `rounding_edges` takes vertical edges only (`FRONT + LEFT`), `chamfer_edges` top or bottom edges (`BOTTOM + FRONT`) or whole faces (`TOP`). Anything else fails an assertion.
-- A rounded vertical edge joins its two sides into a chain; a chamfer always covers the whole chain on its face.
+- The edges decide the axis: all `rounding_edges` must run along one axis (`LEFT + TOP` runs along Y). Without roundings, a whole-face chamfer (`FRONT`) points along it; otherwise it's Z.
+- `chamfer_edges` takes edges on the two faces across the axis or those whole faces. Anything else fails an assertion.
+- Leaving out `rounding_edges` rounds all four edges along the axis; leaving out `chamfer_edges` chamfers both faces across it.
+- A rounded edge joins its two sides into a chain; a chamfer always covers the whole chain on its face.
 - It's a BOSL2 attachable sized like `cuboid`, so `anchor`, `attach` and `align` work as usual.
 - ⚠️ A chamfer wider than the rounding radius turns the rounded corner sharp on that face.
 - Use masks or plain BOSL2 shapes for anything outside these rules.
 
-[`test/kl_cuboid.scad`](test/kl_cuboid.scad) asserts the chamfer chain rule and renders one cuboid per case.
+[`test/kl_cuboid.scad`](test/kl_cuboid.scad) asserts the chamfer chain rule and the axis inference, and renders one cuboid per case.
 
 ### 📸 Catalog
 

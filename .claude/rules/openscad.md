@@ -8,13 +8,20 @@ paths: ["**/*.scad"]
 
 - Use [BOSL2](https://github.com/BelfrySCAD/BOSL2/wiki) for complex geometry operations (prefer attach/align over OpenSCAD's translate/rotate).
 - Consult the BOSL2 wiki for available modules before writing custom geometry.
-- Build cuboids with [`kl_cuboid`](../../models/essentials/lib/kl_cuboid.scad): roundings on vertical edges, chamfers on top and bottom edges. See [print-optimized-kl-cuboid](../../docs/decisions/print-optimized-kl-cuboid.md).
+- Build cuboids with [`kl_cuboid`](../../models/essentials/lib/kl_cuboid.scad): roundings on the edges along one axis, chamfers on the faces across it; point that axis up on the print bed. See [print-optimized-kl-cuboid](../../docs/decisions/print-optimized-kl-cuboid.md).
 
 ## Composing Geometry (attach/align vs union/diff)
 
-- **Position with anchors, not offsets.** Prefer `attach`/`align`/`position` + `left`/`right`/`fwd`/`back` over raw `translate`/`rotate` with hand-computed centre math. `union()` is for merging separate solids, never for positioning.
+- **Build a part as a parent with attached children.** The main body is the parent; every other piece hangs off it (or off a sibling) via `attach`/`align`/`position`. No `union()`, `difference()` or `intersection()` wrapped around siblings: children of an attachable already union, and cutters go into `diff()` with tags. Plain CSG belongs only inside low-level primitives such as `kl_cuboid`.
+- **Position with anchors, not offsets.** No `move()`/`translate()` with hand-computed centre coordinates. A bare `move()` is fine only to place geometry inside its own `attachable()` box; any other offset is a named directional shift (`up`, `left`, `move(hook_side * x)`) after an `attach`/`align`.
+- **`attach`/`align` with `inside = true` default their child to the `remove` tag.** Harmless without a `diff()`, but once the parent sits in one, that child turns into a cutter. Tag a solid inside child `keep` explicitly.
+- **`attach`/`align` place a child by its own anchor box.** An offset baked into a child's 2D path (e.g. a shifted `rect()` in `offset_sweep`) gets re-centered away. Give the child a fixed reference point (`offset_sweep(..., cp = [0, 0, 0])`) or shift after the `attach`.
+- **`align()` offsets act on the whole alignment direction.** `inset` does nothing with `inside = true`, and `shiftout` or an `overlap` on an edge or corner anchor moves along the normalized diagonal (0.707 per axis on an edge). For an offset on one axis, anchor on a single face (`align(-hook_side, BACK, inside = true, overlap = -x)`) or add a directional shift.
 - **`diff()` is tag-based.** Kept (untagged) geometry and `remove`-tagged cutters coexist in one `diff()`; cutters only subtract where they overlap. A part welded on after the bores belongs *inside* the same `diff()` as an untagged child, do **not** wrap it in `union()` to "shield" it.
-- **Isolate a child's own `diff()`/`edge_mask` with `tag_scope()`.** A nested chamfer (edge_mask applies a `remove` tag) leaks into an enclosing `diff()` and gets cancelled. Wrap the inner part in `tag_scope()` at the call site to contain its tags.
+- **Isolate a child's own `diff()`/`edge_mask` with `tag_scope()`.** A nested chamfer (edge_mask applies a `remove` tag) leaks into an enclosing `diff()` and gets cancelled. Wrap the module's `attachable()` in `tag_scope()`, as `sleeve()` does.
+- **Tag masks explicitly under a tagged parent.** `edge_mask`/`corner_mask` only default to `remove` when no tag is inherited, so under `tag("keep")` they turn into solid geometry. Write `tag("remove") edge_mask(...)`.
+- **`keep` parts are added after all cuts.** A `remove` mask can't cut a `keep`-tagged part in the same `diff()`. Give that part its own `tag_scope()` + `diff()`, or use the shape's own `chamfer`/`rounding` + `edges` arguments.
+- **BOSL2 directions are vectors.** `-TOP` is `BOTTOM`, `TOP + LEFT` names an edge, so `-side + LEFT` picks the opposite edge without a ternary.
 - **Edge breaks in one pass.** Chamfer/fillet an assembly's outer edge with `edge_mask` on the bounding-box edges, not per-member, per-piece chamfers leave nubs at junctions.
 - **Keep sub-parts ignorant of the parent.** A reusable part (e.g. a back brace) should take its own size and attach to a face; splitting/clipping belongs in the parent, not duplicated inside the part.
 

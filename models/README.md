@@ -20,7 +20,7 @@ See [core/README.md](core/README.md) for details.
 
 Generic utilities used across all models:
 
-- **Cuboid**: Rounded vertical edges with chamfers that follow them, the base shape for new parts
+- **Cuboid**: Rounded edges along one axis with chamfers that follow them, the base shape for new parts
 - **Print Bed Fit**: Longest part of a given width that fits a print bed, diagonal included
 
 ![Cuboid](./essentials/parts/renders/kl_cuboid.png)
@@ -45,6 +45,14 @@ Fully customizable rackmount ears for standard 10" and 19" rack mounting.
 ![Rackmount Ears](./rackmount_ears/parts/renders/rackmount_ears.png)
 
 See [rackmount_ears/README.md](rackmount_ears/README.md) for details.
+
+### 🗄️ Rackmount Adapter
+
+Connects the vertical HomeRacker front supports to a standard rack rail of any inch width, one adapter per rack side, with end covers closing the rack's top and bottom.
+
+![Rackmount Adapter](./rackmount_adapter/parts/renders/rackmount_adapter.png)
+
+See [rackmount_adapter/README.md](rackmount_adapter/README.md) for details.
 
 ### 🧲 Wall Mount
 
