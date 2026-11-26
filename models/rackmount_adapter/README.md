@@ -57,6 +57,7 @@ Open `parts/rackmount_adapter.scad` in OpenSCAD and use the **Customizer** panel
 
 - ⚠️ The adapters plate holds a left and a right adapter. Don't mirror an adapter in the slicer: that mirrors the engraved markings too.
 - The markings sit on the side that faces the connectors: an up arrow on the top cover, the inch width and rack units on the bottom cover.
+- 📌 The front support needs a free left-to-right lock pin hole where the sleeve sits: use `x_holes = true`, or turn a support with holes in one direction only so they run left to right.
 - 🔩 Insert the cage nuts before the adapter goes onto the rack. The gap fill next to the rack rail is narrowest on 10" racks (0.5 mm per side, with 7" and 20" close behind), which leaves little room to reach a cage nut once mounted. Any adapter comes off on its own, without taking the rack apart.
 - 🔩 Tested with [deleyCON M6 cage nuts](https://www.amazon.de/s?k=deleyCON+M6+K%C3%A4figmuttern) (relaxed hook span 13.58 mm). Cage nuts aren't standardized beyond the 9.5 mm square hole: pick M6 nuts rated for about 2 mm panel thickness. Nuts made for thin panels (under about 1.8 mm, like [RS type N](https://uk.rs-online.com/web/p/cage-nuts/2662268)) may not seat.
 
