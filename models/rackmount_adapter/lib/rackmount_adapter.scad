@@ -82,9 +82,10 @@ hr_rackmount_marking_cap_height = 0.688 * hr_rackmount_marking_em;    // digits 
 hr_rackmount_marking_advances = [["\"", 0.474], [" ", 0.278], ["-", 0.333], ["B", 0.722], ["M", 0.833], ["O", 0.778], ["P", 0.667], ["T", 0.611], ["U", 0.722]];
 
 // End cover hook in the end cover dock
-hr_rackmount_end_cover_hook_height = 3;      // in mm
-hr_rackmount_end_cover_hook_rounding = 1.5;  // in mm
-hr_rackmount_end_cover_tongue_reach = 4;     // in mm - how far the end cover's tongue reaches past the hook
+hr_rackmount_end_cover_hook_height = 3;       // in mm
+hr_rackmount_end_cover_hook_rounding = 1.5;   // in mm
+hr_rackmount_end_cover_hook_clearance = 0.3;  // in mm - total clearance around the hook in the end cover's groove
+hr_rackmount_end_cover_tongue_reach = 4;      // in mm - how far the end cover's tongue reaches past the hook
 
 // Mount Bridge
 // The incline to broaden the bridge to match up with the homeracker sleeve width
@@ -397,8 +398,8 @@ function get_gapfill_top_height(height_units) = (BASE_UNIT * 3 - STD_UNIT_HEIGHT
  *   depth (number): Pocket depth in mm, along Y.
  *   hook_side (vector, default=TOP): TOP or BOTTOM, the side of the pocket the hook hangs from.
  *   cover (bool, default=false): True builds the end cover's tongue: it reaches only
- *     hr_rackmount_end_cover_tongue_reach past the hook, its height shrinks by TOLERANCE and the groove grows by TOLERANCE,
- *     both in total. Its ends are free, so its width needs no clearance. The hook's entry chamfer stays on the dock only.
+ *     hr_rackmount_end_cover_tongue_reach past the hook, its height shrinks by TOLERANCE and the groove grows by
+ *     hr_rackmount_end_cover_hook_clearance, both in total. Its ends are free, so its width needs no clearance. The hook's entry chamfer stays on the dock only.
  *   mirrored (bool, default=false): Moves the hook to the left end, matching a right side adapter (side = RIGHT).
  *   color (color, default=hr_rackmount_primary_color): Color of the tongue.
  *   debug_colors (bool, default=false): Colors the tongue and the groove for debugging; the dock's and the cover's differ.
@@ -424,7 +425,10 @@ module end_cover_hook(width, height, depth, hook_side = TOP, cover = false, mirr
   // the dock's pocket spans the full width; the cover's tongue runs from the hook end to just past the hook
   tongue_width = cover ? BASE_STRENGTH + hook_strength + hr_rackmount_end_cover_tongue_reach : width;
   tongue_size = [tongue_width, depth, height - clearance];
-  groove_rounding = hr_rackmount_end_cover_hook_rounding + clearance / 2;
+  groove_clearance = cover ? hr_rackmount_end_cover_hook_clearance : 0;
+  // flush with the tongue's hook side face, the groove reaches the extra clearance below the hook the tongue's own doesn't cover
+  groove_height = hook_height + HR_EPSILON + (groove_clearance - clearance) / 2;
+  groove_rounding = hr_rackmount_end_cover_hook_rounding + groove_clearance / 2;
   funnel_inset = 0.1;  // in mm
   // spin keeps the tongue upright when attached against the adapter's BACK-pointing anchors
   anchors = [named_anchor("end_cover_hook", [-hook_end.x * (width - tongue_width) / 2, -depth / 2, 0], FRONT, spin = 180)];
@@ -437,12 +441,12 @@ module end_cover_hook(width, height, depth, hook_side = TOP, cover = false, mirr
         color_this(debug_colors ? (cover ? HR_WHITE : HR_YELLOW) : color)
           kl_cuboid(tongue_size, rounding = cover ? BASE_STRENGTH : 0, rounding_edges = [FRONT - hook_end, BACK - hook_end],
             chamfer = cover && !disable_chamfer ? BASE_CHAMFER : 0, chamfer_edges = [-hook_side]) {
-            // the groove runs through from the back; flush with the tongue's hook side face, it leaves TOLERANCE / 2 below the hook
+            // the groove runs through from the back, flush with the tongue's hook side face
             // the epsilons let it poke through the back, the front and the hook side face
             tag("groove") align(hook_side + hook_end + BACK, inside = true)
-              move((hook_side + BACK) * HR_EPSILON - hook_end * (BASE_STRENGTH - clearance / 2))
+              move((hook_side + BACK) * HR_EPSILON - hook_end * (BASE_STRENGTH - groove_clearance / 2))
                 color_this(debug_colors ? (cover ? HR_RED : HR_GREEN) : color)
-                  kl_cuboid([hook_strength + clearance, depth + 2 * HR_EPSILON, hook_height + HR_EPSILON],
+                  kl_cuboid([hook_strength + groove_clearance, depth + 2 * HR_EPSILON, groove_height],
                     rounding = groove_rounding, rounding_edges = [LEFT - hook_side, RIGHT - hook_side],
                     // the dock's hook keeps its back chamfer, which guides the cover in
                     chamfer = cover || disable_chamfer ? 0 : BASE_CHAMFER, chamfer_edges = [BACK + LEFT, BACK + RIGHT]) {
@@ -454,7 +458,7 @@ module end_cover_hook(width, height, depth, hook_side = TOP, cover = false, mirr
                         color_this(debug_colors ? HR_GREEN : color)
                           offset_sweep(
                             back(hook_side.z * (BASE_CHAMFER + funnel_inset) / 2,
-                              p = rect([hook_strength + clearance - 2 * funnel_inset, hook_height + HR_EPSILON + BASE_CHAMFER - funnel_inset],
+                              p = rect([hook_strength + groove_clearance - 2 * funnel_inset, groove_height + BASE_CHAMFER - funnel_inset],
                                 rounding = (groove_rounding - funnel_inset) * (hook_side.z > 0 ? [0, 0, 1, 1] : [1, 1, 0, 0]))),
                             height = BASE_CHAMFER + funnel_inset + HR_EPSILON,
                             top = os_chamfer(height = BASE_CHAMFER + funnel_inset, width = -(BASE_CHAMFER + funnel_inset)),
