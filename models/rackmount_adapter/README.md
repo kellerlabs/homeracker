@@ -72,6 +72,8 @@ Open `parts/rackmount_adapter.scad` in OpenSCAD and use the **Customizer** panel
 | 7" | 12 | 14" | 24 | | |
 | 8" | 14 | 15" | 26 | | |
 
+[`test/rackmount_adapter.scad`](test/rackmount_adapter.scad) asserts the EIA-310 hole spacing and the frame widths, and checks that the end covers close the frame around both adapters at 2" 1U, 10" 2U and 20" 10U.
+
 **Library usage**, include in your own model:
 
 ```scad

@@ -199,7 +199,7 @@ module rackmount_cage_nut_hole(debug_colors = false,
   attachable_depth = get_rackmount_cage_nut_hole_depth();
   attachable_height = hr_rackmount_cage_nut_hole_height;
 
-  attachable(size = [attachable_width, attachable_depth, attachable_height], anchor = CENTER, orient = UP, spin = 0) {
+  attachable(size = [attachable_width, attachable_depth, attachable_height], anchor = anchor, orient = orient, spin = spin) {
     tag_scope("rackmount_cage_nut_hole")
       fwd(hr_rackmount_cage_nut_hole_mid_depth / 2 + hr_rackmount_cage_nut_hole_back_radius)
         rackmount_cage_nut_hole_front() {
