@@ -1,7 +1,5 @@
 # 🗄️ Rackmount Adapter
 
-> ⚠️ Work in progress: geometry and parameters still change.
-
 ## 📌 What
 
 Connects a vertical HomeRacker front support to a standard rack rail. One adapter per rack side, for racks from 2" to 20" wide (10" and 19" are the common ones) and 1 to 10 rack units tall.
