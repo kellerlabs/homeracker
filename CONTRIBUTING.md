@@ -258,7 +258,6 @@ cmd/              # Python and shell tooling
 configurator/     # TypeScript web configurator
 site/             # Astro site, renders this repo's READMEs
 docs/             # Style guide, workflows, and ADRs in docs/decisions/
-png_creation/     # Marketing render generation
 .claude/          # Agent config: skills/, rules/ (path-scoped guidelines), agents/
 .github/          # Workflows, composite actions, PR template
 bin/              # OpenSCAD binaries and libraries, created by `scadm install` (gitignored)
