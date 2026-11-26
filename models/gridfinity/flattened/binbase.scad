@@ -29,7 +29,6 @@ GRIDFINITY_BB_HEIGHT = GRIDFINITY_BB_BOTTOM_LIP_HEIGHT + GRIDFINITY_BB_MID_PART_
 // Render: Based on typical 0.4mm nozzle capabilities
 $fs = $preview ? 0.8 : 0.4;
 $fa = $preview ? 6 : 2;
-
 module binbase_cell(anchor = CENTER, spin = 0, orient = UP) {
   width = GRIDFINITY_BASE_UNIT;
   depth = GRIDFINITY_BASE_UNIT;
@@ -43,7 +42,6 @@ module binbase_cell(anchor = CENTER, spin = 0, orient = UP) {
     children();
   }
 }
-
 module binbase(units_x = 1, units_y = 1,
   anchor = CENTER, spin = 0, orient = UP
 ) {
@@ -60,7 +58,6 @@ module binbase(units_x = 1, units_y = 1,
     children();
   }
 }
-
 module binbase_with_topplate(units_x = 1, units_y = 1, topplate_thickness = 2, anchor = CENTER, spin = 0, orient = UP) {
 
   length_x = GRIDFINITY_BASE_UNIT * units_x - GRIDFINITY_BINBASE_SUBTRACTOR;
