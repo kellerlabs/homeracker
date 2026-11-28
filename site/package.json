@@ -18,10 +18,10 @@
     "check": "npm run lint && npm run test"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.3.9",
+    "@astrojs/markdown-remark": "7.3.10",
     "@fontsource/orbitron": "5.3.0",
     "@fontsource/source-code-pro": "5.3.1",
-    "astro": "7.4.12",
+    "astro": "7.4.13",
     "sharp": "0.35.5",
     "three": "0.187.0"
   },
@@ -34,6 +34,6 @@
     "hast-util-to-string": "3.0.1",
     "typescript": "6.0.3",
     "unist-util-visit": "5.2.0",
-    "vitest": "5.1.0"
+    "vitest": "5.1.1"
   }
 }
