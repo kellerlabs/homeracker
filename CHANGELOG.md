@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.22.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.21.0...homeracker-v3.22.0) (2026-11-28)
+
+
+### ✨ Features
+
+* **rackmount_adapter:** add any-inch rackmount adapter with end covers ([#505](https://github.com/kellerlabs/homeracker/issues/505)) ([a35cfba](https://github.com/kellerlabs/homeracker/commit/a35cfbac11ca32e76e0ee2cab93f42562c48e0c4))
+
+
+### 📦 Dependencies
+
+* update dependency belfryscad/bosl2 to v2.0.788 ([#617](https://github.com/kellerlabs/homeracker/issues/617)) ([37fef14](https://github.com/kellerlabs/homeracker/commit/37fef147bfa801ffa8ae73e77912d6679c7fae9b))
+* update dependency openscad to v2026.11.27 ([#618](https://github.com/kellerlabs/homeracker/issues/618)) ([c447ab4](https://github.com/kellerlabs/homeracker/commit/c447ab4b5ddc554fa22b6b929dbf2805e81a71a9))
+* update npm dependencies ([#619](https://github.com/kellerlabs/homeracker/issues/619)) ([d5ddafa](https://github.com/kellerlabs/homeracker/commit/d5ddafae1f2e1f1f28f74ed57e9c0c562f8f5e53))
+
+
+### 🔧 Miscellaneous
+
+* remove png_creation and the sync-instructions action ([#616](https://github.com/kellerlabs/homeracker/issues/616)) ([b307737](https://github.com/kellerlabs/homeracker/commit/b30773711efa6649b2acf0411c093d772df4ea26))
+
 ## [3.21.0](https://github.com/kellerlabs/homeracker/compare/homeracker-v3.20.0...homeracker-v3.21.0) (2026-11-22)
 
 
